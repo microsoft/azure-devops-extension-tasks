@@ -1,0 +1,42 @@
+{
+  "contributions": [
+    {
+      "id": "template",
+      "type": "contribution-point"
+    },
+    {
+      "id": "blank-template",
+      "targets": [
+        ".platform"
+      ],
+      "type": ".contribution",
+      "properties": {
+        "uri": "Web/Templates/Blank/Blank.html",
+        "displayName": "Extension for Visual Studio Online"
+      }
+    },
+    {
+      "id": "integration",
+      "targets": [
+        ".platform"
+      ],
+      "type": ".contribution",
+      "properties": {
+        "uri": "Web/Templates/Integration/Integration.html",
+        "displayName": "Integration for Visual Studio Online or Team Foundation Server"
+      }
+    },      
+    {
+      "id": "vsonline-host",
+      "targets": [
+        ".host"
+      ],
+      "type": ".contribution",
+      "properties": {
+        "uri": "Web/VSOnlineHost.html",
+        "displayName": "Visual Studio Online",
+        "order": 0
+      }
+    }
+  ]
+}

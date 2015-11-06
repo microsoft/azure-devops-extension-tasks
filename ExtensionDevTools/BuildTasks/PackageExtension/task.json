@@ -1,0 +1,85 @@
+{
+  "id": "e59022e0-667a-11e5-ad4c-dd75b69a0d2c",
+  "name": "PackageExtension",
+  "friendlyName": "Package VSO/TFS Extension",
+  "description": "Packages a VSO/TFS extension with TFS Cross Platform Command Line (tfx)",
+  "author": "Microsoft Corporation",
+  "helpMarkDown": "Replace with markdown to show in help",
+  "category": "Utility",
+  "visibility": [
+    "Build",
+    "Release"
+  ],
+  "demands": [
+    "vset"
+  ],
+  "version": {
+    "Major": "0",
+    "Minor": "1",
+    "Patch": "0"
+  },
+  "minimumAgentVersion": "1.83.0",
+  "groups": [
+    {
+      "name": "advanced",
+      "displayName": "Advanced",
+      "isExpanded": false
+    }
+  ],
+  "instanceNameFormat": "Package Extension $(rootFolder)",
+  "inputs": [
+    {
+      "name": "rootFolder",
+      "type": "filePath",
+      "label": "Root manifests folder",
+      "defaultValue": "",
+      "required": false,
+      "helpMarkDown": "Root folder from which the manifests are searched"
+    },
+    {
+      "name": "patternManifest",
+      "type": "string",
+      "label": "Manifest file",
+      "defaultValue": "vss-extension.json",
+      "required": false,
+      "helpMarkDown": "Specify the pattern for manifest files to join"
+    },
+    {
+      "name": "outputPath",
+      "type": "filePath",
+      "label": "Package output file",
+      "defaultValue": "",
+      "required": false,
+      "helpMarkDown": "Specify the path and file name of the generated vsix."
+    },
+    {
+      "name": "arguments",
+      "type": "string",
+      "label": "Arguments",
+      "defaultValue": "",
+      "helpMarkDown": "Additional arguments passed to tfx. ",
+      "required": false,
+      "groupName": "advanced"
+    },
+    {
+      "name": "cwd",
+      "type": "filePath",
+      "label": "Working Directory",
+      "defaultValue": "",
+      "required": false,
+      "helpMarkDown": "Current working directory when tfx is run. Defaults to the folder where the manifest is located.",
+      "groupName": "advanced"
+    }
+  ],
+  "execution": {
+    "Node": {
+      "target": "PackageExtension.js",
+      "argumentFormat": ""
+    },
+    "PowerShell": {
+      "target": "$(currentDirectory)\\PackageExtension.ps1",
+      "argumentFormat": "",
+      "workingDirectory": "$(currentDirectory)"
+    }
+  }
+}
