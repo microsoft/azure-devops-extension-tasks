@@ -4,7 +4,7 @@
   "friendlyName": "Package VSO/TFS Extension",
   "description": "Packages a VSO/TFS extension with TFS Cross Platform Command Line (tfx)",
   "author": "Microsoft Corporation",
-  "helpMarkDown": "Replace with markdown to show in help",
+  "helpMarkDown": "",
   "category": "Utility",
   "visibility": [
     "Build",

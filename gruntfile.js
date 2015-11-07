@@ -7,12 +7,6 @@ module.exports = function (grunt) {
   var baseUri = grunt.option('baseUri') || 'http://localhost:1111';
   var release = grunt.option('release');
   var publisher = grunt.option('publisher') || 'ms-devlabs';
-  
-  var manifests = [
-    "vss-main-extension.json",
-    "vss-vsonline-extension.json",
-    "vss-buildtasks-extension.json"
-  ];
 
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-copy');
@@ -23,7 +17,7 @@ module.exports = function (grunt) {
   grunt.initConfig({
     dirs: {
       output: {
-        packages: "dist/",
+        base: "dist/",
         web: "dist/Web/",
         buildTasks: "dist/BuildTasks/"
       }
@@ -59,9 +53,13 @@ module.exports = function (grunt) {
         },
         {
           expand: true,
-          cwd: 'Manifests',
-          src: manifests,
-          dest: '<%= dirs.output.packages %>'
+          src: 'vss-extension*.json',
+          dest: '<%= dirs.output.base %>'
+        },
+        {
+          expand: true,
+          src: [ '*.md', '*.txt' ],
+          dest: '<%= dirs.output.base %>'
         },
         {
           expand: true,
