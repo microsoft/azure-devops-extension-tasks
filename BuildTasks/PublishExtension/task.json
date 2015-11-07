@@ -1,0 +1,114 @@
+{
+  "id": "631511B4-50AB-47C8-B766-7AE2AA672733",
+  "name": "PublishExtension",
+  "friendlyName": "Publish VSO/TFS Extension",
+  "description": "Publishes a VSO/TFS extension with TFS Cross Platform Command Line (tfx)",
+  "author": "Microsoft Corporation",
+  "helpMarkDown": "Replace with markdown to show in help",
+  "category": "Utility",
+  "visibility": [
+    "Build",
+    "Release"
+  ],
+  "demands": [
+    "vset"
+  ],
+  "version": {
+    "Major": "0",
+    "Minor": "1",
+    "Patch": "0"
+  },
+  "minimumAgentVersion": "1.83.0",
+  "groups": [
+    {
+      "name": "advanced",
+      "displayName": "Advanced",
+      "isExpanded": false
+    }
+  ],
+  "instanceNameFormat": "Publish Extension",
+  "inputs": [
+    {
+        "name": "connectedServiceName",
+        "type": "connectedService:Generic",
+        "label": "Gallery Endpoint",
+        "required": true,
+        "helpMarkDown": "The Gallery generic endpoint, set the key 'Password/Token Key' field with a Personal Access Token"
+    },    
+    {
+      "name": "publisher",
+      "type": "string",
+      "label": "Publisher",
+      "defaultValue": "",
+      "required": false,
+      "helpMarkDown": "Extension publisher. If not specifified it will be used the publisher in VSIX/manifest file."
+    },    
+    {
+        "name":"fileType",
+        "type":"radio",
+        "label":"Input file type",
+        "required":true,
+        "defaultValue":"manifest",
+        "options": {
+            "manifest": "Manifest file",
+            "vsix": "VSIX file"
+        }   
+    },    
+    {
+      "name": "vsixFile",
+      "type": "filePath",
+      "label": "VSIX file",
+      "defaultValue": "",
+      "required": true,
+      "helpMarkDown": "VSIX Publish to be published",
+      "visibleRule": "fileType = vsix"
+    },    
+    {
+      "name": "rootFolder",
+      "type": "filePath",
+      "label": "Root manifests folder",
+      "defaultValue": "",
+      "required": false,
+      "helpMarkDown": "Root folder from which the manifests are searched",
+      "visibleRule": "fileType = manifest"
+    },
+    {
+      "name": "patternManifest",
+      "type": "string",
+      "label": "Manifest file",
+      "defaultValue": "vss-extension.json",
+      "required": false,
+      "helpMarkDown": "Specify the pattern for manifest files to join",
+      "visibleRule": "fileType = manifest"
+    },
+    {
+      "name": "arguments",
+      "type": "string",
+      "label": "Arguments",
+      "defaultValue": "",
+      "helpMarkDown": "Additional arguments passed to tfx. ",
+      "required": false,
+      "groupName": "advanced"
+    },
+    {
+      "name": "cwd",
+      "type": "filePath",
+      "label": "Working Directory",
+      "defaultValue": "",
+      "required": false,
+      "helpMarkDown": "Current working directory when tfx is run. Defaults to the folder where the manifest is located.",
+      "groupName": "advanced"
+    }
+  ],
+  "execution": {
+    "Node": {
+      "target": "PublishExtension.js",
+      "argumentFormat": ""
+    },
+    "PowerShell": {
+      "target": "$(currentDirectory)\\PublishExtension.ps1",
+      "argumentFormat": "",
+      "workingDirectory": "$(currentDirectory)"
+    }
+  }
+}

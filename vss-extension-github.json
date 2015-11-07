@@ -1,0 +1,16 @@
+{
+  "contributions": [
+    {
+      "id": "github-host",
+      "targets": [
+        ".host"
+      ],
+      "type": ".contribution",
+      "properties": {
+        "uri": "Web/GitHubHost.html",
+        "displayName": "GitHub",
+        "order": 100
+      }
+    }
+  ]
+}
