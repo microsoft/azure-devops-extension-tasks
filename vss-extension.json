@@ -1,5 +1,4 @@
 {
-  "baseUri": "http://localhost:1111",
   "manifestVersion": 1,
   "id": "vss-developer-tools",
   "version": "0.0.1",
