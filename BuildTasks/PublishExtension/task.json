@@ -2,7 +2,7 @@
   "id": "631511B4-50AB-47C8-B766-7AE2AA672733",
   "name": "PublishExtension",
   "friendlyName": "Publish VSO/TFS Extension",
-  "description": "Publishes a VSO/TFS extension with TFS Cross Platform Command Line (tfx)",
+  "description": "Publishes a VSO/TFS extension with Visual Studio Online Extension Tool (vset)",
   "author": "Microsoft Corporation",
   "helpMarkDown": "Replace with markdown to show in help",
   "category": "Utility",
@@ -86,7 +86,7 @@
       "type": "string",
       "label": "Arguments",
       "defaultValue": "",
-      "helpMarkDown": "Additional arguments passed to tfx. ",
+      "helpMarkDown": "Additional arguments passed to vset. ",
       "required": false,
       "groupName": "advanced"
     },
@@ -96,7 +96,7 @@
       "label": "Working Directory",
       "defaultValue": "",
       "required": false,
-      "helpMarkDown": "Current working directory when tfx is run. Defaults to the folder where the manifest is located.",
+      "helpMarkDown": "Current working directory when vset is run. Defaults to the folder where the manifest is located.",
       "groupName": "advanced"
     }
   ],
