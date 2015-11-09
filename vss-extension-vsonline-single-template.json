@@ -1,0 +1,15 @@
+{
+  "contributions": [
+    {
+      "id": "blank-template",
+      "targets": [
+        ".platform"
+      ],
+      "type": ".contribution",
+      "properties": {
+        "uri": "Web/Templates/Blank/Blank.html",
+        "displayName": "Extension for Visual Studio Online"
+      }
+    }
+  ]
+}

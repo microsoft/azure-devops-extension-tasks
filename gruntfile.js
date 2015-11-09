@@ -48,7 +48,7 @@ module.exports = function (grunt) {
         {
           expand: true,
           cwd: 'Web',
-          src: ['web.config', '**/*.{html,css,png,jpg,js}', '**/Templates/**/Files/**'],
+          src: ['**/*.{html,css,png,jpg,js}', '**/Templates/**/Files/**'],
           dest: '<%= dirs.output.web %>'
         },
         {
@@ -73,7 +73,7 @@ module.exports = function (grunt) {
 
   var prepManifestConfig = {
     main: {
-      manifest: '<%= dirs.output.packages %>' + 'vss-main-extension.json',
+      manifest: '<%= dirs.output.packages %>' + 'vss-extension.json',
       newBaseUri: baseUri + '/' + (release ? release + '/' : "")
     }
   };
@@ -87,7 +87,7 @@ module.exports = function (grunt) {
       },
     },
     assets: {
-      files: ['Web/**/*.{html,css,png,jpg,js}', 'Web/**/Templates/**/Files/**', 'Manifests/**'],
+      files: ['Web/**/*.{html,css,png,jpg,js}', 'Web/**/Templates/**/Files/**'],
       tasks: ['copy'],
       options: {
         spawn: false,

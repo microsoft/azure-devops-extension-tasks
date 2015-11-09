@@ -8,8 +8,7 @@
   "scopes": [
     "vso.code_manage",
     "vso.build_execute",
-    "vso.serviceendpoint_manage",
-    "vso.gallery"
+    "vso.serviceendpoint_manage"
   ],
   "category": [
     "Code"
@@ -111,54 +110,6 @@
         "uri": "Web/VSOnlineHost.html",
         "displayName": "Visual Studio Online",
         "order": 0
-      }
-    },
-    {
-      "id": "template",
-      "type": "contribution-point"
-    },
-    {
-      "id": "vsonline-platform",
-      "targets": [
-        ".platform"
-      ],
-      "type": ".contribution",
-      "properties": {
-        "uri": "Web/VSOnlinePlatform.html",
-        "displayName": "Extension for Visual Studio Online"
-      }
-    },
-    {
-      "id": "blank-template",
-      "targets": [
-        ".template"
-      ],
-      "type": ".contribution",
-      "properties": {
-        "uri": "Web/Templates/Blank/Blank.html",
-        "displayName": "Blank"
-      }
-    },
-    {
-      "id": "basic-web-template",
-      "targets": [
-        ".template"
-      ],
-      "type": ".contribution",
-      "properties": {
-        "uri": "Web/Templates/BasicWeb/BasicWeb.html",
-        "displayName": "Basic web extension (hub + splitter)"
-      }
-    },
-    {
-      "id": "build-task-template",
-      "targets": [
-        ".template"
-      ],
-      "type": ".contribution",
-      "properties": {
-        "uri": "Web/Templates/BuildTask/BuildTask.html",
-        "displayName": "Build task extension"
       }
     }
   ],
