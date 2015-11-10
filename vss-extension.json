@@ -88,7 +88,7 @@
       "type": ".contribution",
       "properties": {
         "uri": "Web/Templates/Integration/Integration.html",
-        "displayName": "Integration for Visual Studio Online or Team Foundation Server"
+        "displayName": "Integration"
       }
     },
     {
