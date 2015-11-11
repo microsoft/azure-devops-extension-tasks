@@ -48,7 +48,7 @@ module.exports = function (grunt) {
         {
           expand: true,
           cwd: 'Web',
-          src: ['**/*.{html,css,png,jpg,js}', '**/Templates/**/Files/**'],
+          src: ['**/*.{html,css,png,jpg,js}', '**/Templates/**/Files/**', '**/Samples/**', '**/ref/**', '**/CodeEditor/**'],
           dest: '<%= dirs.output.web %>'
         },
         {
@@ -58,7 +58,7 @@ module.exports = function (grunt) {
         },
         {
           expand: true,
-          src: [ '*.md', '*.txt' ],
+          src: [ '*.md', '*.txt', '*.config' ],
           dest: '<%= dirs.output.base %>'
         },
         {
