@@ -61,6 +61,26 @@
       }
     },
     {
+      "id": "extend-playground-hub",
+      "type": "ms.vss-web.hub",
+      "targets": [
+        ".extend-hub-group"
+      ],"properties": {
+        "name": "Playground",
+        "uri": "Web/PlaygroundHub.html",
+        "order": 20
+      }
+    },
+    {
+      "id": "extend-playground-run",
+      "type": "ms.vss-web.control",
+      "description": "Content for running playground in a dialog",
+      "targets": [],
+      "properties": {
+        "uri": "Web/PlaygroundRun.html"
+      }
+    },
+    {
       "id": "host",
       "type": "contribution-point"
     },
