@@ -1,8 +1,8 @@
 {
   "manifestVersion": 1,
   "id": "vss-developer-tools",
-  "version": "0.91.1",
-  "publisher": "serkani",
+  "version": "0.0.1",
+  "publisher": "ms-devlabs",
   "name": "Extension Developer Tools",
   "description": "Tools to help you create, develop, and publish extensions and integrations to the Visual Studio Marketplace.",
   "scopes": [
