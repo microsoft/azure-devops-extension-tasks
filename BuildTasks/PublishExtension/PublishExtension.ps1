@@ -27,30 +27,30 @@ function GetEndpointData
 import-module "Microsoft.TeamFoundation.DistributedTask.Task.Internal"
 import-module "Microsoft.TeamFoundation.DistributedTask.Task.Common"
 
-# try to find vset in the path
-$vset = Get-Command -Name vset -ErrorAction Ignore
+# try to find tfx in the path
+$tfx = Get-Command -Name tfx -ErrorAction Ignore
 
-if(!$vset)
+if(!$tfx)
 {
-    Write-Verbose "try to find vset in the node_modules in the sources directory"
+    Write-Verbose "try to find tfx in the node_modules in the sources directory"
     $buildSourcesDirectory = Get-TaskVariable -Context $distributedTaskContext -Name "Build.SourcesDirectory"
     $nodeBinPath = Join-Path -Path $buildSourcesDirectory -ChildPath 'node_modules\.bin'
 
     if(Test-Path -Path $nodeBinPath -PathType Container)
     {
-        $vsetPath = Join-Path -Path $nodeBinPath -ChildPath "vset.cmd"
-        Write-Verbose "Looking for vset.cmd in $vsetPath"
-        $vset = Get-Command -Name $vsetPath -ErrorAction Ignore
+        $tfxPath = Join-Path -Path $nodeBinPath -ChildPath "tfx.cmd"
+        Write-Verbose "Looking for tfx.cmd in $tfxPath"
+        $tfx = Get-Command -Name $tfxPath -ErrorAction Ignore
     }
     else
     {
-        Write-Verbose "Recursively searching for vset.cmd in $buildSourcesDirectory"
-        $searchPattern = Join-Path -Path $buildSourcesDirectory -ChildPath '**\vset.cmd'
+        Write-Verbose "Recursively searching for tfx.cmd in $buildSourcesDirectory"
+        $searchPattern = Join-Path -Path $buildSourcesDirectory -ChildPath '**\tfx.cmd'
         $foundFiles = Find-Files -SearchPattern $searchPattern
         foreach($file in $foundFiles)
         {
-            $vsetPath = $file;
-            $vset = Get-Command -Name $vsetPath
+            $tfxPath = $file;
+            $tfx = Get-Command -Name $tfxPath
             break;
         }
     }
@@ -67,10 +67,9 @@ if ($fileType = "manifest")
         $arguments = "--root $rootFolder $arguments"
     }
     
-    
     if ($patternManifest)
     {
-        $arguments = "--manifest-glob $patternManifest $arguments"
+        $arguments = "--manifest-globs $patternManifest $arguments"
     }
 }
 else 
@@ -95,8 +94,8 @@ else
     $cwd = $location.Path
 }
 
-$arguments = "publish -t $patToken -g $galleryUrl $arguments"
+$arguments = "extension publish --token $patToken --service-url $galleryUrl $arguments"
 
-Write-Verbose "Running vset $vset"
-Invoke-Tool -Path $vset.Path -Arguments $arguments -WorkingFolder $cwd
+Write-Verbose "Running tfx $tfx"
+Invoke-Tool -Path $tfx.Path -Arguments $arguments -WorkingFolder $cwd
 

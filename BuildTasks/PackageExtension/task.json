@@ -1,8 +1,8 @@
 {
   "id": "e59022e0-667a-11e5-ad4c-dd75b69a0d2c",
   "name": "PackageExtension",
-  "friendlyName": "Package VSO/TFS Extension",
-  "description": "Packages a VSO/TFS extension with Visual Studio Online Extension Tool (vset)",
+  "friendlyName": "Package VSTS/TFS Extension",
+  "description": "Packages a VSTS/TFS extension with TFS Cross Platform Command Line Interface (tfx)",
   "author": "Microsoft Corporation",
   "helpMarkDown": "",
   "category": "Utility",
@@ -11,7 +11,7 @@
     "Release"
   ],
   "demands": [
-    "vset"
+    "tfx"
   ],
   "version": {
     "Major": "0",
@@ -57,7 +57,7 @@
       "type": "string",
       "label": "Arguments",
       "defaultValue": "",
-      "helpMarkDown": "Additional arguments passed to vset. ",
+      "helpMarkDown": "Additional arguments passed to tfx. ",
       "required": false,
       "groupName": "advanced"
     },
@@ -67,7 +67,7 @@
       "label": "Working Directory",
       "defaultValue": "",
       "required": false,
-      "helpMarkDown": "Current working directory when vset is run. Defaults to the folder where the manifest is located.",
+      "helpMarkDown": "Current working directory when tfx is run. Defaults to the folder where the manifest is located.",
       "groupName": "advanced"
     }
   ],

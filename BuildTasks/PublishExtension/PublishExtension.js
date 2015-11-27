@@ -19,8 +19,8 @@ function getEndpointDetails(inputFieldName) {
         throw new Error("The authorization scheme " + auth.scheme + " is not supported for a Gallery endpoint. Please use a username and a password.");
     }
 
-    var hostUsername = auth.parameters.Username;
-    var hostPassword = auth.parameters.Password;
+    var hostUsername = auth.parameters.username;
+    var hostPassword = auth.parameters.password;
 
     return {
         "Url": hostUrl,
@@ -29,35 +29,52 @@ function getEndpointDetails(inputFieldName) {
     };
 }
 
-var vset = new tl.ToolRunner(tl.which('vset', true));
-vset.arg("publish");
+var tfx = new tl.ToolRunner(tl.which('tfx', true));
+tfx.arg("extension publish");
 
-var rootFolder = tl.getInput('rootFolder', false);
-if (rootFolder) {
-    vset.args('-r');
-    vset.arg(rootFolder);
+// Read gallery endpoint
+var galleryEndpoint = getEndpointDetails('connectedServiceName');
+tfx.arg('--token');
+tfx.arg(galleryEndpoint.Password);
+
+tfx.arg('--service-url');
+tfx.arg(galleryEndpoint.Url);
+
+// Read file type
+var fileType = tl.getInput('fileType', true);
+if (fileType == "manifest") {
+    var rootFolder = tl.getInput('rootFolder', false);
+    if (rootFolder) {
+        tfx.arg('--root');
+        tfx.arg(rootFolder);
+    }
+
+    var globsManifest = tl.getInput('patternManifest', false);
+    if (globsManifest) {
+        tfx.arg('--manifest-globs');
+        tfx.arg(globsManifest);
+    }
+} else {
+    var vsixFile = tl.getInput('vsixFile', true);
+    tfx.arg('--vsix');
+    tfx.arg(vsixFile);
 }
 
-var globsManifest = tl.getInput('patternManifest', false);
-if (globsManifest) {
-    vset.args('-m');
-    vset.arg(globsManifest);
+// Read publisher
+var publisher = tl.getInput('publisher', false);
+if (publisher) {
+    tfx.arg('--publisher');
+    tfx.arg(publisher);
 }
 
-var outputPath = tl.getInput('outputPath', false);
-if (outputPath) {
-    vset.args('-o');
-    vset.args(outputPath);
-}
-
-vset.arg(tl.getDelimitedInput('arguments', ' ', false));
+tfx.arg(tl.getDelimitedInput('arguments', ' ', false));
 
 var cwd = tl.getInput('cwd', false);
 if (cwd) {
     tl.cd(cwd);
 }
 
-vset.exec({ failOnStdErr: false})
+tfx.exec({ failOnStdErr: false})
 .then(function(code) {
     tl.exit(code);
 })
