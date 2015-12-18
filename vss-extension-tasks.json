@@ -24,6 +24,44 @@
       "properties": {
         "name": "BuildTasks/PublishExtension"
       }
-    }
+    },
+    {
+      "id": "marketplace-endpoint-type",
+      "description": "Marketplace Publishing",
+      "type": "ms.vss-endpoint.service-endpoint-type",
+      "targets": [
+        "ms.vss-endpoint.endpoint-types"
+      ],
+      "properties": {
+        "name": "MarketplacePublishing",
+        "displayName": "Marketplace Publishing",
+        "url": "https://marketplace.visualstudio.com",
+        "authenticationSchemes": [
+          {
+            "type": "ms.vss-endpoint.endpoint-auth-scheme-vsspat",
+            "inputDescriptors": [
+              {
+                "id": "scopes",
+                "name": "Scopes",
+                "description": "Space-separated list of scopes",
+                "inputMode": "textbox",
+                "isConfidential": false,
+                "validation": {
+                  "isRequired": true,
+                  "dataType": "string",
+                  "maxLength": 300,
+                  "pattern": "vso\\.gallery_publish"
+                },
+                "values": {
+                  "inputId": "scopes",
+                  "defaultValue": "vso.gallery_publish",
+                  "isReadOnly": true
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }    
   ]
 }

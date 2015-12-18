@@ -30,10 +30,10 @@
   "inputs": [
     {
         "name": "connectedServiceName",
-        "type": "connectedService:Generic",
-        "label": "Gallery Endpoint",
+        "type": "connectedService:MarketplacePublishing",
+        "label": "Marketplace Endpoint",
         "required": true,
-        "helpMarkDown": "The Gallery generic endpoint, set the key 'Password/Token Key' field with a Personal Access Token"
+        "helpMarkDown": "The MArketplace endpoint"
     },    
     {
       "name": "publisher",

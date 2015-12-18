@@ -58,7 +58,7 @@ if(!$tfx)
 
 $serviceEndpoint = GetEndpointData $connectedServiceName
 $galleryUrl = $($serviceEndpoint.Url)
-$patToken = $($serviceEndpoint.Authorization.Parameters.Password)
+$patToken = $($serviceEndpoint.Authorization.Parameters.Apitoken)
 
 if ($fileType = "manifest")
 {

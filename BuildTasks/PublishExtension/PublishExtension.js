@@ -15,17 +15,15 @@ function getEndpointDetails(inputFieldName) {
     var hostUrl = tl.getEndpointUrl(genericEndpoint, false);
     var auth = tl.getEndpointAuthorization(genericEndpoint, false);
 
-    if (auth.scheme != "UsernamePassword") {
-        throw new Error("The authorization scheme " + auth.scheme + " is not supported for a Gallery endpoint. Please use a username and a password.");
+    if (auth.scheme != "PersonalAccessToken") {
+        throw new Error("The authorization scheme " + auth.scheme + " is not supported for a Marketplace endpoint. Please use a Marketplace Publishing endpoint.");
     }
 
-    var hostUsername = auth.parameters.username;
-    var hostPassword = auth.parameters.password;
+    var apitoken = auth.parameters.apitoken;
 
     return {
         "Url": hostUrl,
-        "Username": hostUsername,
-        "Password": hostPassword
+        "Token": apitoken
     };
 }
 
@@ -35,7 +33,7 @@ tfx.arg("extension publish");
 // Read gallery endpoint
 var galleryEndpoint = getEndpointDetails('connectedServiceName');
 tfx.arg('--token');
-tfx.arg(galleryEndpoint.Password);
+tfx.arg(galleryEndpoint.Token);
 
 tfx.arg('--service-url');
 tfx.arg(galleryEndpoint.Url);
