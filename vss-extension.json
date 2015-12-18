@@ -128,55 +128,6 @@
         "displayName": "Visual Studio Online",
         "order": 0
       }
-    },
-    {
-      "id": "endpoint-auth-scheme-vsspat",
-      "description": "Personal access token based endpoint authentication scheme contribution",
-      "type": "ms.vss-endpoint.service-endpoint-auth-scheme",
-      "targets": [
-        "ms.vss-endpoint.endpoint-auth-schemes"
-      ],
-      "properties": {
-        "name": "PersonalAccessToken",
-        "displayName": "Personal Access Token",
-        "headers": [
-          {
-            "name": "Authorization",
-            "value": "Basic {{ #base64 \":\" endpoint.apitoken }}"
-          }
-        ],
-        "inputDescriptors": [
-          {
-            "id": "apitoken",
-            "name": "API Token",
-            "description": "API Token for connection to endpoint",
-            "inputMode": "passwordbox",
-            "isConfidential": true,
-            "validation": {
-              "isRequired": false,
-              "dataType": "string",
-              "maxLength": 300
-            },
-            "values": {
-              "inputId": "apitoken",
-              "isDisabled": true,
-              "defaultValue": ""
-            }
-          },
-          {
-            "id": "scopes",
-            "name": "Scopes",
-            "description": "Space-separated list of scopes",
-            "inputMode": "textbox",
-            "isConfidential": false,
-            "validation": {
-              "isRequired": true,
-              "dataType": "string",
-              "maxLength": 300
-            }
-          }
-        ]
-      }
     }
   ],
   "contributionTypes": [
