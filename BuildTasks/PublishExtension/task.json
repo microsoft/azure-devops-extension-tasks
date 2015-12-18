@@ -33,7 +33,7 @@
         "type": "connectedService:MarketplacePublishing",
         "label": "Marketplace Endpoint",
         "required": true,
-        "helpMarkDown": "The MArketplace endpoint"
+        "helpMarkDown": "The Marketplace endpoint"
     },    
     {
       "name": "publisher",
