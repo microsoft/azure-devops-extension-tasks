@@ -104,11 +104,6 @@
     "Node": {
       "target": "PublishExtension.js",
       "argumentFormat": ""
-    },
-    "PowerShell": {
-      "target": "$(currentDirectory)\\PublishExtension.ps1",
-      "argumentFormat": "",
-      "workingDirectory": "$(currentDirectory)"
     }
   }
 }
