@@ -7,23 +7,22 @@
     "tfs"
   ],
   "scripts": {
+    "initdev:npm": "npm install",
+    "initdev:typings": "pushd BuildTasks && typings install && popd",
+    "initdev": "npm run initdev:npm  && npm run initdev:typings ",
     "clean": "rimraf dist",
-
     "precompile:web": "tsconfig .",
     "compile:web": "tsc",
-
+    "compile:tasks": "tsc --project BuildTasks",
     "content:web": "copyfiles \"./Web/**/!(*.ts)\" ./Web/**/ref/**.d.ts dist",
-    "content:tasks": "copyfiles ./BuildTasks/**/* dist",
+    "content:tasks": "copyfiles \"./BuildTasks/**/!(*.ts)\" dist",
     "content:extension": "copyfiles vss-extension*.json *.md license.txt dist",
     "content:all": "npm run content:web && npm run content:tasks && npm run content:extension",
-
-    "prelink:tasks": "mkdirp dist/_temp && pushd \"dist/_temp\" && npm init -f && npm install vsts-task-lib && popd",
+    "prelink:tasks": "mkdirp dist/_temp && pushd \"dist/_temp\" && npm init --force -s && npm install vsts-task-lib -s && popd",
     "link:tasks": "copyfiles -u 2 dist/_temp/node_modules/**/* dist/BuildTasks/PackageExtension && copyfiles -u 2 dist/_temp/node_modules/**/* dist/BuildTasks/PublishExtension",
     "postlink:tasks": "rimraf dist/_temp",
-
-    "build": "npm run clean && npm run compile:web && npm run content:all && npm run link:tasks",
-    
-    "pkgvstsext":"tfx extension create --root dist --output-path dist --manifest-globs vss-extension*.json" 
+    "build": "npm run clean && npm run compile:web && npm run compile:tasks && npm run content:all && npm run link:tasks",
+    "createvsix": "tfx extension create --root dist --output-path dist --manifest-globs vss-extension*.json"
   },
   "author": "Microsoft Corporation",
   "license": "MIT",
@@ -33,6 +32,8 @@
     "rimraf": "^2.5.1",
     "tfx-cli": "^0.3.12",
     "tsconfig-glob": "^0.4.0",
+    "typescript": "^1.7.5",
+    "typings": "^0.6.6",
     "vss-sdk": "^1.94.0",
     "vsts-task-lib": "^0.5.10"
   }

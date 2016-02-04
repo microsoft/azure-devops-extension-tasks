@@ -1,5 +1,5 @@
-var path = require('path');
-var tl = require('vsts-task-lib/task');
+///<reference path="../typings/main.d.ts" />
+import tl = require('vsts-task-lib/task');
 
 function getEndpointDetails(inputFieldName) {
     var errorMessage = "Could not decode the marketplace endpoint. Please ensure you are running the latest VSTS agent";
@@ -15,24 +15,24 @@ function getEndpointDetails(inputFieldName) {
     var hostUrl = tl.getEndpointUrl(marketplaceEndpoint, false);
     var auth = tl.getEndpointAuthorization(marketplaceEndpoint, false);
 
-    var apitoken = auth.parameters.password;
+    var apitoken = auth.parameters['password'];
 
     return {
-        "Url": hostUrl,
-        "Token": apitoken
+        "url": hostUrl,
+        "token": apitoken
     };
 }
 
-var tfx = new tl.ToolRunner(tl.which('tfx', true));
+var tfx = tl.createToolRunner(tl.which('tfx', true));
 tfx.arg("extension publish");
 
 // Read gallery endpoint
 var galleryEndpoint = getEndpointDetails('connectedServiceName');
 tfx.arg('--token');
-tfx.arg(galleryEndpoint.Token);
+tfx.arg(galleryEndpoint.token);
 
 tfx.arg('--service-url');
-tfx.arg(galleryEndpoint.Url);
+tfx.arg(galleryEndpoint.url);
 
 // Read file type
 var fileType = tl.getInput('fileType', true);
@@ -61,18 +61,15 @@ if (publisher) {
     tfx.arg(publisher);
 }
 
-tfx.arg(tl.getDelimitedInput('arguments', ' ', false));
+tfx.arg(tl.getInput('arguments', false));
 
 var cwd = tl.getInput('cwd', false);
 if (cwd) {
     tl.cd(cwd);
 }
 
-tfx.exec({ failOnStdErr: false})
-.then(function(code) {
-    tl.exit(code);
-})
-.fail(function(err) {
-    tl.debug('taskRunner fail');
-    tl.exit(1);
-})
+tfx.exec().then(code => {
+    tl.setResult(tl.TaskResult.Succeeded, `tfx exited with return code: ${code}`);
+}).fail(err => {
+    tl.setResult(tl.TaskResult.Failed, `tfx failed with error: ${err}`);
+});

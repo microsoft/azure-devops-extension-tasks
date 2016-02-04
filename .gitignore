@@ -1,6 +1,6 @@
 dist/
 node_modules/
 .vscode/
-
+BuildTasks/typings/
 *.vsix
 web.config

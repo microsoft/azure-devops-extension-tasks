@@ -1,7 +1,7 @@
-var path = require('path');
-var tl = require('vsts-task-lib/task');
+///<reference path="../typings/main.d.ts" />
+import tl = require('vsts-task-lib/task');
 
-var tfx = new tl.ToolRunner(tl.which('tfx', true));
+var tfx = tl.createToolRunner(tl.which('tfx', true));
 tfx.arg("extension");
 tfx.arg("create");
 
@@ -23,18 +23,15 @@ if (outputPath) {
     tfx.arg(outputPath);
 }
 
-tfx.arg(tl.getDelimitedInput('arguments', ' ', false));
+tfx.arg(tl.getInput('arguments', false));
 
 var cwd = tl.getInput('cwd', false);
 if (cwd) {
     tl.cd(cwd);
 }
 
-tfx.exec({ failOnStdErr: false})
-.then(function(code) {
-    tl.exit(code);
-})
-.fail(function(err) {
-    tl.debug('taskRunner fail');
-    tl.exit(1);
-})
+tfx.exec().then(code => {
+    tl.setResult(tl.TaskResult.Succeeded, `tfx exited with return code: ${code}`);
+}).fail(err => {
+    tl.setResult(tl.TaskResult.Failed, `tfx failed with error: ${err}`);
+});
