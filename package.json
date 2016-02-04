@@ -15,7 +15,7 @@
     "compile:web": "tsc",
     "compile:tasks": "tsc --project BuildTasks",
     "content:web": "copyfiles \"./Web/**/!(*.ts)\" ./Web/**/ref/**.d.ts dist",
-    "content:tasks": "copyfiles \"./BuildTasks/**/!(*.ts)\" dist",
+    "content:tasks": "copyfiles \"./BuildTasks/*Extension/**/!(*.ts)\" dist",
     "content:extension": "copyfiles vss-extension*.json *.md license.txt dist",
     "content:all": "npm run content:web && npm run content:tasks && npm run content:extension",
     "prelink:tasks": "mkdirp dist/_temp && pushd \"dist/_temp\" && npm init --force -s && npm install vsts-task-lib -s && popd",
