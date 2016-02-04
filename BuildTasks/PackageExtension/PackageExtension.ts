@@ -5,6 +5,12 @@ var tfx = tl.createToolRunner(tl.which('tfx', true));
 tfx.arg("extension");
 tfx.arg("create");
 
+var publisher = tl.getInput('publisher', false);
+if (publisher) {
+    tfx.arg('--publisher');
+    tfx.arg(publisher);
+}
+
 var rootFolder = tl.getInput('rootFolder', false);
 if (rootFolder) {
     tfx.arg('--root');

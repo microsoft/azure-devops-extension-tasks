@@ -29,6 +29,14 @@
   "instanceNameFormat": "Package Extension $(rootFolder)",
   "inputs": [
     {
+      "name": "publisher",
+      "type": "string",
+      "label": "Publisher",
+      "defaultValue": "",
+      "required": false,
+      "helpMarkDown": "Extension publisher. If not specifified it will be used the publisher in manifest file."
+    },        
+    {
       "name": "rootFolder",
       "type": "filePath",
       "label": "Root manifests folder",
