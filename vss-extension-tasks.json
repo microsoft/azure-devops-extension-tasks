@@ -1,67 +1,78 @@
 {
-  "files": [
-    {
-      "path": "BuildTasks"
-    }
-  ],
-  "contributions": [
-    {
-      "id": "package-extension-build-task",
-      "type": "ms.vss-distributed-task.task",
-      "targets": [
-        "ms.vss-distributed-task.tasks"
-      ],
-      "properties": {
-        "name": "BuildTasks/PackageExtension"
-      }
-    },
-    {
-      "id": "publish-extension-build-task",
-      "type": "ms.vss-distributed-task.task",
-      "targets": [
-        "ms.vss-distributed-task.tasks"
-      ],
-      "properties": {
-        "name": "BuildTasks/PublishExtension"
-      }
-    },
-    {
-      "id": "marketplace-endpoint-type",
-      "description": "Marketplace Publishing",
-      "type": "ms.vss-endpoint.service-endpoint-type",
-      "targets": [
-        "ms.vss-endpoint.endpoint-types"
-      ],
-      "properties": {
-        "name": "MarketplacePublishing",
-        "displayName": "Marketplace Publishing",
-        "url": "https://marketplace.visualstudio.com",
-        "authenticationSchemes": [
-          {
-            "type": "ms.vss-endpoint.endpoint-auth-scheme-vsspat",
-            "inputDescriptors": [
-              {
-                "id": "scopes",
-                "name": "Scopes",
-                "description": "Space-separated list of scopes",
-                "inputMode": "textbox",
-                "isConfidential": false,
-                "validation": {
-                  "isRequired": true,
-                  "dataType": "string",
-                  "maxLength": 300,
-                  "pattern": "vso\\.gallery_publish"
-                },
-                "values": {
-                  "inputId": "scopes",
-                  "defaultValue": "vso.gallery_publish",
-                  "isReadOnly": true
-                }
-              }
-            ]
-          }
-        ]
-      }
-    }    
-  ]
+    "files": [
+        {
+            "path": "BuildTasks"
+        }
+    ],
+    "contributions": [
+        {
+            "id": "package-extension-build-task",
+            "type": "ms.vss-distributed-task.task",
+            "targets": [
+                "ms.vss-distributed-task.tasks"
+            ],
+            "properties": {
+                "name": "BuildTasks/PackageExtension"
+            }
+        },
+        {
+            "id": "publish-extension-build-task",
+            "type": "ms.vss-distributed-task.task",
+            "targets": [
+                "ms.vss-distributed-task.tasks"
+            ],
+            "properties": {
+                "name": "BuildTasks/PublishExtension"
+            }
+        },
+        {
+            "id": "vsts-marketplace-endpoint-type",
+            "description": "VSTS Marketplace Publishing",
+            "type": "ms.vss-endpoint.service-endpoint-type",
+            "targets": [
+                "ms.vss-endpoint.endpoint-types"
+            ],
+            "properties": {
+                "name": "VstsMarketplacePublishing",
+                "displayName": "VSTS Marketplace Publishing",
+                "url": "https://marketplace.visualstudio.com",
+                "authenticationSchemes": [
+                    {
+                        "type": "ms.vss-endpoint.endpoint-auth-scheme-basic",
+                        "inputDescriptors": [
+                            {
+                                "id": "username",
+                                "name": "Username",
+                                "description": "VSTS username",
+                                "inputMode": "textbox",
+                                "isConfidential": false,
+                                "validation": {
+                                    "isRequired": false,
+                                    "dataType": "string",
+                                    "maxLength": 300
+                                },
+                                "values": {
+                                    "inputId": "username",
+                                    "isDisabled": true,
+                                    "defaultValue": ""
+                                }
+                            },
+                            {
+                                "id": "password",
+                                "name": "VSTS personal token",
+                                "description": "VSTS personal access token (PAT) with Marketplace publishing permissions",
+                                "inputMode": "passwordbox",
+                                "isConfidential": true,
+                                "validation": {
+                                    "isRequired": true,
+                                    "dataType": "string",
+                                    "maxLength": 300
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    ]
 }

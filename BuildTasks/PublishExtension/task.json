@@ -30,10 +30,10 @@
   "inputs": [
     {
         "name": "connectedServiceName",
-        "type": "connectedService:MarketplacePublishing",
-        "label": "Marketplace Endpoint",
+        "type": "connectedService:VstsMarketplacePublishing",
+        "label": "VSTS Marketplace Endpoint",
         "required": true,
-        "helpMarkDown": "The Marketplace endpoint"
+        "helpMarkDown": "The VSTS Marketplace endpoint"
     },    
     {
       "name": "publisher",

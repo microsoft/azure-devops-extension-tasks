@@ -11,12 +11,10 @@
     }
   ],
   "scopes": [
-    "vso.code_manage",
-    "vso.build_execute",
-    "vso.serviceendpoint_manage"
   ],
   "category": [
-    "Code"
+    "Code",
+    "Build and Release"
   ],
   "content": {
     "details": {
@@ -54,18 +52,6 @@
       }
     },
     {
-      "id": "extend-overview-hub",
-      "type": "ms.vss-web.hub",
-      "targets": [
-        ".extend-hub-group"
-      ],
-      "properties": {
-        "name": "Overview",
-        "order": 10,
-        "uri": "Web/DevToolsHub.html"
-      }
-    },
-    {
       "id": "extend-playground-hub",
       "type": "ms.vss-web.hub",
       "targets": [
@@ -84,74 +70,6 @@
       "targets": [],
       "properties": {
         "uri": "Web/PlaygroundRun.html"
-      }
-    },
-    {
-      "id": "host",
-      "type": "contribution-point"
-    },
-    {
-      "id": "platform",
-      "type": "contribution-point"
-    },
-    {
-      "id": "download-host",
-      "targets": [
-        ".host"
-      ],
-      "type": ".contribution",
-      "properties": {
-        "uri": "Web/DownloadHost.html",
-        "displayName": "Download",
-        "order": 9999
-      }
-    },
-    {
-      "id": "integration",
-      "targets": [
-        ".platform"
-      ],
-      "type": ".contribution",
-      "properties": {
-        "uri": "Web/Templates/Integration/Integration.html",
-        "displayName": "Integration"
-      }
-    },
-    {
-      "id": "vsonline-host",
-      "targets": [
-        ".host"
-      ],
-      "type": ".contribution",
-      "properties": {
-        "uri": "Web/VSOnlineHost.html",
-        "displayName": "Visual Studio Online",
-        "order": 0
-      }
-    }
-  ],
-  "contributionTypes": [
-    {
-      "title": "Extension Developer Tools Contribution",
-      "id": "contribution",
-      "name": "contribution",
-      "description": "A contribution to this extension to be put in an iframe within the main extension",
-      "type": "object",
-      "properties": {
-        "uri": {
-          "description": "URI to the HTML content which registers the subextension and contains the page to be put in the iframe.",
-          "type": "string",
-          "required": true
-        },
-        "displayName": {
-          "description": "Name to display to the user when showing this contribution.",
-          "type": "string",
-          "required": true
-        },
-        "order": {
-          "description": "An optional ordering value which can indicate in which position to place the contribution",
-          "type": "integer"
-        }
       }
     }
   ]

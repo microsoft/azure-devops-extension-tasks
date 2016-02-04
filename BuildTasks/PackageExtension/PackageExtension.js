@@ -1,5 +1,5 @@
 var path = require('path');
-var tl = require('vso-task-lib');
+var tl = require('vsts-task-lib/task');
 
 var tfx = new tl.ToolRunner(tl.which('tfx', true));
 tfx.arg("extension");

@@ -1,25 +1,21 @@
 var path = require('path');
-var tl = require('vso-task-lib');
+var tl = require('vsts-task-lib/task');
 
 function getEndpointDetails(inputFieldName) {
-    var errorMessage = "Could not decode the generic endpoint. Please ensure you are running the latest agent (min version 0.3.0)"
+    var errorMessage = "Could not decode the marketplace endpoint. Please ensure you are running the latest VSTS agent";
     if (!tl.getEndpointUrl) {
         throw new Error(errorMessage);
     }
 
-    var genericEndpoint = tl.getInput(inputFieldName);
-    if (!genericEndpoint) {
+    var marketplaceEndpoint = tl.getInput(inputFieldName);
+    if (!marketplaceEndpoint) {
         throw new Error(errorMessage);
     }
 
-    var hostUrl = tl.getEndpointUrl(genericEndpoint, false);
-    var auth = tl.getEndpointAuthorization(genericEndpoint, false);
+    var hostUrl = tl.getEndpointUrl(marketplaceEndpoint, false);
+    var auth = tl.getEndpointAuthorization(marketplaceEndpoint, false);
 
-    if (auth.scheme != "PersonalAccessToken") {
-        throw new Error("The authorization scheme " + auth.scheme + " is not supported for a Marketplace endpoint. Please use a Marketplace Publishing endpoint.");
-    }
-
-    var apitoken = auth.parameters.apitoken;
+    var apitoken = auth.parameters.password;
 
     return {
         "Url": hostUrl,

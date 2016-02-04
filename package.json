@@ -3,21 +3,37 @@
   "version": "0.0.1",
   "description": "Visual Studio Online Extension Developer Tools Extension",
   "keywords": [
-    "vso",
+    "vsts",
     "tfs"
   ],
+  "scripts": {
+    "clean": "rimraf dist",
+
+    "precompile:web": "tsconfig .",
+    "compile:web": "tsc",
+
+    "content:web": "copyfiles \"./Web/**/!(*.ts)\" ./Web/**/ref/**.d.ts dist",
+    "content:tasks": "copyfiles ./BuildTasks/**/* dist",
+    "content:extension": "copyfiles vss-extension*.json *.md license.txt dist",
+    "content:all": "npm run content:web && npm run content:tasks && npm run content:extension",
+
+    "prelink:tasks": "mkdirp dist/_temp && pushd \"dist/_temp\" && npm init -f && npm install vsts-task-lib && popd",
+    "link:tasks": "copyfiles -u 2 dist/_temp/node_modules/**/* dist/BuildTasks/PackageExtension && copyfiles -u 2 dist/_temp/node_modules/**/* dist/BuildTasks/PublishExtension",
+    "postlink:tasks": "rimraf dist/_temp",
+
+    "build": "npm run clean && npm run compile:web && npm run content:all && npm run link:tasks",
+    
+    "pkgvstsext":"tfx extension create --root dist --output-path dist --manifest-globs vss-extension*.json" 
+  },
   "author": "Microsoft Corporation",
   "license": "MIT",
   "devDependencies": {
-    "grunt": "~0.4.5",
-    "grunt-contrib-clean": "^0.6.0",
-    "grunt-contrib-copy": "^0.8.0",
-    "grunt-contrib-jshint": "~0.10.0",
-    "grunt-contrib-nodeunit": "~0.4.1",
-    "grunt-contrib-uglify": "~0.5.0",
-    "grunt-contrib-watch": "^0.6.1",
-    "grunt-typescript": "^0.6.2",
-    "semver": "^5.1.0",
-    "shelljs": "^0.5.3"
+    "copyfiles": "^0.2.1",
+    "mkdirp": "^0.5.1",
+    "rimraf": "^2.5.1",
+    "tfx-cli": "^0.3.12",
+    "tsconfig-glob": "^0.4.0",
+    "vss-sdk": "^1.94.0",
+    "vsts-task-lib": "^0.5.10"
   }
 }

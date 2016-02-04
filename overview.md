@@ -2,6 +2,6 @@
 
 What's included:
 
-* Wizard to quickly create a new extension
+* Playground to run samples
 * Build tasks to package and publish to the Marketplace
 * More ...
