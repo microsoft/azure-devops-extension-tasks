@@ -11,7 +11,7 @@
     "Release"
   ],
   "demands": [
-    "tfx"
+    "npm"
   ],
   "version": {
     "Major": "0",
