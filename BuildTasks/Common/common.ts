@@ -39,7 +39,7 @@ export function runTfx(cmd : (tfx: ToolRunner) => void) {
     var npm = tl.createToolRunner(tl.which('npm', true));
     npm.arg('install tfx-cli');
     
-    var res = npm.exec().then(code => {
+    npm.exec().then(code => {
       tfx = tl.createToolRunner(tl.which(tfxLocalPath, true));
       cmd(tfx);  
     }).fail(err => {
