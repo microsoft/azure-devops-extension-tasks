@@ -1,8 +1,8 @@
 {
   "id": "e59022e0-667a-11e5-ad4c-dd75b69a0d2c",
-  "name": "PackageExtension",
-  "friendlyName": "Package VSTS/TFS Extension",
-  "description": "Packages a VSTS/TFS extension with TFS Cross Platform Command Line Interface (tfx)",
+  "name": "PackageVSTSExtension",
+  "friendlyName": "Package Extension",
+  "description": "Packages a Visual Studio Team Services extension into a VSIX file.",
   "author": "Microsoft Corporation",
   "helpMarkDown": "",
   "category": "Utility",
@@ -34,7 +34,7 @@
       "label": "Publisher",
       "defaultValue": "",
       "required": false,
-      "helpMarkDown": "Extension publisher. If not specifified it will be used the publisher in manifest file."
+      "helpMarkDown": "Extension publisher. If not specified, the publisher specified in the manifest will be used."
     },        
     {
       "name": "rootFolder",
@@ -42,7 +42,7 @@
       "label": "Root manifests folder",
       "defaultValue": "",
       "required": false,
-      "helpMarkDown": "Root folder from which the manifests are searched"
+      "helpMarkDown": "Root folder from which the manifests are searched."
     },
     {
       "name": "patternManifest",
@@ -50,7 +50,7 @@
       "label": "Manifest file",
       "defaultValue": "vss-extension.json",
       "required": false,
-      "helpMarkDown": "Specify the pattern for manifest files to join"
+      "helpMarkDown": "Specify the pattern for manifest files to join."
     },
     {
       "name": "outputPath",
@@ -65,7 +65,7 @@
       "type": "string",
       "label": "Arguments",
       "defaultValue": "",
-      "helpMarkDown": "Additional arguments passed to tfx. ",
+      "helpMarkDown": "Additional arguments passed to tfx.",
       "required": false,
       "groupName": "advanced"
     },

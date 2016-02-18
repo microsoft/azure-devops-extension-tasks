@@ -1,10 +1,10 @@
 {
   "id": "631511B4-50AB-47C8-B766-7AE2AA672733",
   "name": "PublishExtension",
-  "friendlyName": "Publish VSTS/TFS Extension",
-  "description": "Publishes a VSTS/TFS extension with TFS Cross Platform Command Line Interface (tfx)",
+  "friendlyName": "Publish Extension",
+  "description": "Publish a Visual Studio Team Services extension to the Marketplace.",
   "author": "Microsoft Corporation",
-  "helpMarkDown": "Replace with markdown to show in help",
+  "helpMarkDown": "",
   "category": "Utility",
   "visibility": [
     "Build",
@@ -31,9 +31,9 @@
     {
         "name": "connectedServiceName",
         "type": "connectedService:VstsMarketplacePublishing",
-        "label": "VSTS Marketplace Endpoint",
+        "label": "Marketplace connection",
         "required": true,
-        "helpMarkDown": "The VSTS Marketplace endpoint"
+        "helpMarkDown": "Service endpoint connection to publish the extension with."
     },    
     {
       "name": "publisher",
@@ -41,7 +41,7 @@
       "label": "Publisher",
       "defaultValue": "",
       "required": false,
-      "helpMarkDown": "Extension publisher. If not specifified it will be used the publisher in VSIX/manifest file."
+      "helpMarkDown": "Extension publisher. If not specified, the publisher specified in the manifest will be used."
     },    
     {
         "name":"fileType",
@@ -50,7 +50,7 @@
         "required":true,
         "defaultValue":"manifest",
         "options": {
-            "manifest": "Manifest file",
+            "manifest": "Extension manifest file",
             "vsix": "VSIX file"
         }   
     },    
@@ -60,16 +60,16 @@
       "label": "VSIX file",
       "defaultValue": "",
       "required": true,
-      "helpMarkDown": "VSIX Publish to be published",
+      "helpMarkDown": "VSIX file to publish.",
       "visibleRule": "fileType = vsix"
     },    
     {
       "name": "rootFolder",
       "type": "filePath",
-      "label": "Root manifests folder",
+      "label": "Root manifest folder",
       "defaultValue": "",
       "required": false,
-      "helpMarkDown": "Root folder from which the manifests are searched",
+      "helpMarkDown": "Folder where manifest file(s) exist.",
       "visibleRule": "fileType = manifest"
     },
     {
@@ -78,7 +78,7 @@
       "label": "Manifest file",
       "defaultValue": "vss-extension.json",
       "required": false,
-      "helpMarkDown": "Specify the pattern for manifest files to join",
+      "helpMarkDown": "Pattern for the manifest files to join.",
       "visibleRule": "fileType = manifest"
     },
     {
@@ -86,7 +86,7 @@
       "type": "string",
       "label": "Arguments",
       "defaultValue": "",
-      "helpMarkDown": "Additional arguments passed to tfx ",
+      "helpMarkDown": "Additional arguments passed to the package and publishing tool.",
       "required": false,
       "groupName": "advanced"
     },
@@ -96,7 +96,7 @@
       "label": "Working Directory",
       "defaultValue": "",
       "required": false,
-      "helpMarkDown": "Current working directory when tfx is run. Defaults to the folder where the manifest is located.",
+      "helpMarkDown": "Working directory to run the package and publishing process from. Defaults to the folder where the manifest is located.",
       "groupName": "advanced"
     }
   ],

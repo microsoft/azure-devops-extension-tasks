@@ -43,7 +43,7 @@
                             {
                                 "id": "username",
                                 "name": "Username",
-                                "description": "VSTS username",
+                                "description": "Username",
                                 "inputMode": "textbox",
                                 "isConfidential": false,
                                 "validation": {
@@ -59,8 +59,8 @@
                             },
                             {
                                 "id": "password",
-                                "name": "VSTS personal token",
-                                "description": "VSTS personal access token (PAT) with Marketplace publishing permissions",
+                                "name": "Personal access token",
+                                "description": "Team Services personal access token. Requires at least the Marketplace (publish) scope.",
                                 "inputMode": "passwordbox",
                                 "isConfidential": true,
                                 "validation": {

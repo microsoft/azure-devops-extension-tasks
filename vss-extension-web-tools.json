@@ -1,0 +1,43 @@
+{
+    "files": [
+        {
+            "path": "Web",
+            "addressable": true
+        }
+    ],
+    "contributions": [
+        {
+            "id": "extend-hub-group",
+            "type": "ms.vss-web.hub-group",
+            "description": "Extend hub group",
+            "targets": [
+                "ms.vss-web.project-hub-groups-collection"
+            ],
+            "properties": {
+                "name": "Extend",
+                "order": 100
+            }
+        },
+        {
+            "id": "extend-playground-hub",
+            "type": "ms.vss-web.hub",
+            "targets": [
+                ".extend-hub-group"
+            ],
+            "properties": {
+                "name": "Playground",
+                "uri": "Web/PlaygroundHub.html",
+                "order": 20
+            }
+        },
+        {
+            "id": "extend-playground-run",
+            "type": "ms.vss-web.control",
+            "description": "Content for running playground in a dialog",
+            "targets": [],
+            "properties": {
+                "uri": "Web/PlaygroundRun.html"
+            }
+        }
+    ]
+}

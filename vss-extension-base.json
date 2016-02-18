@@ -1,0 +1,37 @@
+{
+  "manifestVersion": 1,
+  "id": "vss-developer-tools",
+  "version": "0.0.4",
+  "publisher": "ms-devlabs",
+  "name": "Extension Developer Tools",
+  "description": "Tools to help you create, develop, and publish extensions and integrations to the Visual Studio Marketplace.",
+  "targets": [
+    {
+      "id": "Microsoft.VisualStudio.Services"
+    }
+  ],
+  "scopes": [
+      "vso.code_write"
+  ],
+  "category": [
+    "Code"
+  ],
+  "content": {
+    "details": {
+      "path": "overview.md"
+    },
+    "license": {
+      "path": "license.txt"
+    }
+  },
+  "links": {
+    "repository": {
+      "uri": "https://github.com/Microsoft/vss-developer-tools"
+    },
+    "issues": {
+      "uri": "https://github.com/Microsoft/vss-developer-tools/issues"
+    }
+  },
+
+
+}
