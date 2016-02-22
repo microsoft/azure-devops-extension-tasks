@@ -12,4 +12,8 @@ Tools to help you build great extensions for Visual Studio Team Services.
 
 To compile the build tasks, run `tsc` from the `BuildTasks` folder.
 
+## To use the build tasks
 
+1. Create a new build definition
+2. Add a "npm" (install step)
+3. Add either the package or task
