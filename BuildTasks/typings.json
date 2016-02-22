@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "devDependencies": {},
+  "ambientDevDependencies": {
+    "Q": "github:DefinitelyTyped/DefinitelyTyped/q/Q.d.ts#aae1368c8ee377f6e9c59c2d6faf1acb3ece7e05",
+    "node": "github:DefinitelyTyped/DefinitelyTyped/node/node.d.ts#1c56e368e17bb28ca57577250624ca5bd561aa81",
+    "vsts-task-lib": "github:Microsoft/vso-agent-tasks/definitions/vsts-task-lib.d.ts#releases/m94"
+  }
+}

@@ -1,8 +1,8 @@
 {
   "id": "e59022e0-667a-11e5-ad4c-dd75b69a0d2c",
-  "name": "PackageExtension",
-  "friendlyName": "Package VSTS/TFS Extension",
-  "description": "Packages a VSTS/TFS extension with TFS Cross Platform Command Line Interface (tfx)",
+  "name": "PackageVSTSExtension",
+  "friendlyName": "Package Extension",
+  "description": "Packages a Visual Studio Team Services extension into a VSIX file.",
   "author": "Microsoft Corporation",
   "helpMarkDown": "",
   "category": "Utility",
@@ -11,7 +11,7 @@
     "Release"
   ],
   "demands": [
-    "tfx"
+    "npm"
   ],
   "version": {
     "Major": "0",
@@ -29,12 +29,20 @@
   "instanceNameFormat": "Package Extension $(rootFolder)",
   "inputs": [
     {
+      "name": "publisher",
+      "type": "string",
+      "label": "Publisher",
+      "defaultValue": "",
+      "required": false,
+      "helpMarkDown": "Extension publisher. If not specified, the publisher specified in the manifest will be used."
+    },        
+    {
       "name": "rootFolder",
       "type": "filePath",
       "label": "Root manifests folder",
       "defaultValue": "",
       "required": false,
-      "helpMarkDown": "Root folder from which the manifests are searched"
+      "helpMarkDown": "Root folder from which the manifests are searched."
     },
     {
       "name": "patternManifest",
@@ -42,7 +50,7 @@
       "label": "Manifest file",
       "defaultValue": "vss-extension.json",
       "required": false,
-      "helpMarkDown": "Specify the pattern for manifest files to join"
+      "helpMarkDown": "Specify the pattern for manifest files to join."
     },
     {
       "name": "outputPath",
@@ -57,7 +65,7 @@
       "type": "string",
       "label": "Arguments",
       "defaultValue": "",
-      "helpMarkDown": "Additional arguments passed to tfx. ",
+      "helpMarkDown": "Additional arguments passed to tfx.",
       "required": false,
       "groupName": "advanced"
     },
@@ -75,11 +83,6 @@
     "Node": {
       "target": "PackageExtension.js",
       "argumentFormat": ""
-    },
-    "PowerShell": {
-      "target": "$(currentDirectory)\\PackageExtension.ps1",
-      "argumentFormat": "",
-      "workingDirectory": "$(currentDirectory)"
     }
   }
 }

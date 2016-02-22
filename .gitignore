@@ -1,6 +1,7 @@
 dist/
 node_modules/
 .vscode/
-
+BuildTasks/typings/
+BuildTasks/*Extension/common.ts
 *.vsix
 web.config
