@@ -1,7 +1,7 @@
 {
-  "name": "vss-developer-tools",
+  "name": "vts-developer-tools",
   "version": "0.0.1",
-  "description": "Visual Studio Online Extension Developer Tools Extension",
+  "description": "Visual Studio Team Services Extension Developer Tools",
   "keywords": [
     "vsts",
     "tfs"
@@ -35,7 +35,7 @@
     "tsconfig-glob": "^0.4.0",
     "typescript": "^1.7.5",
     "typings": "^0.6.6",
-    "vss-sdk": "^1.94.0",
+    "vss-web-extension-sdk": "^1.94.0",
     "vsts-task-lib": "^0.5.10"
   }
 }

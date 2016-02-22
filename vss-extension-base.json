@@ -1,7 +1,7 @@
 {
   "manifestVersion": 1,
-  "id": "vss-developer-tools",
-  "version": "0.0.4",
+  "id": "vsts-developer-tools",
+  "version": "0.0.5",
   "publisher": "ms-devlabs",
   "name": "Extension Developer Tools",
   "description": "Tools to help you create, develop, and publish extensions and integrations to the Visual Studio Marketplace.",

@@ -1,7 +1,9 @@
 dist/
-node_modules/
 built/
 .vscode/
+
+node_modules/
+npm-debug.log
 
 BuildTasks/typings/
 BuildTasks/**/*.js
