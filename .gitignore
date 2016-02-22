@@ -1,7 +1,12 @@
 dist/
 node_modules/
+built/
 .vscode/
+
 BuildTasks/typings/
-BuildTasks/*Extension/common.ts
+BuildTasks/**/*.js
+
+Web/scripts/Playground/**/*.js
+
 *.vsix
 web.config
