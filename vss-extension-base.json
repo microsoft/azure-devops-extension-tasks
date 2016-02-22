@@ -5,20 +5,24 @@
   "publisher": "ms-devlabs",
   "name": "Extension Developer Tools",
   "description": "Tools to help you create, develop, and publish extensions and integrations to the Visual Studio Marketplace.",
+  "public": false,
   "targets": [
     {
       "id": "Microsoft.VisualStudio.Services"
     }
   ],
   "scopes": [
-      "vso.code_write"
+      "vso.code_write",
+      "vso.build_execute",
+      "vso.work_write",
+      "vso.gallery_manage"
   ],
   "category": [
     "Code"
   ],
   "content": {
     "details": {
-      "path": "overview.md"
+      "path": "readme.md"
     },
     "license": {
       "path": "license.txt"
@@ -26,12 +30,10 @@
   },
   "links": {
     "repository": {
-      "uri": "https://github.com/Microsoft/vss-developer-tools"
+      "uri": "https://github.com/Microsoft/vsts-developer-tools"
     },
     "issues": {
-      "uri": "https://github.com/Microsoft/vss-developer-tools/issues"
+      "uri": "https://github.com/Microsoft/vsts-developer-tools/issues"
     }
-  },
-
-
+  }
 }
