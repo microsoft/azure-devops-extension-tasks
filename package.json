@@ -14,7 +14,7 @@
     "compile:web": "tsc --project Web",
     "compile:tasks": "tsc --project BuildTasks",
     "precompile:tasks": "copyfiles -u 2 BuildTasks/Common/common.ts BuildTasks/PackageExtension && copyfiles -u 2 BuildTasks/Common/common.ts BuildTasks/PublishExtension",
-    "content:web": "copyfiles \"./Web/**/!(*.ts)\" dist",
+    "content:web": "copyfiles \"./Web/**/!(*.ts|tsconfig.json)\" dist",
     "content:tasks": "copyfiles \"./BuildTasks/*Extension/**/!(*.ts)\" dist",
     "content:extension": "copyfiles vss-extension*.json *.md license.txt dist",
     "content:all": "npm run content:web && npm run content:tasks && npm run content:extension",
