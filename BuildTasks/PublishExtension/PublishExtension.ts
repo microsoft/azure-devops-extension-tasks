@@ -1,6 +1,6 @@
 ///<reference path="../typings/main.d.ts" />
 import tl = require('vsts-task-lib/task');
-import common = require('../Common/Common');
+import common = require('./Common');
 
 function getEndpointDetails(inputFieldName) {
     var errorMessage = "Could not decode the marketplace endpoint. Please ensure you are running the latest VSTS agent";

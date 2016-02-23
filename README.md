@@ -8,12 +8,10 @@ Tools to help you build great extensions for Visual Studio Team Services.
 2. UI control playground
 3. Wizard to quickly create a new extension
 
-## To compile
+## To contribute
 
-To compile the build tasks, run `tsc` from the `BuildTasks` folder.
+1. From the root of the repo run `npm run initdev`. This will pull down the necessary modules and TypeScript declare files.
+2. Run `npm run build:tasks` to compile the build tasks
+3. Run `npm run package:tasks` to create a .vsix extension package that includes the build tasks
 
-## To use the build tasks
 
-1. Create a new build definition
-2. Add a "npm" (install step)
-3. Add either the package or task

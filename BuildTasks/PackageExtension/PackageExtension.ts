@@ -1,6 +1,6 @@
 ///<reference path="../typings/main.d.ts" />
 import tl = require('vsts-task-lib/task');
-import common = require("../Common/common");
+import common = require("./common");
 
 common.runTfx(tfx => {
     tfx.arg("extension");

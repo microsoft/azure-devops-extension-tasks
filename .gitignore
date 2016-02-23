@@ -6,7 +6,7 @@ node_modules/
 npm-debug.log
 
 BuildTasks/typings/
-BuildTasks/**/*.js
+BuildTasks/*Extension/common.ts
 
 Web/scripts/Playground/**/*.js
 
