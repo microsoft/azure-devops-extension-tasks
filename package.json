@@ -11,6 +11,7 @@
     "initdev:typings": "pushd BuildTasks && typings install && popd",
     "initdev": "npm run initdev:npm  && npm run initdev:typings ",
     "clean": "rimraf dist",
+    "precompile:web": "tsconfig Web",
     "compile:web": "tsc --project Web",
     "compile:tasks": "tsc --project BuildTasks",
     "precompile:tasks": "copyfiles -u 2 BuildTasks/Common/common.ts BuildTasks/PackageExtension && copyfiles -u 2 BuildTasks/Common/common.ts BuildTasks/PublishExtension",
