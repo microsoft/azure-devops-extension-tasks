@@ -21,6 +21,11 @@
   "minimumAgentVersion": "1.83.0",
   "groups": [
     {
+      "name": "overrides",
+      "displayName": "Overrides manifest",
+      "isExpanded": true
+    },
+    {
       "name": "advanced",
       "displayName": "Advanced",
       "isExpanded": false
@@ -28,14 +33,6 @@
   ],
   "instanceNameFormat": "Package Extension $(rootFolder)",
   "inputs": [
-    {
-      "name": "publisher",
-      "type": "string",
-      "label": "Publisher",
-      "defaultValue": "",
-      "required": false,
-      "helpMarkDown": "Extension publisher. If not specified, the publisher specified in the manifest will be used."
-    },        
     {
       "name": "rootFolder",
       "type": "filePath",
@@ -59,6 +56,47 @@
       "defaultValue": "",
       "required": false,
       "helpMarkDown": "Specify the path and file name of the generated vsix."
+    },
+    {
+      "name": "publisher",
+      "type": "string",
+      "label": "Publisher",
+      "defaultValue": "",
+      "required": false,
+      "helpMarkDown": "Extension publisher. If not specified, the publisher specified in the manifest will be used.",
+      "groupName": "overrides"
+    },       
+    {
+      "name": "extensionId",
+      "type": "string",
+      "label": "Extension ID",
+      "defaultValue": "",
+      "helpMarkDown": "Overrides extension ID. If not specified, the extension ID specified in the manifest will be used",
+      "required": false,
+      "groupName": "overrides"
+    },
+    {
+      "name": "extensionName",
+      "type": "string",
+      "label": "Extension name",
+      "defaultValue": "",
+      "helpMarkDown": "Overrides extension name. If not specified, the extension name specified in the manifest will be used",
+      "required": false,
+      "groupName": "overrides"
+    },
+    {
+      "name": "extensionVisibility",
+      "type": "pickList",
+      "label": "Extension visibility",
+      "defaultValue": "",
+      "helpMarkDown": "Overrides extension visibility (Public vs Private). If not specified, the extension visibility specified in the manifest will be used",
+      "required": false,
+      "groupName": "overrides",
+      "options": {
+        "default": "Not set",
+        "private": "Private",
+        "public": "Public"
+      }
     },
     {
       "name": "arguments",

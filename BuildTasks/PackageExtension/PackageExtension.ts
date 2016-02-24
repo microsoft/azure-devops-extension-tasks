@@ -1,38 +1,22 @@
 ///<reference path="../typings/main.d.ts" />
-import tl = require('vsts-task-lib/task');
+import tl = require("vsts-task-lib/task");
 import common = require("./common");
 
 common.runTfx(tfx => {
-    tfx.arg("extension");
-    tfx.arg("create");
+    tfx.arg(["extension", "create"]);
 
-    var publisher = tl.getInput('publisher', false);
-    if (publisher) {
-        tfx.arg('--publisher');
-        tfx.arg(publisher);
-    }
+    // Set tfx manifest arguments
+    const cleanupTfxArgs = common.setTfxManifestArguments(tfx);
 
-    var rootFolder = tl.getInput('rootFolder', false);
-    if (rootFolder) {
-        tfx.arg('--root');
-        tfx.arg(rootFolder);
-    }
+    // Set vsix output path
+    const outputPath = tl.getInput("outputPath", false);
+    tfx.argIf(outputPath, ["--output-path", outputPath]);
 
-    var globsManifest = tl.getInput('patternManifest', false);
-    if (globsManifest) {
-        tfx.arg('--manifest-globs');
-        tfx.arg(globsManifest);
-    }
+    // Aditional arguments
+    tfx.arg(tl.getInput("arguments", false));
 
-    var outputPath = tl.getInput('outputPath', false);
-    if (outputPath) {
-        tfx.arg('--output-path');
-        tfx.arg(outputPath);
-    }
-
-    tfx.arg(tl.getInput('arguments', false));
-
-    var cwd = tl.getInput('cwd', false);
+    // Set working directory
+    const cwd = tl.getInput("cwd", false);
     if (cwd) {
         tl.cd(cwd);
     }
@@ -41,6 +25,8 @@ common.runTfx(tfx => {
         tl.setResult(tl.TaskResult.Succeeded, `tfx exited with return code: ${code}`);
     }).fail(err => {
         tl.setResult(tl.TaskResult.Failed, `tfx failed with error: ${err}`);
-    });    
-})
+    }).finally(() => {
+        cleanupTfxArgs();
+    });
+});
 

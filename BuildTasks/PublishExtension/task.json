@@ -21,9 +21,14 @@
   "minimumAgentVersion": "1.83.0",
   "groups": [
     {
+      "name": "manifest",
+      "displayName": "Extension manifest",
+      "isExpanded": true
+    },      
+    {
       "name": "advanced",
       "displayName": "Advanced",
-      "isExpanded": false
+      "isExpanded": false,
     }
   ],
   "instanceNameFormat": "Publish Extension",
@@ -36,14 +41,6 @@
         "helpMarkDown": "Service endpoint connection to publish the extension with."
     },    
     {
-      "name": "publisher",
-      "type": "string",
-      "label": "Publisher",
-      "defaultValue": "",
-      "required": false,
-      "helpMarkDown": "Extension publisher. If not specified, the publisher specified in the manifest will be used."
-    },    
-    {
         "name":"fileType",
         "type":"radio",
         "label":"Input file type",
@@ -52,7 +49,8 @@
         "options": {
             "manifest": "Extension manifest file",
             "vsix": "VSIX file"
-        }   
+        },
+        "groupName": "manifest"  
     },    
     {
       "name": "vsixFile",
@@ -61,7 +59,8 @@
       "defaultValue": "",
       "required": true,
       "helpMarkDown": "VSIX file to publish.",
-      "visibleRule": "fileType = vsix"
+      "visibleRule": "fileType = vsix",
+      "groupName": "manifest"  
     },    
     {
       "name": "rootFolder",
@@ -70,7 +69,8 @@
       "defaultValue": "",
       "required": false,
       "helpMarkDown": "Folder where manifest file(s) exist.",
-      "visibleRule": "fileType = manifest"
+      "visibleRule": "fileType = manifest",
+      "groupName": "manifest"  
     },
     {
       "name": "patternManifest",
@@ -79,8 +79,55 @@
       "defaultValue": "vss-extension.json",
       "required": false,
       "helpMarkDown": "Pattern for the manifest files to join.",
-      "visibleRule": "fileType = manifest"
+      "visibleRule": "fileType = manifest",
+      "groupName": "manifest"  
     },
+    {
+      "name": "publisher",
+      "type": "string",
+      "label": "Publisher",
+      "defaultValue": "",
+      "required": false,
+      "helpMarkDown": "Extension publisher. If not specified, the publisher specified in the manifest will be used.",
+      "visibleRule": "fileType = manifest",
+      "groupName": "manifest"
+    },       
+    {
+      "name": "extensionId",
+      "type": "string",
+      "label": "Extension ID",
+      "defaultValue": "",
+      "helpMarkDown": "Overrides extension ID. If not specified, the extension ID specified in the manifest will be used",
+      "required": false,
+      "visibleRule": "fileType = manifest",
+      "groupName": "manifest"
+    },
+    {
+      "name": "extensionName",
+      "type": "string",
+      "label": "Extension name",
+      "defaultValue": "",
+      "helpMarkDown": "Overrides extension name. If not specified, the extension name specified in the manifest will be used",
+      "required": false,
+      "visibleRule": "fileType = manifest",
+      "groupName": "manifest"
+    },
+    {
+      "name": "extensionVisibility",
+      "type": "pickList",
+      "label": "Extension visibility",
+      "defaultValue": "",
+      "helpMarkDown": "Overrides extension visibility (Public vs Private). If not specified, the extension visibility specified in the manifest will be used",
+      "required": false,
+      "options": {
+        "default": "Not set",
+        "private": "Private",
+        "public": "Public"
+      },
+      "visibleRule": "fileType = manifest",
+      "groupName": "manifest"
+    },
+    
     {
       "name": "arguments",
       "type": "string",

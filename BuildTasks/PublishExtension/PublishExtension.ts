@@ -1,22 +1,13 @@
 ///<reference path="../typings/main.d.ts" />
-import tl = require('vsts-task-lib/task');
-import common = require('./Common');
+import tl = require("vsts-task-lib/task");
+import common = require("./common");
 
 function getEndpointDetails(inputFieldName) {
-    var errorMessage = "Could not decode the marketplace endpoint. Please ensure you are running the latest VSTS agent";
-    if (!tl.getEndpointUrl) {
-        throw new Error(errorMessage);
-    }
+    const marketplaceEndpoint = tl.getInput(inputFieldName, true);
+    const hostUrl = tl.getEndpointUrl(marketplaceEndpoint, false);
+    const auth = tl.getEndpointAuthorization(marketplaceEndpoint, false);
 
-    var marketplaceEndpoint = tl.getInput(inputFieldName);
-    if (!marketplaceEndpoint) {
-        throw new Error(errorMessage);
-    }
-
-    var hostUrl = tl.getEndpointUrl(marketplaceEndpoint, false);
-    var auth = tl.getEndpointAuthorization(marketplaceEndpoint, false);
-
-    var apitoken = auth.parameters['password'];
+    const apitoken = auth.parameters["password"];
 
     return {
         "url": hostUrl,
@@ -25,46 +16,31 @@ function getEndpointDetails(inputFieldName) {
 }
 
 common.runTfx(tfx => {
-    tfx.arg("extension publish");
+    tfx.arg(["extension", "publish"]);
 
     // Read gallery endpoint
-    var galleryEndpoint = getEndpointDetails('connectedServiceName');
-    tfx.arg('--token');
-    tfx.arg(galleryEndpoint.token);
+    const galleryEndpoint = getEndpointDetails("connectedServiceName");
+    tfx.arg(["--token", galleryEndpoint.token]);
 
-    tfx.arg('--service-url');
-    tfx.arg(galleryEndpoint.url);
+    tfx.arg(["--service-url", galleryEndpoint.url]);
 
     // Read file type
-    var fileType = tl.getInput('fileType', true);
-    if (fileType == "manifest") {
-        var rootFolder = tl.getInput('rootFolder', false);
-        if (rootFolder) {
-            tfx.arg('--root');
-            tfx.arg(rootFolder);
-        }
-
-        var globsManifest = tl.getInput('patternManifest', false);
-        if (globsManifest) {
-            tfx.arg('--manifest-globs');
-            tfx.arg(globsManifest);
-        }
+    const fileType = tl.getInput("fileType", true);
+    let cleanupTfxArgs: () => void;
+    if (fileType === "manifest") {
+        // Set tfx manifest arguments
+        cleanupTfxArgs = common.setTfxManifestArguments(tfx);
     } else {
-        var vsixFile = tl.getInput('vsixFile', true);
-        tfx.arg('--vsix');
-        tfx.arg(vsixFile);
+        // Set vsix file argument
+        let vsixFile = tl.getInput("vsixFile", true);
+        tfx.arg(["--vsix", vsixFile]);
     }
 
-    // Read publisher
-    var publisher = tl.getInput('publisher', false);
-    if (publisher) {
-        tfx.arg('--publisher');
-        tfx.arg(publisher);
-    }
+    // Aditional arguments
+    tfx.arg(tl.getInput("arguments", false));
 
-    tfx.arg(tl.getInput('arguments', false));
-
-    var cwd = tl.getInput('cwd', false);
+    // Set working folder
+    const cwd = tl.getInput("cwd", false);
     if (cwd) {
         tl.cd(cwd);
     }
@@ -73,5 +49,9 @@ common.runTfx(tfx => {
         tl.setResult(tl.TaskResult.Succeeded, `tfx exited with return code: ${code}`);
     }).fail(err => {
         tl.setResult(tl.TaskResult.Failed, `tfx failed with error: ${err}`);
+    }).finally(() => {
+        if (cleanupTfxArgs) {
+            cleanupTfxArgs();
+        }
     });
 });
