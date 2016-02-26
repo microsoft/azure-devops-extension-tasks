@@ -24,7 +24,12 @@
       "name": "manifest",
       "displayName": "Extension manifest",
       "isExpanded": true
-    },      
+    },
+    {
+      "name": "sharing",
+      "displayName": "Sharing",
+      "isExpanded": true
+    },
     {
       "name": "advanced",
       "displayName": "Advanced",
@@ -39,7 +44,7 @@
         "label": "Marketplace connection",
         "required": true,
         "helpMarkDown": "Service endpoint connection to publish the extension with."
-    },    
+    },
     {
         "name":"fileType",
         "type":"radio",
@@ -50,8 +55,8 @@
             "manifest": "Extension manifest file",
             "vsix": "VSIX file"
         },
-        "groupName": "manifest"  
-    },    
+        "groupName": "manifest"
+    },
     {
       "name": "vsixFile",
       "type": "filePath",
@@ -60,8 +65,8 @@
       "required": true,
       "helpMarkDown": "VSIX file to publish.",
       "visibleRule": "fileType = vsix",
-      "groupName": "manifest"  
-    },    
+      "groupName": "manifest"
+    },
     {
       "name": "rootFolder",
       "type": "filePath",
@@ -70,7 +75,7 @@
       "required": false,
       "helpMarkDown": "Folder where manifest file(s) exist.",
       "visibleRule": "fileType = manifest",
-      "groupName": "manifest"  
+      "groupName": "manifest"
     },
     {
       "name": "patternManifest",
@@ -80,7 +85,7 @@
       "required": false,
       "helpMarkDown": "Pattern for the manifest files to join.",
       "visibleRule": "fileType = manifest",
-      "groupName": "manifest"  
+      "groupName": "manifest"
     },
     {
       "name": "publisher",
@@ -91,7 +96,7 @@
       "helpMarkDown": "Extension publisher. If not specified, the publisher specified in the manifest will be used.",
       "visibleRule": "fileType = manifest",
       "groupName": "manifest"
-    },       
+    },
     {
       "name": "extensionId",
       "type": "string",
@@ -127,7 +132,15 @@
       "visibleRule": "fileType = manifest",
       "groupName": "manifest"
     },
-    
+    {
+      "name": "shareWith",
+      "type": "string",
+      "label": "Share with",
+      "defaultValue": "",
+      "helpMarkDown": "Comma separated list of accounts with which to share the extension if it's private (e.g. account_x,account_y,account_z)",
+      "required": false,
+      "groupName": "sharing"
+    },
     {
       "name": "arguments",
       "type": "string",
