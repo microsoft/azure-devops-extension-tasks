@@ -36,6 +36,14 @@ common.runTfx(tfx => {
         tfx.arg(["--vsix", vsixFile]);
     }
 
+    // Share with
+    const shareWith = tl.getInput("shareWith");
+    if (shareWith) {
+        // Sanitize accounts to share with
+        let accounts = shareWith.split(",").map(a => a.replace(/\s/g, "")).filter(a => a.length > 0);
+        tfx.argIf(accounts && accounts.length > 0, ["--share-with", ...accounts]);
+    }
+
     // Aditional arguments
     tfx.arg(tl.getInput("arguments", false));
 
