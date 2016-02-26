@@ -33,7 +33,7 @@
     {
       "name": "advanced",
       "displayName": "Advanced",
-      "isExpanded": false,
+      "isExpanded": false
     }
   ],
   "instanceNameFormat": "Publish Extension",
