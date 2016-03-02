@@ -121,7 +121,8 @@ export function runTfx(cmd: (tfx: ToolRunner) => void) {
 }
 
 /**
- * Get the Marketplace endpoint details to be used while publishing or installing an extension
+ * Get the Marketplace endpoint details to be used while publishing or installing an extension.
+ * 
  * @param  {string="connectedServiceName"} inputFieldName
  * @returns string
  */
