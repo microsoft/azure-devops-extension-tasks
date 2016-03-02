@@ -17,7 +17,7 @@
     "precompile:tasks": "copyfiles -u 2 BuildTasks/Common/common.ts BuildTasks/PackageExtension && copyfiles -u 2 BuildTasks/Common/common.ts BuildTasks/PublishExtension",
     "content:web": "copyfiles \"./Web/**/!(*.ts|tsconfig.json)\" ./Web/**/ref/**.d.ts dist",
     "content:tasks": "copyfiles \"./BuildTasks/*Extension/**/!(*.ts)\" dist",
-    "content:extension": "copyfiles vss-extension*.json *.md license.txt dist",
+    "content:extension": "copyfiles vss-extension*.json *.md license.txt tools-icon.png dist",
     "content:all": "npm run content:web && npm run content:tasks && npm run content:extension",
     "prelink:tasks": "mkdirp dist/_temp/node_modules && pushd \"dist/_temp\" && npm install vsts-task-lib -s && popd",
     "link:tasks": "copyfiles -u 2 dist/_temp/node_modules/**/* dist/BuildTasks/PackageExtension && copyfiles -u 2 dist/_temp/node_modules/**/* dist/BuildTasks/PublishExtension",

@@ -5,6 +5,9 @@
   "publisher": "ms-devlabs",
   "name": "Extension Developer Tools",
   "description": "Tools to help you create, develop, and publish extensions and integrations to the Visual Studio Marketplace.",
+  "icons": {
+    "default": "tools-icon.png"  
+  },
   "public": false,
   "targets": [
     {
