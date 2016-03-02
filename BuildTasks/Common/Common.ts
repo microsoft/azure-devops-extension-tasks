@@ -46,7 +46,7 @@ export function setTfxManifestArguments(tfx: ToolRunner): (() => void) {
     tfx.argIf(globsManifest, ["--manifest-globs", globsManifest]);
 
     // Overrides manifest file
-    const publisher = tl.getInput("publisher", false);
+    const publisher = tl.getInput("publisherId", false);
     tfx.argIf(publisher, ["--publisher", publisher]);
 
     const extensionId = tl.getInput("extensionId", false);
@@ -118,4 +118,22 @@ export function runTfx(cmd: (tfx: ToolRunner) => void) {
     }).fail(err => {
         tl.setResult(tl.TaskResult.Failed, `Error installing tfx: ${err}`);
     });
+}
+
+/**
+ * Get the Marketplace endpoint details to be used while publishing or installing an extension
+ * @param  {string="connectedServiceName"} inputFieldName
+ * @returns string
+ */
+export function getMarketplaceEndpointDetails(inputFieldName: string = "connectedServiceName"): { url: string, token: string } {
+    const marketplaceEndpoint = tl.getInput(inputFieldName, true);
+    const hostUrl = tl.getEndpointUrl(marketplaceEndpoint, false);
+    const auth = tl.getEndpointAuthorization(marketplaceEndpoint, false);
+
+    const apitoken = auth.parameters["password"];
+
+    return {
+        "url": hostUrl,
+        "token": apitoken
+    };
 }
