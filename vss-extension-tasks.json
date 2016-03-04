@@ -26,6 +26,16 @@
             }
         },
         {
+            "id": "install-extension-build-task",
+            "type": "ms.vss-distributed-task.task",
+            "targets": [
+                "ms.vss-distributed-task.tasks"
+            ],
+            "properties": {
+                "name": "BuildTasks/InstallExtension"
+            }
+        },        
+        {
             "id": "vsts-marketplace-endpoint-type",
             "description": "VSTS Marketplace Publishing",
             "type": "ms.vss-endpoint.service-endpoint-type",

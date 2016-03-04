@@ -2,26 +2,12 @@
 import tl = require("vsts-task-lib/task");
 import common = require("./common");
 
-function getEndpointDetails(inputFieldName) {
-    const marketplaceEndpoint = tl.getInput(inputFieldName, true);
-    const hostUrl = tl.getEndpointUrl(marketplaceEndpoint, false);
-    const auth = tl.getEndpointAuthorization(marketplaceEndpoint, false);
-
-    const apitoken = auth.parameters["password"];
-
-    return {
-        "url": hostUrl,
-        "token": apitoken
-    };
-}
-
 common.runTfx(tfx => {
     tfx.arg(["extension", "publish"]);
 
     // Read gallery endpoint
-    const galleryEndpoint = getEndpointDetails("connectedServiceName");
+    const galleryEndpoint = common.getMarketplaceEndpointDetails();
     tfx.arg(["--token", galleryEndpoint.token]);
-
     tfx.arg(["--service-url", galleryEndpoint.url]);
 
     // Read file type

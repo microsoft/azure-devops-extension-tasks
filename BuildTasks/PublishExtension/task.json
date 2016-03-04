@@ -88,12 +88,12 @@
       "groupName": "manifest"
     },
     {
-      "name": "publisher",
+      "name": "publisherId",
       "type": "string",
-      "label": "Publisher",
+      "label": "Publisher ID",
       "defaultValue": "",
       "required": false,
-      "helpMarkDown": "Extension publisher. If not specified, the publisher specified in the manifest will be used.",
+      "helpMarkDown": "Extension publisher ID. If not specified, the publisher specified in the manifest will be used.",
       "visibleRule": "fileType = manifest",
       "groupName": "manifest"
     },

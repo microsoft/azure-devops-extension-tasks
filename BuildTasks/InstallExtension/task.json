@@ -1,0 +1,100 @@
+{
+  "id": "47a0f73c-f8e6-4fc5-a759-4d560031ef75",
+  "name": "InstallExtension",
+  "friendlyName": "Install Extension",
+  "description": "Install a Visual Studio Team Services extension published in the Marketplace.",
+  "author": "Microsoft Corporation",
+  "helpMarkDown": "",
+  "category": "Utility",
+  "visibility": [
+    "Build",
+    "Release"
+  ],
+  "demands": [
+    "npm"
+  ],
+  "version": {
+    "Major": "0",
+    "Minor": "2",
+    "Patch": "0"
+  },
+  "minimumAgentVersion": "1.83.0",
+  "groups": [
+    {
+      "name": "extension",
+      "displayName": "Extension",
+      "isExpanded": true
+    },
+    {
+      "name": "installation",
+      "displayName": "Installation",
+      "isExpanded": true
+    },
+    {
+      "name": "advanced",
+      "displayName": "Advanced",
+      "isExpanded": false
+    }
+  ],
+  "instanceNameFormat": "Install Extension",
+  "inputs": [
+    {
+        "name": "connectedServiceName",
+        "type": "connectedService:VstsMarketplacePublishing",
+        "label": "Marketplace connection",
+        "required": true,
+        "helpMarkDown": "Service endpoint connection to install the extension."
+    },
+    {
+      "name": "publisherId",
+      "type": "string",
+      "label": "Publisher ID",
+      "defaultValue": "",
+      "required": true,
+      "helpMarkDown": "Publisher ID of the extension to be installed.",
+      "groupName": "extension"
+    },
+    {
+      "name": "extensionId",
+      "type": "string",
+      "label": "Extension ID",
+      "defaultValue": "",
+      "helpMarkDown": "Extension ID of the extension to be installed",
+      "required": true,
+      "groupName": "extension"
+    },
+    {
+      "name": "accounts",
+      "type": "string",
+      "label": "Install in",
+      "defaultValue": "",
+      "helpMarkDown": "Comma separated list of accounts where to install the extension (e.g. account_x,account_y,account_z)",
+      "required": true,
+      "groupName": "installation"
+    },
+    {
+      "name": "arguments",
+      "type": "string",
+      "label": "Arguments",
+      "defaultValue": "",
+      "helpMarkDown": "Additional arguments passed to the package and publishing tool.",
+      "required": false,
+      "groupName": "advanced"
+    },
+    {
+      "name": "cwd",
+      "type": "filePath",
+      "label": "Working Directory",
+      "defaultValue": "",
+      "required": false,
+      "helpMarkDown": "Working directory to run the package and publishing process from. Defaults to the folder where the manifest is located.",
+      "groupName": "advanced"
+    }
+  ],
+  "execution": {
+    "Node": {
+      "target": "InstallExtension.js",
+      "argumentFormat": ""
+    }
+  }
+}
