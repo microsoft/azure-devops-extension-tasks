@@ -1,4 +1,44 @@
 {
+    "manifestVersion": 1,
+    "id": "vsts-developer-tools-web",
+    "version": "0.2.0",
+    "publisher": "ms-devlabs",
+    "name": "Extension Developer Tools for Web",
+    "description": "Web tools to help you create and develop extensions and integrations to the Visual Studio Marketplace.",
+    "icons": {
+        "default": "tools-icon.png"
+    },
+    "public": false,
+    "targets": [
+        {
+            "id": "Microsoft.VisualStudio.Services"
+        }
+    ],
+    "scopes": [
+        "vso.code_write",
+        "vso.build_execute",
+        "vso.work_write",
+        "vso.gallery_manage"
+    ],
+    "category": [
+        "Code"
+    ],
+    "content": {
+        "details": {
+            "path": "readme.md"
+        },
+        "license": {
+            "path": "license.txt"
+        }
+    },
+    "links": {
+        "repository": {
+            "uri": "https://github.com/Microsoft/vsts-developer-tools"
+        },
+        "issues": {
+            "uri": "https://github.com/Microsoft/vsts-developer-tools/issues"
+        }
+    },
     "files": [
         {
             "path": "Web",
