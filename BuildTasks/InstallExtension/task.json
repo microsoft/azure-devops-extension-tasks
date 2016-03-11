@@ -2,7 +2,7 @@
   "id": "47a0f73c-f8e6-4fc5-a759-4d560031ef75",
   "name": "InstallExtension",
   "friendlyName": "Install Extension",
-  "description": "Install a Visual Studio Team Services extension published in the Marketplace.",
+  "description": "Install a published extension to a Team Services account",
   "author": "Microsoft Corporation",
   "helpMarkDown": "",
   "category": "Utility",
@@ -16,7 +16,7 @@
   "version": {
     "Major": "0",
     "Minor": "2",
-    "Patch": "0"
+    "Patch": "2"
   },
   "minimumAgentVersion": "1.83.0",
   "groups": [

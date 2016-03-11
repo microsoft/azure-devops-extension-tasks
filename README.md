@@ -14,4 +14,3 @@ Tools to help you build great extensions for Visual Studio Team Services.
 2. Run `npm run build:tasks` to compile the build tasks
 3. Run `npm run package:tasks` to create a .vsix extension package that includes the build tasks
 
-

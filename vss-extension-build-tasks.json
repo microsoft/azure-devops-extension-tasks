@@ -1,10 +1,10 @@
 {
     "manifestVersion": 1,
     "id": "vsts-developer-tools-build-tasks",
-    "version": "0.2.0",
+    "version": "0.2.2",
     "publisher": "ms-devlabs",
-    "name": "Extension Build Tasks",
-    "description": "Build tasks to help you package, publish and install extensions and integrations to the Visual Studio Marketplace.",
+    "name": "Extension Developer Tools (Build Tasks)",
+    "description": "Build tasks for packaging, publishing, and installing Team Services extensions to the Visual Studio Marketplace.",
     "icons": {
         "default": "tools-icon.png"
     },
@@ -15,11 +15,13 @@
         }
     ],
     "scopes": [
-        "vso.code_write",
         "vso.build_execute",
-        "vso.work_write",
         "vso.gallery_manage"
     ],
+    "branding": {
+        "theme": "dark",
+        "color": "rgb(164,34,11)"  
+    },
     "category": [
         "Build and release"
     ],
@@ -77,14 +79,13 @@
         },
         {
             "id": "vsts-marketplace-endpoint-type",
-            "description": "VSTS Marketplace Publishing",
             "type": "ms.vss-endpoint.service-endpoint-type",
             "targets": [
                 "ms.vss-endpoint.endpoint-types"
             ],
             "properties": {
                 "name": "VstsMarketplacePublishing",
-                "displayName": "VSTS Marketplace Publishing",
+                "displayName": "Marketplace Publishing",
                 "url": "https://marketplace.visualstudio.com",
                 "authenticationSchemes": [
                     {

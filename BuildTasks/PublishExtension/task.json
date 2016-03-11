@@ -2,7 +2,7 @@
   "id": "631511B4-50AB-47C8-B766-7AE2AA672733",
   "name": "PublishExtension",
   "friendlyName": "Publish Extension",
-  "description": "Publish a Visual Studio Team Services extension to the Marketplace.",
+  "description": "Publish a Team Services extension to the Visual Studio Marketplace",
   "author": "Microsoft Corporation",
   "helpMarkDown": "",
   "category": "Utility",
@@ -16,7 +16,7 @@
   "version": {
     "Major": "0",
     "Minor": "2",
-    "Patch": "0"
+    "Patch": "2"
   },
   "minimumAgentVersion": "1.83.0",
   "groups": [

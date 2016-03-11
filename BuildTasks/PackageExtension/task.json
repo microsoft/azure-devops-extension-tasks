@@ -2,7 +2,7 @@
   "id": "e59022e0-667a-11e5-ad4c-dd75b69a0d2c",
   "name": "PackageVSTSExtension",
   "friendlyName": "Package Extension",
-  "description": "Packages a Visual Studio Team Services extension into a VSIX file.",
+  "description": "Package a Team Services extension into a VSIX file",
   "author": "Microsoft Corporation",
   "helpMarkDown": "",
   "category": "Utility",
@@ -16,7 +16,7 @@
   "version": {
     "Major": "0",
     "Minor": "2",
-    "Patch": "0"
+    "Patch": "2"
   },
   "minimumAgentVersion": "1.83.0",
   "groups": [
