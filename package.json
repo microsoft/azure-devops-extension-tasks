@@ -20,7 +20,7 @@
     "package:web": "tfx extension create --root dist --output-path dist --manifest-globs vss-extension-web.json",
     "precompile:tasks": "node scripts/copyFilesToBuildTasks -u 2 BuildTasks/Common/common.ts BuildTasks",
     "compile:tasks": "tsc --project BuildTasks",
-    "prelink:tasks": "mkdirp dist/_temp/node_modules  && copyfiles package.json dist/_temp && pushd \"dist/_temp\" && npm install --production -s && popd",
+    "prelink:tasks": "mkdirp dist/_temp/node_modules_small && copyfiles package.json dist/_temp && pushd \"dist/_temp\" && npm install --production -s && popd",
     "link:tasks": "node scripts/copyfilesToBuildTasks -u 2 dist/_temp/node_modules/**/* dist/BuildTasks",
     "postlink:tasks": "rimraf dist/_temp",
     "content:tasks": "copyfiles \"./BuildTasks/*Extension/**/!(*.ts)\" dist",
@@ -29,8 +29,7 @@
     "build:tasks:noclean": "npm run compile:tasks && npm run content:tasks && npm run content:extension:tasks  && npm run link:tasks",
     "package:tasks": "tfx extension create --root dist --output-path dist --manifest-globs vss-extension-build-tasks.json",
     "build:all": "npm run clean && npm run build:web:noclean && npm run build:tasks:noclean",
-    "package:all": "npm run package:tasks && npm run package:web",
-    "bla":" && copyfiles package.json dist/_temp &&"
+    "package:all": "npm run package:tasks && npm run package:web"
   },
   "author": "Microsoft Corporation",
   "license": "MIT",

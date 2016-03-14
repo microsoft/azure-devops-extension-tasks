@@ -1,31 +1,37 @@
 /// <reference path="../typings/main.d.ts" />
-
 import AdmZip = require("adm-zip")
 import temp = require('temp');
 import fs = require('fs');
 import path = require('path');
 import Q = require("q");
+import tl = require("vsts-task-lib/task");
 
-class VSIXEditor {
+/**
+ * Set manifest related arguments for packaged vsix, such as
+ * the  publisher and extension id
+ * @returns {string}  
+ */
+
+
+export class VSIXEditor {
     private zip: AdmZip;
-    private outputPath: string;
     private edit: boolean = false;
 
     private versionNumber: string = null;
     private id: string = null;
     private publisher: string = null;
 
-    constructor(input: string, output: string) {
-        this.outputPath = output;
+    constructor(public input: string,
+                public  output :string) {
         this.zip = new AdmZip(input);
     }
-
+ 
     public startEdit() {
         if (this.edit) throw "Edit is already started";
         this.edit = true;
     }
 
-    public endEdit() {
+    public endEdit(){
         this.validateEditMode();
 
         if (this.hasEdits()) {
@@ -40,7 +46,8 @@ class VSIXEditor {
                     .then(() => {
                         this.EditVsoManifest(dirPath).then(() => {
                             var archiver = require('archiver');
-                            var output = fs.createWriteStream(this.outputPath);
+                            var outputPath= path.join(dirPath, "output.vsix");
+                            var output = fs.createWriteStream(outputPath);
                             var archive = archiver('zip');
 
                             output.on('close', function () {
@@ -60,8 +67,6 @@ class VSIXEditor {
                             archive.finalize();
                         });
                     });
-
-
             });
         }
     }
@@ -107,6 +112,8 @@ class VSIXEditor {
 
     private hasEdits(): boolean {
         return this.versionNumber != null
+            || this.id != null
+            || this.publisher != null;
     }
     public EditVersion(version: string) {
         this.validateEditMode();
