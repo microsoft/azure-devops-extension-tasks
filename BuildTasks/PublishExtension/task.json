@@ -94,7 +94,6 @@
       "defaultValue": "",
       "required": false,
       "helpMarkDown": "Extension publisher ID. If not specified, the publisher specified in the manifest will be used.",
-      "visibleRule": "fileType = manifest",
       "groupName": "manifest"
     },
     {
@@ -104,7 +103,6 @@
       "defaultValue": "",
       "helpMarkDown": "Overrides extension ID. If not specified, the extension ID specified in the manifest will be used",
       "required": false,
-      "visibleRule": "fileType = manifest",
       "groupName": "manifest"
     },
     {
