@@ -22,53 +22,51 @@ export class VSIXEditor {
     private publisher: string = null;
 
     constructor(public input: string,
-                public  output :string) {
+        public output: string) {
         this.zip = new AdmZip(input);
     }
- 
+
     public startEdit() {
         if (this.edit) throw "Edit is already started";
         this.edit = true;
     }
 
-    public endEdit(){
+    public endEdit() {
         this.validateEditMode();
 
-        if (this.hasEdits()) {
-            temp.track();
+        temp.track();
 
-            temp.mkdir("visxeditor", (err, dirPath) => {
-                if (err) throw err;
+        temp.mkdir("visxeditor", (err, dirPath) => {
+            if (err) throw err;
 
-                this.zip.extractAllTo(dirPath, true);
+            this.zip.extractAllTo(dirPath, true);
 
-                this.EditVsixManifest(dirPath)
-                    .then(() => {
-                        this.EditVsoManifest(dirPath).then(() => {
-                            var archiver = require('archiver');
-                            var outputPath= path.join(dirPath, "output.vsix");
-                            var output = fs.createWriteStream(outputPath);
-                            var archive = archiver('zip');
+            this.EditVsixManifest(dirPath)
+                .then(() => {
+                    this.EditVsoManifest(dirPath).then(() => {
+                        var archiver = require('archiver');
+                        var output = fs.createWriteStream(this.output);
+                        var archive = archiver('zip');
 
-                            output.on('close', function () {
-                                console.log(archive.pointer() + ' total bytes');
-                                console.log('archiver has been finalized and the output file descriptor has closed.');
-                            });
-
-                            archive.on('error', function (err) {
-                                throw err;
-                            });
-
-                            archive.pipe(output);
-
-                            archive.bulk([
-                                { expand: true, cwd: dirPath, src: ['**/*'] }
-                            ]);
-                            archive.finalize();
+                        output.on('close', function() {
+                            console.log(archive.pointer() + ' total bytes');
+                            console.log('archiver has been finalized and the output file descriptor has closed.');
                         });
+
+                        archive.on('error', function(err) {
+                            throw err;
+                        });
+
+                        archive.pipe(output);
+
+                        archive.bulk([
+                            { expand: true, cwd: dirPath, src: ['**/*'] }
+                        ]);
+                        archive.finalize();
                     });
-            });
-        }
+                });
+        });
+
     }
     private EditVsoManifest(dirPath: string) {
         var deferred = Q.defer<boolean>();

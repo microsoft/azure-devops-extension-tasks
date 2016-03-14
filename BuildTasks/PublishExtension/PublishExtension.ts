@@ -2,6 +2,7 @@
 import tl = require("vsts-task-lib/task");
 import common = require("./common");
 import vsixeditor = require("./vsixeditor")
+import path = require("path")
 
 common.runTfx(tfx => {
     tfx.arg(["extension", "publish"]);
@@ -20,7 +21,7 @@ common.runTfx(tfx => {
     } else {
         // Set vsix file argument
         let vsixFile = tl.getInput("vsixFile", true);
-        const outputvsix = "c:\temp\output.vsix";
+        const outputvsix = path.join(tl.getVariable("System.DefaultWorkingDirectory"), "output.vsix");
 
         const publisher = tl.getInput("publisherId", false);
         const extensionId = tl.getInput("extensionId", false);
