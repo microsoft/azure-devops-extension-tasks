@@ -29,6 +29,7 @@ export class VSIXEditor {
     public startEdit() {
         if (this.edit) throw "Edit is already started";
         this.edit = true;
+        console.debug("Editing started");
     }
 
     public endEdit() {
@@ -38,7 +39,8 @@ export class VSIXEditor {
 
         temp.mkdir("visxeditor", (err, dirPath) => {
             if (err) throw err;
-
+            console.debug("Finalizing edit");
+            console.debug("Extracting files to " + dirPath);
             this.zip.extractAllTo(dirPath, true);
 
             this.EditVsixManifest(dirPath)
@@ -47,10 +49,12 @@ export class VSIXEditor {
                         var archiver = require('archiver');
                         var output = fs.createWriteStream(this.output);
                         var archive = archiver('zip');
-
+            
+                        console.debug("Creating final archive file at " + this.output);
+            
                         output.on('close', function() {
-                            console.log(archive.pointer() + ' total bytes');
-                            console.log('archiver has been finalized and the output file descriptor has closed.');
+                            console.debug(archive.pointer() + ' total bytes');
+                            console.debug('archiver has been finalized and the output file descriptor has closed.');
                         });
 
                         archive.on('error', function(err) {
@@ -63,11 +67,13 @@ export class VSIXEditor {
                             { expand: true, cwd: dirPath, src: ['**/*'] }
                         ]);
                         archive.finalize();
+                        console.debug("Final archive file created");
                     });
                 });
         });
 
     }
+    
     private EditVsoManifest(dirPath: string) {
         var deferred = Q.defer<boolean>();
 

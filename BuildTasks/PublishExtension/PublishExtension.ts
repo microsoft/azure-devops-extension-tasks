@@ -25,7 +25,7 @@ common.runTfx(tfx => {
 
         const publisher = tl.getInput("publisherId", false);
         const extensionId = tl.getInput("extensionId", false);
-        
+        console.debug("Start editing of VSIX");
         var ve = new vsixeditor.VSIXEditor(vsixFile, outputvsix)
         ve.startEdit();
 
