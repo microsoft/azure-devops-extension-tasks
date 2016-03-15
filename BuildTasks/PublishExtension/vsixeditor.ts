@@ -39,8 +39,8 @@ export class VSIXEditor {
 
         temp.mkdir("visxeditor", (err, dirPath) => {
             if (err) throw err;
-            console.debug("Finalizing edit");
-            console.debug("Extracting files to " + dirPath);
+            tl.debug("Finalizing edit");
+            tl.debug("Extracting files to " + dirPath);
             this.zip.extractAllTo(dirPath, true);
 
             this.EditVsixManifest(dirPath)
@@ -50,11 +50,11 @@ export class VSIXEditor {
                         var output = fs.createWriteStream(this.output);
                         var archive = archiver('zip');
             
-                        console.debug("Creating final archive file at " + this.output);
+                        tl.debug("Creating final archive file at " + this.output);
             
                         output.on('close', function() {
-                            console.debug(archive.pointer() + ' total bytes');
-                            console.debug('archiver has been finalized and the output file descriptor has closed.');
+                          tl.debug(archive.pointer() + ' total bytes');
+                            tl.debug('archiver has been finalized and the output file descriptor has closed.');
                         });
 
                         archive.on('error', function(err) {
@@ -67,7 +67,7 @@ export class VSIXEditor {
                             { expand: true, cwd: dirPath, src: ['**/*'] }
                         ]);
                         archive.finalize();
-                        console.debug("Final archive file created");
+                        tl.debug("Final archive file created");
                     });
                 });
         });
