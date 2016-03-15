@@ -21,19 +21,20 @@ common.runTfx(tfx => {
     } else {
         // Set vsix file argument
         let vsixFile = tl.getInput("vsixFile", true);
-//        const outputvsix = path.join(tl.getVariable("System.DefaultWorkingDirectory"), "output.vsix");
+        const outputvsix = path.join(tl.getVariable("System.DefaultWorkingDirectory"), "output.vsix");
 
-  //      const publisher = tl.getInput("publisherId", false);
-    //    const extensionId = tl.getInput("extensionId", false);
-        console.debug("Start editing of VSIX");
-     //   var ve = new vsixeditor.VSIXEditor(vsixFile, outputvsix)
-      //  ve.startEdit();
+        const publisher = tl.getInput("publisherId", false);
+        const extensionId = tl.getInput("extensionId", false);
+        tl.debug("Start editing of VSIX");
+        var ve = new vsixeditor.VSIXEditor(vsixFile, outputvsix)
+        ve.startEdit();
 
-        //if (publisher) ve.EditPublisher(publisher);
-        //if (extensionId) ve.EditId(extensionId);
-        
-        //ve.endEdit();
-        
+        if (publisher) ve.EditPublisher(publisher);
+        if (extensionId) ve.EditId(extensionId);
+
+        ve.endEdit();
+
+
         tfx.arg(["--vsix", vsixFile]);
     }
 

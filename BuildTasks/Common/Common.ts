@@ -78,7 +78,6 @@ export function setTfxManifestArguments(tfx: ToolRunner): (() => void) {
 
     return () => deleteBuildTempFile(overrideFilePath);
 }
-
 /**
  * Run a tfx command by ensuring that "tfx" exists, installing it on the fly if needed.
  * @param  {(tfx:ToolRunner)=>void} cmd

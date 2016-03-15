@@ -6,13 +6,6 @@ import path = require('path');
 import Q = require("q");
 import tl = require("vsts-task-lib/task");
 
-/**
- * Set manifest related arguments for packaged vsix, such as
- * the  publisher and extension id
- * @returns {string}  
- */
-
-
 export class VSIXEditor {
     private zip: AdmZip;
     private edit: boolean = false;
@@ -29,7 +22,7 @@ export class VSIXEditor {
     public startEdit() {
         if (this.edit) throw "Edit is already started";
         this.edit = true;
-        console.debug("Editing started");
+        tl.debug("Editing started");
     }
 
     public endEdit() {
