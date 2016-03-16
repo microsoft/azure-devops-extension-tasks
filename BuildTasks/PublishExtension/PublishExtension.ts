@@ -25,16 +25,23 @@ common.runTfx(tfx => {
 
         const publisher = tl.getInput("publisherId", false);
         const extensionId = tl.getInput("extensionId", false);
+        const extensionName = tl.getInput("extensionName", false);
+        const extensionVisibility = tl.getInput("extensionVisibility", false);
+        const extensionVersion = tl.getInput("extensionVersion", false);
+
         tl.debug("Start editing of VSIX");
         let ve = new vsixeditor.VSIXEditor(vsixFile, outputvsix);
         ve.startEdit();
 
-        if (publisher) { ve.EditPublisher(publisher); }
-        if (extensionId) { ve.EditId(extensionId); }
-
+        if (publisher) { ve.editPublisher(publisher); }
+        if (extensionId) { ve.editId(extensionId); }
+        if (extensionName) { ve.editExtensionName(extensionName); }
+        if (extensionVisibility) { ve.editExtensionVisibility(extensionVisibility); }
+        if (extensionVersion) { ve.editVersion(extensionVersion); }
+        
         ve.endEdit();
 
-        tfx.arg(["--vsix", vsixFile]);
+        tfx.arg(["--vsix", outputvsix]);
     }
 
     // Share with

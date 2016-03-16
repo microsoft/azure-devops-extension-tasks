@@ -1,165 +1,175 @@
 {
-  "id": "631511B4-50AB-47C8-B766-7AE2AA672733",
-  "name": "PublishExtension",
-  "friendlyName": "Publish Extension",
-  "description": "Publish a Team Services extension to the Visual Studio Marketplace",
-  "author": "Microsoft Corporation",
-  "helpMarkDown": "",
-  "category": "Utility",
-  "visibility": [
-    "Build",
-    "Release"
-  ],
-  "demands": [
-    "npm"
-  ],
-  "version": {
-    "Major": "0",
-    "Minor": "4",
-    "Patch": "18"
-  },
-  "minimumAgentVersion": "1.83.0",
-  "groups": [
-    {
-      "name": "manifest",
-      "displayName": "Extension manifest",
-      "isExpanded": true
+    "id": "631511B4-50AB-47C8-B766-7AE2AA672733",
+    "name": "PublishExtension",
+    "friendlyName": "Publish Extension",
+    "description": "Publish a Team Services extension to the Visual Studio Marketplace",
+    "author": "Microsoft Corporation",
+    "helpMarkDown": "",
+    "category": "Utility",
+    "visibility": [
+        "Build",
+        "Release"
+    ],
+    "demands": [
+        "npm"
+    ],
+    "version": {
+        "Major": "0",
+        "Minor": "4",
+        "Patch": "22"
     },
-    {
-      "name": "sharing",
-      "displayName": "Sharing",
-      "isExpanded": true
-    },
-    {
-      "name": "advanced",
-      "displayName": "Advanced",
-      "isExpanded": false
-    }
-  ],
-  "instanceNameFormat": "Publish Extension",
-  "inputs": [
-    {
-        "name": "connectedServiceName",
-        "type": "connectedService:VstsMarketplacePublishing",
-        "label": "Marketplace connection",
-        "required": true,
-        "helpMarkDown": "Service endpoint connection to publish the extension with."
-    },
-    {
-        "name":"fileType",
-        "type":"radio",
-        "label":"Input file type",
-        "required":true,
-        "defaultValue":"manifest",
-        "options": {
-            "manifest": "Extension manifest file",
-            "vsix": "VSIX file"
+    "minimumAgentVersion": "1.83.0",
+    "groups": [
+        {
+            "name": "manifest",
+            "displayName": "Extension manifest",
+            "isExpanded": true
         },
-        "groupName": "manifest"
-    },
-    {
-      "name": "vsixFile",
-      "type": "filePath",
-      "label": "VSIX file",
-      "defaultValue": "",
-      "required": true,
-      "helpMarkDown": "VSIX file to publish.",
-      "visibleRule": "fileType = vsix",
-      "groupName": "manifest"
-    },
-    {
-      "name": "rootFolder",
-      "type": "filePath",
-      "label": "Root manifest folder",
-      "defaultValue": "",
-      "required": false,
-      "helpMarkDown": "Folder where manifest file(s) exist.",
-      "visibleRule": "fileType = manifest",
-      "groupName": "manifest"
-    },
-    {
-      "name": "patternManifest",
-      "type": "string",
-      "label": "Manifest file",
-      "defaultValue": "vss-extension.json",
-      "required": false,
-      "helpMarkDown": "Pattern for the manifest files to join.",
-      "visibleRule": "fileType = manifest",
-      "groupName": "manifest"
-    },
-    {
-      "name": "publisherId",
-      "type": "string",
-      "label": "Publisher ID",
-      "defaultValue": "",
-      "required": false,
-      "helpMarkDown": "Extension publisher ID. If not specified, the publisher specified in the manifest will be used.",
-      "groupName": "manifest"
-    },
-    {
-      "name": "extensionId",
-      "type": "string",
-      "label": "Extension ID",
-      "defaultValue": "",
-      "helpMarkDown": "Overrides extension ID. If not specified, the extension ID specified in the manifest will be used",
-      "required": false,
-      "groupName": "manifest"
-    },
-    {
-      "name": "extensionName",
-      "type": "string",
-      "label": "Extension name",
-      "defaultValue": "",
-      "helpMarkDown": "Overrides extension name. If not specified, the extension name specified in the manifest will be used",
-      "required": false,
-      "groupName": "manifest"
-    },
-    {
-      "name": "extensionVisibility",
-      "type": "pickList",
-      "label": "Extension visibility",
-      "defaultValue": "",
-      "helpMarkDown": "Overrides extension visibility (Public vs Private). If not specified, the extension visibility specified in the manifest will be used",
-      "required": false,
-      "options": {
-        "default": "Not set",
-        "private": "Private",
-        "public": "Public"
-      },
-      "groupName": "manifest"
-    },
-    {
-      "name": "shareWith",
-      "type": "string",
-      "label": "Share with",
-      "defaultValue": "",
-      "helpMarkDown": "Comma separated list of accounts with which to share the extension if it's private (e.g. account_x,account_y,account_z)",
-      "required": false,
-      "groupName": "sharing"
-    },
-    {
-      "name": "arguments",
-      "type": "string",
-      "label": "Arguments",
-      "defaultValue": "",
-      "helpMarkDown": "Additional arguments passed to the package and publishing tool.",
-      "required": false,
-      "groupName": "advanced"
-    },
-    {
-      "name": "cwd",
-      "type": "filePath",
-      "label": "Working Directory",
-      "defaultValue": "",
-      "required": false,
-      "helpMarkDown": "Working directory to run the package and publishing process from. Defaults to the folder where the manifest is located.",
-      "groupName": "advanced"
+        {
+            "name": "sharing",
+            "displayName": "Sharing",
+            "isExpanded": true
+        },
+        {
+            "name": "advanced",
+            "displayName": "Advanced",
+            "isExpanded": false
+        }
+    ],
+    "instanceNameFormat": "Publish Extension",
+    "inputs": [
+        {
+            "name": "connectedServiceName",
+            "type": "connectedService:VstsMarketplacePublishing",
+            "label": "Marketplace connection",
+            "required": true,
+            "helpMarkDown": "Service endpoint connection to publish the extension with."
+        },
+        {
+            "name": "fileType",
+            "type": "radio",
+            "label": "Input file type",
+            "required": true,
+            "defaultValue": "manifest",
+            "options": {
+                "manifest": "Extension manifest file",
+                "vsix": "VSIX file"
+            },
+            "groupName": "manifest"
+        },
+        {
+            "name": "vsixFile",
+            "type": "filePath",
+            "label": "VSIX file",
+            "defaultValue": "",
+            "required": true,
+            "helpMarkDown": "VSIX file to publish.",
+            "visibleRule": "fileType = vsix",
+            "groupName": "manifest"
+        },
+        {
+            "name": "rootFolder",
+            "type": "filePath",
+            "label": "Root manifest folder",
+            "defaultValue": "",
+            "required": false,
+            "helpMarkDown": "Folder where manifest file(s) exist.",
+            "visibleRule": "fileType = manifest",
+            "groupName": "manifest"
+        },
+        {
+            "name": "patternManifest",
+            "type": "string",
+            "label": "Manifest file",
+            "defaultValue": "vss-extension.json",
+            "required": false,
+            "helpMarkDown": "Pattern for the manifest files to join.",
+            "visibleRule": "fileType = manifest",
+            "groupName": "manifest"
+        },
+        {
+            "name": "publisherId",
+            "type": "string",
+            "label": "Publisher ID",
+            "defaultValue": "",
+            "required": false,
+            "helpMarkDown": "Extension publisher ID. If not specified, the publisher specified in the manifest will be used.",
+            "groupName": "manifest"
+        },
+        {
+            "name": "extensionId",
+            "type": "string",
+            "label": "Extension ID",
+            "defaultValue": "",
+            "helpMarkDown": "Overrides extension ID. If not specified, the extension ID specified in the manifest will be used",
+            "required": false,
+            "groupName": "manifest"
+        },
+        {
+            "name": "extensionName",
+            "type": "string",
+            "label": "Extension name",
+            "defaultValue": "",
+            "helpMarkDown": "Overrides extension name. If not specified, the extension name specified in the manifest will be used",
+            "required": false,
+            "groupName": "manifest"
+        },
+        {
+            "name": "extensionVersion",
+            "type": "string",
+            "label": "Extension version",
+            "defaultValue": "",
+            "helpMarkDown": "Overrides extension version. If not specified, the extension version specified in the manifest will be used",
+            "required": false,
+            "visibleRule": "fileType = vsix",
+            "groupName": "manifest"
+        },
+        {
+            "name": "extensionVisibility",
+            "type": "pickList",
+            "label": "Extension visibility",
+            "defaultValue": "",
+            "helpMarkDown": "Overrides extension visibility (Public vs Private). If not specified, the extension visibility specified in the manifest will be used",
+            "required": false,
+            "options": {
+                "default": "Not set",
+                "private": "Private",
+                "public": "Public"
+            },
+            "groupName": "manifest"
+        },
+        {
+            "name": "shareWith",
+            "type": "string",
+            "label": "Share with",
+            "defaultValue": "",
+            "helpMarkDown": "Comma separated list of accounts with which to share the extension if it's private (e.g. account_x,account_y,account_z)",
+            "required": false,
+            "groupName": "sharing"
+        },
+        {
+            "name": "arguments",
+            "type": "string",
+            "label": "Arguments",
+            "defaultValue": "",
+            "helpMarkDown": "Additional arguments passed to the package and publishing tool.",
+            "required": false,
+            "groupName": "advanced"
+        },
+        {
+            "name": "cwd",
+            "type": "filePath",
+            "label": "Working Directory",
+            "defaultValue": "",
+            "required": false,
+            "helpMarkDown": "Working directory to run the package and publishing process from. Defaults to the folder where the manifest is located.",
+            "groupName": "advanced"
+        }
+    ],
+    "execution": {
+        "Node": {
+            "target": "PublishExtension.js",
+            "argumentFormat": ""
+        }
     }
-  ],
-  "execution": {
-    "Node": {
-      "target": "PublishExtension.js",
-      "argumentFormat": ""
-    }
-  }
 }

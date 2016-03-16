@@ -15,7 +15,7 @@ export class VSIXEditor {
     private publisher: string = null;
     private extensionName: string = null;
     private extensionVisibility: string = null;
-    
+
     constructor(public input: string,
         public output: string) {
         this.zip = new AdmZip(input);
@@ -93,10 +93,12 @@ export class VSIXEditor {
 
             let vsixmanifest = x2js.xml2js(vsixManifestData);
             let identity = vsixmanifest.PackageManifest.Metadata.Identity;
+
             if (this.versionNumber) { identity._Version = this.versionNumber; }
             if (this.id) { identity._Id = this.id; }
             if (this.publisher) { identity._Publisher = this.publisher; }
-
+            if (this.editExtensionName) { vsixmanifest.PackageManifest.Metadata.DisplayName = this.extensionName; }
+            if (this.extensionVisibility) { vsixmanifest.PackageManifest.Metadata.GalleryFlags = this.extensionVisibility }
             vsixManifestData = x2js.js2xml(vsixmanifest);
 
             fs.writeFile(vsixManifestPath, vsixManifestData, () => {
@@ -125,7 +127,13 @@ export class VSIXEditor {
 
     public editExtensionVisibility(visibility: string) {
         this.validateEditMode();
-        this.extensionVisibility = visibility;
+
+        if (visibility == "public") {
+            this.extensionVisibility = "Public";
+        }
+        else {
+            this.extensionVisibility = "";
+        }
     }
 
     public editId(id: string) {
@@ -133,7 +141,7 @@ export class VSIXEditor {
         this.id = id;
     }
 
-    public EditPublisher(publisher: string) {
+    public editPublisher(publisher: string) {
         this.validateEditMode();
         this.publisher = publisher;
     }
