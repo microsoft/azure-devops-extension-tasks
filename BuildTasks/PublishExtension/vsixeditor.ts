@@ -99,7 +99,7 @@ export class VSIXEditor {
             if (this.id) { identity._Id = this.id; }
             if (this.publisher) { identity._Publisher = this.publisher; }
             if (this.editExtensionName) { vsixmanifest.PackageManifest.Metadata.DisplayName = this.extensionName; }
-            if (this.extensionVisibility) { vsixmanifest.PackageManifest.Metadata.GalleryFlags = this.extensionVisibility }
+            if (this.extensionVisibility) { vsixmanifest.PackageManifest.Metadata.GalleryFlags += this.extensionVisibility }
             vsixManifestData = x2js.js2xml(vsixmanifest);
 
             fs.writeFile(vsixManifestPath, vsixManifestData, () => {
