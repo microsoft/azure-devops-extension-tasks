@@ -24,10 +24,10 @@
     "link:tasks": "node scripts/copyfilesToBuildTasks -u 2 dist/_temp/node_modules/**/* dist/BuildTasks",
     "postlink:tasks": "rimraf dist/_temp",
     "content:tasks": "copyfiles \"./BuildTasks/*Extension/**/!(*.ts)\" dist",
-    "content:extension:tasks": "copyfiles vss-extension-tasks.json *.md license.txt tools-icon.png dist",
+    "content:extension:tasks": "copyfiles vss-extension-build-tasks.json *.md license.txt tools-icon.png dist",
     "build:tasks": "npm run clean && npm run build:tasks:noclean",
     "build:tasks:noclean": "npm run compile:tasks && npm run content:tasks && npm run content:extension:tasks  && npm run link:tasks",
-    "package:tasks": "tfx extension create --root dist --output-path dist --manifest-globs vss-extension-tasks.json",
+    "package:tasks": "tfx extension create --root dist --output-path dist --manifest-globs vss-extension-build-tasks.json",
     "build:all": "npm run clean && npm run build:web:noclean && npm run build:tasks:noclean",
     "package:all": "npm run package:tasks && npm run package:web"
   },
