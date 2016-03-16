@@ -1,8 +1,8 @@
 ///<reference path="../typings/main.d.ts" />
 import tl = require("vsts-task-lib/task");
 import common = require("./common");
-import vsixeditor = require("./vsixeditor")
-import path = require("path")
+import vsixeditor = require("./vsixeditor");
+import path = require("path");
 
 common.runTfx(tfx => {
     tfx.arg(["extension", "publish"]);
@@ -26,14 +26,13 @@ common.runTfx(tfx => {
         const publisher = tl.getInput("publisherId", false);
         const extensionId = tl.getInput("extensionId", false);
         tl.debug("Start editing of VSIX");
-        var ve = new vsixeditor.VSIXEditor(vsixFile, outputvsix)
+        let ve = new vsixeditor.VSIXEditor(vsixFile, outputvsix);
         ve.startEdit();
 
-        if (publisher) ve.EditPublisher(publisher);
-        if (extensionId) ve.EditId(extensionId);
+        if (publisher) { ve.EditPublisher(publisher); }
+        if (extensionId) { ve.EditId(extensionId); }
 
         ve.endEdit();
-
 
         tfx.arg(["--vsix", vsixFile]);
     }

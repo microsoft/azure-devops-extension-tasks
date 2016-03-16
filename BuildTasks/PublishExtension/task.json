@@ -16,7 +16,7 @@
   "version": {
     "Major": "0",
     "Minor": "4",
-    "Patch": "17"
+    "Patch": "18"
   },
   "minimumAgentVersion": "1.83.0",
   "groups": [
@@ -112,7 +112,6 @@
       "defaultValue": "",
       "helpMarkDown": "Overrides extension name. If not specified, the extension name specified in the manifest will be used",
       "required": false,
-      "visibleRule": "fileType = manifest",
       "groupName": "manifest"
     },
     {
@@ -127,7 +126,6 @@
         "private": "Private",
         "public": "Public"
       },
-      "visibleRule": "fileType = manifest",
       "groupName": "manifest"
     },
     {
