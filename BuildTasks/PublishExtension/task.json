@@ -15,8 +15,8 @@
     ],
     "version": {
         "Major": "0",
-        "Minor": "4",
-        "Patch": "22"
+        "Minor": "2",
+        "Patch": "2"
     },
     "minimumAgentVersion": "1.83.0",
     "groups": [
