@@ -21,7 +21,7 @@ common.runTfx(tfx => {
     } else {
         // Set vsix file argument
         let vsixFile = tl.getInput("vsixFile", true);
-        let  outputvsix = path.join(tl.getVariable("System.DefaultWorkingDirectory"), "output.vsix");
+        let outputvsix = path.join(tl.getVariable("System.DefaultWorkingDirectory"), "output.vsix");
 
         const publisher = tl.getInput("publisherId", false);
         const extensionId = tl.getInput("extensionId", false);
@@ -29,22 +29,28 @@ common.runTfx(tfx => {
         const extensionVisibility = tl.getInput("extensionVisibility", false);
         const extensionVersion = tl.getInput("extensionVersion", false);
 
-        tl.debug("Start editing of VSIX");
-        let ve = new vsixeditor.VSIXEditor(vsixFile, outputvsix);
-        ve.startEdit();
+        if (publisher != null
+            || extensionId != null
+            || extensionName != null
+            || extensionVisibility != null
+            || extensionVersion != null) {
 
-        if (publisher) { ve.editPublisher(publisher); }
-        if (extensionId) { ve.editId(extensionId); }
-        if (extensionName) { ve.editExtensionName(extensionName); }
-        if (extensionVisibility) { ve.editExtensionVisibility(extensionVisibility); }
-        if (extensionVersion) { ve.editVersion(extensionVersion); }
+            tl.debug("Start editing of VSIX");
+            let ve = new vsixeditor.VSIXEditor(vsixFile, outputvsix);
+            ve.startEdit();
 
-        if (!ve.hasEdits()) {
-            outputvsix = vsixFile
-        }
-        else {
+            if (publisher) { ve.editPublisher(publisher); }
+            if (extensionId) { ve.editId(extensionId); }
+            if (extensionName) { ve.editExtensionName(extensionName); }
+            if (extensionVisibility) { ve.editExtensionVisibility(extensionVisibility); }
+            if (extensionVersion) { ve.editVersion(extensionVersion); }
+
             ve.endEdit();
         }
+        else {
+            outputvsix = vsixFile;
+        }
+
         tfx.arg(["--vsix", outputvsix]);
     }
 
