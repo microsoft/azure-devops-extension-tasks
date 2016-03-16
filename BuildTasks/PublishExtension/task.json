@@ -121,7 +121,6 @@
             "defaultValue": "",
             "helpMarkDown": "Overrides extension version. If not specified, the extension version specified in the manifest will be used",
             "required": false,
-            "visibleRule": "fileType = vsix",
             "groupName": "manifest"
         },
         {
