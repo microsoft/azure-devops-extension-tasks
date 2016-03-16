@@ -30,43 +30,44 @@ export class VSIXEditor {
     public endEdit() {
         this.validateEditMode();
 
-        temp.track();
+        if (this.hasEdits()) {
+            temp.track();
 
-        temp.mkdir("visxeditor", (err, dirPath) => {
-            if (err) { throw err; }
-            tl.debug("Finalizing edit");
-            tl.debug("Extracting files to " + dirPath);
-            this.zip.extractAllTo(dirPath, true);
+            temp.mkdir("visxeditor", (err, dirPath) => {
+                if (err) { throw err; }
+                tl.debug("Finalizing edit");
+                tl.debug("Extracting files to " + dirPath);
+                this.zip.extractAllTo(dirPath, true);
 
-            this.editVsixManifest(dirPath)
-                .then(() => {
-                    this.editVsoManifest(dirPath).then(() => {
-                        let archiver = require("archiver");
-                        let output = fs.createWriteStream(this.output);
-                        let archive = archiver("zip");
+                this.editVsixManifest(dirPath)
+                    .then(() => {
+                        this.editVsoManifest(dirPath).then(() => {
+                            let archiver = require("archiver");
+                            let output = fs.createWriteStream(this.output);
+                            let archive = archiver("zip");
 
-                        tl.debug("Creating final archive file at " + this.output);
+                            tl.debug("Creating final archive file at " + this.output);
 
-                        output.on("close", function() {
-                            tl.debug(archive.pointer() + " total bytes");
-                            tl.debug("archiver has been finalized and the output file descriptor has closed.");
+                            output.on("close", function() {
+                                tl.debug(archive.pointer() + " total bytes");
+                                tl.debug("archiver has been finalized and the output file descriptor has closed.");
+                            });
+
+                            archive.on("error", function(err) {
+                                throw err;
+                            });
+
+                            archive.pipe(output);
+
+                            archive.bulk([
+                                { expand: true, cwd: dirPath, src: ["**/*"] }
+                            ]);
+                            archive.finalize();
+                            tl.debug("Final archive file created");
                         });
-
-                        archive.on("error", function(err) {
-                            throw err;
-                        });
-
-                        archive.pipe(output);
-
-                        archive.bulk([
-                            { expand: true, cwd: dirPath, src: ["**/*"] }
-                        ]);
-                        archive.finalize();
-                        tl.debug("Final archive file created");
                     });
-                });
-        });
-
+            });
+        }
     }
 
     private editVsoManifest(dirPath: string) {
@@ -110,10 +111,13 @@ export class VSIXEditor {
         return deferred.promise;
     }
 
-    private hasEdits(): boolean {
+    public hasEdits(): boolean {
         return this.versionNumber != null
             || this.id != null
-            || this.publisher != null;
+            || this.publisher != null
+            || this.extensionName != null
+            || this.extensionVisibility != null
+            || this.extensionName != null;
     }
     public editVersion(version: string) {
         this.validateEditMode();
