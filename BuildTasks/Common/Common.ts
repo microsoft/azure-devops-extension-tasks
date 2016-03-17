@@ -12,12 +12,11 @@ import trl = require("vsts-task-lib/toolrunner");
 import ToolRunner = trl.ToolRunner;
 
 function writeBuildTempFile(taskName: string, data: any): string {
-    const buildNumber = tl.getVariable("Build.BuildNumber");
     let tempFile: string;
     do {
         // Let's add a random suffix
         let randomSuffix = Math.random().toFixed(6);
-        tempFile = path.join(os.tmpdir(), `${taskName}-${buildNumber}-${randomSuffix}.tmp`);
+        tempFile = path.join(os.tmpdir(), `${taskName}-${randomSuffix}.tmp`);
     } while (fs.existsSync(tempFile));
 
     tl.debug(`Generating Build temp file: ${tempFile}`);
@@ -114,40 +113,13 @@ export function runTfx(cmd: (tfx: ToolRunner) => void) {
         return;
     }
 
-    // Check tfx in a build installation path
-    const tfxInstallBasePath = path.join(tl.getVariable("Agent.BuildDirectory"), "_tools", "tfx-cli");
-    const tfxInstallPath = path.join(tfxInstallBasePath, tl.getVariable("Build.DefinitionVersion"));
-    const tfxBuildPath = path.join(tfxInstallPath, tfxLocalPath);
-
-    console.log(`Checking tfx in build path (${tfxBuildPath})`);
-    tfxPath = tl.which(tfxBuildPath);
-    if (tfxPath) {
-        console.log(`Found tfx in ${tfxPath}`);
-        tfx = tl.createToolRunner(tfxPath);
-        cmd(tfx);
-        return;
-    }
-
-
-    console.log(`Could not find tfx command. Preparing to install it in ${tfxInstallPath}`);
+    console.log(`Could not find tfx command. Preparing to install it in current task folder`);
 
     const npm = tl.createToolRunner(tl.which("npm", true));
     npm.arg(["install", "tfx-cli"]);
 
-    // Ensure tools dir exists in build
-    if (!tl.exist(tfxInstallPath)) {
-        // We are about to install tfx-cli for a new version definition. Delete previous versions to deleteBuildTempFile
-        if (tl.exist(tfxInstallBasePath)) {
-            console.log("Removing tfx-cli installed in previous versions");
-            tl.rmRF(tfxInstallBasePath, true);
-        }
-
-        tl.mkdirP(tfxInstallPath);
-    }
-
-    const tfxInstallOptions = <trl.IExecOptions> { cwd: tfxInstallPath };
-    npm.exec(tfxInstallOptions).then(code => {
-      tfx = tl.createToolRunner(tl.which(tfxBuildPath, true));
+    npm.exec().then(code => {
+      tfx = tl.createToolRunner(tl.which(tfxLocalPath, true));
       cmd(tfx);
     }).fail(err => {
         tl.setResult(tl.TaskResult.Failed, `Error installing tfx: ${err}`);
