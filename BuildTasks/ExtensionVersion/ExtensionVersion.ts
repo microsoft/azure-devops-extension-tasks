@@ -39,18 +39,15 @@ common.runTfx(tfx => {
         if (versionAction !== "None") {
             let versionparts = version.Split(".");
             switch (versionAction) {
-                case "Major": {
+                case "Major": 
                     versionparts = [+versionparts[0] + 1, 0, 0];
                     break;
-                }
-                case "Minor": {
+                case "Minor":
                     versionparts = [+versionparts[0], +versionparts[1] + 1, 0];
                     break;
-                }
-                case "Patch": {
+                case "Patch":
                     versionparts = [+versionparts[0], +versionparts[1], +versionparts[2] + 1];
                     break;
-                }
             }
             version = versionparts.Join(".");
             tl._writeLine(`Updated to       : ${version}.`)
