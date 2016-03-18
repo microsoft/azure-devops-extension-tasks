@@ -32,6 +32,9 @@ common.runTfx(tfx => {
     tfx.exec(<any>{ silent: true }).then(code => {
         const json = JSON.parse(output);
         const version = json.versions[json.versions.length-1].version;
+        
+        tl._writeLine(`Latest version is: ${version}.`)
+
         tl.setVariable(outputVariable, version);
         tl.setResult(tl.TaskResult.Succeeded, `tfx exited with return code: ${code}`);
     }).fail(err => {
