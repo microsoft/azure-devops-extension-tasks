@@ -43,6 +43,7 @@
     "typescript": "^1.7.5",
     "typings": "^0.6.6",
     "vss-web-extension-sdk": "^1.94.0",
-    "vsts-task-lib": "^0.5.10"
+    "vsts-task-lib": "^0.5.10",
+    "JSONPath" : "^0.11.2"
   }
 }
