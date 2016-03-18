@@ -12,6 +12,7 @@ class TfxDebugStream extends stream.Writable {
 
 common.runTfx(tfx => {
     tfx.arg(["extension", "show", "--json"]);
+    const outputVariable = tl.getInput("outputVariable", false);
 
     // Read gallery endpoint
     const galleryEndpoint = common.getMarketplaceEndpointDetails();
@@ -22,7 +23,6 @@ common.runTfx(tfx => {
     tfx.arg(["--publisher", tl.getInput("publisherId", true)]);
     tfx.arg(["--extension-id", tl.getInput("extensionId", true)]);
 
-    const outputVariable = tl.getInput("outputVariable", false);
     const versionAction = tl.getInput("versionAction", false);
 
     // Aditional arguments
@@ -61,7 +61,9 @@ common.runTfx(tfx => {
             tl._writeLine(`Updated to       : ${version}.`);
         }
 
-        tl.setVariable(outputVariable, version);
+        if (outputVariable) {
+            tl.setVariable(outputVariable, version);
+        }
         tl.setResult(tl.TaskResult.Succeeded, `tfx exited with return code: ${code}`);
     }).fail(err => {
         tl.setResult(tl.TaskResult.Failed, `tfx failed with error: ${err}`);

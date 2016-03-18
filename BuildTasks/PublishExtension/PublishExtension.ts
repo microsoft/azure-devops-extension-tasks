@@ -3,7 +3,8 @@ import tl = require("vsts-task-lib/task");
 import common = require("./common");
 
 common.runTfx(tfx => {
-    tfx.arg(["extension", "publish"]);
+    tfx.arg(["extension", "publish", "--json"]);
+    const outputVariable = tl.getInput("outputVariable", false);
 
     // Read gallery endpoint
     const galleryEndpoint = common.getMarketplaceEndpointDetails();
@@ -39,7 +40,16 @@ common.runTfx(tfx => {
         tl.cd(cwd);
     }
 
-    tfx.exec().then(code => {
+    let output = "";;
+    tfx.on("stdout", (data) => output += data );
+
+    tfx.exec(<any>{ silent: true }).then(code => {
+        const json = JSON.parse(output);
+
+        if (outputVariable) {
+            tl.setVariable(outputVariable, json.packaged);
+        }
+        tl._writeLine("Published extension: ${json.packaged}.");
         tl.setResult(tl.TaskResult.Succeeded, `tfx exited with return code: ${code}`);
     }).fail(err => {
         tl.setResult(tl.TaskResult.Failed, `tfx failed with error: ${err}`);

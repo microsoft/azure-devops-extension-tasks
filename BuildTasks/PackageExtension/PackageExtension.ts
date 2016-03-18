@@ -3,7 +3,8 @@ import tl = require("vsts-task-lib/task");
 import common = require("./common");
 
 common.runTfx(tfx => {
-    tfx.arg(["extension", "create"]);
+    tfx.arg(["extension", "create", "--json"]);
+    const outputVariable = tl.getInput("outputVariable", false);
 
     // Set tfx manifest arguments
     const cleanupTfxArgs = common.setTfxManifestArguments(tfx);
@@ -20,8 +21,17 @@ common.runTfx(tfx => {
     if (cwd) {
         tl.cd(cwd);
     }
+    
+    let output = "";
+    tfx.on("stdout", (data) => output += data);
 
-    tfx.exec().then(code => {
+    tfx.exec(<any>{ silent: true }).then(code => {
+        const json = JSON.parse(output);
+
+        if (outputVariable) {
+            tl.setVariable(outputVariable, json.path);
+        }
+        tl._writeLine("Packaged extension: ${json.path}.");
         tl.setResult(tl.TaskResult.Succeeded, `tfx exited with return code: ${code}`);
     }).fail(err => {
         tl.setResult(tl.TaskResult.Failed, `tfx failed with error: ${err}`);

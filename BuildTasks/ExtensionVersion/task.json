@@ -83,7 +83,7 @@
         "type": "string",
         "label": "Output Variable",
         "defaultValue": "Extension.Version",
-        "required": true,
+        "required": false,
         "helpMarkDown": "The variable name to assign the version to.",
         "groupName": "version"
     },
