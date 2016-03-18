@@ -20,7 +20,7 @@
     "package:web": "tfx extension create --root dist --output-path dist --manifest-globs vss-extension-web.json",
     "precompile:tasks": "node scripts/copyFilesToBuildTasks -u 2 BuildTasks/Common/common.ts BuildTasks",
     "compile:tasks": "tsc --project BuildTasks",
-    "prelink:tasks": "mkdirp dist/_temp/node_modules && pushd \"dist/_temp\" && npm install vsts-task-lib && npm install JSONPath -s && popd",
+    "prelink:tasks": "mkdirp dist/_temp/node_modules && pushd \"dist/_temp\" && npm install vsts-task-lib && popd",
     "link:tasks": "node scripts/copyfilesToBuildTasks -u 2 dist/_temp/node_modules/**/* dist/BuildTasks",
     "postlink:tasks": "rimraf dist/_temp",
     "content:tasks": "copyfiles \"./BuildTasks/*Extension*/**/!(*.ts)\" dist",
