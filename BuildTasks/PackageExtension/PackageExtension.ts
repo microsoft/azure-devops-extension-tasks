@@ -1,6 +1,14 @@
 ///<reference path="../typings/main.d.ts" />
 import tl = require("vsts-task-lib/task");
 import common = require("./common");
+import stream = require("stream");
+
+class TfxDebugStream extends stream.Writable {
+    _write(chunk: any, enc: string, cb: Function) {
+        tl.debug(chunk);
+        cb();
+    }
+}
 
 common.runTfx(tfx => {
     tfx.arg(["extension", "create", "--json"]);
@@ -25,7 +33,7 @@ common.runTfx(tfx => {
     let output = "";
     tfx.on("stdout", (data) => output += data);
 
-    tfx.exec(<any>{ silent: true }).then(code => {
+    tfx.exec(<any>{ outStream: new TfxDebugStream() }).then(code => {
         const json = JSON.parse(output);
 
         if (outputVariable) {
