@@ -15,6 +15,7 @@ common.runTfx(tfx => {
     tfx.arg(["--extension-id", tl.getInput("extensionId", true)]);
 
     const outputVariable = tl.getInput("outputVariable", false);
+    const versionAction = tl.getInput("versionAction", false);
     
     // Aditional arguments
     tfx.arg(tl.getInput("arguments", false));
@@ -26,15 +27,43 @@ common.runTfx(tfx => {
     }
 
     let output = ""
-
     tfx.on("stdout", (data) => { output += data })
     
     tfx.exec(<any>{ silent: true }).then(code => {
         const json = JSON.parse(output);
-        const version = json.versions[json.versions.length-1].version;
+        let version = json.versions[json.versions.length-1].version;
         
-        tl._writeLine(`Latest version is: ${version}.`)
-
+        tl._writeLine(`Latest version   : ${version}.`)
+        tl._writeLine(`Requested action : ${versionAction}.`)
+        
+        if (versionAction !== "None")
+        {
+            let versionparts = version.Split(".");
+            switch (versionAction)
+            {
+                case "Major":
+                {
+                    versionparts[0] = Number(versionparts[0]) + 1;
+                    versionparts[1] = 0;
+                    versionparts[2] = 0;
+                    break;
+                }
+                case "Minor":
+                {
+                    versionparts[1] = Number(versionparts[1]) + 1;
+                    versionparts[2] = 0;
+                    break;
+                }
+                case "Patch":
+                {
+                    versionparts[2] = Number(versionparts[2]) + 1;
+                    break;
+                }
+            }
+            version = versionparts.Join(".");
+            tl._writeLine(`Updated to       : ${version}.`)
+        }
+        
         tl.setVariable(outputVariable, version);
         tl.setResult(tl.TaskResult.Succeeded, `tfx exited with return code: ${code}`);
     }).fail(err => {

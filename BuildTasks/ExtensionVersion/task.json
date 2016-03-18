@@ -46,22 +46,37 @@
         "helpMarkDown": "Service endpoint connection to install the extension."
     },
     {
-      "name": "publisherId",
-      "type": "string",
-      "label": "Publisher ID",
-      "defaultValue": "",
-      "required": true,
-      "helpMarkDown": "Publisher ID of the extension to be installed.",
-      "groupName": "extension"
+        "name": "publisherId",
+        "type": "string",
+        "label": "Publisher ID",
+        "defaultValue": "",
+        "required": true,
+        "helpMarkDown": "Publisher ID of the extension to be installed.",
+        "groupName": "extension"
     },
     {
-      "name": "extensionId",
-      "type": "string",
-      "label": "Extension ID",
-      "defaultValue": "",
-      "helpMarkDown": "Extension ID of the extension to be installed",
-      "required": true,
-      "groupName": "extension"
+        "name": "extensionId",
+        "type": "string",
+        "label": "Extension ID",
+        "defaultValue": "",
+        "helpMarkDown": "Extension ID of the extension to be installed",
+        "required": true,
+        "groupName": "extension"
+    },
+    {
+        "defaultValue": "None",
+        "helpMarkdown": "Increase a part of the version.",
+        "label": "Increase version",
+        "name": "versionAction",
+        "required": true,
+        "options": {
+            "None":  "None",
+            "Patch": "Patch",
+            "Minor": "Minor",
+            "Major": "Major"
+        },
+        "type": "pickList",
+        "groupName": "version"
     },
     {
         "name": "outputVariable",
@@ -73,22 +88,22 @@
         "groupName": "version"
     },
     {
-      "name": "arguments",
-      "type": "string",
-      "label": "Arguments",
-      "defaultValue": "",
-      "helpMarkDown": "Additional arguments passed to the package and publishing tool.",
-      "required": false,
-      "groupName": "advanced"
+        "name": "arguments",
+        "type": "string",
+        "label": "Arguments",
+        "defaultValue": "",
+        "helpMarkDown": "Additional arguments passed to the package and publishing tool.",
+        "required": false,
+        "groupName": "advanced"
     },
     {
-      "name": "cwd",
-      "type": "filePath",
-      "label": "Working Directory",
-      "defaultValue": "",
-      "required": false,
-      "helpMarkDown": "Working directory to run the package and publishing process from. Defaults to the folder where the manifest is located.",
-      "groupName": "advanced"
+        "name": "cwd",
+        "type": "filePath",
+        "label": "Working Directory",
+        "defaultValue": "",
+        "required": false,
+        "helpMarkDown": "Working directory to run the package and publishing process from. Defaults to the folder where the manifest is located.",
+        "groupName": "advanced"
     }
   ],
   "execution": {
