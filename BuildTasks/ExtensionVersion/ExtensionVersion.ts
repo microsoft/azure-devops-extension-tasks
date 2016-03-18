@@ -25,12 +25,16 @@ common.runTfx(tfx => {
         tl.cd(cwd);
     }
 
-    const result = tfx.execSync(<any>{ silent: true });
-    tl.exitOnCodeIf(result.code, result.code != 0);
-    
-    const json = JSON.parse(result.stdout)
-    const version = json.versions[json.versions.length-1].version;
+    let output = ""
 
-    tl.setVariable(outputVariable, version);
-    tl.setResult(tl.TaskResult.Succeeded, `tfx exited with return code: ${result.code}`);
+    tfx.on("stdout", (data) => { output += data })
+    
+    tfx.exec(<any>{ silent: true }).then(code => {
+        const json = JSON.parse(output);
+        const version = json.versions[json.versions.length-1].version;
+        tl.setVariable(outputVariable, version);
+        tl.setResult(tl.TaskResult.Succeeded, `tfx exited with return code: ${code}`);
+    }).fail(err => {
+        tl.setResult(tl.TaskResult.Failed, `tfx failed with error: ${err}`);
+    })
 });
