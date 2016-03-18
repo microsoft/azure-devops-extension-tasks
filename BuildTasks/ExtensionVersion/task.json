@@ -1,0 +1,115 @@
+{
+  "id": "5c6fa59e-1d5a-4516-9127-b9efd05df306",
+  "name": "ExtensionVersion",
+  "friendlyName": "Retrieve Extension Version",
+  "description": "Reads the current version from the Visual Studio Marketplace",
+  "author": "Microsoft Corporation",
+  "helpMarkDown": "",
+  "category": "Utility",
+  "visibility": [
+    "Build",
+    "Release"
+  ],
+  "demands": [
+    "npm"
+  ],
+  "version": {
+    "Major": "0",
+    "Minor": "0",
+    "Patch": "0"
+  },
+  "minimumAgentVersion": "1.83.0",
+  "groups": [
+    {
+      "name": "extension",
+      "displayName": "Extension",
+      "isExpanded": true
+    },
+    {
+      "name": "version",
+      "displayName": "Version",
+      "isExpanded": true
+    },
+    {
+      "name": "advanced",
+      "displayName": "Advanced",
+      "isExpanded": false
+    }
+  ],
+  "instanceNameFormat": "Query Extension Version: $(publisherId).$(extensionId)",
+  "inputs": [
+    {
+        "name": "connectedServiceName",
+        "type": "connectedService:VstsMarketplacePublishing",
+        "label": "Marketplace connection",
+        "required": true,
+        "helpMarkDown": "Service endpoint connection to install the extension."
+    },
+    {
+        "name": "publisherId",
+        "type": "string",
+        "label": "Publisher ID",
+        "defaultValue": "",
+        "required": true,
+        "helpMarkDown": "Publisher ID of the extension to be installed.",
+        "groupName": "extension"
+    },
+    {
+        "name": "extensionId",
+        "type": "string",
+        "label": "Extension ID",
+        "defaultValue": "",
+        "helpMarkDown": "Extension ID of the extension to be installed",
+        "required": true,
+        "groupName": "extension"
+    },
+    {
+        "defaultValue": "None",
+        "helpMarkdown": "Increase a part of the version.",
+        "label": "Increase version",
+        "name": "versionAction",
+        "required": true,
+        "options": {
+            "None":  "None",
+            "Patch": "Patch",
+            "Minor": "Minor",
+            "Major": "Major"
+        },
+        "type": "pickList",
+        "groupName": "version"
+    },
+    {
+        "name": "outputVariable",
+        "type": "string",
+        "label": "Output Variable",
+        "defaultValue": "Extension.Version",
+        "required": true,
+        "helpMarkDown": "The variable name to assign the version to.",
+        "groupName": "version"
+    },
+    {
+        "name": "arguments",
+        "type": "string",
+        "label": "Arguments",
+        "defaultValue": "",
+        "helpMarkDown": "Additional arguments passed to the package and publishing tool.",
+        "required": false,
+        "groupName": "advanced"
+    },
+    {
+        "name": "cwd",
+        "type": "filePath",
+        "label": "Working Directory",
+        "defaultValue": "",
+        "required": false,
+        "helpMarkDown": "Working directory to run the package and publishing process from. Defaults to the folder where the manifest is located.",
+        "groupName": "advanced"
+    }
+  ],
+  "execution": {
+    "Node": {
+      "target": "ExtensionVersion.js",
+      "argumentFormat": ""
+    }
+  }
+}

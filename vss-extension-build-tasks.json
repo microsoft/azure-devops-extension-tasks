@@ -20,7 +20,7 @@
     ],
     "branding": {
         "theme": "dark",
-        "color": "rgb(164,34,11)"  
+        "color": "rgb(164,34,11)"
     },
     "category": [
         "Build and release"
@@ -75,6 +75,16 @@
             ],
             "properties": {
                 "name": "BuildTasks/InstallExtension"
+            }
+        },
+        {
+            "id": "extension-version-build-task",
+            "type": "ms.vss-distributed-task.task",
+            "targets": [
+                "ms.vss-distributed-task.tasks"
+            ],
+            "properties": {
+                "name": "BuildTasks/ExtensionVersion"
             }
         },
         {
