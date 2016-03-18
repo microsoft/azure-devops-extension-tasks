@@ -23,7 +23,7 @@
     "prelink:tasks": "mkdirp dist/_temp/node_modules && pushd \"dist/_temp\" && npm install vsts-task-lib && npm install JSONPath -s && popd",
     "link:tasks": "node scripts/copyfilesToBuildTasks -u 2 dist/_temp/node_modules/**/* dist/BuildTasks",
     "postlink:tasks": "rimraf dist/_temp",
-    "content:tasks": "copyfiles \"./BuildTasks/*Extension/**/!(*.ts)\" dist",
+    "content:tasks": "copyfiles \"./BuildTasks/*Extension*/**/!(*.ts)\" dist",
     "content:extension:tasks": "copyfiles vss-extension-build-tasks.json *.md license.txt tools-icon.png dist",
     "build:tasks": "npm run clean && npm run build:tasks:noclean",
     "build:tasks:noclean": "npm run compile:tasks && npm run content:tasks && npm run content:extension:tasks  && npm run link:tasks",

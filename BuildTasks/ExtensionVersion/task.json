@@ -36,7 +36,7 @@
       "isExpanded": false
     }
   ],
-  "instanceNameFormat": "Query Extension Version: $(PublisherID).$(ExtensionID)",
+  "instanceNameFormat": "Query Extension Version: $(publisherId).$(extensionId)",
   "inputs": [
     {
         "name": "connectedServiceName",
