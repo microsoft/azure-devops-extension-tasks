@@ -40,18 +40,15 @@ common.runTfx(tfx => {
             let versionparts = version.Split(".");
             switch (versionAction) {
                 case "Major": {
-                    versionparts[0] = Number(versionparts[0]) + 1;
-                    versionparts[1] = 0;
-                    versionparts[2] = 0;
+                    versionparts = [+versionparts[0] + 1, 0, 0];
                     break;
                 }
                 case "Minor": {
-                    versionparts[1] = Number(versionparts[1]) + 1;
-                    versionparts[2] = 0;
+                    versionparts = [+versionparts[0], +versionparts[1] + 1, 0];
                     break;
                 }
                 case "Patch": {
-                    versionparts[2] = Number(versionparts[2]) + 1;
+                    versionparts = [+versionparts[0], +versionparts[1], +versionparts[2] + 1];
                     break;
                 }
             }
