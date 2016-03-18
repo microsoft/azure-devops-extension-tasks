@@ -1,8 +1,6 @@
 ///<reference path="../typings/main.d.ts" />
 import tl = require("vsts-task-lib/task");
 import common = require("./common");
-//import jsonpath = require("jsonpath");
-//import NodeJS = require("stream");
 
 common.runTfx(tfx => {
     tfx.arg(["extension", "show", "--json"]);
@@ -27,14 +25,12 @@ common.runTfx(tfx => {
         tl.cd(cwd);
     }
 
-    //var outputReplacement = new NodeJS.WritableStream();
-    
-    var result = tfx.execSync(<any>{ silent: true /*, stdout: outputReplacement */});
+    const result = tfx.execSync(<any>{ silent: true });
     tl.exitOnCodeIf(result.code, result.code != 0);
     
-    var json = JSON.parse(result.stdout)
-    var version = json.versions[json.versions.length-1].version;
-    //var version = jsonpath.value(json, "$.versions[-1:].version");
+    const json = JSON.parse(result.stdout)
+    const version = json.versions[json.versions.length-1].version;
+
     tl.setVariable(outputVariable, version);
     tl.setResult(tl.TaskResult.Succeeded, `tfx exited with return code: ${result.code}`);
 });
