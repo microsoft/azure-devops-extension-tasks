@@ -73,21 +73,6 @@
         "groupName": "version"
     },
     {
-        "defaultValue": "None",
-        "helpMarkdown": "Update the version.",
-        "label": "Auto increase",
-        "name": "updateVersion",
-        "required": true,
-        "options": {
-            "None": "None",
-            "Patch": "Patch",
-            "Minor": "Minor",
-            "Major": "Major"
-        },
-        "type": "pickList",
-        "groupName": "version"
-    },
-    {
       "name": "arguments",
       "type": "string",
       "label": "Arguments",

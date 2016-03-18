@@ -1,7 +1,8 @@
 ///<reference path="../typings/main.d.ts" />
 import tl = require("vsts-task-lib/task");
 import common = require("./common");
-import jsonpath = require("jsonpath");
+//import jsonpath = require("jsonpath");
+//import NodeJS = require("stream");
 
 common.runTfx(tfx => {
     tfx.arg(["extension", "show", "--json"]);
@@ -26,21 +27,14 @@ common.runTfx(tfx => {
         tl.cd(cwd);
     }
 
-    var capturedOutput = ""
-    tfx.exec(<any>{stdout: output => { capturedOutput += output }})
-    .then(code => {
-        var version = jsonpath.value(capturedOutput, "$.versions[-1:].version", "0.0.1");
-        tl.setVariable(outputVariable, version);
-        
-        tl.setResult(tl.TaskResult.Succeeded, `tfx exited with return code: ${code}`);
-    })
-
-
-    tfx.exec().then( code => {
-        tl.setResult(tl.TaskResult.Succeeded, `tfx exited with return code: ${code}`);
-    }
-   
-    ).fail(err => {
-        tl.setResult(tl.TaskResult.Failed, `tfx failed with error: ${err}`);
-    });
+    //var outputReplacement = new NodeJS.WritableStream();
+    
+    var result = tfx.execSync(<any>{ silent: true /*, stdout: outputReplacement */});
+    tl.exitOnCodeIf(result.code, result.code != 0);
+    
+    var json = JSON.parse(result.stdout)
+    var version = json.versions[json.versions.length-1].version;
+    //var version = jsonpath.value(json, "$.versions[-1:].version");
+    tl.setVariable(outputVariable, version);
+    tl.setResult(tl.TaskResult.Succeeded, `tfx exited with return code: ${result.code}`);
 });
