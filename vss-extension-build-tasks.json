@@ -78,6 +78,16 @@
             }
         },
         {
+            "id": "extension-version-build-task",
+            "type": "ms.vss-distributed-task.task",
+            "targets": [
+                "ms.vss-distributed-task.tasks"
+            ],
+            "properties": {
+                "name": "BuildTasks/ExtensionVersion"
+            }
+        },
+        {
             "id": "vsts-marketplace-endpoint-type",
             "type": "ms.vss-endpoint.service-endpoint-type",
             "targets": [

@@ -26,8 +26,8 @@
       "isExpanded": true
     },
     {
-      "name": "installation",
-      "displayName": "Installation",
+      "name": "version",
+      "displayName": "Version",
       "isExpanded": true
     },
     {
@@ -36,7 +36,7 @@
       "isExpanded": false
     }
   ],
-  "instanceNameFormat": "Install Extension",
+  "instanceNameFormat": "Query Extension Version: $(PublisherID).$(ExtensionID)",
   "inputs": [
     {
         "name": "connectedServiceName",
@@ -70,7 +70,7 @@
         "defaultValue": "Extension.Version",
         "required": true,
         "helpMarkDown": "The variable name to assign the version to.",
-        "groupName": "extension"
+        "groupName": "version"
     },
     {
         "defaultValue": "None",
@@ -85,7 +85,7 @@
             "Major": "Major"
         },
         "type": "pickList",
-        "groupName": "extension"
+        "groupName": "version"
     },
     {
       "name": "arguments",
