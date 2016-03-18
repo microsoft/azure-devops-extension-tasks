@@ -36,26 +36,21 @@ common.runTfx(tfx => {
         tl._writeLine(`Latest version   : ${version}.`)
         tl._writeLine(`Requested action : ${versionAction}.`)
         
-        if (versionAction !== "None")
-        {
+        if (versionAction !== "None") {
             let versionparts = version.Split(".");
-            switch (versionAction)
-            {
-                case "Major":
-                {
+            switch (versionAction) {
+                case "Major": {
                     versionparts[0] = Number(versionparts[0]) + 1;
                     versionparts[1] = 0;
                     versionparts[2] = 0;
                     break;
                 }
-                case "Minor":
-                {
+                case "Minor": {
                     versionparts[1] = Number(versionparts[1]) + 1;
                     versionparts[2] = 0;
                     break;
                 }
-                case "Patch":
-                {
+                case "Patch": {
                     versionparts[2] = Number(versionparts[2]) + 1;
                     break;
                 }
