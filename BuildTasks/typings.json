@@ -1,12 +1,12 @@
 {
-  "dependencies": {},
-  "devDependencies": {},
-  "ambientDevDependencies": {
-    "adm-zip": "github:DefinitelyTyped/DefinitelyTyped/adm-zip/adm-zip.d.ts",
-    "Q": "github:DefinitelyTyped/DefinitelyTyped/q/Q.d.ts#aae1368c8ee377f6e9c59c2d6faf1acb3ece7e05",
-    "node": "github:DefinitelyTyped/DefinitelyTyped/node/node.d.ts#1c56e368e17bb28ca57577250624ca5bd561aa81",
-    "temp": "github:DefinitelyTyped/DefinitelyTyped/temp/temp.d.ts",
-    "vsts-task-lib": "github:Microsoft/vso-agent-tasks/definitions/vsts-task-lib.d.ts#releases/m94"
-    
-  }
+    "dependencies": {},
+    "devDependencies": {},
+    "ambientDevDependencies": {
+        "adm-zip": "github:DefinitelyTyped/DefinitelyTyped/adm-zip/adm-zip.d.ts",
+        "lodash": "github:DefinitelyTyped/DefinitelyTyped/lodash/lodash.d.ts",
+        "Q": "github:DefinitelyTyped/DefinitelyTyped/q/Q.d.ts#aae1368c8ee377f6e9c59c2d6faf1acb3ece7e05",
+        "node": "github:DefinitelyTyped/DefinitelyTyped/node/node.d.ts#1c56e368e17bb28ca57577250624ca5bd561aa81",
+        "temp": "github:DefinitelyTyped/DefinitelyTyped/temp/temp.d.ts",
+        "vsts-task-lib": "github:Microsoft/vso-agent-tasks/definitions/vsts-task-lib.d.ts#releases/m94"
+    }
 }

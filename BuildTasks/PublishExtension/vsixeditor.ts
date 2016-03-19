@@ -5,6 +5,7 @@ import fs = require("fs");
 import path = require("path");
 import Q = require("q");
 import tl = require("vsts-task-lib/task");
+import _ = require("lodash");
 
 export class VSIXEditor {
     private zip: AdmZip;
@@ -48,12 +49,12 @@ export class VSIXEditor {
 
                             tl.debug("Creating final archive file at " + this.output);
 
-                            output.on("close", function() {
+                            output.on("close", function () {
                                 tl.debug(archive.pointer() + " total bytes");
                                 tl.debug("archiver has been finalized and the output file descriptor has closed.");
                             });
 
-                            archive.on("error", function(err) {
+                            archive.on("error", function (err) {
                                 throw err;
                             });
 
@@ -99,7 +100,15 @@ export class VSIXEditor {
             if (this.id) { identity._Id = this.id; }
             if (this.publisher) { identity._Publisher = this.publisher; }
             if (this.editExtensionName) { vsixmanifest.PackageManifest.Metadata.DisplayName = this.extensionName; }
-            if (this.extensionVisibility) { vsixmanifest.PackageManifest.Metadata.GalleryFlags += this.extensionVisibility }
+            if (this.extensionVisibility) {
+                let flagsEditor = new GalleryFlagsEditor(vsixmanifest.PackageManifest.Metadata.GalleryFlags);
+
+                if (this.extensionVisibility.toLowerCase() == "private") {
+                    vsixmanifest.PackageManifest.Metadata.GalleryFlags = flagsEditor.removePublicFlag();
+                } else if (this.extensionVisibility.toLowerCase() == "public") {
+                    vsixmanifest.PackageManifest.Metadata.GalleryFlags = flagsEditor.addPublicFlag();
+                }
+            }
             vsixManifestData = x2js.js2xml(vsixmanifest);
 
             fs.writeFile(vsixManifestPath, vsixManifestData, () => {
@@ -131,13 +140,7 @@ export class VSIXEditor {
 
     public editExtensionVisibility(visibility: string) {
         this.validateEditMode();
-
-        if (visibility == "public") {
-            this.extensionVisibility = "Public";
-        }
-        else {
-            this.extensionVisibility = "";
-        }
+        this.extensionVisibility = visibility;
     }
 
     public editId(id: string) {
@@ -152,5 +155,32 @@ export class VSIXEditor {
 
     private validateEditMode() {
         if (!this.edit) { throw "Editing is not started"; }
+    }
+}
+
+class GalleryFlagsEditor {
+    constructor(public galleryFlagsEditor: string) {
+    }
+
+    public addPublicFlag(): string {
+        let flags = this.getFlags();
+        flags.push("Public");
+        return this.joinFlags(flags);
+    }
+
+    public removePublicFlag(): string {
+        let flags = this.getFlags();
+        _.remove(flags, v => v === "Public");
+        return this.joinFlags(flags);
+    }
+
+    private joinFlags(flags: string[]): string {
+        return _.uniq(flags).join(" ");
+    }
+
+    private getFlags(): string[] {
+        let flags = this.galleryFlagsEditor.split(" ");
+        _.remove(flags, v => v === "");
+        return flags;
     }
 }

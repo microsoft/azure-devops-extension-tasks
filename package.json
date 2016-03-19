@@ -36,6 +36,7 @@
     "dependencies": {
         "adm-zip": "^0.4.7",
         "archiver": "^0.21.0",
+        "lodash":"^4.6.1",
         "temp": "^0.8.3",
         "vsts-task-lib": "^0.5.10",
         "x2js": "^2.0.0",
