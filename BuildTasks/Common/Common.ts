@@ -167,19 +167,24 @@ export class TfxJsonOutputStream extends stream.Writable {
 
         if (!this.commandline) {
             this.commandline = chunkStr;
-            if (!this.silent) { tl._writeLine(this.commandline); }
+            if (!this.silent) { this.taskOutput(chunkStr, tl._writeLine); }
         }
         else if (!this.jsonString && chunkStr.toString()[0] !== "{" ) {
             this.messages.push(chunkStr);
-            if (!this.silent) { tl.warning(chunkStr); }
+            if (!this.silent) { this.taskOutput(chunkStr, tl.warning); }
         }
         else {
             this.jsonString += chunkStr;
+            this.taskOutput(chunkStr, tl.debug);
         }
 
-        // Emit a debug for each line to avoid having it displayed in console
-        chunkStr.split("\n").forEach(m => tl.debug(m));
-
         cb();
+    }
+    
+    private taskOutput(messages: string, lineWriter: (m: string) => void) {
+        if (!messages) { return; }
+        // Split messages to be sure that we are invoking the write lineWriter for each lineWriter
+        // Otherwise we could get messages in console with the wrong prefix used by vsts-task-lib
+        messages.split("\n").forEach(lineWriter);
     }
 }
