@@ -39,13 +39,13 @@ common.runTfx(tfx => {
             let versionparts: number[] = version.split(".").map(v => +v);
             switch (versionAction) {
                 case "Major":
-                    versionparts = [+versionparts[0] + 1, 0, 0];
+                    versionparts = [versionparts[0] + 1, 0, 0];
                     break;
                 case "Minor":
-                    versionparts = [+versionparts[0], +versionparts[1] + 1, 0];
+                    versionparts = [versionparts[0], versionparts[1] + 1, 0];
                     break;
                 case "Patch":
-                    versionparts = [+versionparts[0], +versionparts[1], +versionparts[2] + 1];
+                    versionparts = [versionparts[0], versionparts[1], versionparts[2] + 1];
                     break;
             }
             version = versionparts.join(".");
