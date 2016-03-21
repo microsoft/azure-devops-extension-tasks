@@ -6,6 +6,7 @@
 
 import os = require("os");
 import path = require("path");
+import stream = require("stream");
 import fs = require("fs");
 import tl = require("vsts-task-lib/task");
 import trl = require("vsts-task-lib/toolrunner");
@@ -143,4 +144,42 @@ export function getMarketplaceEndpointDetails(inputFieldName: string = "connecte
         "url": hostUrl,
         "token": apitoken
     };
+}
+
+/**
+ * A writable stream intended to be used with Tfx when using JSON output.
+ * This class overcomes the problem of having tfx warnings being displayed
+ * in stdout as regular messages, even when using --json switch in tfx.
+ *
+ */
+export class TfxJsonOutputStream extends stream.Writable {
+
+    jsonString: string = "";
+    messages: string[] = [];
+    commandline: string = "";
+
+    constructor(public silent = false) {
+        super();
+    }
+
+    _write(chunk: any, enc: string, cb: Function) {
+        const chunkStr: string = chunk.toString();
+
+        if (!this.commandline) {
+            this.commandline = chunkStr;
+            if (!this.silent) { tl._writeLine(this.commandline); }
+        }
+        else if (!this.jsonString && chunkStr.toString()[0] !== "{" ) {
+            this.messages.push(chunkStr);
+            if (!this.silent) { tl.warning(chunkStr); }
+        }
+        else {
+            this.jsonString += chunkStr;
+        }
+
+        // Emit a debug for each line to avoid having it displayed in console
+        chunkStr.split("\n").forEach(m => tl.debug(m));
+
+        cb();
+    }
 }
