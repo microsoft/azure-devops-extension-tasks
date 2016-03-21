@@ -1,28 +1,6 @@
 ///<reference path="../typings/main.d.ts" />
 import tl = require("vsts-task-lib/task");
 import common = require("./common");
-import stream = require("stream");
-
-class TfxDebugStream extends stream.Writable {
-
-    jsonString: string;
-    messages: string[];
-    commandline: string;
-
-    _write(chunk: any, enc: string, cb: Function) {
-        if (!this.commandline) {
-            this.commandline = chunk;
-        }
-        else if (!this.jsonString && !chunk.startsWith("{")) {
-            this.messages += chunk;
-        }
-        else {
-            this.jsonString += chunk;
-        }
-        tl.debug(chunk);
-        cb();
-    }
-}
 
 common.runTfx(tfx => {
     tfx.arg(["extension", "create", "--json"]);
@@ -43,31 +21,19 @@ common.runTfx(tfx => {
     if (cwd) {
         tl.cd(cwd);
     }
-    
-    const outputStream = new TfxDebugStream();
 
-    tfx.exec(<any>{ outStream: outputStream }).then(code => {
-        tl._writeLine(outputStream.commandline);
+    const outputStream = new common.TfxJsonOutputStream();
 
-        for (let i = 0; i <= outputStream.messages.length; i++) {
-            tl.warning(outputStream.messages[i]);
-        }
-
+    tfx.exec(<any>{ outStream: outputStream, failOnStdErr: true }).then(code => {
         const json = JSON.parse(outputStream.jsonString);
 
         if (outputVariable) {
             tl.setVariable(outputVariable, json.path);
         }
 
-        tl._writeLine("Packaged extension: ${json.path}.");
+        tl._writeLine(`Packaged extension: ${json.path}.`);
         tl.setResult(tl.TaskResult.Succeeded, `tfx exited with return code: ${code}`);
     }).fail(err => {
-        tl._writeLine(outputStream.commandline);
-
-        for (let i = 0; i <= outputStream.messages.length; i++) {
-            tl.error(outputStream.messages[i]);
-        }
-
         tl.setResult(tl.TaskResult.Failed, `tfx failed with error: ${err}`);
     }).finally(() => {
         cleanupTfxArgs();

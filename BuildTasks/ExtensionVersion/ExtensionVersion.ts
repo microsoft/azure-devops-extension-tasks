@@ -3,13 +3,6 @@ import tl = require("vsts-task-lib/task");
 import common = require("./common");
 import stream = require("stream");
 
-class TfxDebugStream extends stream.Writable {
-    _write(chunk: any, enc: string, cb: Function) {
-        tl.debug(chunk);
-        cb();
-    }
-}
-
 common.runTfx(tfx => {
     tfx.arg(["extension", "show", "--json"]);
     const outputVariable = tl.getInput("outputVariable", false);
@@ -34,18 +27,16 @@ common.runTfx(tfx => {
         tl.cd(cwd);
     }
 
-    let output = "";
-    tfx.on("stdout", (data) => output += data);
-
-    tfx.exec(<any>{ outStream: new TfxDebugStream() }).then(code => {
-        const json = JSON.parse(output);
-        let version = json.versions[json.versions.length - 1].version;
+    const outputStream = new common.TfxJsonOutputStream();
+    tfx.exec(<any>{ outStream: outputStream, failOnStdErr: true }).then(code => {
+        const json = JSON.parse(outputStream.jsonString);
+        let version: string = json.versions[json.versions.length - 1].version;
 
         tl._writeLine(`Latest version   : ${version}.`);
         tl._writeLine(`Requested action : ${versionAction}.`);
 
         if (versionAction !== "None") {
-            let versionparts = version.Split(".");
+            let versionparts: number[] = version.split(".").map(v => +v);
             switch (versionAction) {
                 case "Major":
                     versionparts = [+versionparts[0] + 1, 0, 0];
@@ -57,7 +48,7 @@ common.runTfx(tfx => {
                     versionparts = [+versionparts[0], +versionparts[1], +versionparts[2] + 1];
                     break;
             }
-            version = versionparts.Join(".");
+            version = versionparts.join(".");
             tl._writeLine(`Updated to       : ${version}.`);
         }
 
