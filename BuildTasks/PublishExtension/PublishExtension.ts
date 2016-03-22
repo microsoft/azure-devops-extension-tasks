@@ -1,6 +1,8 @@
 ///<reference path="../typings/main.d.ts" />
 import tl = require("vsts-task-lib/task");
 import common = require("./common");
+import vsixeditor = require("./vsixeditor");
+import path = require("path");
 
 common.runTfx(tfx => {
     tfx.arg(["extension", "publish", "--json"]);
@@ -13,6 +15,7 @@ common.runTfx(tfx => {
 
     // Read file type
     const fileType = tl.getInput("fileType", true);
+    let publishedVsix;
     let cleanupTfxArgs: () => void;
     if (fileType === "manifest") {
         // Set tfx manifest arguments
@@ -20,7 +23,37 @@ common.runTfx(tfx => {
     } else {
         // Set vsix file argument
         let vsixFile = tl.getInput("vsixFile", true);
-        tfx.arg(["--vsix", vsixFile]);
+        publishedVsix = path.join(tl.getVariable("System.DefaultWorkingDirectory"), "output.vsix");
+
+        const publisher = tl.getInput("publisherId", false);
+        const extensionId = tl.getInput("extensionId", false);
+        const extensionName = tl.getInput("extensionName", false);
+        const extensionVisibility = tl.getInput("extensionVisibility", false);
+        const extensionVersion = tl.getInput("extensionVersion", false);
+
+        if (publisher
+            || extensionId
+            || extensionName
+            || (extensionVisibility && extensionVisibility !== "default")
+            || extensionVersion) {
+
+            tl.debug("Start editing of VSIX");
+            let ve = new vsixeditor.VSIXEditor(vsixFile, publishedVsix);
+            ve.startEdit();
+
+            if (publisher) { ve.editPublisher(publisher); }
+            if (extensionId) { ve.editId(extensionId); }
+            if (extensionName) { ve.editExtensionName(extensionName); }
+            if (extensionVisibility) { ve.editExtensionVisibility(extensionVisibility); }
+            if (extensionVersion) { ve.editVersion(extensionVersion); }
+
+            ve.endEdit();
+        }
+        else {
+            publishedVsix = vsixFile;
+        }
+
+        tfx.arg(["--vsix", publishedVsix]);
     }
 
     // Share with
@@ -45,7 +78,7 @@ common.runTfx(tfx => {
     tfx.exec(<any>{ outStream: outputStream, failOnStdErr: true }).then(code => {
         const json = JSON.parse(outputStream.jsonString);
 
-        const publishedVsix = fileType === "manifest" ? json.packaged : tl.getInput("vsixFile");
+        const publishedVsix = fileType === "manifest" ? json.packaged : publishedVsix;
 
         if (fileType === "manifest" && outputVariable) {
             tl.setVariable(outputVariable, publishedVsix);

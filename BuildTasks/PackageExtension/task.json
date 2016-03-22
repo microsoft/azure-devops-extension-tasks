@@ -93,6 +93,15 @@
             "groupName": "overrides"
         },
         {
+            "name": "extensionVersion",
+            "type": "string",
+            "label": "Extension version",
+            "defaultValue": "",
+            "helpMarkDown": "Overrides extension version. If not specified, the extension version specified in the manifest will be used",
+            "required": false,
+            "groupName": "overrides"
+        },        
+        {
             "name": "extensionVisibility",
             "type": "pickList",
             "label": "Extension visibility",
