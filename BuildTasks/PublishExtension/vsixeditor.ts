@@ -121,13 +121,13 @@ export class VSIXEditor {
     }
 
     public hasEdits(): boolean {
-        return this.versionNumber != null
-            || this.id != null
-            || this.publisher != null
-            || this.extensionName != null
-            || this.extensionVisibility != null
-            || this.extensionName != null;
+        return <boolean>(this.versionNumber
+            || this.id
+            || this.publisher
+            || this.extensionName
+            || (this.extensionVisibility && this.extensionVisibility !== "default"));
     }
+
     public editVersion(version: string) {
         this.validateEditMode();
         this.versionNumber = version;
