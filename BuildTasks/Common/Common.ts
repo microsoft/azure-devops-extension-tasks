@@ -187,7 +187,7 @@ export class TfxJsonOutputStream extends stream.Writable {
 
         cb();
     }
-    
+
     private taskOutput(messages: string, lineWriter: (m: string) => void) {
         if (!messages) { return; }
         // Split messages to be sure that we are invoking the write lineWriter for each lineWriter
