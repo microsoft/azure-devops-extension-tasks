@@ -67,6 +67,13 @@ export function setTfxManifestArguments(tfx: ToolRunner): (() => void) {
         jsonOverrides.public = (extensionVisibility === "public");
     }
 
+    const extensionVersion = tl.getInput("extensionVersion", false);
+    if (extensionVersion) {
+        tl.debug(`Overriding extension version to: ${extensionVersion}`);
+        jsonOverrides = (jsonOverrides || {});
+        jsonOverrides.version = extensionVersion;
+    }
+
     let overrideFilePath: string;
     if (jsonOverrides) {
         // Generate a temp file
@@ -120,8 +127,8 @@ export function runTfx(cmd: (tfx: ToolRunner) => void) {
     npm.arg(["install", "tfx-cli"]);
 
     npm.exec().then(code => {
-      tfx = tl.createToolRunner(tl.which(tfxLocalPath, true));
-      cmd(tfx);
+        tfx = tl.createToolRunner(tl.which(tfxLocalPath, true));
+        cmd(tfx);
     }).fail(err => {
         tl.setResult(tl.TaskResult.Failed, `Error installing tfx: ${err}`);
     });
