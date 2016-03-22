@@ -23,7 +23,7 @@ export class VSIXEditor {
     }
 
     public startEdit() {
-        if (this.edit) { throw "Edit is already started"; }
+        if (this.edit) { throw new Error("Edit is already started"); }
         this.edit = true;
         tl.debug("Editing started");
     }
@@ -154,7 +154,7 @@ export class VSIXEditor {
     }
 
     private validateEditMode() {
-        if (!this.edit) { throw "Editing is not started"; }
+        if (!this.edit) { throw  new Error("Editing is not started"); }
     }
 }
 
