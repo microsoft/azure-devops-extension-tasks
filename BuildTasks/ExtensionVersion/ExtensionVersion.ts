@@ -5,7 +5,7 @@ import stream = require("stream");
 
 common.runTfx(tfx => {
     tfx.arg(["extension", "show", "--json"]);
-    const outputVariable = tl.getInput("outputVariable", false);
+    const outputVariable = tl.getInput("outputVariable", true);
 
     // Read gallery endpoint
     const galleryEndpoint = common.getMarketplaceEndpointDetails();
@@ -39,22 +39,20 @@ common.runTfx(tfx => {
             let versionparts: number[] = version.split(".").map(v => +v);
             switch (versionAction) {
                 case "Major":
-                    versionparts = [+versionparts[0] + 1, 0, 0];
+                    versionparts = [versionparts[0] + 1, 0, 0];
                     break;
                 case "Minor":
-                    versionparts = [+versionparts[0], +versionparts[1] + 1, 0];
+                    versionparts = [versionparts[0], versionparts[1] + 1, 0];
                     break;
                 case "Patch":
-                    versionparts = [+versionparts[0], +versionparts[1], +versionparts[2] + 1];
+                    versionparts = [versionparts[0], versionparts[1], versionparts[2] + 1];
                     break;
             }
             version = versionparts.join(".");
             tl._writeLine(`Updated to       : ${version}.`);
         }
 
-        if (outputVariable) {
-            tl.setVariable(outputVariable, version);
-        }
+        tl.setVariable(outputVariable, version);
         tl.setResult(tl.TaskResult.Succeeded, `tfx exited with return code: ${code}`);
     }).fail(err => {
         tl.setResult(tl.TaskResult.Failed, `tfx failed with error: ${err}`);
