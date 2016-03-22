@@ -15,7 +15,7 @@ common.runTfx(tfx => {
 
     // Read file type
     const fileType = tl.getInput("fileType", true);
-    let publishedVsix;
+    let vsixOutput;
     let cleanupTfxArgs: () => void;
     if (fileType === "manifest") {
         // Set tfx manifest arguments
@@ -23,7 +23,7 @@ common.runTfx(tfx => {
     } else {
         // Set vsix file argument
         let vsixFile = tl.getInput("vsixFile", true);
-        publishedVsix = path.join(tl.getVariable("System.DefaultWorkingDirectory"), "output.vsix");
+        vsixOutput = path.join(tl.getVariable("System.DefaultWorkingDirectory"), "output.vsix");
 
         const publisher = tl.getInput("publisherId", false);
         const extensionId = tl.getInput("extensionId", false);
@@ -38,7 +38,7 @@ common.runTfx(tfx => {
             || extensionVersion) {
 
             tl.debug("Start editing of VSIX");
-            let ve = new vsixeditor.VSIXEditor(vsixFile, publishedVsix);
+            let ve = new vsixeditor.VSIXEditor(vsixFile, vsixOutput);
             ve.startEdit();
 
             if (publisher) { ve.editPublisher(publisher); }
@@ -50,10 +50,10 @@ common.runTfx(tfx => {
             ve.endEdit();
         }
         else {
-            publishedVsix = vsixFile;
+            vsixOutput = vsixFile;
         }
 
-        tfx.arg(["--vsix", publishedVsix]);
+        tfx.arg(["--vsix", vsixOutput]);
     }
 
     // Share with
@@ -78,7 +78,7 @@ common.runTfx(tfx => {
     tfx.exec(<any>{ outStream: outputStream, failOnStdErr: true }).then(code => {
         const json = JSON.parse(outputStream.jsonString);
 
-        const publishedVsix = fileType === "manifest" ? json.packaged : publishedVsix;
+        const publishedVsix = fileType === "manifest" ? json.packaged : vsixOutput;
 
         if (fileType === "manifest" && outputVariable) {
             tl.setVariable(outputVariable, publishedVsix);
