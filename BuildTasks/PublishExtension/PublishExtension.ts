@@ -18,14 +18,14 @@ common.runTfx(tfx => {
     const fileType = tl.getInput("fileType", true);
     let vsixOutput;
     let cleanupTfxArgs: () => void;
-    let updateTasksVersionDone = Q(null);
+    let runBeforeTfx = Q(null);
 
     if (fileType === "manifest") {
         // Set tfx manifest arguments
         cleanupTfxArgs = common.setTfxManifestArguments(tfx);
 
         // Update tasks version if needed
-        updateTasksVersionDone = common.checkUpdateTasksVersion();
+        runBeforeTfx = runBeforeTfx.then(() => common.checkUpdateTasksVersion());
     } else {
         // Set vsix file argument
         let vsixFile = tl.getInput("vsixFile", true);
@@ -53,7 +53,7 @@ common.runTfx(tfx => {
             if (extensionVisibility) { ve.editExtensionVisibility(extensionVisibility); }
             if (extensionVersion) { ve.editVersion(extensionVersion); }
 
-            ve.endEdit();
+            runBeforeTfx = runBeforeTfx.then(() => ve.endEdit());
         }
         else {
             vsixOutput = vsixFile;
@@ -77,7 +77,7 @@ common.runTfx(tfx => {
     const cwd = tl.getInput("cwd", false);
     if (cwd) { tl.cd(cwd); }
 
-    updateTasksVersionDone.then(() => {
+    runBeforeTfx.then(() => {
         const outputStream = new common.TfxJsonOutputStream();
         tfx.exec(<any>{ outStream: outputStream, failOnStdErr: true }).then(code => {
             const json = JSON.parse(outputStream.jsonString);
@@ -98,6 +98,6 @@ common.runTfx(tfx => {
             }
         });
     }).fail(err => {
-        tl.setResult(tl.TaskResult.Failed, `Error occurred while updating tasks version: ${err}`);
+        tl.setResult(tl.TaskResult.Failed, `Error occurred before preparing to run tfx: ${err}`);
     });
 });
