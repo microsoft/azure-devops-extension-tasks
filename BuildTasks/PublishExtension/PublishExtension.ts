@@ -1,4 +1,5 @@
 ///<reference path="../typings/main.d.ts" />
+import Q = require("q");
 import tl = require("vsts-task-lib/task");
 import common = require("./common");
 import vsixeditor = require("./vsixeditor");
@@ -17,9 +18,14 @@ common.runTfx(tfx => {
     const fileType = tl.getInput("fileType", true);
     let vsixOutput;
     let cleanupTfxArgs: () => void;
+    let runBeforeTfx = Q(null);
+
     if (fileType === "manifest") {
         // Set tfx manifest arguments
         cleanupTfxArgs = common.setTfxManifestArguments(tfx);
+
+        // Update tasks version if needed
+        runBeforeTfx = runBeforeTfx.then(() => common.checkUpdateTasksVersion());
     } else {
         // Set vsix file argument
         let vsixFile = tl.getInput("vsixFile", true);
@@ -47,7 +53,7 @@ common.runTfx(tfx => {
             if (extensionVisibility) { ve.editExtensionVisibility(extensionVisibility); }
             if (extensionVersion) { ve.editVersion(extensionVersion); }
 
-            ve.endEdit();
+            runBeforeTfx = runBeforeTfx.then(() => ve.endEdit());
         }
         else {
             vsixOutput = vsixFile;
@@ -69,28 +75,29 @@ common.runTfx(tfx => {
 
     // Set working folder
     const cwd = tl.getInput("cwd", false);
-    if (cwd) {
-        tl.cd(cwd);
-    }
+    if (cwd) { tl.cd(cwd); }
 
-    const outputStream = new common.TfxJsonOutputStream();
+    runBeforeTfx.then(() => {
+        const outputStream = new common.TfxJsonOutputStream();
+        tfx.exec(<any>{ outStream: outputStream, failOnStdErr: true }).then(code => {
+            const json = JSON.parse(outputStream.jsonString);
 
-    tfx.exec(<any>{ outStream: outputStream, failOnStdErr: true }).then(code => {
-        const json = JSON.parse(outputStream.jsonString);
+            const publishedVsix = fileType === "manifest" ? json.packaged : vsixOutput;
 
-        const publishedVsix = fileType === "manifest" ? json.packaged : vsixOutput;
+            if (fileType === "manifest" && outputVariable) {
+                tl.setVariable(outputVariable, publishedVsix);
+            }
 
-        if (fileType === "manifest" && outputVariable) {
-            tl.setVariable(outputVariable, publishedVsix);
-        }
-
-        tl._writeLine(`Published VSIX: ${publishedVsix}.`);
-        tl.setResult(tl.TaskResult.Succeeded, `tfx exited with return code: ${code}`);
+            tl._writeLine(`Published VSIX: ${publishedVsix}.`);
+            tl.setResult(tl.TaskResult.Succeeded, `tfx exited with return code: ${code}`);
+        }).fail(err => {
+            tl.setResult(tl.TaskResult.Failed, `tfx failed with error: ${err}`);
+        }).finally(() => {
+            if (cleanupTfxArgs) {
+                cleanupTfxArgs();
+            }
+        });
     }).fail(err => {
-        tl.setResult(tl.TaskResult.Failed, `tfx failed with error: ${err}`);
-    }).finally(() => {
-        if (cleanupTfxArgs) {
-            cleanupTfxArgs();
-        }
+        tl.setResult(tl.TaskResult.Failed, `Error occurred before preparing to run tfx: ${err}`);
     });
 });

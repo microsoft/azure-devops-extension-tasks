@@ -28,47 +28,56 @@ export class VSIXEditor {
         tl.debug("Editing started");
     }
 
-    public endEdit() {
+    public endEdit(): Q.Promise<any> {
         this.validateEditMode();
 
-        if (this.hasEdits()) {
-            temp.track();
+        if (!this.hasEdits()) { return Q(null); }
 
-            temp.mkdir("visxeditor", (err, dirPath) => {
-                if (err) { throw err; }
-                tl.debug("Finalizing edit");
-                tl.debug("Extracting files to " + dirPath);
-                this.zip.extractAllTo(dirPath, true);
+        const deferred = Q.defer();
 
-                this.editVsixManifest(dirPath)
-                    .then(() => {
-                        this.editVsoManifest(dirPath).then(() => {
-                            let archiver = require("archiver");
-                            let output = fs.createWriteStream(this.output);
-                            let archive = archiver("zip");
+        temp.track();
 
-                            tl.debug("Creating final archive file at " + this.output);
+        Q.nfcall(temp.mkdir, "vsixeditor")
+        .then((dirPath: string) => {
+            tl.debug("Finalizing edit");
+            tl.debug("Extracting files to " + dirPath);
+            this.zip.extractAllTo(dirPath, true);
+            return dirPath;
+        })
+        .then(dirPath => {
+            tl.debug("Editing VSIX manifest");
+            return this.editVsixManifest(dirPath).then(() => dirPath);
+        })
+        .then(dirPath => {
+            tl.debug("Editing VSO manifest");
+            return this.editVsoManifest(dirPath).then(() => dirPath);
+        })
+        .then(dirPath => {
+            let archiver = require("archiver");
+            let output = fs.createWriteStream(this.output);
+            let archive = archiver("zip");
 
-                            output.on("close", function () {
-                                tl.debug(archive.pointer() + " total bytes");
-                                tl.debug("archiver has been finalized and the output file descriptor has closed.");
-                            });
+            tl.debug("Creating final archive file at " + this.output);
 
-                            archive.on("error", function (err) {
-                                throw err;
-                            });
-
-                            archive.pipe(output);
-
-                            archive.bulk([
-                                { expand: true, cwd: dirPath, src: ["**/*"] }
-                            ]);
-                            archive.finalize();
-                            tl.debug("Final archive file created");
-                        });
-                    });
+            output.on("close", function () {
+                tl.debug(archive.pointer() + " total bytes");
+                tl.debug("archiver has been finalized and the output file descriptor has closed.");
+                deferred.resolve();
             });
-        }
+
+            archive.on("error", err => deferred.reject(err));
+
+            archive.pipe(output);
+
+            archive.bulk([
+                { expand: true, cwd: dirPath, src: ["**/*"] }
+            ]);
+            archive.finalize();
+            tl.debug("Final archive file created");
+        })
+        .fail (err => deferred.reject(err));
+
+        return deferred.promise;
     }
 
     private editVsoManifest(dirPath: string) {
