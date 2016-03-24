@@ -29,7 +29,7 @@ common.runTfx(tfx => {
     } else {
         // Set vsix file argument
         let vsixFile = tl.getInput("vsixFile", true);
-        vsixOutput = path.join(tl.getVariable("System.DefaultWorkingDirectory"), "output.vsix");
+        vsixOutput = tl.getVariable("System.DefaultWorkingDirectory");
 
         const publisher = tl.getInput("publisherId", false);
         const extensionId = tl.getInput("extensionId", false);
@@ -53,13 +53,16 @@ common.runTfx(tfx => {
             if (extensionVisibility) { ve.editExtensionVisibility(extensionVisibility); }
             if (extensionVersion) { ve.editVersion(extensionVersion); }
 
-            runBeforeTfx = runBeforeTfx.then(() => ve.endEdit());
+            runBeforeTfx = runBeforeTfx.then(() => ve.endEdit().then(vsixGeneratedFile => {
+                tfx.arg(["--vsix", vsixGeneratedFile]);
+                vsixOutput = vsixGeneratedFile;
+                return true;
+            }));
         }
         else {
             vsixOutput = vsixFile;
+            tfx.arg(["--vsix", vsixOutput]);
         }
-
-        tfx.arg(["--vsix", vsixOutput]);
     }
 
     // Share with
