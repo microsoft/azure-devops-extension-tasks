@@ -143,6 +143,8 @@
             "options": {
                 "default": "Not set",
                 "private": "Private",
+                "private_preview": "Private Preview",
+                "public_preview": "Public Preview",
                 "public": "Public"
             },
             "groupName": "manifest"

@@ -96,7 +96,10 @@
             "properties": {
                 "name": "VstsMarketplacePublishing",
                 "displayName": "Marketplace Publishing",
-                "url": "https://marketplace.visualstudio.com",
+                "url": {
+                    "displayName": "Marketplace URL",
+                    "value": "https://marketplace.visualstudio.com"
+                },
                 "authenticationSchemes": [
                     {
                         "type": "ms.vss-endpoint.endpoint-auth-scheme-basic",

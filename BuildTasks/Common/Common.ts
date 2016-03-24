@@ -65,7 +65,12 @@ export function setTfxManifestArguments(tfx: ToolRunner): (() => void) {
     if (extensionVisibility && extensionVisibility !== "default") {
         tl.debug(`Overriding extension visibility to: ${extensionVisibility}`);
         jsonOverrides = (jsonOverrides || {});
-        jsonOverrides.public = (extensionVisibility === "public");
+
+        const isPublic = extensionVisibility.indexOf("public") >= 0;
+        const isPreview = extensionVisibility.indexOf("preview") >= 0;
+
+        jsonOverrides.public = isPublic;
+        if (isPreview) { jsonOverrides.galleryFlags = ["Preview"]; };
     }
 
     const extensionVersion = tl.getInput("extensionVersion", false);
@@ -177,7 +182,7 @@ export class TfxJsonOutputStream extends stream.Writable {
             this.commandline = chunkStr;
             if (!this.silent) { this.taskOutput(chunkStr, tl._writeLine); }
         }
-        else if (!this.jsonString && chunkStr.toString()[0] !== "{" ) {
+        else if (!this.jsonString && chunkStr.toString()[0] !== "{") {
             this.messages.push(chunkStr);
             if (!this.silent) { this.taskOutput(chunkStr, tl.warning); }
         }

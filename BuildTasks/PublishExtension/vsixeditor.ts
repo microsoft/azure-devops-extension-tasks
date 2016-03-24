@@ -5,7 +5,6 @@ import fs = require("fs");
 import path = require("path");
 import Q = require("q");
 import tl = require("vsts-task-lib/task");
-import _ = require("lodash");
 
 export class VSIXEditor {
     private zip: AdmZip;
@@ -38,44 +37,44 @@ export class VSIXEditor {
         temp.track();
 
         Q.nfcall(temp.mkdir, "vsixeditor")
-        .then((dirPath: string) => {
-            tl.debug("Finalizing edit");
-            tl.debug("Extracting files to " + dirPath);
-            this.zip.extractAllTo(dirPath, true);
-            return dirPath;
-        })
-        .then(dirPath => {
-            tl.debug("Editing VSIX manifest");
-            return this.editVsixManifest(dirPath).then(() => dirPath);
-        })
-        .then(dirPath => {
-            tl.debug("Editing VSO manifest");
-            return this.editVsoManifest(dirPath).then(() => dirPath);
-        })
-        .then(dirPath => {
-            let archiver = require("archiver");
-            let output = fs.createWriteStream(this.output);
-            let archive = archiver("zip");
+            .then((dirPath: string) => {
+                tl.debug("Finalizing edit");
+                tl.debug("Extracting files to " + dirPath);
+                this.zip.extractAllTo(dirPath, true);
+                return dirPath;
+            })
+            .then(dirPath => {
+                tl.debug("Editing VSIX manifest");
+                return this.editVsixManifest(dirPath).then(() => dirPath);
+            })
+            .then(dirPath => {
+                tl.debug("Editing VSO manifest");
+                return this.editVsoManifest(dirPath).then(() => dirPath);
+            })
+            .then(dirPath => {
+                let archiver = require("archiver");
+                let output = fs.createWriteStream(this.output);
+                let archive = archiver("zip");
 
-            tl.debug("Creating final archive file at " + this.output);
+                tl.debug("Creating final archive file at " + this.output);
 
-            output.on("close", function () {
-                tl.debug(archive.pointer() + " total bytes");
-                tl.debug("archiver has been finalized and the output file descriptor has closed.");
-                deferred.resolve();
-            });
+                output.on("close", function() {
+                    tl.debug(archive.pointer() + " total bytes");
+                    tl.debug("archiver has been finalized and the output file descriptor has closed.");
+                    deferred.resolve();
+                });
 
-            archive.on("error", err => deferred.reject(err));
+                archive.on("error", err => deferred.reject(err));
 
-            archive.pipe(output);
+                archive.pipe(output);
 
-            archive.bulk([
-                { expand: true, cwd: dirPath, src: ["**/*"] }
-            ]);
-            archive.finalize();
-            tl.debug("Final archive file created");
-        })
-        .fail (err => deferred.reject(err));
+                archive.bulk([
+                    { expand: true, cwd: dirPath, src: ["**/*"] }
+                ]);
+                archive.finalize();
+                tl.debug("Final archive file created");
+            })
+            .fail(err => deferred.reject(err));
 
         return deferred.promise;
     }
@@ -109,15 +108,29 @@ export class VSIXEditor {
             if (this.id) { identity._Id = this.id; }
             if (this.publisher) { identity._Publisher = this.publisher; }
             if (this.editExtensionName) { vsixmanifest.PackageManifest.Metadata.DisplayName = this.extensionName; }
-            if (this.extensionVisibility) {
+            if (this.extensionVisibility && this.extensionVisibility !== "default") {
                 let flagsEditor = new GalleryFlagsEditor(vsixmanifest.PackageManifest.Metadata.GalleryFlags);
 
-                if (this.extensionVisibility.toLowerCase() === "private") {
-                    vsixmanifest.PackageManifest.Metadata.GalleryFlags = flagsEditor.removePublicFlag();
-                } else if (this.extensionVisibility.toLowerCase() === "public") {
-                    vsixmanifest.PackageManifest.Metadata.GalleryFlags = flagsEditor.addPublicFlag();
+                const isPublic = this.extensionVisibility.indexOf("public") >= 0;
+                const isPreview = this.extensionVisibility.indexOf("preview") >= 0;
+
+                if (isPublic) {
+                    flagsEditor.addPublicFlag();
                 }
+                else {
+                    flagsEditor.removePublicFlag();
+                }
+
+                if (isPreview) {
+                    flagsEditor.addPreviewFlag();
+                }
+                else {
+                    flagsEditor.removePreviewFlag();
+                }
+
+                vsixmanifest.PackageManifest.Metadata.GalleryFlags = flagsEditor.toString();
             }
+
             vsixManifestData = x2js.js2xml(vsixmanifest);
 
             fs.writeFile(vsixManifestPath, vsixManifestData, () => {
@@ -163,33 +176,44 @@ export class VSIXEditor {
     }
 
     private validateEditMode() {
-        if (!this.edit) { throw  new Error("Editing is not started"); }
+        if (!this.edit) { throw new Error("Editing is not started"); }
     }
 }
 
 class GalleryFlagsEditor {
-    constructor(public galleryFlagsEditor: string) {
+    flags: string[] = [];
+    constructor(galleryFlagsEditor: string) {
+        if (galleryFlagsEditor) {
+            this.flags = galleryFlagsEditor.split(" ").filter(f => f != null && f !== "");
+        }
     }
 
-    public addPublicFlag(): string {
-        let flags = this.getFlags();
-        flags.push("Public");
-        return this.joinFlags(flags);
+    private addFlag(flag: string) {
+        if (this.flags.indexOf(flag) < 0) { this.flags.push(flag); }
     }
 
-    public removePublicFlag(): string {
-        let flags = this.getFlags();
-        _.remove(flags, v => v === "Public");
-        return this.joinFlags(flags);
+    private removeFlag(flag: string) {
+        const index = this.flags.indexOf(flag);
+        if (index >= 0) { this.flags.splice(index, 1); };
     }
 
-    private joinFlags(flags: string[]): string {
-        return _.uniq(flags).join(" ");
+    addPublicFlag() {
+        this.addFlag("Public");
     }
 
-    private getFlags(): string[] {
-        let flags = this.galleryFlagsEditor.split(" ");
-        _.remove(flags, v => v === "");
-        return flags;
+    removePublicFlag() {
+        this.removeFlag("Public");
+    }
+
+    addPreviewFlag() {
+        this.addFlag("Preview");
+    }
+
+    removePreviewFlag() {
+        this.removeFlag("Preview");
+    }
+
+    toString(): string {
+        return this.flags.join(" ");
     }
 }
