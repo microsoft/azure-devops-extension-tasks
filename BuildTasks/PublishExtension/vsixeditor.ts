@@ -174,11 +174,12 @@ class ManifestData {
 
     public createOutputFilePath(outputPath: string): Q.Promise<string> {
         let deferred = Q.defer<string>();
-        let fileName = this.publisher + "." + this.id + "-" + this.version + ".gen.vsix";
+        let fileName = `${this.publisher}.${this.id}-${this.version}.gen.vsix`;
 
         const updateFileName = (fileName: string, iteration: number) => {
             if (iteration > 0) {
-                fileName = this.publisher + "." + this.id + "-" + this.version + ".gen" + "00".substring(0, "00".length - iteration.toString().length) + iteration + ".vsix";
+                let gen = "00".substring(0, "00".length - iteration.toString().length) + iteration;
+                fileName = `${this.publisher}.${this.id}-${this.version}.gen${gen}.vsix`;
             }
             fs.exists(path.join(outputPath, fileName), result => {
                 if (result) {
