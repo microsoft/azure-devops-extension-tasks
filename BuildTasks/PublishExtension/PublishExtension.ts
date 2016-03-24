@@ -29,7 +29,7 @@ common.runTfx(tfx => {
     } else {
         // Set vsix file argument
         let vsixFile = tl.getInput("vsixFile", true);
-        vsixOutput = path.join(tl.getVariable("System.DefaultWorkingDirectory"), "output.vsix");
+        vsixOutput = tl.getVariable("System.DefaultWorkingDirectory");
 
         const publisher = tl.getInput("publisherId", false);
         const extensionId = tl.getInput("extensionId", false);
@@ -53,51 +53,53 @@ common.runTfx(tfx => {
             if (extensionVisibility) { ve.editExtensionVisibility(extensionVisibility); }
             if (extensionVersion) { ve.editVersion(extensionVersion); }
 
-            runBeforeTfx = runBeforeTfx.then(() => ve.endEdit());
+            runBeforeTfx = runBeforeTfx.then(() => ve.endEdit().then(result => {
+                tfx.arg(["--vsix", result]);
+                return true;
+            }));
         }
         else {
-            vsixOutput = vsixFile;
+    vsixOutput = vsixFile;
+    tfx.arg(["--vsix", vsixOutput]);
+}
+    }
+
+// Share with
+const shareWith = tl.getInput("shareWith");
+if (shareWith) {
+    // Sanitize accounts to share with
+    let accounts = shareWith.split(",").map(a => a.replace(/\s/g, "")).filter(a => a.length > 0);
+    tfx.argIf(accounts && accounts.length > 0, ["--share-with", ...accounts]);
+}
+
+// Aditional arguments
+tfx.arg(tl.getInput("arguments", false));
+
+// Set working folder
+const cwd = tl.getInput("cwd", false);
+if (cwd) { tl.cd(cwd); }
+
+runBeforeTfx.then(() => {
+    const outputStream = new common.TfxJsonOutputStream();
+    tfx.exec(<any>{ outStream: outputStream, failOnStdErr: true }).then(code => {
+        const json = JSON.parse(outputStream.jsonString);
+
+        const publishedVsix = fileType === "manifest" ? json.packaged : vsixOutput;
+
+        if (fileType === "manifest" && outputVariable) {
+            tl.setVariable(outputVariable, publishedVsix);
         }
 
-        tfx.arg(["--vsix", vsixOutput]);
-    }
-
-    // Share with
-    const shareWith = tl.getInput("shareWith");
-    if (shareWith) {
-        // Sanitize accounts to share with
-        let accounts = shareWith.split(",").map(a => a.replace(/\s/g, "")).filter(a => a.length > 0);
-        tfx.argIf(accounts && accounts.length > 0, ["--share-with", ...accounts]);
-    }
-
-    // Aditional arguments
-    tfx.arg(tl.getInput("arguments", false));
-
-    // Set working folder
-    const cwd = tl.getInput("cwd", false);
-    if (cwd) { tl.cd(cwd); }
-
-    runBeforeTfx.then(() => {
-        const outputStream = new common.TfxJsonOutputStream();
-        tfx.exec(<any>{ outStream: outputStream, failOnStdErr: true }).then(code => {
-            const json = JSON.parse(outputStream.jsonString);
-
-            const publishedVsix = fileType === "manifest" ? json.packaged : vsixOutput;
-
-            if (fileType === "manifest" && outputVariable) {
-                tl.setVariable(outputVariable, publishedVsix);
-            }
-
-            tl._writeLine(`Published VSIX: ${publishedVsix}.`);
-            tl.setResult(tl.TaskResult.Succeeded, `tfx exited with return code: ${code}`);
-        }).fail(err => {
-            tl.setResult(tl.TaskResult.Failed, `tfx failed with error: ${err}`);
-        }).finally(() => {
-            if (cleanupTfxArgs) {
-                cleanupTfxArgs();
-            }
-        });
+        tl._writeLine(`Published VSIX: ${publishedVsix}.`);
+        tl.setResult(tl.TaskResult.Succeeded, `tfx exited with return code: ${code}`);
     }).fail(err => {
-        tl.setResult(tl.TaskResult.Failed, `Error occurred before preparing to run tfx: ${err}`);
+        tl.setResult(tl.TaskResult.Failed, `tfx failed with error: ${err}`);
+    }).finally(() => {
+        if (cleanupTfxArgs) {
+            cleanupTfxArgs();
+        }
     });
+}).fail(err => {
+    tl.setResult(tl.TaskResult.Failed, `Error occurred before preparing to run tfx: ${err}`);
+});
 });

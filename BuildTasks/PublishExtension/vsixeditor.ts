@@ -28,7 +28,7 @@ export class VSIXEditor {
         tl.debug("Editing started");
     }
 
-    public endEdit(): Q.Promise<any> {
+    public endEdit(): Q.Promise<string> {
         this.validateEditMode();
 
         if (!this.hasEdits()) { return Q(this.inputFile); }
