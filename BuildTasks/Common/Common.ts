@@ -218,15 +218,24 @@ function getTaskPathContributions(manifestFile: string): Q.Promise<string[]> {
     });
 };
 
-function getTasksManifestPaths(): Q.Promise<string[]> {
-    // Search for extension manifests given the rootFolder and patternManifest inputs
-    const rootFolder = tl.getInput("rootFolder", false) || tl.getInput("System.DefaultWorkingDirectory");
-    const manifestsPattern = tl.getInput("patternManifest", false) || "vss-extension.json";
+function getTasksManifestPaths(manifestFile?: string): Q.Promise<string[]> {
+    let rootFolder: string;
+    let extensionManifestFiles: string[];
 
-    const globPattern = path.join(rootFolder, manifestsPattern);
-    tl.debug(`Searching for extension manifests ${globPattern}`);
+    if (!manifestFile) {
+        // Search for extension manifests given the rootFolder and patternManifest inputs
+        rootFolder = tl.getInput("rootFolder", false) || tl.getInput("System.DefaultWorkingDirectory");
+        const manifestsPattern = tl.getInput("patternManifest", false) || "vss-extension.json";
 
-    const extensionManifestFiles = tl.glob(globPattern);
+        const globPattern = path.join(rootFolder, manifestsPattern);
+        tl.debug(`Searching for extension manifests ${globPattern}`);
+
+        extensionManifestFiles = tl.glob(globPattern);
+    }
+    else {
+        rootFolder = path.dirname(manifestFile);
+        extensionManifestFiles = [manifestFile];
+    }
 
     return Q.all(
         extensionManifestFiles.map(manifest => {
@@ -254,12 +263,12 @@ function updateTaskVersion(manifestFilePath: string, version: { Major: string, M
 }
 
 /**
- * 
+ *
  * Check whether the version update should be propagated to tasks included
  * in the extension.
- * 
+ *
  */
-export function checkUpdateTasksVersion() {
+export function checkUpdateTasksVersion(manifestFile?: string) {
     // Check if we need to touch in tasks manifest before packaging
     let extensionVersion = tl.getInput("extensionVersion", false);
     const updateTasksVersion = tl.getBoolInput("updateTasksVersion", false);
@@ -276,7 +285,7 @@ export function checkUpdateTasksVersion() {
         const versionParts = extensionVersion.split(".");
         const taskVersion = { Major: versionParts[0], Minor: versionParts[1], Patch: versionParts[2] };
 
-        getTasksManifestPaths().then(taskManifests => {
+        getTasksManifestPaths(manifestFile).then(taskManifests => {
             tl.debug(`Processing the following task manifest ${taskManifests}`);
             const taskUpdates = taskManifests.map(manifest => updateTaskVersion(manifest, taskVersion));
 

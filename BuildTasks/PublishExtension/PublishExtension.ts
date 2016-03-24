@@ -36,6 +36,7 @@ common.runTfx(tfx => {
         const extensionName = tl.getInput("extensionName", false);
         const extensionVisibility = tl.getInput("extensionVisibility", false);
         const extensionVersion = tl.getInput("extensionVersion", false);
+        const updateTasksVersion = tl.getBoolInput("updateTasksVersion", false);
 
         if (publisher
             || extensionId
@@ -51,7 +52,10 @@ common.runTfx(tfx => {
             if (extensionId) { ve.editId(extensionId); }
             if (extensionName) { ve.editExtensionName(extensionName); }
             if (extensionVisibility) { ve.editExtensionVisibility(extensionVisibility); }
-            if (extensionVersion) { ve.editVersion(extensionVersion); }
+            if (extensionVersion) {
+                ve.editVersion(extensionVersion);
+                ve.editUpdateTasksVersion(updateTasksVersion);
+            }
 
             runBeforeTfx = runBeforeTfx.then(() => ve.endEdit().then(vsixGeneratedFile => {
                 tfx.arg(["--vsix", vsixGeneratedFile]);

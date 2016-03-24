@@ -5,6 +5,7 @@ import fs = require("fs");
 import path = require("path");
 import Q = require("q");
 import tl = require("vsts-task-lib/task");
+import common = require("./common");
 
 export class VSIXEditor {
     private zip: AdmZip;
@@ -15,6 +16,7 @@ export class VSIXEditor {
     private publisher: string = null;
     private extensionName: string = null;
     private extensionVisibility: string = null;
+    private updateTasksVersion: boolean = true;
 
     constructor(public inputFile: string,
         public outputPath: string) {
@@ -42,6 +44,16 @@ export class VSIXEditor {
                 tl.debug("Extracting files to " + dirPath);
                 this.zip.extractAllTo(dirPath, true);
                 return dirPath;
+            })
+            .then(dirPath => {
+                if (this.versionNumber && this.updateTasksVersion) {
+                    tl.debug("Look for build tasks manifest");
+                    const extensionManifest = path.join(dirPath, "extension.vsomanifest");
+                    return common.checkUpdateTasksVersion(extensionManifest).then(() => dirPath);
+                }
+                else {
+                    return dirPath;
+                }
             })
             .then(dirPath => {
                 tl.debug("Editing VSIX manifest");
@@ -170,6 +182,11 @@ export class VSIXEditor {
     public editPublisher(publisher: string) {
         this.validateEditMode();
         this.publisher = publisher;
+    }
+
+    public editUpdateTasksVersion(updateTasksVersion: boolean) {
+        this.validateEditMode();
+        this.updateTasksVersion = updateTasksVersion;
     }
 
     private validateEditMode() {
