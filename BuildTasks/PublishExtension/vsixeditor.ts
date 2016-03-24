@@ -174,35 +174,25 @@ class ManifestData {
 
     public createOutputFilePath(outputPath: string): Q.Promise<string> {
         let deferred = Q.defer<string>();
-        let fileName = "mynewvsix02.zip";
+        let fileName = this.publisher + "." + this.id + "-" + this.version + ".gen.vsix";
 
-        this.updateFileName(outputPath, fileName).then(newFileName => {
-            deferred.resolve(path.join(outputPath, newFileName));
-        });
-
-        return deferred.promise;
-    }
-
-    public updateFileName(outputPath: string, fileName: string) {
-
-        return Q.Promise(function (resolve) {
-
-            let testFileName = path.join(outputPath, fileName);
-
-            fs.exists(testFileName, (result) => {
+        const updateFileName = (fileName: string, iteration: number) => {
+            if (iteration > 0) {
+                fileName = this.publisher + "." + this.id + "-" + this.version + ".gen" + "00".substring(0, "00".length - iteration.toString().length) + iteration + ".vsix";
+            }
+            fs.exists(path.join(outputPath, fileName), result => {
                 if (result) {
-                    fileName = fileName.replace(/(\D+)(\d+)(\D+)$/, function (str, m1, m2, m3) {
-                        var newstr = (+m2 + 1) + "";
-                        return m1 + new Array(3 - newstr.length).join("0") + newstr + m3;
-                    });
-
-                    resolve(this.updateFileName(outputPath, fileName));
-                }
-                else {
-                    resolve(fileName);
+                    updateFileName(fileName, ++iteration);
+                } else {
+                    tl.debug("Generated filename: " + fileName);
+                    deferred.resolve(fileName);
                 }
             });
-        });
+        };
+
+        updateFileName(fileName, 0);
+
+        return deferred.promise;
     }
 }
 class GalleryFlagsEditor {
