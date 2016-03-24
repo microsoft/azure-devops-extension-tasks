@@ -17,9 +17,9 @@ export class VSIXEditor {
     private extensionName: string = null;
     private extensionVisibility: string = null;
 
-    constructor(public input: string,
-        public output: string) {
-        this.zip = new AdmZip(input);
+    constructor(public inputFile: string,
+        public outputPath: string) {
+        this.zip = new AdmZip(inputFile);
     }
 
     public startEdit() {
@@ -31,70 +31,62 @@ export class VSIXEditor {
     public endEdit(): Q.Promise<any> {
         this.validateEditMode();
 
-        if (!this.hasEdits()) { return Q(null); }
+        if (!this.hasEdits()) { return Q(this.inputFile); }
 
-        const deferred = Q.defer();
+        const deferred = Q.defer<string>();
 
         temp.track();
 
         Q.nfcall(temp.mkdir, "vsixeditor")
-        .then((dirPath: string) => {
-            tl.debug("Finalizing edit");
-            tl.debug("Extracting files to " + dirPath);
-            this.zip.extractAllTo(dirPath, true);
-            return dirPath;
-        })
-        .then(dirPath => {
-            tl.debug("Editing VSIX manifest");
-            return this.editVsixManifest(dirPath).then(() => dirPath);
-        })
-        .then(dirPath => {
-            tl.debug("Editing VSO manifest");
-            return this.editVsoManifest(dirPath).then(() => dirPath);
-        })
-        .then(dirPath => {
-            let archiver = require("archiver");
-            let output = fs.createWriteStream(this.output);
-            let archive = archiver("zip");
+            .then((dirPath: string) => {
+                tl.debug("Finalizing edit");
+                tl.debug("Extracting files to " + dirPath);
+                this.zip.extractAllTo(dirPath, true);
+                return dirPath;
+            })
+            .then(dirPath => {
+                tl.debug("Editing VSIX manifest");
+                return this.editVsixManifest(dirPath).then((manifestData: ManifestData) => manifestData);
+            })
+            .then((manifestData: ManifestData) => {
+                let dirPath = manifestData.dirPath;
+                return manifestData.createOutputFilePath(this.outputPath).then((outputFile) => {
+                    manifestData.outputFileName = outputFile;
+                    return manifestData;
+                });
+            })
+            .then((manifestData: ManifestData) => {
+                let outputFile = manifestData.outputFileName;
+                let output = fs.createWriteStream(outputFile);
 
-            tl.debug("Creating final archive file at " + this.output);
+                let archiver = require("archiver");
+                let archive = archiver("zip");
 
-            output.on("close", function () {
-                tl.debug(archive.pointer() + " total bytes");
-                tl.debug("archiver has been finalized and the output file descriptor has closed.");
-                deferred.resolve();
-            });
+                tl.debug("Creating final archive file at " + this.outputPath);
 
-            archive.on("error", err => deferred.reject(err));
+                output.on("close", function () {
+                    tl.debug(archive.pointer() + " total bytes");
+                    tl.debug("archiver has been finalized and the output file descriptor has closed.");
+                    deferred.resolve(outputFile);
+                });
 
-            archive.pipe(output);
+                archive.on("error", err => deferred.reject(err));
 
-            archive.bulk([
-                { expand: true, cwd: dirPath, src: ["**/*"] }
-            ]);
-            archive.finalize();
-            tl.debug("Final archive file created");
-        })
-        .fail (err => deferred.reject(err));
+                archive.pipe(output);
 
-        return deferred.promise;
-    }
+                archive.bulk([
+                    { expand: true, cwd: manifestData.dirPath, src: ["**/*"] }
+                ]);
+                archive.finalize();
+                tl.debug("Final archive file created");
+            })
+            .fail(err => deferred.reject(err));
 
-    private editVsoManifest(dirPath: string) {
-        let deferred = Q.defer<boolean>();
-
-        let vsoManifestPath = path.join(dirPath, "extension.vsomanifest");
-        fs.readFile(vsoManifestPath, "utf8", (err, vsoManifestData) => {
-            if (err) { throw err; }
-            fs.writeFile(vsoManifestPath, vsoManifestData, () => {
-                deferred.resolve(true);
-            });
-        });
         return deferred.promise;
     }
 
     private editVsixManifest(dirPath: string) {
-        let deferred = Q.defer<boolean>();
+        let deferred = Q.defer<ManifestData>();
         let x2jsLib = require("x2js");
         let x2js = new x2jsLib();
 
@@ -119,11 +111,16 @@ export class VSIXEditor {
                 }
             }
             vsixManifestData = x2js.js2xml(vsixmanifest);
+            let manifestData = new ManifestData(identity._Version,
+                identity._Id,
+                identity._Publisher,
+                this.extensionVisibility,
+                vsixmanifest.PackageManifest.Metadata.DisplayName,
+                dirPath);
 
             fs.writeFile(vsixManifestPath, vsixManifestData, () => {
-                deferred.resolve(true);
+                deferred.resolve(manifestData);
             });
-            deferred.resolve(true);
         });
 
         return deferred.promise;
@@ -163,10 +160,51 @@ export class VSIXEditor {
     }
 
     private validateEditMode() {
-        if (!this.edit) { throw  new Error("Editing is not started"); }
+        if (!this.edit) { throw new Error("Editing is not started"); }
     }
 }
+class ManifestData {
+    public outputFileName: string;
+    constructor(public version: string,
+        public id: string,
+        public publisher: string,
+        public visibility: string,
+        public name: string,
+        public dirPath: string) { }
 
+    public createOutputFilePath(outputPath: string): Q.Promise<string> {
+        let deferred = Q.defer<string>();
+        let fileName = "mynewvsix02.zip";
+
+        this.updateFileName(outputPath, fileName).then(newFileName => {
+            deferred.resolve(path.join(outputPath, newFileName));
+        });
+
+        return deferred.promise;
+    }
+
+    public updateFileName(outputPath: string, fileName: string) {
+
+        return Q.Promise(function (resolve) {
+
+            let testFileName = path.join(outputPath, fileName);
+
+            fs.exists(testFileName, (result) => {
+                if (result) {
+                    fileName = fileName.replace(/(\D+)(\d+)(\D+)$/, function (str, m1, m2, m3) {
+                        var newstr = (+m2 + 1) + "";
+                        return m1 + new Array(3 - newstr.length).join("0") + newstr + m3;
+                    });
+
+                    resolve(this.updateFileName(outputPath, fileName));
+                }
+                else {
+                    resolve(fileName);
+                }
+            });
+        });
+    }
+}
 class GalleryFlagsEditor {
     constructor(public galleryFlagsEditor: string) {
     }
