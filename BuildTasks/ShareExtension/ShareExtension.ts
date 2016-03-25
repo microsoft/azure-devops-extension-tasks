@@ -5,19 +5,19 @@ import common = require("./common");
 common.runTfx(tfx => {
     tfx.arg(["extension", "share"]);
     const method = tl.getInput("method", true);
-    
+
     // Read gallery endpoint
     const galleryEndpoint = common.getMarketplaceEndpointDetails();
     tfx.arg(["--token", galleryEndpoint.token]);
     tfx.arg(["--service-url", galleryEndpoint.url]);
 
-    switch (method){
+    switch (method) {
         case "id":
         // Extension name
         tfx.arg(["--publisher", tl.getInput("publisherId", true)]);
         tfx.arg(["--extension-id", tl.getInput("extensionId", true)]);
         break;
-        
+
         case "vsix":
         tfx.arg(["--vsix", tl.getInput("vsixFile", true)]);
         break;
