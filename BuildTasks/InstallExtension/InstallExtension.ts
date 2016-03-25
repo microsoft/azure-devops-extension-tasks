@@ -4,16 +4,25 @@ import common = require("./common");
 
 common.runTfx(tfx => {
     tfx.arg(["extension", "install"]);
-
+    const method = tl.getInput("method", true);
+    
     // Read gallery endpoint
     const galleryEndpoint = common.getMarketplaceEndpointDetails();
     tfx.arg(["--token", galleryEndpoint.token]);
     tfx.arg(["--service-url", galleryEndpoint.url]);
 
-    // Extension name
-    tfx.arg(["--publisher", tl.getInput("publisherId", true)]);
-    tfx.arg(["--extension-id", tl.getInput("extensionId", true)]);
-
+    switch (method){
+        case "id":
+        // Extension name
+        tfx.arg(["--publisher", tl.getInput("publisherId", true)]);
+        tfx.arg(["--extension-id", tl.getInput("extensionId", true)]);
+        break;
+        
+        case "vsix":
+        tfx.arg(["--vsix", tl.getInput("vsixFile", true)]);
+        break;
+    }
+    
     // Installation targets
     const accountsArg = tl.getInput("accounts", true);
 

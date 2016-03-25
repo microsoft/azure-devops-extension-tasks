@@ -46,22 +46,47 @@
         "helpMarkDown": "Service endpoint connection to install the extension."
     },
     {
-      "name": "publisherId",
-      "type": "string",
-      "label": "Publisher ID",
-      "defaultValue": "",
-      "required": true,
-      "helpMarkDown": "Publisher ID of the extension to be installed.",
-      "groupName": "extension"
+        "name": "method",
+        "type": "radio",
+        "label": "Install using",
+        "required": true,
+        "defaultValue": "id",
+        "helpMarkDown": "Install using either an existing VSIX or using the Publisher and Extension ID.",
+        "options": {
+            "id": "Publisher + Extension ID",
+            "vsix": "VSIX file"
+        },
+        "groupName": "extension"
     },
     {
-      "name": "extensionId",
-      "type": "string",
-      "label": "Extension ID",
-      "defaultValue": "",
-      "helpMarkDown": "Extension ID of the extension to be installed",
-      "required": true,
-      "groupName": "extension"
+        "name": "publisherId",
+        "type": "string",
+        "label": "Publisher ID",
+        "defaultValue": "",
+        "required": true,
+        "helpMarkDown": "Publisher ID of the extension to be installed.",
+        "groupName": "extension",
+        "visibleRule": "method = id"
+    },
+    {
+        "name": "extensionId",
+        "type": "string",
+        "label": "Extension ID",
+        "defaultValue": "",
+        "helpMarkDown": "Extension ID of the extension to be installed",
+        "required": true,
+        "groupName": "extension",
+        "visibleRule": "method = id"
+    },
+    {
+        "name": "vsixFile",
+        "type": "filePath",
+        "label": "VSIX file",
+        "defaultValue": "",
+        "required": true,
+        "helpMarkDown": "VSIX file of the extension to be installed.",
+        "visibleRule": "fileType = vsix",
+        "groupName": "extension"
     },
     {
       "name": "accounts",
