@@ -5,7 +5,7 @@
   "description": "Share a published extension with a Team Services account",
   "author": "Microsoft Corporation",
   "helpMarkDown": "",
-  "category": "Utility",
+  "category": "Deploy",
   "visibility": [
     "Build",
     "Release"

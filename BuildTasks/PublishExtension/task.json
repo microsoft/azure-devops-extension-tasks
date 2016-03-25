@@ -5,7 +5,7 @@
     "description": "Publish a Team Services extension to the Visual Studio Marketplace",
     "author": "Microsoft Corporation",
     "helpMarkDown": "",
-    "category": "Utility",
+    "category": "Deploy",
     "visibility": [
         "Build",
         "Release"

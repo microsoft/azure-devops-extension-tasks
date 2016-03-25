@@ -5,7 +5,7 @@
   "description": "Package a Team Services extension into a VSIX file",
   "author": "Microsoft Corporation",
   "helpMarkDown": "",
-  "category": "Utility",
+  "category": "Package",
   "visibility": [
     "Build",
     "Release"

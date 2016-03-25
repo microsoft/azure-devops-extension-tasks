@@ -5,7 +5,7 @@
   "description": "Install a published extension to a Team Services account",
   "author": "Microsoft Corporation",
   "helpMarkDown": "",
-  "category": "Utility",
+  "category": "Deploy",
   "visibility": [
     "Build",
     "Release"
