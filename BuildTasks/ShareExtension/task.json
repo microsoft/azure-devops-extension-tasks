@@ -43,7 +43,7 @@
         "type": "connectedService:VstsMarketplacePublishing",
         "label": "Marketplace connection",
         "required": true,
-        "helpMarkDown": "Service endpoint connection to install the extension."
+        "helpMarkDown": "Service endpoint connection to share the extension."
     },
     {
         "name": "method",

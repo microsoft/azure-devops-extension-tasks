@@ -31,7 +31,7 @@
       "isExpanded": false
     }
   ],
-  "instanceNameFormat": "Package Extension $(rootFolder)",
+  "instanceNameFormat": "Package Extension: $(rootFolder)",
     "inputs": [
         {
             "name": "rootFolder",
