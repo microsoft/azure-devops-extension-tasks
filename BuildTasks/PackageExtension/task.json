@@ -115,7 +115,7 @@
             "type": "pickList",
             "label": "Extension visibility",
             "defaultValue": "",
-            "helpMarkDown": "Overrides extension visibility (Public vs Private) and optionally adds the Preview flag.. If not specified, the extension visibility specified in the manifest will be used",
+            "helpMarkDown": "Overrides extension visibility (Public vs Private) and optionally adds the Preview flag. If not specified, the extension visibility specified in the manifest will be used",
             "required": false,
             "groupName": "overrides",
             "options": {
