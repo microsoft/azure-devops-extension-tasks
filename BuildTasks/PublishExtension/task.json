@@ -130,7 +130,7 @@
             "defaultValue": "true",
             "required": false,
             "helpMarkDown": "Search for contributed tasks in extension manifests and updates the version specified in each Build and Release task found.",
-            "groupName": "manifest",
+            "groupName": "manifest"
         },          
         {
             "name": "extensionVisibility",
