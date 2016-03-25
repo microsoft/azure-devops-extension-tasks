@@ -1,0 +1,125 @@
+{
+  "id": "22683a08-0dbe-4fe8-8c53-4606fcb32752",
+  "name": "ShareExtension",
+  "friendlyName": "Share Extension",
+  "description": "Share a published extension with a Team Services account",
+  "author": "Microsoft Corporation",
+  "helpMarkDown": "",
+  "category": "Utility",
+  "visibility": [
+    "Build",
+    "Release"
+  ],
+  "demands": [
+    "npm"
+  ],
+  "version": {
+    "Major": "0",
+    "Minor": "2",
+    "Patch": "3"
+  },
+  "minimumAgentVersion": "1.83.0",
+  "groups": [
+    {
+      "name": "extension",
+      "displayName": "Extension",
+      "isExpanded": true
+    },
+    {
+      "name": "share",
+      "displayName": "Share",
+      "isExpanded": true
+    },
+    {
+      "name": "advanced",
+      "displayName": "Advanced",
+      "isExpanded": false
+    }
+  ],
+  "instanceNameFormat": "Share Extension",
+  "inputs": [
+    {
+        "name": "connectedServiceName",
+        "type": "connectedService:VstsMarketplacePublishing",
+        "label": "Marketplace connection",
+        "required": true,
+        "helpMarkDown": "Service endpoint connection to install the extension."
+    },
+    {
+        "name": "method",
+        "type": "radio",
+        "label": "Share using",
+        "required": true,
+        "defaultValue": "id",
+        "helpMarkDown": "Share using either an existing VSIX or using the Publisher and Extension ID.",
+        "options": {
+            "id": "Publisher + Extension ID",
+            "vsix": "VSIX file"
+        },
+        "groupName": "extension"
+    },
+    {
+      "name": "publisherId",
+      "type": "string",
+      "label": "Publisher ID",
+      "defaultValue": "",
+      "required": true,
+      "helpMarkDown": "Publisher ID of the extension to be shared.",
+      "groupName": "extension",
+      "visibleRule": "method = id"
+    },
+    {
+      "name": "extensionId",
+      "type": "string",
+      "label": "Extension ID",
+      "defaultValue": "",
+      "helpMarkDown": "Extension ID of the extension to be shared",
+      "required": true,
+      "groupName": "extension",
+      "visibleRule": "method = id"
+    },
+    {
+        "name": "vsixFile",
+        "type": "filePath",
+        "label": "VSIX file",
+        "defaultValue": "",
+        "required": true,
+        "helpMarkDown": "VSIX file of the extension to be shared.",
+        "visibleRule": "fileType = vsix",
+        "groupName": "extension"
+    },
+    {
+      "name": "accounts",
+      "type": "string",
+      "label": "Share with",
+      "defaultValue": "",
+      "helpMarkDown": "Comma separated list of accounts where to install the extension (e.g. account_x,account_y,account_z)",
+      "required": true,
+      "groupName": "share"
+    },
+    {
+      "name": "arguments",
+      "type": "string",
+      "label": "Arguments",
+      "defaultValue": "",
+      "helpMarkDown": "Additional arguments passed to the package and publishing tool.",
+      "required": false,
+      "groupName": "advanced"
+    },
+    {
+      "name": "cwd",
+      "type": "filePath",
+      "label": "Working Directory",
+      "defaultValue": "",
+      "required": false,
+      "helpMarkDown": "Working directory to run the package and publishing process from. Defaults to the folder where the manifest is located.",
+      "groupName": "advanced"
+    }
+  ],
+  "execution": {
+    "Node": {
+      "target": "ShareExtension.js",
+      "argumentFormat": ""
+    }
+  }
+}

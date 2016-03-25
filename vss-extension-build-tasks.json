@@ -88,6 +88,16 @@
             }
         },
         {
+            "id": "share-extension-build-task",
+            "type": "ms.vss-distributed-task.task",
+            "targets": [
+                "ms.vss-distributed-task.tasks"
+            ],
+            "properties": {
+                "name": "BuildTasks/ShareExtension"
+            }
+        },
+        {
             "id": "vsts-marketplace-endpoint-type",
             "type": "ms.vss-endpoint.service-endpoint-type",
             "targets": [
