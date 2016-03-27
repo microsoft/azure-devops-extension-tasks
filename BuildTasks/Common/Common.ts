@@ -50,9 +50,14 @@ export function setTfxManifestArguments(tfx: ToolRunner): (() => void) {
     const publisher = tl.getInput("publisherId", false);
     tfx.argIf(publisher, ["--publisher", publisher]);
 
-    const extensionId = tl.getInput("extensionId", false);
-    tfx.argIf(extensionId, ["--extension-id", extensionId]);
-
+    let extensionId = tl.getInput("extensionId", false);
+    const extensionTag = tl.getInput("extensionTag", false);
+    
+    if (extensionId && extensionTag) {
+        extensionId += extensionTag
+        tl.debug(`Overriding extension id to: ${extensionId}`);
+    }
+    
     let jsonOverrides: any;
     const extensionName = tl.getInput("extensionName", false);
     if (extensionName) {
