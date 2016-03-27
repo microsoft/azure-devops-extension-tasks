@@ -78,6 +78,16 @@
             "groupName": "manifest"
         },
         {
+            "name": "localizationRoot",
+            "type": "filePath",
+            "label": "Localization Root folder",
+            "defaultValue": "",
+            "required": false,
+            "helpMarkDown": "Folder where localization file(s) exist.",
+            "visibleRule": "fileType = manifest",
+            "groupName": "manifest"
+        },
+        {
             "name": "patternManifest",
             "type": "string",
             "label": "Manifest file",

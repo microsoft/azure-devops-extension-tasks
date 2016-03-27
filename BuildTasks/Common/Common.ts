@@ -50,6 +50,9 @@ export function setTfxManifestArguments(tfx: ToolRunner): (() => void) {
     const publisher = tl.getInput("publisherId", false);
     tfx.argIf(publisher, ["--publisher", publisher]);
 
+    const localizationRoot = tl.getInput("localizationRoot", false);
+    tfx.argIf(localizationRoot, ["--loc-root", localizationRoot]);
+    
     let extensionId = tl.getInput("extensionId", false);
     const extensionTag = tl.getInput("extensionTag", false);
     
@@ -57,6 +60,7 @@ export function setTfxManifestArguments(tfx: ToolRunner): (() => void) {
         extensionId += extensionTag
         tl.debug(`Overriding extension id to: ${extensionId}`);
     }
+    tfx.argIf(extensionId, ["--extension-id", extensionId]);
     
     let jsonOverrides: any;
     const extensionName = tl.getInput("extensionName", false);
