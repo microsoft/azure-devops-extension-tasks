@@ -1,7 +1,7 @@
 {
     "manifestVersion": 1,
     "id": "vsts-developer-tools-web",
-    "version": "0.2.0",
+    "version": "0.2.4",
     "publisher": "ms-devlabs",
     "name": "Extension Developer Tools for Web",
     "description": "Web tools to help you create and develop extensions and integrations to the Visual Studio Marketplace.",
