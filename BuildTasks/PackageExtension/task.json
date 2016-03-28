@@ -42,6 +42,14 @@
             "helpMarkDown": "Root folder from which the manifests are searched."
         },
         {
+            "name": "localizationRoot",
+            "type": "filePath",
+            "label": "Localization Root folder",
+            "defaultValue": "",
+            "required": false,
+            "helpMarkDown": "Folder where localization file(s) exist."
+        },
+        {
             "name": "patternManifest",
             "type": "string",
             "label": "Manifest file",
@@ -80,6 +88,15 @@
             "label": "Extension ID",
             "defaultValue": "",
             "helpMarkDown": "Overrides extension ID. If not specified, the extension ID specified in the manifest will be used",
+            "required": false,
+            "groupName": "overrides"
+        },
+        {
+            "name": "extensionTag",
+            "type": "string",
+            "label": "Extension Tag",
+            "defaultValue": "",
+            "helpMarkDown": "Extension Tag to append to the extension ID",
             "required": false,
             "groupName": "overrides"
         },

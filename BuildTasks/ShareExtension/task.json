@@ -79,6 +79,16 @@
       "visibleRule": "method = id"
     },
     {
+      "name": "extensionTag",
+      "type": "string",
+      "label": "Extension Tag",
+      "defaultValue": "",
+      "helpMarkDown": "Extension Tag to append to the extension id",
+      "required": false,
+      "groupName": "extension",
+      "visibleRule": "method = id"
+    },
+    {
         "name": "vsixFile",
         "type": "filePath",
         "label": "VSIX file",

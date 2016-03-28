@@ -13,14 +13,14 @@ common.runTfx(tfx => {
 
     switch (method) {
         case "id":
-        // Extension name
-        tfx.arg(["--publisher", tl.getInput("publisherId", true)]);
-        tfx.arg(["--extension-id", tl.getInput("extensionId", true)]);
-        break;
+            // Extension name
+            tfx.arg(["--publisher", tl.getInput("publisherId", true)]);
+            tfx.arg(["--extension-id", tl.getInput("extensionId", true)]);
+            break;
 
         case "vsix":
-        tfx.arg(["--vsix", tl.getInput("vsixFile", true)]);
-        break;
+            tfx.arg(["--vsix", tl.getInput("vsixFile", true)]);
+            break;
     }
 
     // Installation targets
