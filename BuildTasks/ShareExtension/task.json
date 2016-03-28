@@ -95,7 +95,7 @@
         "defaultValue": "",
         "required": true,
         "helpMarkDown": "VSIX file of the extension to be shared.",
-        "visibleRule": "fileType = vsix",
+        "visibleRule": "method = vsix",
         "groupName": "extension"
     },
     {
