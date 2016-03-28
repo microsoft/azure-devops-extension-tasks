@@ -3,7 +3,7 @@ import tl = require("vsts-task-lib/task");
 import common = require("./common");
 
 common.runTfx(tfx => {
-    tfx.arg(["extension", "install"]);
+    tfx.arg(["extension", "share"]);
     const method = tl.getInput("method", true);
 
     // Read gallery endpoint
@@ -28,7 +28,7 @@ common.runTfx(tfx => {
 
     // Sanitize accounts list
     const accounts = accountsArg.split(",").map(a => a.replace(/\s/g, "")).filter(a => a.length > 0);
-    tfx.arg(["--accounts", ...accounts]);
+    tfx.arg(["--share-with", ...accounts]);
 
     // Aditional arguments
     tfx.arg(tl.getInput("arguments", false));

@@ -5,7 +5,7 @@
     "description": "Publish a Team Services extension to the Visual Studio Marketplace",
     "author": "Microsoft Corporation",
     "helpMarkDown": "",
-    "category": "Utility",
+    "category": "Deploy",
     "visibility": [
         "Build",
         "Release"
@@ -130,14 +130,14 @@
             "defaultValue": "true",
             "required": false,
             "helpMarkDown": "Search for contributed tasks in extension manifests and updates the version specified in each Build and Release task found.",
-            "groupName": "manifest",
+            "groupName": "manifest"
         },          
         {
             "name": "extensionVisibility",
             "type": "pickList",
             "label": "Extension visibility",
             "defaultValue": "",
-            "helpMarkDown": "Overrides extension visibility (Public vs Private). If not specified, the extension visibility specified in the manifest will be used",
+            "helpMarkDown": "Overrides extension visibility (Public vs Private) and optionally adds the Preview flag. If not specified, the extension visibility specified in the manifest will be used",
             "required": false,
             "options": {
                 "default": "Not set",

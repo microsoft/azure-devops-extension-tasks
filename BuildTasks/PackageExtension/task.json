@@ -5,7 +5,7 @@
   "description": "Package a Team Services extension into a VSIX file",
   "author": "Microsoft Corporation",
   "helpMarkDown": "",
-  "category": "Utility",
+  "category": "Package",
   "visibility": [
     "Build",
     "Release"
@@ -31,7 +31,7 @@
       "isExpanded": false
     }
   ],
-  "instanceNameFormat": "Package Extension $(rootFolder)",
+  "instanceNameFormat": "Package Extension: $(rootFolder)",
     "inputs": [
         {
             "name": "rootFolder",
@@ -109,13 +109,13 @@
             "required": false,
             "helpMarkDown": "Search for contributed tasks in extension manifests and updates the version specified in each Build and Release task found.",
             "groupName": "overrides"
-        },          
+        },
         {
             "name": "extensionVisibility",
             "type": "pickList",
             "label": "Extension visibility",
             "defaultValue": "",
-            "helpMarkDown": "Overrides extension visibility (Public vs Private). If not specified, the extension visibility specified in the manifest will be used",
+            "helpMarkDown": "Overrides extension visibility (Public vs Private) and optionally adds the Preview flag. If not specified, the extension visibility specified in the manifest will be used",
             "required": false,
             "groupName": "overrides",
             "options": {
