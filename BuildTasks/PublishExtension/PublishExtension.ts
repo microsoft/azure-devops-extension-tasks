@@ -32,15 +32,15 @@ common.runTfx(tfx => {
         vsixOutput = tl.getVariable("System.DefaultWorkingDirectory");
 
         const publisher = tl.getInput("publisherId", false);
-        
+
         let extensionId = tl.getInput("extensionId", false);
         const extensionTag = tl.getInput("extensionTag", false);
-        
+
         if (extensionId && extensionTag) {
-            extensionId += extensionTag
+            extensionId += extensionTag;
             tl.debug(`Overriding extension id to: ${extensionId}`);
         }
-        
+
         const extensionName = tl.getInput("extensionName", false);
         const extensionVisibility = tl.getInput("extensionVisibility", false);
         const extensionVersion = tl.getInput("extensionVersion", false);
