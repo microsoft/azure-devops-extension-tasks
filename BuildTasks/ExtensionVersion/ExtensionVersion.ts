@@ -7,6 +7,7 @@ const extensionVersionOverride = tl.getInput("extensionVersionOverride", false);
 const outputVariable = tl.getInput("outputVariable", true);
 
 if (extensionVersionOverride) {
+    tl._writeLine(`Ignoring Marketplace version and using supplied override: ${extensionVersionOverride}.`);
     tl.setVariable(outputVariable, extensionVersionOverride);
 } else {
     common.runTfx(tfx => {
