@@ -5,6 +5,7 @@ import stream = require("stream");
 
 const extensionVersionOverrideVariable = tl.getInput("extensionVersionOverride", false);
 const outputVariable = tl.getInput("outputVariable", true);
+let usingOverride = false;
 
 if (extensionVersionOverrideVariable) {
     tl.debug(`Override variable specified checking for value.`)
@@ -13,8 +14,11 @@ if (extensionVersionOverrideVariable) {
     if (extensionVersionOverride) {
         tl._writeLine(`Ignoring Marketplace version and using supplied override: ${extensionVersionOverride}.`);
         tl.setVariable(outputVariable, extensionVersionOverride);
+        usingOverride = true;
     }
-} else {
+} 
+
+if (!usingOverride) {
     common.runTfx(tfx => {
         tfx.arg(["extension", "show", "--json"]);
 
