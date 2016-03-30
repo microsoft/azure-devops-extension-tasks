@@ -3,12 +3,17 @@ import tl = require("vsts-task-lib/task");
 import common = require("./common");
 import stream = require("stream");
 
-const extensionVersionOverride = tl.getInput("extensionVersionOverride", false);
+const extensionVersionOverrideVariable = tl.getInput("extensionVersionOverride", false);
 const outputVariable = tl.getInput("outputVariable", true);
 
-if (extensionVersionOverride) {
-    tl._writeLine(`Ignoring Marketplace version and using supplied override: ${extensionVersionOverride}.`);
-    tl.setVariable(outputVariable, extensionVersionOverride);
+if (extensionVersionOverrideVariable) {
+    tl.debug(`Override variable specified checking for value.`)
+    const extensionVersionOverride = tl.getVariable(extensionVersionOverrideVariable);
+    
+    if (extensionVersionOverride) {
+        tl._writeLine(`Ignoring Marketplace version and using supplied override: ${extensionVersionOverride}.`);
+        tl.setVariable(outputVariable, extensionVersionOverride);
+    }
 } else {
     common.runTfx(tfx => {
         tfx.arg(["extension", "show", "--json"]);

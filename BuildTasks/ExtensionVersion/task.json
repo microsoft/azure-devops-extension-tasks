@@ -73,15 +73,6 @@
         "groupName": "extension"
     },
     {
-        "name": "extensionVersionOverride",
-        "type": "string",
-        "label": "Extension Version Override",
-        "defaultValue": "$(Extension.VersionOverride)",
-        "helpMarkDown": "When this value is specified the extension version task will take it regardless of the version returned from the marketplace. Use this variable at Queue time to move to the next major version.",
-        "required": false,
-        "groupName": "extension"
-    },
-    {
         "defaultValue": "None",
         "helpMarkdown": "Increase a part of the version.",
         "label": "Increase version",
@@ -103,6 +94,15 @@
         "defaultValue": "Extension.Version",
         "required": true,
         "helpMarkDown": "The variable name to assign the version to.",
+        "groupName": "version"
+    },
+    {
+        "name": "extensionVersionOverride",
+        "type": "string",
+        "label": "Override Variable",
+        "defaultValue": "Extension.VersionOverride",
+        "helpMarkDown": "When this value is specified the extension version task will take it regardless of the version returned from the marketplace. You can use this variable at Queue time to move to the next major version. When teh variable value is empty or when the variable doesn't exist the markertplace will be queried.",
+        "required": false,
         "groupName": "version"
     },
     {
