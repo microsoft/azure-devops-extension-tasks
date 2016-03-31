@@ -45,7 +45,7 @@ if (!usingOverride) {
         const outputStream = new common.TfxJsonOutputStream();
         tfx.exec(<any>{ outStream: outputStream, failOnStdErr: true }).then(code => {
             const json = JSON.parse(outputStream.jsonString);
-            let version: string = json.versions[json.versions.length - 1].version;
+            let version: string = json.versions[0].version;
 
             tl._writeLine(`Latest version   : ${version}.`);
             tl._writeLine(`Requested action : ${versionAction}.`);
