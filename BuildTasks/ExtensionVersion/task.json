@@ -101,7 +101,7 @@
         "type": "string",
         "label": "Override Variable",
         "defaultValue": "Extension.VersionOverride",
-        "helpMarkDown": "When this value is specified the extension version task will take it regardless of the version returned from the marketplace. You can use this variable at Queue time to move to the next major version. When teh variable value is empty or when the variable doesn't exist the markertplace will be queried.",
+        "helpMarkDown": "When this value is specified the extension version task will take it regardless of the version returned from the marketplace. You can use this variable at Queue time to move to the next major version. When the variable value is empty or when the variable doesn't exist the markertplace will be queried.",
         "required": false,
         "groupName": "version"
     },
