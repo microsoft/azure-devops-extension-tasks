@@ -8,15 +8,15 @@ const outputVariable = tl.getInput("outputVariable", true);
 let usingOverride = false;
 
 if (extensionVersionOverrideVariable) {
-    tl.debug(`Override variable specified checking for value.`)
+    tl.debug(`Override variable specified checking for value.`);
     const extensionVersionOverride = tl.getVariable(extensionVersionOverrideVariable);
-    
+
     if (extensionVersionOverride) {
         tl._writeLine(`Ignoring Marketplace version and using supplied override: ${extensionVersionOverride}.`);
         tl.setVariable(outputVariable, extensionVersionOverride);
         usingOverride = true;
     }
-} 
+}
 
 if (!usingOverride) {
     common.runTfx(tfx => {
