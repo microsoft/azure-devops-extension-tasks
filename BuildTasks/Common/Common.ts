@@ -287,7 +287,7 @@ export function checkUpdateTasksVersion(manifestFile?: string) {
 
         // Check extension version in format Major.Minor.Patch
         extensionVersion = extensionVersion.trim();
-        if (!/^\d+\.\d+\.\d$/g.test(extensionVersion)) {
+        if (!/^\d+\.\d+\.\d+$/g.test(extensionVersion)) {
             throw new Error("Task Version not in expected format <Major>.<Minor>.<Patch>");
         }
 
