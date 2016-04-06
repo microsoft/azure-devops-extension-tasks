@@ -111,7 +111,7 @@ export class VSIXEditor {
             if (this.versionNumber) { identity._Version = this.versionNumber; }
             if (this.id) { identity._Id = this.id; }
             if (this.publisher) { identity._Publisher = this.publisher; }
-            if (this.editExtensionName) { vsixmanifest.PackageManifest.Metadata.DisplayName = this.extensionName; }
+            if (this.extensionName) { vsixmanifest.PackageManifest.Metadata.DisplayName = this.extensionName; }
             if (this.extensionVisibility && this.extensionVisibility !== "default") {
                 let flagsEditor = new GalleryFlagsEditor(vsixmanifest.PackageManifest.Metadata.GalleryFlags);
 
