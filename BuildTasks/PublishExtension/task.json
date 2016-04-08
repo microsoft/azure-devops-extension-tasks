@@ -150,7 +150,7 @@
             "name": "extensionVisibility",
             "type": "pickList",
             "label": "Extension visibility",
-            "defaultValue": "Not set",
+            "defaultValue": "default",
             "helpMarkDown": "Overrides extension visibility (Public vs Private) and optionally adds the Preview flag. If not specified, the extension visibility specified in the manifest will be used",
             "required": false,
             "options": {
@@ -181,7 +181,6 @@
             "required": false,
             "groupName": "manifest",
             "visibleRule": "extensionVisibility = private || extensionVisibility = privatepreview || extensionVisibility = default"
-            
         },
         {
             "name": "arguments",
