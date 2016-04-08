@@ -79,10 +79,16 @@ common.runTfx(tfx => {
 
     // Share with
     const shareWith = tl.getInput("shareWith");
+    const extensionVisibility = tl.getInput("extensionVisibility", false);
+
     if (shareWith) {
-        // Sanitize accounts to share with
-        let accounts = shareWith.split(",").map(a => a.replace(/\s/g, "")).filter(a => a.length > 0);
-        tfx.argIf(accounts && accounts.length > 0, ["--share-with", ...accounts]);
+        if (extensionVisibility.indexOf("public") >= 0) {
+            // Sanitize accounts to share with
+            let accounts = shareWith.split(",").map(a => a.replace(/\s/g, "")).filter(a => a.length > 0);
+            tfx.argIf(accounts && accounts.length > 0, ["--share-with", ...accounts]);
+        } else {
+            tl.warning("Ignoring Share - Not available on public extensions.");
+        }
     }
 
     // Aditional arguments
