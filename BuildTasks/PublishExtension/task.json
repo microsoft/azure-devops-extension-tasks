@@ -26,11 +26,6 @@
             "isExpanded": true
         },
         {
-            "name": "sharing",
-            "displayName": "Sharing",
-            "isExpanded": true
-        },
-        {
             "name": "advanced",
             "displayName": "Advanced",
             "isExpanded": false
@@ -155,14 +150,14 @@
             "name": "extensionVisibility",
             "type": "pickList",
             "label": "Extension visibility",
-            "defaultValue": "",
+            "defaultValue": "default",
             "helpMarkDown": "Overrides extension visibility (Public vs Private) and optionally adds the Preview flag. If not specified, the extension visibility specified in the manifest will be used",
             "required": false,
             "options": {
                 "default": "Not set",
                 "private": "Private",
-                "private_preview": "Private Preview",
-                "public_preview": "Public Preview",
+                "privatepreview": "Private Preview",
+                "publicpreview": "Public Preview",
                 "public": "Public"
             },
             "groupName": "manifest"
@@ -184,7 +179,8 @@
             "defaultValue": "",
             "helpMarkDown": "Comma separated list of accounts with which to share the extension if it's private (e.g. account_x,account_y,account_z)",
             "required": false,
-            "groupName": "sharing"
+            "groupName": "manifest",
+            "visibleRule": "extensionVisibility = private || extensionVisibility = privatepreview || extensionVisibility = default"
         },
         {
             "name": "arguments",
