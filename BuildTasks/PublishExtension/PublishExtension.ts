@@ -82,7 +82,8 @@ common.runTfx(tfx => {
     const extensionVisibility = tl.getInput("extensionVisibility", false);
 
     if (shareWith) {
-        if (extensionVisibility.indexOf("public") >= 0) {
+        // Only handle shareWith if the extension is not public
+        if (extensionVisibility.indexOf("public") < 0) {
             // Sanitize accounts to share with
             let accounts = shareWith.split(",").map(a => a.replace(/\s/g, "")).filter(a => a.length > 0);
             tfx.argIf(accounts && accounts.length > 0, ["--share-with", ...accounts]);
