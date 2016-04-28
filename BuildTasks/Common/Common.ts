@@ -261,8 +261,16 @@ function getTasksManifestPaths(manifestFile?: string): Q.Promise<string[]> {
 
 function updateTaskVersion(manifestFilePath: string, version: { Major: string, Minor: string, Patch: string }): Q.Promise<void> {
     tl.debug(`Reading task manifest ${manifestFilePath}`);
-    return Q.nfcall(fs.readFile, manifestFilePath).then((data: string) => {
-        let manifestJSON = JSON.parse(data);
+    return Q.nfcall(fs.readFile, manifestFilePath, "utf8").then((data: string) => {
+        // BOM check
+        data = data.replace(/^\uFEFF/, "");
+        let manifestJSON;
+        try {
+            manifestJSON = JSON.parse(data);
+        }
+        catch (jsonError) {
+            throw new Error(`Error parsing JSON task manifest ${manifestFilePath}: ${jsonError}`);
+        }
         manifestJSON.version = version;
         const newContent = JSON.stringify(manifestJSON, null, "\t");
         return Q.nfcall(fs.writeFile, manifestFilePath, newContent).then(() => {
