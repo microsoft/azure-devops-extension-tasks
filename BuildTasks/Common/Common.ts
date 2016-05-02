@@ -292,17 +292,24 @@ export function checkUpdateTasksVersion(manifestFile?: string) {
     let updateTasksFinished = Q.defer();
 
     if (extensionVersion && updateTasksVersion) {
-
-        // Check extension version in format Major.Minor.Patch
-        extensionVersion = extensionVersion.trim();
-        if (!/^\d+\.\d+\.\d+$/g.test(extensionVersion)) {
-            throw new Error("Task Version not in expected format <Major>.<Minor>.<Patch>");
-        }
-
-        const versionParts = extensionVersion.split(".");
-        const taskVersion = { Major: versionParts[0], Minor: versionParts[1], Patch: versionParts[2] };
-
         getTasksManifestPaths(manifestFile).then(taskManifests => {
+
+            if (taskManifests === null || taskManifests.length === 0) {
+                tl.debug("This extension has no build tasks on it.");
+                updateTasksFinished.resolve(null);
+                return;
+            }
+
+            // Check extension version in format Major.Minor.Patch
+            extensionVersion = extensionVersion.trim();
+            const versionParts = /^(\d+)\.(\d+)\.(\d+)(?:\D.*)?$/.exec(extensionVersion);
+            if (versionParts == null) {
+                updateTasksFinished.reject("Task Version not in expected format <Major>.<Minor>.<Patch>");
+                return;
+            }
+
+            const taskVersion = { Major: versionParts[1], Minor: versionParts[2], Patch: versionParts[3] };
+
             tl.debug(`Processing the following task manifest ${taskManifests}`);
             const taskUpdates = taskManifests.map(manifest => updateTaskVersion(manifest, taskVersion));
 
