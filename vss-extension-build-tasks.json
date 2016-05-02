@@ -35,10 +35,10 @@
     },
     "links": {
         "repository": {
-            "uri": "https://github.com/Microsoft/vsts-developer-tools"
+            "uri": "https://github.com/Microsoft/vsts-extension-build-release-tasks"
         },
         "issues": {
-            "uri": "https://github.com/Microsoft/vsts-developer-tools/issues"
+            "uri": "https://github.com/Microsoft/vsts-extension-build-release-tasks/issues"
         }
     },
     "files": [

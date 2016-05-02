@@ -8,10 +8,7 @@ npm-debug.log
 BuildTasks/typings/
 BuildTasks/*Extension*/common.ts
 
-Web/scripts/Playground/**/*.js
-
 *.vsix
-web.config
 
 /.vs
 *.sqlite

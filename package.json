@@ -11,13 +11,6 @@
         "initdev:typings": "pushd BuildTasks && typings install && popd",
         "initdev": "npm run initdev:npm  && npm run initdev:typings ",
         "clean": "rimraf dist",
-        "precompile:web": "tsconfig Web",
-        "compile:web": "tsc --project Web",
-        "content:web": "copyfiles \"./Web/**/!(*.ts|tsconfig.json)\" ./Web/**/ref/**.d.ts dist",
-        "build:web": "npm run clean && npm run build:web:noclean",
-        "content:extension:web": "copyfiles vss-extension-web.json *.md license.txt tools-icon.png dist",
-        "build:web:noclean": "npm run compile:web && npm run content:web && npm run content:extension:web",
-        "package:web": "tfx extension create --root dist --output-path dist --manifest-globs vss-extension-web.json",
         "precompile:tasks": "node scripts/copyFilesToBuildTasks -u 2 BuildTasks/Common/common.ts BuildTasks",
         "compile:tasks": "tsc --project BuildTasks",
         "postcompile:tasks": "npm run lint:tasks",
@@ -31,8 +24,8 @@
         "build:tasks": "npm run clean && npm run build:tasks:noclean",
         "build:tasks:noclean": "npm run compile:tasks && npm run content:tasks && npm run content:extension:tasks  && npm run link:tasks && npm run link:tasks:publish",
         "package:tasks": "tfx extension create --root dist --output-path dist --manifest-globs vss-extension-build-tasks.json",
-        "build:all": "npm run clean && npm run build:web:noclean && npm run build:tasks:noclean",
-        "package:all": "npm run package:tasks && npm run package:web"
+        "build:all": "npm run build:tasks",
+        "package:all": "npm run package:tasks"
     },
     "author": "Microsoft Corporation",
     "license": "MIT",
@@ -41,11 +34,10 @@
         "mkdirp": "^0.5.1",
         "q": "^1.4.1",
         "rimraf": "^2.5.1",
-        "tfx-cli": "^0.3.18",
+        "tfx-cli": "^0.3.20",
         "tsconfig-glob": "^0.4.0",
         "tslint": "^3.6.0",
         "typescript": "^1.7.5",
-        "typings": "^0.6.6",
-        "vss-web-extension-sdk": "^1.94.0"
+        "typings": "^0.6.6"
     }
 }
