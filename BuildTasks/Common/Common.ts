@@ -191,7 +191,7 @@ export class TfxJsonOutputStream extends stream.Writable {
             this.commandline = chunkStr;
             if (!this.silent) { this.taskOutput(chunkStr, tl._writeLine); }
         }
-        else if (!this.jsonString && chunkStr.toString()[0] !== "{") {
+        else if (!this.jsonString && (chunkStr.toString()[0] !== "{" || chunkStr.toString()[0] !== "[")) {
             this.messages.push(chunkStr);
             if (!this.silent) { this.taskOutput(chunkStr, tl.warning); }
         }
