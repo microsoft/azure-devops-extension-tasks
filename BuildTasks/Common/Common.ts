@@ -82,11 +82,19 @@ export function setTfxManifestArguments(tfx: ToolRunner): (() => void) {
         if (isPreview) { jsonOverrides.galleryFlags = ["Preview"]; };
     }
 
-    const extensionVersion = tl.getInput("extensionVersion", false);
+    let extensionVersion = tl.getInput("extensionVersion", false);
     if (extensionVersion) {
-        tl.debug(`Overriding extension version to: ${extensionVersion}`);
-        jsonOverrides = (jsonOverrides || {});
-        jsonOverrides.version = extensionVersion;
+       const extractedVersions = extensionVersion.match(/[0-9]+\.[0-9]+\.[0-9]+/);
+       if (extractedVersions && extractedVersions.length === 1) {
+            extensionVersion = extractedVersions[0];
+            tl.debug(`Overriding extension version to: ${extensionVersion}`);
+            jsonOverrides = (jsonOverrides || {});
+            jsonOverrides.version = extensionVersion;
+        }
+        else
+        {
+            tl.error(`Supplied ExtensionVersion must contain a string matching '##.##.##'.`);
+        }
     }
 
     let overrideFilePath: string;
