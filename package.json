@@ -20,7 +20,7 @@
         "postlink:tasks": "rimraf dist/_temp",
         "link:tasks:publish": "pushd \"dist/BuildTasks/PublishExtension\" && npm install && popd",
         "content:tasks": "copyfiles \"./BuildTasks/*Extension*/**/!(*.ts)\" dist",
-        "content:extension:tasks": "copyfiles vss-extension.json *.md license.txt tools-icon.png dist",
+        "content:extension:tasks": "copyfiles vss-extension.json *.md license.txt tools-icon.png add-task.png dist",
         "build:tasks": "npm run clean && npm run build:tasks:noclean",
         "build:tasks:noclean": "npm run compile:tasks && npm run content:tasks && npm run content:extension:tasks  && npm run link:tasks && npm run link:tasks:publish",
         "package:tasks": "tfx extension create --root dist --output-path dist --manifest-globs vss-extension.json",
