@@ -1,11 +1,11 @@
-# Build and Release Tasks for Team Services Extensions
+# Build and release tasks for Team Services extensions
 
 Tasks to help you simplify and automate the delivery of Team Services extensions. Package, publish, share, and install your Team Services extensions to the Visual Studio Marketplace.
 
 ## Tasks included
 
 * **Package**: package a Team Services extension into an extension package (.VSIX) file
-* **Publish**: publish an extension (either privately or publicly) to the Visual Studio Marketplace
+* **Publish**: optionally package and publish an extension (either privately or publicly) to the Visual Studio Marketplace
 * **Share**: share an extension with a Team Services account
 * **Install**: install an extension to a Team Services account
 * **Query version**: query an extension's version (to make it easy to increment on your next package or publish)

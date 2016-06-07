@@ -1,7 +1,7 @@
 {
     "manifestVersion": 1,
     "id": "vsts-developer-tools-build-tasks",
-    "version": "0.6.1",
+    "version": "0.7.0",
     "publisher": "ms-devlabs",
     "name": "Build and Release Tasks for Extensions",
     "description": "Tasks for packaging and publishing Team Services extensions to the Visual Studio Marketplace.",
@@ -39,7 +39,10 @@
         },
         "issues": {
             "uri": "https://github.com/Microsoft/vsts-extension-build-release-tasks/issues"
-        }
+        },
+        "support": {
+            "uri": "https://github.com/Microsoft/vsts-extension-build-release-tasks/issues"
+        } 
     },
     "files": [
         {
