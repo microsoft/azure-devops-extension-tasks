@@ -8,7 +8,7 @@
     "icons": {
         "default": "tools-icon.png"
     },
-    "public": false,
+    "public": true,
     "targets": [
         {
             "id": "Microsoft.VisualStudio.Services"
