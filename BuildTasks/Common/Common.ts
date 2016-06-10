@@ -186,17 +186,34 @@ export function getExtensionVersion(): string {
  * @param  {string="connectedServiceName"} inputFieldName
  * @returns string
  */
-export function getMarketplaceEndpointDetails(inputFieldName: string = "connectedServiceName"): { url: string, token: string } {
+export function getMarketplaceEndpointDetails(inputFieldName: string = "connectedServiceName"): any {
     const marketplaceEndpoint = tl.getInput(inputFieldName, true);
-    const hostUrl = tl.getEndpointUrl(marketplaceEndpoint, false);
+
     const auth = tl.getEndpointAuthorization(marketplaceEndpoint, false);
+    const authScheme = auth.scheme;
+    let hostUrl = "";
 
-    const apitoken = auth.parameters["password"];
+    switch (authScheme) {
+        case "Token":
+            hostUrl = tl.getEndpointUrl(marketplaceEndpoint, false);
+            const apitoken = auth.parameters["apitoken"];
 
-    return {
-        "url": hostUrl,
-        "token": apitoken
-    };
+            return {
+                "url": hostUrl,
+                "token": apitoken
+            };
+
+        case "UsernamePassword":
+            hostUrl = auth.parameters["serverUri"];
+            const username = auth.parameters["username"];
+            const password = auth.parameters["password"];
+
+            return {
+                "url": hostUrl,
+                "username": username,
+                "password": password
+            };
+    }
 }
 
 /**

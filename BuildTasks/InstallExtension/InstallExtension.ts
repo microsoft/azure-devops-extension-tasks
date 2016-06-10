@@ -8,7 +8,15 @@ common.runTfx(tfx => {
 
     // Read gallery endpoint
     const galleryEndpoint = common.getMarketplaceEndpointDetails();
-    tfx.arg(["--token", galleryEndpoint.token]);
+    if (galleryEndpoint.token) {
+        tfx.arg(["--auth-type", "pat"]);
+        tfx.arg(["--token", galleryEndpoint.token]);
+    } else {
+        tfx.arg(["--auth-type", "basic"]);
+        tfx.arg(["--username", galleryEndpoint.username]);
+        tfx.arg(["--password", galleryEndpoint.password]);
+    }
+
     tfx.arg(["--service-url", galleryEndpoint.url]);
 
     switch (method) {
