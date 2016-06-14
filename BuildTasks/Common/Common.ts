@@ -158,7 +158,7 @@ export function runTfx(cmd: (tfx: ToolRunner) => void) {
 export function getExtensionVersion(): string {
     const extensionVersion = tl.getInput("extensionVersion", false);
     if (extensionVersion) {
-        const extractedVersions = extensionVersion.match(/[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?/);
+        const extractedVersions = extensionVersion.match(/[0-9]+\.[0-9]+\.[0-9]+(?:\.[0-9]+)?/);
         if (extractedVersions && extractedVersions.length === 1) {
             return extractedVersions[0];
         }
