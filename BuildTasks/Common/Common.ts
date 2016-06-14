@@ -193,10 +193,23 @@ export function getMarketplaceEndpointDetails(inputFieldName: string = "connecte
     const authScheme = auth.scheme;
     let hostUrl = "";
 
+    const apitoken = auth.parameters["apitoken"];
+    const password = auth.parameters["password"];
+    const username = auth.parameters["username"];
+    const serverUri = auth.parameters["serverUri"];
+
+    if (authScheme === "UsernamePassword" && !username) {
+        tl.warning("To support TFS 2015u2 an update was made to the service endpoint definition. Please recreate your endpoint.");
+        hostUrl = tl.getEndpointUrl(marketplaceEndpoint, false);
+        return {
+            "url": hostUrl,
+            "token": password
+        };
+    }
+
     switch (authScheme) {
         case "Token":
             hostUrl = tl.getEndpointUrl(marketplaceEndpoint, false);
-            const apitoken = auth.parameters["apitoken"];
 
             return {
                 "url": hostUrl,
@@ -204,12 +217,8 @@ export function getMarketplaceEndpointDetails(inputFieldName: string = "connecte
             };
 
         case "UsernamePassword":
-            hostUrl = auth.parameters["serverUri"];
-            const username = auth.parameters["username"];
-            const password = auth.parameters["password"];
-
             return {
-                "url": hostUrl,
+                "url": serverUri,
                 "username": username,
                 "password": password
             };
