@@ -43,20 +43,9 @@ common.runTfx(tfx => {
 
         const extensionName = tl.getInput("extensionName", false);
         const extensionVisibility = tl.getInput("extensionVisibility", false);
-                
-        let extensionVersion = tl.getInput("extensionVersion", false);
-        if (extensionVersion) {
-            const extractedVersions = extensionVersion.match(/[0-9]+\.[0-9]+\.[0-9]+/);
-            if (extractedVersions && extractedVersions.length === 1) {
-                extensionVersion = extractedVersions[0];
-                tl.debug(`Overriding extension version to: ${extensionVersion}`);
-            }
-            else
-            {
-                tl.error(`Supplied Extension Version must contain a string matching '##.##.##'.`);
-            }
-        }
-        
+
+        let extensionVersion = common.getExtensionVersion();
+
         const updateTasksVersion = tl.getBoolInput("updateTasksVersion", false);
 
         if (publisher

@@ -82,19 +82,11 @@ export function setTfxManifestArguments(tfx: ToolRunner): (() => void) {
         if (isPreview) { jsonOverrides.galleryFlags = ["Preview"]; };
     }
 
-    let extensionVersion = tl.getInput("extensionVersion", false);
+    let extensionVersion = getExtensionVersion();
     if (extensionVersion) {
-       const extractedVersions = extensionVersion.match(/[0-9]+\.[0-9]+\.[0-9]+/);
-       if (extractedVersions && extractedVersions.length === 1) {
-            extensionVersion = extractedVersions[0];
-            tl.debug(`Overriding extension version to: ${extensionVersion}`);
-            jsonOverrides = (jsonOverrides || {});
-            jsonOverrides.version = extensionVersion;
-        }
-        else
-        {
-            tl.error(`Supplied ExtensionVersion must contain a string matching '##.##.##'.`);
-        }
+        tl.debug(`Overriding extension version to: ${extensionVersion}`);
+        jsonOverrides = (jsonOverrides || {});
+        jsonOverrides.version = extensionVersion;
     }
 
     let overrideFilePath: string;
@@ -155,6 +147,26 @@ export function runTfx(cmd: (tfx: ToolRunner) => void) {
     }).fail(err => {
         tl.setResult(tl.TaskResult.Failed, `Error installing tfx: ${err}`);
     });
+}
+
+/**
+ * Reads the extension version from the supplied variable
+ *
+ * @param  {string="connectedServiceName"} inputFieldName
+ * @returns string
+ */
+export function getExtensionVersion(): string {
+    const extensionVersion = tl.getInput("extensionVersion", false);
+    if (extensionVersion) {
+        const extractedVersions = extensionVersion.match(/[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?/);
+        if (extractedVersions && extractedVersions.length === 1) {
+            return extractedVersions[0];
+        }
+        else {
+            tl.error(`Supplied ExtensionVersion must contain a string matching '##.##.##'.`);
+        }
+    }
+    return null;
 }
 
 /**
@@ -295,14 +307,14 @@ function updateTaskVersion(manifestFilePath: string, version: { Major: string, M
  */
 export function checkUpdateTasksVersion(manifestFile?: string) {
     // Check if we need to touch in tasks manifest before packaging
-    let extensionVersion = tl.getInput("extensionVersion", false);
+    let extensionVersion = getExtensionVersion();
     const updateTasksVersion = tl.getBoolInput("updateTasksVersion", false);
     let updateTasksFinished = Q.defer();
 
     if (extensionVersion && updateTasksVersion) {
         getTasksManifestPaths(manifestFile).then(taskManifests => {
 
-            if (taskManifests === null || taskManifests.length === 0) {
+            if (taskManifests == null || taskManifests.length === 0) {
                 tl.debug("This extension has no build tasks on it.");
                 updateTasksFinished.resolve(null);
                 return;
