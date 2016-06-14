@@ -163,7 +163,7 @@ export function getExtensionVersion(): string {
             return extractedVersions[0];
         }
         else {
-            tl.error(`Supplied ExtensionVersion must contain a string matching '##.##.##'.`);
+            throw new Error(`Supplied ExtensionVersion must contain a string matching '##.##.##(.##)'.`);
         }
     }
     return null;
