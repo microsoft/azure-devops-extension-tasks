@@ -110,84 +110,75 @@
             "targets": [
                 "ms.vss-endpoint.endpoint-types"
             ],
-            "properties": {
-                "name": "VstsMarketplacePublishing",
-                "displayName": "Marketplace",
-                "url": {
-                    "displayName": "Marketplace URL",
-                    "value": "https://marketplace.visualstudio.com"
-                },
-              "authenticationSchemes": [
-                {
-                  "type": "ms.vss-endpoint.endpoint-auth-scheme-token",
-                  "inputDescriptors": [
-                    {
-                      "id": "apitoken",
-                      "name": "Personal access token",
-                      "description": "Team Services personal access token. Requires at least the Marketplace (publish) scope.",
-                      "inputMode": "passwordbox",
-                      "isConfidential": true,
-                      "validation": {
-                        "isRequired": true,
-                        "dataType": "string",
-                        "maxLength": 300
-                      }
+          "properties": {
+            "name": "VstsMarketplacePublishing",
+            "displayName": "Marketplace",
+            "url": {
+              "displayName": "Marketplace URL",
+              "value": "https://marketplace.visualstudio.com"
+            },
+            "helpMarkDown": "To publish to the Visual Studio marketplace, choose <b>Token Based Authentication</b>.<br />To publish to a Team Foundation Server 2015 Gallery, choose <b>Basic Authentication</b>",
+            "authenticationSchemes": [
+              {
+                "type": "ms.vss-endpoint.endpoint-auth-scheme-token",
+                "inputDescriptors": [
+                  {
+                    "id": "apitoken",
+                    "name": "Personal access token",
+                    "description": "Team Services personal access token. Requires at least the Marketplace (publish) scope.",
+                    "inputMode": "passwordbox",
+                    "isConfidential": true,
+                    "validation": {
+                      "isRequired": true,
+                      "dataType": "string",
+                      "maxLength": 300
                     }
-                  ]
-                },
-                {
-                  "type": "ms.vss-endpoint.endpoint-auth-scheme-basic",
-                  "inputDescriptors": [
-                    {
-                      "id": "serverUri",
-                      "name": "TFS Server",
-                      "description": "TFS Server Uri",
-                      "inputMode": "textbox",
-                      "isConfidential": false,
-                      "validation": {
-                        "isRequired": true,
-                        "dataType": "string",
-                        "maxLength": 300
-                      },
-                      "values": {
-                        "inputId": "serverUri",
-                        "isDisabled": false,
-                        "defaultValue": ""
-                      }
-                    },
-                    {
-                      "id": "username",
-                      "name": "Username",
-                      "description": "Username",
-                      "inputMode": "textbox",
-                      "isConfidential": false,
-                      "validation": {
-                        "isRequired": true,
-                        "dataType": "string",
-                        "maxLength": 300
-                      },
-                      "values": {
-                        "inputId": "username",
-                        "isDisabled": false,
-                        "defaultValue": ""
-                      }
-                    },
-                    {
-                      "id": "password",
-                      "name": "Password",
-                      "description": "Password.",
-                      "inputMode": "passwordbox",
-                      "isConfidential": true,
-                      "validation": {
-                        "isRequired": true,
-                        "dataType": "string",
-                        "maxLength": 300
-                      }
+                  }
+                ]
+              },
+              {
+                "type": "ms.vss-endpoint.endpoint-auth-scheme-basic",
+                "inputDescriptors": [
+                  {
+                    "id": "serverUri",
+                    "name": "TFS Server",
+                    "description": "TFS Server Uri (e.g. https://server/tfs or http://server:8080/tfs).",
+                    "inputMode": "textbox",
+                    "isConfidential": false,
+                    "validation": {
+                      "isRequired": true,
+                      "dataType": "string",
+                      "maxLength": 300
                     }
-                  ]
-                }
-              ]
-            }
+                  },
+                  {
+                    "id": "username",
+                    "name": "Username",
+                    "description": "Username",
+                    "inputMode": "textbox",
+                    "isConfidential": false,
+                    "validation": {
+                      "isRequired": true,
+                      "dataType": "string",
+                      "maxLength": 300
+                    }
+                  },
+                  {
+                    "id": "password",
+                    "name": "Password",
+                    "description": "Password.",
+                    "inputMode": "passwordbox",
+                    "isConfidential": true,
+                    "validation": {
+                      "isRequired": true,
+                      "dataType": "string",
+                      "maxLength": 300
+                    }
+                  }
+                ]
+              }
+            ]
+          }
         }
     ]
 }
