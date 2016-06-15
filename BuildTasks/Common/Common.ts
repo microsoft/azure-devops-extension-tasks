@@ -392,6 +392,10 @@ export function checkUpdateTasksVersion(manifestFile?: string): Q.Promise<any> {
 
                 // Extract version parts Major, Minor, Patch
                 const versionParts = extensionVersion.split(".");
+                if (versionParts.length > 3) {
+                    tl.warning("Detected a version that consists of more than 3 parts. Build tasks support only 3 parts, ignoring the rest.");
+                }
+
                 const taskVersion = { Major: versionParts[0], Minor: versionParts[1], Patch: versionParts[2] };
 
                 tl.debug(`Processing the following task manifest ${taskManifests}`);
