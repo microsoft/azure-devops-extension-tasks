@@ -108,6 +108,17 @@ export function runTfx(cmd: (tfx: ToolRunner) => void) {
     let tfx: ToolRunner;
     let tfxPath: string;
 
+    const tryRunCmd = (tfx: ToolRunner) => {
+        try {
+            cmd(tfx);
+            return true;
+        }
+        catch (err) {
+            tl.setResult(tl.TaskResult.Failed, `Error running task: ${err}`);
+            return false;
+        }
+    };
+
     const checkTfxGlobalVar = tl.getVariable("vstsDevTools.buildTasks.checkGlobalTfx");
     if (checkTfxGlobalVar && checkTfxGlobalVar.toLowerCase() !== "false") {
         console.log("Checking tfx globally");
@@ -115,7 +126,7 @@ export function runTfx(cmd: (tfx: ToolRunner) => void) {
         if (tfxPath) {
             console.log(`Found tfx globally ${tfxPath}`);
             tfx = tl.createToolRunner(tfxPath);
-            cmd(tfx);
+            tryRunCmd(tfx);
             return;
         }
     }
@@ -132,7 +143,7 @@ export function runTfx(cmd: (tfx: ToolRunner) => void) {
     if (tfxPath) {
         console.log(`Found tfx in current task folder ${tfxPath}`);
         tfx = tl.createToolRunner(tfxPath);
-        cmd(tfx);
+        tryRunCmd(tfx);
         return;
     }
 
@@ -143,16 +154,16 @@ export function runTfx(cmd: (tfx: ToolRunner) => void) {
 
     npm.exec().then(code => {
         tfx = tl.createToolRunner(tl.which(tfxLocalPath, true));
-        cmd(tfx);
+        tryRunCmd(tfx);
     }).fail(err => {
         tl.setResult(tl.TaskResult.Failed, `Error installing tfx: ${err}`);
     });
 }
 
 /**
- * Reads the extension version from the supplied variable
+ * Reads the extension version from the 'extensionVersion' variable, extracting
+ * just the part that is compatible with the versioning scheme used in the Marketplace.
  *
- * @param  {string="connectedServiceName"} inputFieldName
  * @returns string
  */
 export function getExtensionVersion(): string {
@@ -305,39 +316,48 @@ function updateTaskVersion(manifestFilePath: string, version: { Major: string, M
  * in the extension.
  *
  */
-export function checkUpdateTasksVersion(manifestFile?: string) {
+export function checkUpdateTasksVersion(manifestFile?: string): Q.Promise<any> {
     // Check if we need to touch in tasks manifest before packaging
-    let extensionVersion = getExtensionVersion();
     const updateTasksVersion = tl.getBoolInput("updateTasksVersion", false);
     let updateTasksFinished = Q.defer();
 
-    if (extensionVersion && updateTasksVersion) {
-        getTasksManifestPaths(manifestFile).then(taskManifests => {
+    if (updateTasksVersion) {
+        // Extract the extension version
+        let extensionVersion;
+        try {
+            extensionVersion = getExtensionVersion();
+        }
+        catch (err) {
+            return Q.reject(err);
+        }
 
-            if (taskManifests == null || taskManifests.length === 0) {
-                tl.debug("This extension has no build tasks on it.");
-                updateTasksFinished.resolve(null);
-                return;
-            }
+        // If extension version specified, let's search for build tasks
+        if (extensionVersion) {
+            getTasksManifestPaths(manifestFile).then(taskManifests => {
 
-            // Check extension version in format Major.Minor.Patch
-            extensionVersion = extensionVersion.trim();
-            const versionParts = /^(\d+)\.(\d+)\.(\d+)(?:\D.*)?$/.exec(extensionVersion);
-            if (versionParts == null) {
-                updateTasksFinished.reject("Task Version not in expected format <Major>.<Minor>.<Patch>");
-                return;
-            }
+                if (taskManifests == null || taskManifests.length === 0) {
+                    tl.debug("This extension has no build tasks on it.");
+                    updateTasksFinished.resolve(null);
+                    return;
+                }
 
-            const taskVersion = { Major: versionParts[1], Minor: versionParts[2], Patch: versionParts[3] };
+                // Extract version parts Major, Minor, Patch
+                const versionParts = extensionVersion.split(".");
+                const taskVersion = { Major: versionParts[0], Minor: versionParts[1], Patch: versionParts[2] };
 
-            tl.debug(`Processing the following task manifest ${taskManifests}`);
-            const taskUpdates = taskManifests.map(manifest => updateTaskVersion(manifest, taskVersion));
+                tl.debug(`Processing the following task manifest ${taskManifests}`);
+                const taskUpdates = taskManifests.map(manifest => updateTaskVersion(manifest, taskVersion));
 
-            Q.all(taskUpdates)
-                .then(() => updateTasksFinished.resolve(null))
-                .fail(err => updateTasksFinished.reject(`Error updating version in task manifests: ${err}`));
+                Q.all(taskUpdates)
+                    .then(() => updateTasksFinished.resolve(null))
+                    .fail(err => updateTasksFinished.reject(`Error updating version in task manifests: ${err}`));
 
-        }).fail(err => updateTasksFinished.reject(`Error determining tasks manifest paths: ${err}`));
+            }).fail(err => updateTasksFinished.reject(`Error determining tasks manifest paths: ${err}`));
+        }
+        else {
+            tl.debug("No update tasks version required (No extension version specified)");
+            updateTasksFinished.resolve(null);
+        }
     }
     else {
         tl.debug("No update tasks version required");

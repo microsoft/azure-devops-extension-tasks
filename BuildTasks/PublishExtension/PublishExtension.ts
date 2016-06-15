@@ -43,8 +43,7 @@ common.runTfx(tfx => {
 
         const extensionName = tl.getInput("extensionName", false);
         const extensionVisibility = tl.getInput("extensionVisibility", false);
-
-        let extensionVersion = common.getExtensionVersion();
+        const extensionVersion = common.getExtensionVersion();
 
         const updateTasksVersion = tl.getBoolInput("updateTasksVersion", false);
 
