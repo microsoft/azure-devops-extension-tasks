@@ -226,6 +226,29 @@ export function getMarketplaceEndpointDetails(inputFieldName: string = "connecte
 }
 
 /**
+ * Sets the marketplace  endpoint details (url, credentials) for the toolrunner.
+ *
+ * @param  {ToolRunner} tfx
+ * @param  {string="connectedServiceName"} inputFieldName
+ * @returns string
+ */
+export function setTfxMarketplaceArguments(tfx: ToolRunner, inputFieldName: string = "connectedServiceName") {
+    // Read gallery endpoint
+    const galleryEndpoint = getMarketplaceEndpointDetails(inputFieldName);
+
+    if (galleryEndpoint.token) {
+        tfx.arg(["--auth-type", "pat"]);
+        tfx.arg(["--token", galleryEndpoint.token]);
+    } else {
+        tfx.arg(["--auth-type", "basic"]);
+        tfx.arg(["--username", galleryEndpoint.username]);
+        tfx.arg(["--password", galleryEndpoint.password]);
+    }
+
+    tfx.arg(["--service-url", galleryEndpoint.url]);
+}
+
+/**
  * A writable stream intended to be used with Tfx when using JSON output.
  * This class overcomes the problem of having tfx warnings being displayed
  * in stdout as regular messages, even when using --json switch in tfx.

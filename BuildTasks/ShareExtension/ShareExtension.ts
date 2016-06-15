@@ -6,18 +6,7 @@ common.runTfx(tfx => {
     tfx.arg(["extension", "share"]);
     const method = tl.getInput("method", true);
 
-    // Read gallery endpoint
-    const galleryEndpoint = common.getMarketplaceEndpointDetails();
-    if (galleryEndpoint.token) {
-        tfx.arg(["--auth-type", "pat"]);
-        tfx.arg(["--token", galleryEndpoint.token]);
-    } else {
-        tfx.arg(["--auth-type", "basic"]);
-        tfx.arg(["--username", galleryEndpoint.username]);
-        tfx.arg(["--password", galleryEndpoint.password]);
-    }
-
-    tfx.arg(["--service-url", galleryEndpoint.url]);
+    common.setTfxMarketplaceArguments(tfx);
 
     switch (method) {
         case "id":

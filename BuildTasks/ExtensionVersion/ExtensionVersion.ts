@@ -22,18 +22,7 @@ if (!usingOverride) {
     common.runTfx(tfx => {
         tfx.arg(["extension", "show", "--json"]);
 
-        // Read gallery endpoint
-        const galleryEndpoint = common.getMarketplaceEndpointDetails();
-        if (galleryEndpoint.token) {
-            tfx.arg(["--auth-type", "pat"]);
-            tfx.arg(["--token", galleryEndpoint.token]);
-        } else {
-            tfx.arg(["--auth-type", "basic"]);
-            tfx.arg(["--username", galleryEndpoint.username]);
-            tfx.arg(["--password", galleryEndpoint.password]);
-        }
-
-        tfx.arg(["--service-url", galleryEndpoint.url]);
+        common.setTfxMarketplaceArguments(tfx);
 
         // Extension name
         tfx.arg(["--publisher", tl.getInput("publisherId", true)]);
