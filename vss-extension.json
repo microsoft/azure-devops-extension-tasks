@@ -117,7 +117,7 @@
               "displayName": "Marketplace URL",
               "value": "https://marketplace.visualstudio.com"
             },
-            "helpMarkDown": "To publish to the Visual Studio marketplace, choose <b>Token Based Authentication</b>.<br />To publish to a Team Foundation Server 2015 Gallery, choose <b>Basic Authentication</b>",
+            "helpMarkDown": "To publish to the Visual Studio marketplace, choose <b>Token Based Authentication</b>.<br />To publish to a Team Foundation Server 2015 Gallery, choose <b>Basic Authentication</b>.",
             "authenticationSchemes": [
               {
                 "type": "ms.vss-endpoint.endpoint-auth-scheme-token",
