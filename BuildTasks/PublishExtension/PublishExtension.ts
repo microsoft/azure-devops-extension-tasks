@@ -43,7 +43,8 @@ common.runTfx(tfx => {
 
         const extensionName = tl.getInput("extensionName", false);
         const extensionVisibility = tl.getInput("extensionVisibility", false);
-        const extensionVersion = tl.getInput("extensionVersion", false);
+        const extensionVersion = common.getExtensionVersion();
+
         const updateTasksVersion = tl.getBoolInput("updateTasksVersion", false);
 
         if (publisher
