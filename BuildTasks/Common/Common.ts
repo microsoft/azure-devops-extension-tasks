@@ -209,14 +209,15 @@ export function getMarketplaceEndpointDetails(inputFieldName): any {
  * @returns string
  */
 export function setTfxMarketplaceArguments(tfx: ToolRunner) {
-    // Read gallery endpoint
-    const connectTo = tl.getInput("connectTo", true);
-    const galleryEndpoint = getMarketplaceEndpointDetails("connectedServiceName" + connectTo);
+    const connectTo = tl.getInput("connectTo", true) || "VsTeam";
+    let galleryEndpoint;
 
     if (connectTo === "VsTeam") {
+        galleryEndpoint = getMarketplaceEndpointDetails("connectedServiceName");
         tfx.arg(["--auth-type", "pat"]);
         tfx.arg(["--token", galleryEndpoint.password]);
     } else {
+        galleryEndpoint = getMarketplaceEndpointDetails("connectedServiceNameTFS");
         tfx.arg(["--service-url", galleryEndpoint.url]);
         tfx.arg(["--auth-type", "basic"]);
         tfx.arg(["--username", galleryEndpoint.username]);

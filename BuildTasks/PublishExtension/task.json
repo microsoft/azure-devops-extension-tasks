@@ -46,9 +46,9 @@
       }
     },
     {
-      "name": "connectedServiceNameVsTeam",
+      "name": "connectedServiceName",
       "type": "connectedService:VstsMarketplacePublishing",
-      "label": "Marketplace connection",
+      "label": "VSTS Marketplace connection",
       "required": true,
       "helpMarkDown": "Service endpoint connection to install the extension.",
       "visibleRule": "connectTo=VsTeam"
@@ -56,7 +56,7 @@
     {
       "name": "connectedServiceNameTFS",
       "type": "connectedService:TFSMarketplacePublishing",
-      "label": "Marketplace connection",
+      "label": "TFS Marketplace connection",
       "required": true,
       "helpMarkDown": "Service endpoint connection to install the extension.",
       "visibleRule": "connectTo=TFS"
