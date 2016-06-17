@@ -186,43 +186,19 @@ export function getExtensionVersion(): string {
  * @param  {string="connectedServiceName"} inputFieldName
  * @returns string
  */
-export function getMarketplaceEndpointDetails(inputFieldName: string = "connectedServiceName"): any {
+export function getMarketplaceEndpointDetails(inputFieldName): any {
     const marketplaceEndpoint = tl.getInput(inputFieldName, true);
 
+    const hostUrl = tl.getEndpointUrl(marketplaceEndpoint, false);
     const auth = tl.getEndpointAuthorization(marketplaceEndpoint, false);
-    const authScheme = auth.scheme;
-    let hostUrl = "";
-
-    const apitoken = auth.parameters["apitoken"];
     const password = auth.parameters["password"];
     const username = auth.parameters["username"];
-    const serverUri = auth.parameters["serverUri"];
 
-    if (authScheme === "UsernamePassword" && !username) {
-        tl.warning("To support TFS 2015u2 an update was made to the service endpoint definition. Please recreate your endpoint.");
-        hostUrl = tl.getEndpointUrl(marketplaceEndpoint, false);
-        return {
-            "url": hostUrl,
-            "token": password
-        };
-    }
-
-    switch (authScheme) {
-        case "Token":
-            hostUrl = tl.getEndpointUrl(marketplaceEndpoint, false);
-
-            return {
-                "url": hostUrl,
-                "token": apitoken
-            };
-
-        case "UsernamePassword":
-            return {
-                "url": serverUri,
-                "username": username,
-                "password": password
-            };
-    }
+    return {
+        "url": hostUrl,
+        "username": username,
+        "password": password
+    };
 }
 
 /**
@@ -232,20 +208,20 @@ export function getMarketplaceEndpointDetails(inputFieldName: string = "connecte
  * @param  {string="connectedServiceName"} inputFieldName
  * @returns string
  */
-export function setTfxMarketplaceArguments(tfx: ToolRunner, inputFieldName: string = "connectedServiceName") {
+export function setTfxMarketplaceArguments(tfx: ToolRunner) {
     // Read gallery endpoint
-    const galleryEndpoint = getMarketplaceEndpointDetails(inputFieldName);
+    const connectTo = tl.getInput("connectTo", true);
+    const galleryEndpoint = getMarketplaceEndpointDetails("connectedServiceName" + connectTo);
 
-    if (galleryEndpoint.token) {
+    if (connectTo === "VsTeam") {
         tfx.arg(["--auth-type", "pat"]);
-        tfx.arg(["--token", galleryEndpoint.token]);
+        tfx.arg(["--token", galleryEndpoint.password]);
     } else {
+        tfx.arg(["--service-url", galleryEndpoint.url]);
         tfx.arg(["--auth-type", "basic"]);
         tfx.arg(["--username", galleryEndpoint.username]);
         tfx.arg(["--password", galleryEndpoint.password]);
     }
-
-    tfx.arg(["--service-url", galleryEndpoint.url]);
 }
 
 /**

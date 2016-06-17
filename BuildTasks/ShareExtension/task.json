@@ -39,24 +39,45 @@
   "instanceNameFormat": "Share Extension",
   "inputs": [
     {
-        "name": "connectedServiceName",
-        "type": "connectedService:VstsMarketplacePublishing",
-        "label": "Marketplace connection",
-        "required": true,
-        "helpMarkDown": "Service endpoint connection to share the extension."
+      "name": "connectTo",
+      "type": "radio",
+      "label": "Connect to",
+      "required": true,
+      "defaultValue": "VsTeam",
+      "helpMarkDown": "Publish to Visual Studio Team Services or a local TFS server.",
+      "options": {
+        "VsTeam": "Visual Studio Team Services",
+        "TFS": "Team Foundation Server"
+      }
     },
     {
-        "name": "method",
-        "type": "radio",
-        "label": "Share using",
-        "required": true,
-        "defaultValue": "id",
-        "helpMarkDown": "Share using either an existing VSIX or using the Publisher and Extension ID.",
-        "options": {
-            "id": "Publisher + Extension ID",
-            "vsix": "VSIX file"
-        },
-        "groupName": "extension"
+      "name": "connectedServiceNameVsTeam",
+      "type": "connectedService:VstsMarketplacePublishing",
+      "label": "Marketplace connection",
+      "required": true,
+      "helpMarkDown": "Service endpoint connection to install the extension.",
+      "visibleRule": "connectTo=VsTeam"
+    },
+    {
+      "name": "connectedServiceNameTFS",
+      "type": "connectedService:TFSMarketplacePublishing",
+      "label": "Marketplace connection",
+      "required": true,
+      "helpMarkDown": "Service endpoint connection to install the extension.",
+      "visibleRule": "connectTo=TFS"
+    },
+    {
+      "name": "method",
+      "type": "radio",
+      "label": "Share using",
+      "required": true,
+      "defaultValue": "id",
+      "helpMarkDown": "Share using either an existing VSIX or using the Publisher and Extension ID.",
+      "options": {
+        "id": "Publisher + Extension ID",
+        "vsix": "VSIX file"
+      },
+      "groupName": "extension"
     },
     {
       "name": "publisherId",
@@ -89,14 +110,14 @@
       "visibleRule": "method = id"
     },
     {
-        "name": "vsixFile",
-        "type": "filePath",
-        "label": "VSIX file",
-        "defaultValue": "",
-        "required": true,
-        "helpMarkDown": "VSIX file of the extension to be shared.",
-        "visibleRule": "method = vsix",
-        "groupName": "extension"
+      "name": "vsixFile",
+      "type": "filePath",
+      "label": "VSIX file",
+      "defaultValue": "",
+      "required": true,
+      "helpMarkDown": "VSIX file of the extension to be shared.",
+      "visibleRule": "method = vsix",
+      "groupName": "extension"
     },
     {
       "name": "accounts",
