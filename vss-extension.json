@@ -156,7 +156,7 @@
       }
     },
     {
-      "id": "vsts-marketplace-endpoint-type",
+      "id": "tfs-marketplace-endpoint-type",
       "type": "ms.vss-endpoint.service-endpoint-type",
       "targets": [
         "ms.vss-endpoint.endpoint-types"
