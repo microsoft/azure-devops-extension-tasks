@@ -44,10 +44,9 @@
       "label": "Connect to",
       "required": true,
       "defaultValue": "VsTeam",
-      "helpMarkDown": "Publish to Visual Studio Team Services or a local TFS server.",
+      "helpMarkDown": "Connect to Visual Studio Team Services. TFS is not supported for the Share command.",
       "options": {
-        "VsTeam": "Visual Studio Team Services",
-        "TFS": "Team Foundation Server"
+        "VsTeam": "Visual Studio Team Services"
       }
     },
     {
@@ -57,14 +56,6 @@
       "required": true,
       "helpMarkDown": "Service endpoint connection to install the extension.",
       "visibleRule": "connectTo=VsTeam"
-    },
-    {
-      "name": "connectedServiceNameTFS",
-      "type": "connectedService:TFSMarketplacePublishing",
-      "label": "TFS Marketplace connection",
-      "required": true,
-      "helpMarkDown": "Service endpoint connection to install the extension.",
-      "visibleRule": "connectTo=TFS"
     },
     {
       "name": "method",

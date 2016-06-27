@@ -44,10 +44,9 @@
       "label": "Connect to",
       "required": true,
       "defaultValue": "VsTeam",
-      "helpMarkDown": "Publish to Visual Studio Team Services or a local TFS server.",
+      "helpMarkDown": "Publish to Visual Studio Team Services.",
       "options": {
-        "VsTeam": "Visual Studio Team Services",
-        "TFS": "Team Foundation Server"
+        "VsTeam": "Visual Studio Team Services"
       }
     },
     {
@@ -63,7 +62,7 @@
       "type": "connectedService:TFSMarketplacePublishing",
       "label": "TFS Marketplace connection",
       "required": true,
-      "helpMarkDown": "Service endpoint connection to install the extension.",
+      "helpMarkDown": "Service endpoint connection to install the extension. Temporarily unavailable.",
       "visibleRule": "connectTo=TFS"
     },
     {

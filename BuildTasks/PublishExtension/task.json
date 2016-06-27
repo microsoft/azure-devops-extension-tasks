@@ -198,7 +198,7 @@
       "type": "string",
       "label": "Share with",
       "defaultValue": "",
-      "helpMarkDown": "Comma separated list of accounts with which to share the extension if it's private (e.g. account_x,account_y,account_z)",
+      "helpMarkDown": "Comma separated list of accounts with which to share the extension if it's private (e.g. account_x,account_y,account_z). Share is ignored for public extensions and when publishing to TFS.",
       "required": false,
       "groupName": "manifest",
       "visibleRule": "extensionVisibility = private || extensionVisibility = privatepreview || extensionVisibility = default"

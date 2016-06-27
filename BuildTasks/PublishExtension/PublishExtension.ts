@@ -78,10 +78,13 @@ common.runTfx(tfx => {
     // Share with
     const shareWith = tl.getInput("shareWith");
     const extensionVisibility = tl.getInput("extensionVisibility", false);
-
+    const connectTo = tl.getInput("connectTo", true);
     if (shareWith) {
-        // Only handle shareWith if the extension is not public
-        if (extensionVisibility.indexOf("public") < 0) {
+        if (connectTo === "TFS") {
+            tl.warning("Ignoring Share - Not available on TFS.");
+        }
+        else if (extensionVisibility.indexOf("public") < 0) {
+            // Only handle shareWith if the extension is not public
             // Sanitize accounts to share with
             let accounts = shareWith.split(",").map(a => a.replace(/\s/g, "")).filter(a => a.length > 0);
             tfx.argIf(accounts && accounts.length > 0, ["--share-with", ...accounts]);
