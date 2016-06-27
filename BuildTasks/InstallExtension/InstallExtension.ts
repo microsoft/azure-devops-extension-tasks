@@ -6,10 +6,7 @@ common.runTfx(tfx => {
     tfx.arg(["extension", "install"]);
     const method = tl.getInput("method", true);
 
-    // Read gallery endpoint
-    const galleryEndpoint = common.getMarketplaceEndpointDetails();
-    tfx.arg(["--token", galleryEndpoint.token]);
-    tfx.arg(["--service-url", galleryEndpoint.url]);
+    common.setTfxMarketplaceArguments(tfx);
 
     switch (method) {
         case "id":

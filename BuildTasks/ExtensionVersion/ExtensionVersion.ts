@@ -22,10 +22,7 @@ if (!usingOverride) {
     common.runTfx(tfx => {
         tfx.arg(["extension", "show", "--json"]);
 
-        // Read gallery endpoint
-        const galleryEndpoint = common.getMarketplaceEndpointDetails();
-        tfx.arg(["--token", galleryEndpoint.token]);
-        tfx.arg(["--service-url", galleryEndpoint.url]);
+        common.setTfxMarketplaceArguments(tfx);
 
         // Extension name
         tfx.arg(["--publisher", tl.getInput("publisherId", true)]);

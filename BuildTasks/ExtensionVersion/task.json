@@ -16,7 +16,7 @@
   "version": {
     "Major": "0",
     "Minor": "7",
-    "Patch": "3"
+    "Patch": "4"
   },
   "minimumAgentVersion": "1.83.0",
   "groups": [
@@ -39,11 +39,32 @@
   "instanceNameFormat": "Query Extension Version: $(publisherId).$(extensionId)",
   "inputs": [
     {
-        "name": "connectedServiceName",
-        "type": "connectedService:VstsMarketplacePublishing",
-        "label": "Marketplace connection",
-        "required": true,
-        "helpMarkDown": "Service endpoint connection to install the extension."
+      "name": "connectTo",
+      "type": "radio",
+      "label": "Connect to",
+      "required": true,
+      "defaultValue": "VsTeam",
+      "helpMarkDown": "Publish to Visual Studio Team Services or a local TFS server.",
+      "options": {
+        "VsTeam": "Visual Studio Team Services",
+        "TFS": "Team Foundation Server"
+      }
+    },
+    {
+      "name": "connectedServiceName",
+      "type": "connectedService:VstsMarketplacePublishing",
+      "label": "VSTS Marketplace connection",
+      "required": true,
+      "helpMarkDown": "Service endpoint connection to install the extension.",
+      "visibleRule": "connectTo=VsTeam"
+    },
+    {
+      "name": "connectedServiceNameTFS",
+      "type": "connectedService:TFSMarketplacePublishing",
+      "label": "TFS Local Gallery connection",
+      "required": true,
+      "helpMarkDown": "Service endpoint connection to install the extension.",
+      "visibleRule": "connectTo=TFS"
     },
     {
         "name": "publisherId",

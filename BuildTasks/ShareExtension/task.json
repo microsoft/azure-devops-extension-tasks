@@ -16,7 +16,7 @@
   "version": {
     "Major": "0",
     "Minor": "7",
-    "Patch": "3"
+    "Patch": "4"
   },
   "minimumAgentVersion": "1.83.0",
   "groups": [
@@ -39,24 +39,36 @@
   "instanceNameFormat": "Share Extension",
   "inputs": [
     {
-        "name": "connectedServiceName",
-        "type": "connectedService:VstsMarketplacePublishing",
-        "label": "Marketplace connection",
-        "required": true,
-        "helpMarkDown": "Service endpoint connection to share the extension."
+      "name": "connectTo",
+      "type": "radio",
+      "label": "Connect to",
+      "required": true,
+      "defaultValue": "VsTeam",
+      "helpMarkDown": "Connect to Visual Studio Team Services. TFS is not supported for the Share command.",
+      "options": {
+        "VsTeam": "Visual Studio Team Services"
+      }
     },
     {
-        "name": "method",
-        "type": "radio",
-        "label": "Share using",
-        "required": true,
-        "defaultValue": "id",
-        "helpMarkDown": "Share using either an existing VSIX or using the Publisher and Extension ID.",
-        "options": {
-            "id": "Publisher + Extension ID",
-            "vsix": "VSIX file"
-        },
-        "groupName": "extension"
+      "name": "connectedServiceName",
+      "type": "connectedService:VstsMarketplacePublishing",
+      "label": "VSTS Marketplace connection",
+      "required": true,
+      "helpMarkDown": "Service endpoint connection to install the extension.",
+      "visibleRule": "connectTo=VsTeam"
+    },
+    {
+      "name": "method",
+      "type": "radio",
+      "label": "Share using",
+      "required": true,
+      "defaultValue": "id",
+      "helpMarkDown": "Share using either an existing VSIX or using the Publisher and Extension ID.",
+      "options": {
+        "id": "Publisher + Extension ID",
+        "vsix": "VSIX file"
+      },
+      "groupName": "extension"
     },
     {
       "name": "publisherId",
@@ -89,14 +101,14 @@
       "visibleRule": "method = id"
     },
     {
-        "name": "vsixFile",
-        "type": "filePath",
-        "label": "VSIX file",
-        "defaultValue": "",
-        "required": true,
-        "helpMarkDown": "VSIX file of the extension to be shared.",
-        "visibleRule": "method = vsix",
-        "groupName": "extension"
+      "name": "vsixFile",
+      "type": "filePath",
+      "label": "VSIX file",
+      "defaultValue": "",
+      "required": true,
+      "helpMarkDown": "VSIX file of the extension to be shared.",
+      "visibleRule": "method = vsix",
+      "groupName": "extension"
     },
     {
       "name": "accounts",

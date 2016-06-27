@@ -186,17 +186,43 @@ export function getExtensionVersion(): string {
  * @param  {string="connectedServiceName"} inputFieldName
  * @returns string
  */
-export function getMarketplaceEndpointDetails(inputFieldName: string = "connectedServiceName"): { url: string, token: string } {
+export function getMarketplaceEndpointDetails(inputFieldName): any {
     const marketplaceEndpoint = tl.getInput(inputFieldName, true);
+
     const hostUrl = tl.getEndpointUrl(marketplaceEndpoint, false);
     const auth = tl.getEndpointAuthorization(marketplaceEndpoint, false);
-
-    const apitoken = auth.parameters["password"];
+    const password = auth.parameters["password"];
+    const username = auth.parameters["username"];
 
     return {
         "url": hostUrl,
-        "token": apitoken
+        "username": username,
+        "password": password
     };
+}
+
+/**
+ * Sets the marketplace  endpoint details (url, credentials) for the toolrunner.
+ *
+ * @param  {ToolRunner} tfx
+ * @returns string
+ */
+export function setTfxMarketplaceArguments(tfx: ToolRunner) {
+    const connectTo = tl.getInput("connectTo", false) || "VsTeam";
+    let galleryEndpoint;
+
+    if (connectTo === "VsTeam") {
+        galleryEndpoint = getMarketplaceEndpointDetails("connectedServiceName");
+        tfx.arg(["--service-url", galleryEndpoint.url]);
+        tfx.arg(["--auth-type", "pat"]);
+        tfx.arg(["--token", galleryEndpoint.password]);
+    } else {
+        galleryEndpoint = getMarketplaceEndpointDetails("connectedServiceNameTFS");
+        tfx.arg(["--service-url", galleryEndpoint.url]);
+        tfx.arg(["--auth-type", "basic"]);
+        tfx.arg(["--username", galleryEndpoint.username]);
+        tfx.arg(["--password", galleryEndpoint.password]);
+    }
 }
 
 /**
@@ -343,6 +369,10 @@ export function checkUpdateTasksVersion(manifestFile?: string): Q.Promise<any> {
 
                 // Extract version parts Major, Minor, Patch
                 const versionParts = extensionVersion.split(".");
+                if (versionParts.length > 3) {
+                    tl.warning("Detected a version that consists of more than 3 parts. Build tasks support only 3 parts, ignoring the rest.");
+                }
+
                 const taskVersion = { Major: versionParts[0], Minor: versionParts[1], Patch: versionParts[2] };
 
                 tl.debug(`Processing the following task manifest ${taskManifests}`);

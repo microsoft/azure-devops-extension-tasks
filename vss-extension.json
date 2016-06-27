@@ -1,159 +1,204 @@
 {
-    "manifestVersion": 1,
-    "id": "vsts-developer-tools-build-tasks",
-    "version": "0.7.3",
-    "publisher": "ms-devlabs",
-    "name": "Build and Release Tasks for Extensions",
-    "description": "Tasks for packaging and publishing Team Services extensions to the Visual Studio Marketplace.",
-    "icons": {
-        "default": "tools-icon.png"
+  "manifestVersion": 1,
+  "id": "vsts-developer-tools-build-tasks",
+  "version": "0.7.4",
+  "publisher": "ms-devlabs",
+  "name": "Build and Release Tasks for Extensions",
+  "description": "Tasks for packaging and publishing Team Services extensions to the Visual Studio Marketplace.",
+  "icons": {
+    "default": "tools-icon.png"
+  },
+  "public": true,
+  "targets": [
+    {
+      "id": "Microsoft.VisualStudio.Services"
+    }
+  ],
+  "scopes": [
+    "vso.build_execute",
+    "vso.gallery_manage"
+  ],
+  "branding": {
+    "theme": "dark",
+    "color": "rgb(164,34,11)"
+  },
+  "categories": [
+    "Build and release"
+  ],
+  "content": {
+    "details": {
+      "path": "overview.md"
     },
-    "public": true,
-    "targets": [
-        {
-            "id": "Microsoft.VisualStudio.Services.Cloud"
-        }
-    ],
-    "scopes": [
-        "vso.build_execute",
-        "vso.gallery_manage"
-    ],
-    "branding": {
-        "theme": "dark",
-        "color": "rgb(164,34,11)"
+    "license": {
+      "path": "license.txt"
+    }
+  },
+  "links": {
+    "repository": {
+      "uri": "https://github.com/Microsoft/vsts-extension-build-release-tasks"
     },
-    "categories": [
-        "Build and release"
-    ],
-    "content": {
-        "details": {
-            "path": "overview.md"
-        },
-        "license": {
-            "path": "license.txt"
-        }
+    "issues": {
+      "uri": "https://github.com/Microsoft/vsts-extension-build-release-tasks/issues"
     },
-    "links": {
-        "repository": {
-            "uri": "https://github.com/Microsoft/vsts-extension-build-release-tasks"
-        },
-        "issues": {
-            "uri": "https://github.com/Microsoft/vsts-extension-build-release-tasks/issues"
-        },
-        "support": {
-            "uri": "https://github.com/Microsoft/vsts-extension-build-release-tasks/issues"
-        } 
+    "support": {
+      "uri": "https://github.com/Microsoft/vsts-extension-build-release-tasks/issues"
+    }
+  },
+  "files": [
+    {
+      "path": "BuildTasks"
     },
-    "files": [
-        {
-            "path": "BuildTasks"
+    {
+      "path": "add-task.png",
+      "addressable": true
+    }
+  ],
+  "contributions": [
+    {
+      "id": "package-extension-build-task",
+      "type": "ms.vss-distributed-task.task",
+      "targets": [
+        "ms.vss-distributed-task.tasks"
+      ],
+      "properties": {
+        "name": "BuildTasks/PackageExtension"
+      }
+    },
+    {
+      "id": "publish-extension-build-task",
+      "type": "ms.vss-distributed-task.task",
+      "targets": [
+        "ms.vss-distributed-task.tasks"
+      ],
+      "properties": {
+        "name": "BuildTasks/PublishExtension"
+      }
+    },
+    {
+      "id": "install-extension-build-task",
+      "type": "ms.vss-distributed-task.task",
+      "targets": [
+        "ms.vss-distributed-task.tasks"
+      ],
+      "properties": {
+        "name": "BuildTasks/InstallExtension"
+      }
+    },
+    {
+      "id": "extension-version-build-task",
+      "type": "ms.vss-distributed-task.task",
+      "targets": [
+        "ms.vss-distributed-task.tasks"
+      ],
+      "properties": {
+        "name": "BuildTasks/ExtensionVersion"
+      }
+    },
+    {
+      "id": "share-extension-build-task",
+      "type": "ms.vss-distributed-task.task",
+      "targets": [
+        "ms.vss-distributed-task.tasks"
+      ],
+      "properties": {
+        "name": "BuildTasks/ShareExtension"
+      }
+    },
+    {
+      "id": "vsts-marketplace-endpoint-type",
+      "type": "ms.vss-endpoint.service-endpoint-type",
+      "targets": [
+        "ms.vss-endpoint.endpoint-types"
+      ],
+      "properties": {
+        "name": "VstsMarketplacePublishing",
+        "displayName": "Marketplace",
+        "url": {
+          "displayName": "Marketplace URL",
+          "value": "https://marketplace.visualstudio.com"
         },
-        {
-            "path": "add-task.png",
-            "addressable": true
-        }
-    ],
-    "contributions": [
-        {
-            "id": "package-extension-build-task",
-            "type": "ms.vss-distributed-task.task",
-            "targets": [
-                "ms.vss-distributed-task.tasks"
-            ],
-            "properties": {
-                "name": "BuildTasks/PackageExtension"
-            }
-        },
-        {
-            "id": "publish-extension-build-task",
-            "type": "ms.vss-distributed-task.task",
-            "targets": [
-                "ms.vss-distributed-task.tasks"
-            ],
-            "properties": {
-                "name": "BuildTasks/PublishExtension"
-            }
-        },
-        {
-            "id": "install-extension-build-task",
-            "type": "ms.vss-distributed-task.task",
-            "targets": [
-                "ms.vss-distributed-task.tasks"
-            ],
-            "properties": {
-                "name": "BuildTasks/InstallExtension"
-            }
-        },
-        {
-            "id": "extension-version-build-task",
-            "type": "ms.vss-distributed-task.task",
-            "targets": [
-                "ms.vss-distributed-task.tasks"
-            ],
-            "properties": {
-                "name": "BuildTasks/ExtensionVersion"
-            }
-        },
-        {
-            "id": "share-extension-build-task",
-            "type": "ms.vss-distributed-task.task",
-            "targets": [
-                "ms.vss-distributed-task.tasks"
-            ],
-            "properties": {
-                "name": "BuildTasks/ShareExtension"
-            }
-        },
-        {
-            "id": "vsts-marketplace-endpoint-type",
-            "type": "ms.vss-endpoint.service-endpoint-type",
-            "targets": [
-                "ms.vss-endpoint.endpoint-types"
-            ],
-            "properties": {
-                "name": "VstsMarketplacePublishing",
-                "displayName": "Marketplace",
-                "url": {
-                    "displayName": "Marketplace URL",
-                    "value": "https://marketplace.visualstudio.com"
+        "authenticationSchemes": [
+          {
+            "type": "ms.vss-endpoint.endpoint-auth-scheme-basic",
+            "inputDescriptors": [
+              {
+                "id": "username",
+                "name": "Username",
+                "description": "Username",
+                "inputMode": "textbox",
+                "isConfidential": false,
+                "validation": {
+                  "isRequired": false,
+                  "dataType": "string",
+                  "maxLength": 300
                 },
-                "authenticationSchemes": [
-                    {
-                        "type": "ms.vss-endpoint.endpoint-auth-scheme-basic",
-                        "inputDescriptors": [
-                            {
-                                "id": "username",
-                                "name": "Username",
-                                "description": "Username",
-                                "inputMode": "textbox",
-                                "isConfidential": false,
-                                "validation": {
-                                    "isRequired": false,
-                                    "dataType": "string",
-                                    "maxLength": 300
-                                },
-                                "values": {
-                                    "inputId": "username",
-                                    "isDisabled": true,
-                                    "defaultValue": ""
-                                }
-                            },
-                            {
-                                "id": "password",
-                                "name": "Personal access token",
-                                "description": "Team Services personal access token. Requires at least the Marketplace (publish) scope.",
-                                "inputMode": "passwordbox",
-                                "isConfidential": true,
-                                "validation": {
-                                    "isRequired": true,
-                                    "dataType": "string",
-                                    "maxLength": 300
-                                }
-                            }
-                        ]
-                    }
-                ]
-            }
-        }
-    ]
+                "values": {
+                  "inputId": "username",
+                  "isDisabled": true,
+                  "defaultValue": ""
+                }
+              },
+              {
+                "id": "password",
+                "name": "Personal access token",
+                "description": "Team Services personal access token. Requires at least the Marketplace (publish) scope.",
+                "inputMode": "passwordbox",
+                "isConfidential": true,
+                "validation": {
+                  "isRequired": true,
+                  "dataType": "string",
+                  "maxLength": 300
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "tfs-marketplace-endpoint-type",
+      "type": "ms.vss-endpoint.service-endpoint-type",
+      "targets": [
+        "ms.vss-endpoint.endpoint-types"
+      ],
+      "properties": {
+        "name": "TFSMarketplacePublishing",
+        "displayName": "TFS Local Gallery",
+        "url": {
+          "displayName": "TFS Server Url"
+        },
+        "authenticationSchemes": [
+          {
+            "type": "ms.vss-endpoint.endpoint-auth-scheme-basic",
+            "inputDescriptors": [
+              {
+                "id": "username",
+                "name": "Username",
+                "description": "Username",
+                "inputMode": "textbox",
+                "isConfidential": false,
+                "validation": {
+                  "isRequired": true,
+                  "dataType": "string",
+                  "maxLength": 300
+                }
+              },
+              {
+                "id": "password",
+                "name": "Password",
+                "description": "Password",
+                "inputMode": "passwordbox",
+                "isConfidential": true,
+                "validation": {
+                  "isRequired": true,
+                  "dataType": "string",
+                  "maxLength": 300
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
 }
