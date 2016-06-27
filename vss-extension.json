@@ -1,7 +1,7 @@
 {
   "manifestVersion": 1,
   "id": "vsts-developer-tools-build-tasks",
-  "version": "0.7.3",
+  "version": "0.7.4",
   "publisher": "ms-devlabs",
   "name": "Build and Release Tasks for Extensions",
   "description": "Tasks for packaging and publishing Team Services extensions to the Visual Studio Marketplace.",
@@ -11,7 +11,7 @@
   "public": true,
   "targets": [
     {
-      "id": "Microsoft.VisualStudio.Services.Cloud"
+      "id": "Microsoft.VisualStudio.Services"
     }
   ],
   "scopes": [
@@ -112,7 +112,7 @@
       ],
       "properties": {
         "name": "VstsMarketplacePublishing",
-        "displayName": "VSTS Marketplace",
+        "displayName": "Marketplace",
         "url": {
           "displayName": "Marketplace URL",
           "value": "https://marketplace.visualstudio.com"
@@ -163,7 +163,7 @@
       ],
       "properties": {
         "name": "TFSMarketplacePublishing",
-        "displayName": "TFS Marketplace",
+        "displayName": "TFS Local Gallery",
         "url": {
           "displayName": "TFS Server Url"
         },
@@ -186,7 +186,7 @@
               {
                 "id": "password",
                 "name": "Password",
-                "description": "Password.",
+                "description": "Password",
                 "inputMode": "passwordbox",
                 "isConfidential": true,
                 "validation": {

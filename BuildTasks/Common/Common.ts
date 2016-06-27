@@ -205,15 +205,15 @@ export function getMarketplaceEndpointDetails(inputFieldName): any {
  * Sets the marketplace  endpoint details (url, credentials) for the toolrunner.
  *
  * @param  {ToolRunner} tfx
- * @param  {string="connectedServiceName"} inputFieldName
  * @returns string
  */
 export function setTfxMarketplaceArguments(tfx: ToolRunner) {
-    const connectTo = tl.getInput("connectTo", true) || "VsTeam";
+    const connectTo = tl.getInput("connectTo", false) || "VsTeam";
     let galleryEndpoint;
 
     if (connectTo === "VsTeam") {
         galleryEndpoint = getMarketplaceEndpointDetails("connectedServiceName");
+        tfx.arg(["--service-url", galleryEndpoint.url]);
         tfx.arg(["--auth-type", "pat"]);
         tfx.arg(["--token", galleryEndpoint.password]);
     } else {

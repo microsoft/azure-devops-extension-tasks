@@ -16,7 +16,7 @@
   "version": {
     "Major": "0",
     "Minor": "7",
-    "Patch": "3"
+    "Patch": "4"
   },
   "minimumAgentVersion": "1.83.0",
   "groups": [
@@ -60,7 +60,7 @@
     {
       "name": "connectedServiceNameTFS",
       "type": "connectedService:TFSMarketplacePublishing",
-      "label": "TFS Marketplace connection",
+      "label": "TFS Local Gallery connection",
       "required": true,
       "helpMarkDown": "Service endpoint connection to install the extension. Temporarily unavailable.",
       "visibleRule": "connectTo=TFS"
