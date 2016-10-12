@@ -12,3 +12,5 @@ BuildTasks/*Extension*/common.ts
 
 /.vs
 *.sqlite
+/slnx.VC.VC.opendb
+/slnx.VC.db

@@ -184,6 +184,20 @@
       "groupName": "manifest"
     },
     {
+      "name": "extensionPricing",
+      "type": "pickList",
+      "label": "Extension pricing",
+      "defaultValue": "default",
+      "helpMarkDown": "Overrides extension pricing (Free vs Paid). If not specified, the extension pricing specified in the manifest will be used",
+      "required": false,
+      "groupName": "manifest",
+      "options": {
+        "default": "Not set",
+        "free": "Free",
+        "paid": "Paid"
+      }
+    },
+    {
       "name": "outputVariable",
       "type": "string",
       "label": "Output Variable",

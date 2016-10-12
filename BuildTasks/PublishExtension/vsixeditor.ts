@@ -13,9 +13,11 @@ export class VSIXEditor {
 
     private versionNumber: string = null;
     private id: string = null;
+    private idTag: string = null;
     private publisher: string = null;
     private extensionName: string = null;
     private extensionVisibility: string = null;
+    private extensionPricing: string = null;
     private updateTasksVersion: boolean = true;
 
     constructor(public inputFile: string,
@@ -110,10 +112,11 @@ export class VSIXEditor {
 
             if (this.versionNumber) { identity._Version = this.versionNumber; }
             if (this.id) { identity._Id = this.id; }
+            if (this.idTag) { identity._Id += this.idTag; }
             if (this.publisher) { identity._Publisher = this.publisher; }
             if (this.extensionName) { vsixmanifest.PackageManifest.Metadata.DisplayName = this.extensionName; }
             if (this.extensionVisibility && this.extensionVisibility !== "default") {
-                let flagsEditor = new GalleryFlagsEditor(vsixmanifest.PackageManifest.Metadata.GalleryFlags);
+                const flagsEditor = new GalleryFlagsEditor(vsixmanifest.PackageManifest.Metadata.GalleryFlags);
 
                 const isPublic = this.extensionVisibility.indexOf("public") >= 0;
                 const isPreview = this.extensionVisibility.indexOf("preview") >= 0;
@@ -134,12 +137,29 @@ export class VSIXEditor {
 
                 vsixmanifest.PackageManifest.Metadata.GalleryFlags = flagsEditor.toString();
             }
+            if (this.extensionPricing && this.extensionPricing !== "default") {
+                const flagsEditor = new GalleryFlagsEditor(vsixmanifest.PackageManifest.Metadata.GalleryFlags);
+
+                const isFree = this.extensionPricing.indexOf("free") >= 0;
+                const isPaid = this.extensionPricing.indexOf("paid") >= 0;
+
+                if (isFree) {
+                    flagsEditor.removePaidFlag();
+                }
+
+                if (isPaid) {
+                    flagsEditor.addPaidFlag();
+                }
+
+                vsixmanifest.PackageManifest.Metadata.GalleryFlags = flagsEditor.toString();
+            }
 
             vsixManifestData = x2js.js2xml(vsixmanifest);
             let manifestData = new ManifestData(identity._Version,
                 identity._Id,
                 identity._Publisher,
                 this.extensionVisibility,
+                this.extensionPricing,
                 vsixmanifest.PackageManifest.Metadata.DisplayName,
                 dirPath);
 
@@ -154,9 +174,11 @@ export class VSIXEditor {
     public hasEdits(): boolean {
         return <boolean>(this.versionNumber
             || this.id
+            || this.idTag
             || this.publisher
             || this.extensionName
-            || (this.extensionVisibility && this.extensionVisibility !== "default"));
+            || (this.extensionVisibility && this.extensionVisibility !== "default")
+            || (this.extensionPricing && this.extensionPricing !== "default"));
     }
 
     public editVersion(version: string) {
@@ -174,9 +196,19 @@ export class VSIXEditor {
         this.extensionVisibility = visibility;
     }
 
+    public editExtensionPricing(pricing: string) {
+        this.validateEditMode();
+        this.extensionPricing = pricing;
+    }
+
     public editId(id: string) {
         this.validateEditMode();
         this.id = id;
+    }
+
+    public editIdTag(tag: string) {
+        this.validateEditMode();
+        this.idTag = tag;
     }
 
     public editPublisher(publisher: string) {
@@ -200,6 +232,7 @@ class ManifestData {
         public id: string,
         public publisher: string,
         public visibility: string,
+        public pricing: string,
         public name: string,
         public dirPath: string) { }
 
@@ -251,6 +284,14 @@ class GalleryFlagsEditor {
 
     removePublicFlag() {
         this.removeFlag("Public");
+    }
+
+    removePaidFlag() {
+        this.removeFlag("Paid");
+    }
+
+    addPaidFlag() {
+        this.addFlag("Paid");
     }
 
     addPreviewFlag() {
