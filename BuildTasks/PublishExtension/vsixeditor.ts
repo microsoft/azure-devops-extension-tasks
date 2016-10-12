@@ -13,6 +13,7 @@ export class VSIXEditor {
 
     private versionNumber: string = null;
     private id: string = null;
+    private idTag: string = null;
     private publisher: string = null;
     private extensionName: string = null;
     private extensionVisibility: string = null;
@@ -110,6 +111,7 @@ export class VSIXEditor {
 
             if (this.versionNumber) { identity._Version = this.versionNumber; }
             if (this.id) { identity._Id = this.id; }
+            if (this.idTag) { identity._Id += this.idTag; }
             if (this.publisher) { identity._Publisher = this.publisher; }
             if (this.extensionName) { vsixmanifest.PackageManifest.Metadata.DisplayName = this.extensionName; }
             if (this.extensionVisibility && this.extensionVisibility !== "default") {
@@ -138,6 +140,7 @@ export class VSIXEditor {
             vsixManifestData = x2js.js2xml(vsixmanifest);
             let manifestData = new ManifestData(identity._Version,
                 identity._Id,
+                identity._IdTag,
                 identity._Publisher,
                 this.extensionVisibility,
                 vsixmanifest.PackageManifest.Metadata.DisplayName,
@@ -179,6 +182,11 @@ export class VSIXEditor {
         this.id = id;
     }
 
+    public editIdTag(tag: string) {
+        this.validateEditMode();
+        this.idTag = tag;
+    }
+
     public editPublisher(publisher: string) {
         this.validateEditMode();
         this.publisher = publisher;
@@ -198,6 +206,7 @@ class ManifestData {
     public outputFileName: string;
     constructor(public version: string,
         public id: string,
+        public idTag: string,
         public publisher: string,
         public visibility: string,
         public name: string,
@@ -205,12 +214,12 @@ class ManifestData {
 
     public createOutputFilePath(outputPath: string): Q.Promise<string> {
         let deferred = Q.defer<string>();
-        let fileName = `${this.publisher}.${this.id}-${this.version}.gen.vsix`;
+        let fileName = `${this.publisher}.${this.id}${this.idTag}-${this.version}.gen.vsix`;
 
         const updateFileName = (fileName: string, iteration: number) => {
             if (iteration > 0) {
                 let gen = "00".substring(0, "00".length - iteration.toString().length) + iteration;
-                fileName = `${this.publisher}.${this.id}-${this.version}.gen${gen}.vsix`;
+                fileName = `${this.publisher}.${this.id}${this.idTag}-${this.version}.gen${gen}.vsix`;
             }
             fs.exists(path.join(outputPath, fileName), result => {
                 if (result) {
