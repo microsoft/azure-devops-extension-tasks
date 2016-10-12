@@ -79,7 +79,25 @@ export function setTfxManifestArguments(tfx: ToolRunner): (() => void) {
         const isPreview = extensionVisibility.indexOf("preview") >= 0;
 
         jsonOverrides.public = isPublic;
-        if (isPreview) { jsonOverrides.galleryFlags = ["Preview"]; };
+
+        if (isPreview) {
+            jsonOverrides.galleryFlags = jsonOverrides.galleryFlags || [];
+            jsonOverrides.galleryFlags = ["Preview"];
+        };
+    }
+
+    const extensionPricing = tl.getInput("extensionPricing", false);
+    if (extensionPricing && extensionPricing !== "default") {
+        tl.debug(`Overriding extension pricing to: ${extensionPricing}`);
+        jsonOverrides = (jsonOverrides || {});
+
+        const isFree = extensionPricing.indexOf("free") >= 0;
+        const isPaid = extensionPricing.indexOf("paid") >= 0;
+
+        if (isPaid) {
+            jsonOverrides.galleryFlags = jsonOverrides.galleryFlags || [];
+            jsonOverrides.galleryFlags.Push("Paid");
+        }
     }
 
     let extensionVersion = getExtensionVersion();

@@ -17,6 +17,7 @@ export class VSIXEditor {
     private publisher: string = null;
     private extensionName: string = null;
     private extensionVisibility: string = null;
+    private extensionPricing: string = null;
     private updateTasksVersion: boolean = true;
 
     constructor(public inputFile: string,
@@ -136,6 +137,22 @@ export class VSIXEditor {
 
                 vsixmanifest.PackageManifest.Metadata.GalleryFlags = flagsEditor.toString();
             }
+            if (this.extensionPricing && this.extensionPricing !== "default") {
+                let flagsEditor = new GalleryFlagsEditor(vsixmanifest.PackageManifest.Metadata.GalleryFlags);
+
+                const isFree = this.extensionPricing.indexOf("free") >= 0;
+                const isPaid = this.extensionPricing.indexOf("paid") >= 0;
+
+                if (isFree) {
+                    flagsEditor.removePaidFlag();
+                }
+
+                if (isPaid) {
+                    flagsEditor.addPaidFlag();
+                }
+
+                vsixmanifest.PackageManifest.Metadata.GalleryFlags = flagsEditor.toString();
+            }
 
             vsixManifestData = x2js.js2xml(vsixmanifest);
             let manifestData = new ManifestData(identity._Version,
@@ -143,6 +160,7 @@ export class VSIXEditor {
                 identity._IdTag,
                 identity._Publisher,
                 this.extensionVisibility,
+                this.extensionPricing,
                 vsixmanifest.PackageManifest.Metadata.DisplayName,
                 dirPath);
 
@@ -157,9 +175,11 @@ export class VSIXEditor {
     public hasEdits(): boolean {
         return <boolean>(this.versionNumber
             || this.id
+            || this.idTag
             || this.publisher
             || this.extensionName
-            || (this.extensionVisibility && this.extensionVisibility !== "default"));
+            || (this.extensionVisibility && this.extensionVisibility !== "default")
+            || (this.extensionPricing && this.extensionPricing !== "default"));
     }
 
     public editVersion(version: string) {
@@ -175,6 +195,11 @@ export class VSIXEditor {
     public editExtensionVisibility(visibility: string) {
         this.validateEditMode();
         this.extensionVisibility = visibility;
+    }
+
+    public editExtensionPricing(pricing: string) {
+        this.validateEditMode();
+        this.extensionPricing = pricing;
     }
 
     public editId(id: string) {
@@ -209,6 +234,7 @@ class ManifestData {
         public idTag: string,
         public publisher: string,
         public visibility: string,
+        public pricing: string,
         public name: string,
         public dirPath: string) { }
 
@@ -260,6 +286,14 @@ class GalleryFlagsEditor {
 
     removePublicFlag() {
         this.removeFlag("Public");
+    }
+
+    removePaidFlag() {
+        this.removeFlag("Paid");
+    }
+
+    addPaidFlag() {
+        this.addFlag("Paid");
     }
 
     addPreviewFlag() {

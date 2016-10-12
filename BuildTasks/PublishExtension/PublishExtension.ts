@@ -35,6 +35,7 @@ common.runTfx(tfx => {
 
         const extensionName = tl.getInput("extensionName", false);
         const extensionVisibility = tl.getInput("extensionVisibility", false);
+        const extensionPricing = tl.getInput("extensionPricing", false);
         const extensionVersion = common.getExtensionVersion();
 
         const updateTasksVersion = tl.getBoolInput("updateTasksVersion", false);
@@ -43,6 +44,7 @@ common.runTfx(tfx => {
             || extensionId
             || extensionTag
             || extensionName
+            || (extensionPricing && extensionPricing !== "default")
             || (extensionVisibility && extensionVisibility !== "default")
             || extensionVersion) {
 
@@ -51,10 +53,11 @@ common.runTfx(tfx => {
             ve.startEdit();
 
             if (publisher) { ve.editPublisher(publisher); }
-            if (extensionId) { ve.editId(extensionId); } 
+            if (extensionId) { ve.editId(extensionId); }
             if (extensionTag) { ve.editIdTag(extensionTag); }
             if (extensionName) { ve.editExtensionName(extensionName); }
             if (extensionVisibility) { ve.editExtensionVisibility(extensionVisibility); }
+            if (extensionPricing) { ve.editExtensionVisibility(extensionPricing); }
             if (extensionVersion) {
                 ve.editVersion(extensionVersion);
                 ve.editUpdateTasksVersion(updateTasksVersion);

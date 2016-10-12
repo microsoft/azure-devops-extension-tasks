@@ -42,4 +42,3 @@ common.runTfx(tfx => {
         tl.setResult(tl.TaskResult.Failed, `Error occurred while updating tasks version: ${err}`);
     });
 });
-
