@@ -57,7 +57,7 @@ common.runTfx(tfx => {
             if (extensionTag) { ve.editIdTag(extensionTag); }
             if (extensionName) { ve.editExtensionName(extensionName); }
             if (extensionVisibility) { ve.editExtensionVisibility(extensionVisibility); }
-            if (extensionPricing) { ve.editExtensionVisibility(extensionPricing); }
+            if (extensionPricing) { ve.editExtensionPricing(extensionPricing); }
             if (extensionVersion) {
                 ve.editVersion(extensionVersion);
                 ve.editUpdateTasksVersion(updateTasksVersion);

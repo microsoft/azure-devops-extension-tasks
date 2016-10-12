@@ -157,7 +157,6 @@ export class VSIXEditor {
             vsixManifestData = x2js.js2xml(vsixmanifest);
             let manifestData = new ManifestData(identity._Version,
                 identity._Id,
-                identity._IdTag,
                 identity._Publisher,
                 this.extensionVisibility,
                 this.extensionPricing,
@@ -231,7 +230,6 @@ class ManifestData {
     public outputFileName: string;
     constructor(public version: string,
         public id: string,
-        public idTag: string,
         public publisher: string,
         public visibility: string,
         public pricing: string,
@@ -240,12 +238,12 @@ class ManifestData {
 
     public createOutputFilePath(outputPath: string): Q.Promise<string> {
         let deferred = Q.defer<string>();
-        let fileName = `${this.publisher}.${this.id}${this.idTag}-${this.version}.gen.vsix`;
+        let fileName = `${this.publisher}.${this.id}-${this.version}.gen.vsix`;
 
         const updateFileName = (fileName: string, iteration: number) => {
             if (iteration > 0) {
                 let gen = "00".substring(0, "00".length - iteration.toString().length) + iteration;
-                fileName = `${this.publisher}.${this.id}${this.idTag}-${this.version}.gen${gen}.vsix`;
+                fileName = `${this.publisher}.${this.id}-${this.version}.gen${gen}.vsix`;
             }
             fs.exists(path.join(outputPath, fileName), result => {
                 if (result) {
