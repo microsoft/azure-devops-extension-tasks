@@ -82,7 +82,7 @@ export function setTfxManifestArguments(tfx: ToolRunner): (() => void) {
 
         if (isPreview) {
             jsonOverrides.galleryFlags = jsonOverrides.galleryFlags || [];
-            jsonOverrides.galleryFlags = ["Preview"];
+            jsonOverrides.galleryFlags.Push("Preview");
         };
     }
 

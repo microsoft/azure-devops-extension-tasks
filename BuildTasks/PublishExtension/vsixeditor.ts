@@ -116,7 +116,7 @@ export class VSIXEditor {
             if (this.publisher) { identity._Publisher = this.publisher; }
             if (this.extensionName) { vsixmanifest.PackageManifest.Metadata.DisplayName = this.extensionName; }
             if (this.extensionVisibility && this.extensionVisibility !== "default") {
-                let flagsEditor = new GalleryFlagsEditor(vsixmanifest.PackageManifest.Metadata.GalleryFlags);
+                const flagsEditor = new GalleryFlagsEditor(vsixmanifest.PackageManifest.Metadata.GalleryFlags);
 
                 const isPublic = this.extensionVisibility.indexOf("public") >= 0;
                 const isPreview = this.extensionVisibility.indexOf("preview") >= 0;
@@ -138,7 +138,7 @@ export class VSIXEditor {
                 vsixmanifest.PackageManifest.Metadata.GalleryFlags = flagsEditor.toString();
             }
             if (this.extensionPricing && this.extensionPricing !== "default") {
-                let flagsEditor = new GalleryFlagsEditor(vsixmanifest.PackageManifest.Metadata.GalleryFlags);
+                const flagsEditor = new GalleryFlagsEditor(vsixmanifest.PackageManifest.Metadata.GalleryFlags);
 
                 const isFree = this.extensionPricing.indexOf("free") >= 0;
                 const isPaid = this.extensionPricing.indexOf("paid") >= 0;
