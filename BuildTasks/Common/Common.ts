@@ -82,7 +82,7 @@ export function setTfxManifestArguments(tfx: ToolRunner): (() => void) {
 
         if (isPreview) {
             jsonOverrides.galleryFlags = jsonOverrides.galleryFlags || [];
-            jsonOverrides.galleryFlags.Push("Preview");
+            jsonOverrides.galleryFlags.push("Preview");
         };
     }
 
@@ -96,7 +96,7 @@ export function setTfxManifestArguments(tfx: ToolRunner): (() => void) {
 
         if (isPaid) {
             jsonOverrides.galleryFlags = jsonOverrides.galleryFlags || [];
-            jsonOverrides.galleryFlags.Push("Paid");
+            jsonOverrides.galleryFlags.push("Paid");
         }
     }
 
