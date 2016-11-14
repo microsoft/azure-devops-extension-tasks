@@ -1,4 +1,4 @@
-///<reference path="../typings/main.d.ts" />
+///<reference path="../typings/index.d.ts" />
 import tl = require("vsts-task-lib/task");
 import common = require("./common");
 

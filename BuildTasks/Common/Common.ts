@@ -1,10 +1,10 @@
-///<reference path="../typings/main.d.ts" />
+///<reference path="../typings/index.d.ts" />
 
 //  W A R N I N G!
 // This file is copied to each build task.
 // Any change should be made in the file that is in the Common folder
 
-import os = require("os");
+import * as os from "os";
 import path = require("path");
 import stream = require("stream");
 import fs = require("fs");
@@ -143,7 +143,7 @@ export function runTfx(cmd: (tfx: ToolRunner) => void) {
         tfxPath = tl.which("tfx");
         if (tfxPath) {
             console.log(`Found tfx globally ${tfxPath}`);
-            tfx = tl.createToolRunner(tfxPath);
+            tfx = new trl.ToolRunner(tfxPath);
             tryRunCmd(tfx);
             return;
         }
@@ -160,18 +160,18 @@ export function runTfx(cmd: (tfx: ToolRunner) => void) {
     tfxPath = tl.which(tfxLocalPath);
     if (tfxPath) {
         console.log(`Found tfx in current task folder ${tfxPath}`);
-        tfx = tl.createToolRunner(tfxPath);
+        tfx = new trl.ToolRunner(tfxPath);
         tryRunCmd(tfx);
         return;
     }
 
     console.log(`Could not find tfx command. Preparing to install it in current task folder`);
 
-    const npm = tl.createToolRunner(tl.which("npm", true));
+    const npm = new trl.ToolRunner(tl.which("npm", true));
     npm.arg(["install", "tfx-cli"]);
 
     npm.exec().then(code => {
-        tfx = tl.createToolRunner(tl.which(tfxLocalPath, true));
+        tfx = new trl.ToolRunner(tl.which(tfxLocalPath, true));
         tryRunCmd(tfx);
     }).fail(err => {
         tl.setResult(tl.TaskResult.Failed, `Error installing tfx: ${err}`);
