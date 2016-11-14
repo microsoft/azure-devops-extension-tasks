@@ -14,3 +14,4 @@ BuildTasks/*Extension*/common.ts
 *.sqlite
 /slnx.VC.VC.opendb
 /slnx.VC.db
+.taskkey

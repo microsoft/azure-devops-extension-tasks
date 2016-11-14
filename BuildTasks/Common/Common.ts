@@ -5,12 +5,12 @@
 // Any change should be made in the file that is in the Common folder
 
 import * as os from "os";
-import path = require("path");
-import stream = require("stream");
-import fs = require("fs");
-import Q = require("q");
-import tl = require("vsts-task-lib/task");
-import trl = require("vsts-task-lib/toolrunner");
+import * as path from "path";
+import * as stream from "stream";
+import * as fs from "fs";
+import * as Q from "q";
+import * as tl from "vsts-task-lib/task";
+import * as trl from "vsts-task-lib/toolrunner";
 import ToolRunner = trl.ToolRunner;
 
 function writeBuildTempFile(taskName: string, data: any): string {
@@ -255,7 +255,7 @@ export class TfxJsonOutputStream extends stream.Writable {
     messages: string[] = [];
     commandline: string = "";
 
-    constructor(public silent = false) {
+    constructor(public silent: boolean) {
         super();
     }
 
@@ -328,7 +328,7 @@ function getTasksManifestPaths(manifestFile?: string): Q.Promise<string[]> {
                 return taskPaths.map(taskPath => path.join(rootFolder, taskPath, "task.json"));
             });
         })
-    ).spread((...results: string[][]) => {
+    ).spread((results: string[][]) => {
         // Merge the different contributions from different manifests
         return [].concat.apply([], results);
     });
