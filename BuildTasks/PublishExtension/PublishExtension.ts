@@ -107,7 +107,7 @@ common.runTfx(tfx => {
 
             const publishedVsix = fileType === "manifest" ? json.packaged : vsixOutput;
 
-            if (fileType === "manifest" && outputVariable) {
+            if (outputVariable) {
                 tl.setVariable(outputVariable, publishedVsix);
             }
 
