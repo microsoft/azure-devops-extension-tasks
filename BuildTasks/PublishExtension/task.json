@@ -16,7 +16,7 @@
   "version": {
     "Major": "0",
     "Minor": "7",
-    "Patch": "4"
+    "Patch": "6"
   },
   "minimumAgentVersion": "1.83.0",
   "groups": [
@@ -204,8 +204,7 @@
       "defaultValue": "Extension.OutputPath",
       "required": false,
       "helpMarkDown": "The variable name to assign the location of the generated package to.",
-      "groupName": "manifest",
-      "visibleRule": "fileType = manifest"
+      "groupName": "manifest"
     },
     {
       "name": "shareWith",
