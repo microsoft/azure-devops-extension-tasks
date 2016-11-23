@@ -165,16 +165,34 @@
         "name": "TFSMarketplacePublishing",
         "displayName": "TFS Local Gallery",
         "url": {
-          "displayName": "TFS Server Url"
+          "displayName": "TFS Server Url",
+          "description": "The TFS Server Url, e.g. `https://servername.domain.local/tfs`."
         },
         "authenticationSchemes": [
+          {
+            "type": "ms.vss-endpoint.endpoint-auth-scheme-token",
+            "inputDescriptors": [
+              {
+                "id": "apitoken",
+                "name": "Personal Access Token",
+                "description": "Personal Access Token, supported on TFS 2017 and higher.",
+                "inputMode": "passwordbox",
+                "isConfidential": true,
+                "validation": {
+                  "isRequired": true,
+                  "dataType": "string",
+                  "maxLength": 300
+                }
+              }
+            ]
+          },
           {
             "type": "ms.vss-endpoint.endpoint-auth-scheme-basic",
             "inputDescriptors": [
               {
                 "id": "username",
                 "name": "Username",
-                "description": "Username",
+                "description": "Username, supported on TFS 2015 update 2 and higher when configured for Basic Authentication.",
                 "inputMode": "textbox",
                 "isConfidential": false,
                 "validation": {

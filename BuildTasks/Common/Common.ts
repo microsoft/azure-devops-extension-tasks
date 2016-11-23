@@ -211,11 +211,13 @@ export function getMarketplaceEndpointDetails(inputFieldName): any {
     const auth = tl.getEndpointAuthorization(marketplaceEndpoint, false);
     const password = auth.parameters["password"];
     const username = auth.parameters["username"];
+    const apitoken = auth.parameters["apitoken"];
 
     return {
         "url": hostUrl,
         "username": username,
-        "password": password
+        "password": password,
+        "apitoken": apitoken
     };
 }
 
@@ -237,9 +239,16 @@ export function setTfxMarketplaceArguments(tfx: ToolRunner) {
     } else {
         galleryEndpoint = getMarketplaceEndpointDetails("connectedServiceNameTFS");
         tfx.arg(["--service-url", galleryEndpoint.url]);
-        tfx.arg(["--auth-type", "basic"]);
-        tfx.arg(["--username", galleryEndpoint.username]);
-        tfx.arg(["--password", galleryEndpoint.password]);
+
+        if (galleryEndpoint.username) {
+            tfx.arg(["--auth-type", "basic"]);
+            tfx.arg(["--username", galleryEndpoint.username]);
+            tfx.arg(["--password", galleryEndpoint.password]);
+        }
+        else {
+            tfx.arg(["--auth-type", "pat"]);
+            tfx.arg(["--token", galleryEndpoint.apitoken]);
+        }
     }
 }
 
