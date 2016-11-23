@@ -1,6 +1,6 @@
-///<reference path="../typings/main.d.ts" />
-import tl = require("vsts-task-lib/task");
-import common = require("./common");
+///<reference path="../typings/index.d.ts" />
+import * as tl from "vsts-task-lib/task";
+import * as common from "./common";
 
 common.runTfx(tfx => {
     tfx.arg(["extension", "install"]);
@@ -25,7 +25,7 @@ common.runTfx(tfx => {
 
     // Sanitize accounts list
     const accounts = accountsArg.split(",").map(a => a.replace(/\s/g, "")).filter(a => a.length > 0);
-    tfx.arg(["--accounts", ...accounts]);
+    tfx.arg(["--accounts"].concat(accounts));
 
     // Aditional arguments
     tfx.arg(tl.getInput("arguments", false));

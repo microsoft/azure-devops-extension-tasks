@@ -1,9 +1,9 @@
-///<reference path="../typings/main.d.ts" />
-import Q = require("q");
-import tl = require("vsts-task-lib/task");
-import common = require("./common");
-import vsixeditor = require("./vsixeditor");
-import path = require("path");
+///<reference path="../typings/index.d.ts" />
+import * as Q from "q";
+import * as tl from "vsts-task-lib/task";
+import * as common from "./common";
+import * as vsixeditor from "./vsixeditor";
+import * as path from "path";
 
 common.runTfx(tfx => {
     tfx.arg(["extension", "publish", "--json"]);
@@ -87,7 +87,7 @@ common.runTfx(tfx => {
             // Only handle shareWith if the extension is not public
             // Sanitize accounts to share with
             let accounts = shareWith.split(",").map(a => a.replace(/\s/g, "")).filter(a => a.length > 0);
-            tfx.argIf(accounts && accounts.length > 0, ["--share-with", ...accounts]);
+            tfx.argIf(accounts && accounts.length > 0, ["--share-with"].concat(accounts));
         } else {
             tl.warning("Ignoring Share - Not available on public extensions.");
         }
@@ -101,7 +101,7 @@ common.runTfx(tfx => {
     if (cwd) { tl.cd(cwd); }
 
     runBeforeTfx.then(() => {
-        const outputStream = new common.TfxJsonOutputStream();
+        const outputStream = new common.TfxJsonOutputStream(true);
         tfx.exec(<any>{ outStream: outputStream, failOnStdErr: true }).then(code => {
             const json = JSON.parse(outputStream.jsonString);
 

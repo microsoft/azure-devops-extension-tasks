@@ -1,11 +1,11 @@
 {
-    "name": "vsts-developer-tools",
-    "version": "0.7.6",
-    "description": "Visual Studio Team Services Build and Release Tasks for Extensions",
-    "keywords": [
-        "vsts",
-        "tfs"
-    ],
+  "name": "vsts-developer-tools",
+  "version": "0.7.6",
+  "description": "Visual Studio Team Services Build and Release Tasks for Extensions",
+  "keywords": [
+    "vsts",
+    "tfs"
+  ],
   "scripts": {
     "initdev:npm": "npm install",
     "initdev:typings": "pushd BuildTasks && typings install && popd",
@@ -15,29 +15,33 @@
     "compile:tasks": "tsc --project BuildTasks",
     "postcompile:tasks": "npm run lint:tasks",
     "lint:tasks": "tslint -c tslint.json \"BuildTasks/!(typings)/*.ts",
-    "prelink:tasks": "mkdirp dist/_temp/node_modules && pushd \"dist/_temp\" && npm install vsts-task-lib && popd",
+    "prelink:tasks": "mkdirp dist/_temp/node_modules && pushd \"dist/_temp\" && npm install vsts-task-lib && npm install q && popd",
     "link:tasks": "node scripts/copyfilesToBuildTasks -u 2 dist/_temp/node_modules/**/* dist/BuildTasks",
     "postlink:tasks": "rimraf dist/_temp",
     "link:tasks:publish": "pushd \"dist/BuildTasks/PublishExtension\" && npm install && popd",
     "content:tasks": "copyfiles \"./BuildTasks/*Extension*/**/!(*.ts)\" dist",
     "content:extension:tasks": "copyfiles vss-extension.json *.md license.txt tools-icon.png add-task.png dist",
     "build:tasks": "npm run clean && npm run build:tasks:noclean",
-    "build:tasks:noclean": "npm run compile:tasks && npm run content:tasks && npm run content:extension:tasks  && npm run link:tasks && npm run link:tasks:publish",
+    "build:tasks:noclean": "npm run prelink:tasks && npm run compile:tasks && npm run content:tasks && npm run content:extension:tasks  && npm run link:tasks && npm run link:tasks:publish",
     "package:tasks": "tfx extension create --root dist --output-path dist --manifest-globs vss-extension.json",
     "build:all": "npm run build:tasks",
     "package:all": "npm run package:tasks"
   },
-    "author": "Microsoft Corporation",
-    "license": "MIT",
-    "devDependencies": {
-        "copyfiles": "^0.2.1",
-        "mkdirp": "^0.5.1",
-        "q": "^1.4.1",
-        "rimraf": "^2.5.1",
-        "tfx-cli": "^0.3.20",
-        "tsconfig-glob": "^0.4.0",
-        "tslint": "^3.6.0",
-        "typescript": "^1.7.5",
-        "typings": "^0.6.6"
-    }
+  "author": "Microsoft Corporation",
+  "license": "MIT",
+  "devDependencies": {
+    "copyfiles": "^1.0.0",
+    "mkdirp": "^0.5.1",
+    "q": "^1.4.1",
+    "rimraf": "^2.5.4",
+    "tfx-cli": "^0.3.40",
+    "tsconfig-glob": "^0.4.3",
+    "tslint": "^3.15.1",
+    "typescript": "^2.0.9",
+    "typings": "^2.0.0"
+  },
+  "dependencies": {
+    "q": "^1.4.1",
+    "vsts-task-lib": "^1.1.0"
+  }
 }

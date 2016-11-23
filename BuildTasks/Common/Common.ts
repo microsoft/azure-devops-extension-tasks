@@ -1,16 +1,16 @@
-///<reference path="../typings/main.d.ts" />
+///<reference path="../typings/index.d.ts" />
 
 //  W A R N I N G!
 // This file is copied to each build task.
 // Any change should be made in the file that is in the Common folder
 
-import os = require("os");
-import path = require("path");
-import stream = require("stream");
-import fs = require("fs");
-import Q = require("q");
-import tl = require("vsts-task-lib/task");
-import trl = require("vsts-task-lib/toolrunner");
+import * as os from "os";
+import * as path from "path";
+import * as stream from "stream";
+import * as fs from "fs";
+import * as Q from "q";
+import * as tl from "vsts-task-lib/task";
+import * as trl from "vsts-task-lib/toolrunner";
 import ToolRunner = trl.ToolRunner;
 
 function writeBuildTempFile(taskName: string, data: any): string {
@@ -143,7 +143,7 @@ export function runTfx(cmd: (tfx: ToolRunner) => void) {
         tfxPath = tl.which("tfx");
         if (tfxPath) {
             console.log(`Found tfx globally ${tfxPath}`);
-            tfx = tl.createToolRunner(tfxPath);
+            tfx = new trl.ToolRunner(tfxPath);
             tryRunCmd(tfx);
             return;
         }
@@ -160,18 +160,18 @@ export function runTfx(cmd: (tfx: ToolRunner) => void) {
     tfxPath = tl.which(tfxLocalPath);
     if (tfxPath) {
         console.log(`Found tfx in current task folder ${tfxPath}`);
-        tfx = tl.createToolRunner(tfxPath);
+        tfx = new trl.ToolRunner(tfxPath);
         tryRunCmd(tfx);
         return;
     }
 
     console.log(`Could not find tfx command. Preparing to install it in current task folder`);
 
-    const npm = tl.createToolRunner(tl.which("npm", true));
+    const npm = new trl.ToolRunner(tl.which("npm", true));
     npm.arg(["install", "tfx-cli"]);
 
     npm.exec().then(code => {
-        tfx = tl.createToolRunner(tl.which(tfxLocalPath, true));
+        tfx = new trl.ToolRunner(tl.which(tfxLocalPath, true));
         tryRunCmd(tfx);
     }).fail(err => {
         tl.setResult(tl.TaskResult.Failed, `Error installing tfx: ${err}`);
@@ -211,11 +211,13 @@ export function getMarketplaceEndpointDetails(inputFieldName): any {
     const auth = tl.getEndpointAuthorization(marketplaceEndpoint, false);
     const password = auth.parameters["password"];
     const username = auth.parameters["username"];
+    const apitoken = auth.parameters["apitoken"];
 
     return {
         "url": hostUrl,
         "username": username,
-        "password": password
+        "password": password,
+        "apitoken": apitoken
     };
 }
 
@@ -237,9 +239,16 @@ export function setTfxMarketplaceArguments(tfx: ToolRunner) {
     } else {
         galleryEndpoint = getMarketplaceEndpointDetails("connectedServiceNameTFS");
         tfx.arg(["--service-url", galleryEndpoint.url]);
-        tfx.arg(["--auth-type", "basic"]);
-        tfx.arg(["--username", galleryEndpoint.username]);
-        tfx.arg(["--password", galleryEndpoint.password]);
+
+        if (galleryEndpoint.username) {
+            tfx.arg(["--auth-type", "basic"]);
+            tfx.arg(["--username", galleryEndpoint.username]);
+            tfx.arg(["--password", galleryEndpoint.password]);
+        }
+        else {
+            tfx.arg(["--auth-type", "pat"]);
+            tfx.arg(["--token", galleryEndpoint.apitoken]);
+        }
     }
 }
 
@@ -255,7 +264,7 @@ export class TfxJsonOutputStream extends stream.Writable {
     messages: string[] = [];
     commandline: string = "";
 
-    constructor(public silent = false) {
+    constructor(public silent: boolean) {
         super();
     }
 
@@ -328,7 +337,7 @@ function getTasksManifestPaths(manifestFile?: string): Q.Promise<string[]> {
                 return taskPaths.map(taskPath => path.join(rootFolder, taskPath, "task.json"));
             });
         })
-    ).spread((...results: string[][]) => {
+    ).spread((results: string[][]) => {
         // Merge the different contributions from different manifests
         return [].concat.apply([], results);
     });

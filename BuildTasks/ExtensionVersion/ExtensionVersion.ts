@@ -1,7 +1,7 @@
-///<reference path="../typings/main.d.ts" />
-import tl = require("vsts-task-lib/task");
-import common = require("./common");
-import stream = require("stream");
+///<reference path="../typings/index.d.ts" />
+import * as tl from "vsts-task-lib/task";
+import * as common from "./common";
+import * as stream from "stream";
 
 const extensionVersionOverrideVariable = tl.getInput("extensionVersionOverride", false);
 const outputVariable = tl.getInput("outputVariable", true);
@@ -39,7 +39,7 @@ if (!usingOverride) {
             tl.cd(cwd);
         }
 
-        const outputStream = new common.TfxJsonOutputStream();
+        const outputStream = new common.TfxJsonOutputStream(false);
         tfx.exec(<any>{ outStream: outputStream, failOnStdErr: true }).then(code => {
             const json = JSON.parse(outputStream.jsonString);
             let version: string = json.versions[0].version;

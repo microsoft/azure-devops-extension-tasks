@@ -1,6 +1,6 @@
-///<reference path="../typings/main.d.ts" />
-import tl = require("vsts-task-lib/task");
-import common = require("./common");
+///<reference path="../typings/index.d.ts" />
+import * as tl from "vsts-task-lib/task";
+import * as common from "./common";
 
 common.runTfx(tfx => {
     tfx.arg(["extension", "create", "--json"]);
@@ -22,7 +22,7 @@ common.runTfx(tfx => {
 
     // Before executing check update on tasks version
     common.checkUpdateTasksVersion().then(() => {
-        const outputStream = new common.TfxJsonOutputStream();
+        const outputStream = new common.TfxJsonOutputStream(false);
 
         tfx.exec(<any>{ outStream: outputStream, failOnStdErr: true }).then(code => {
             const json = JSON.parse(outputStream.jsonString);
