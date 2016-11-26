@@ -26,3 +26,7 @@ The [source](https://github.com/Microsoft/vsts-extension-build-release-tasks) fo
 ## Contributors
 
 This extension was created by Microsoft with help from the community. We'd like to thank Wouter de Kort and Jesse Houwing for their contributions.
+
+## Feedback & Issues
+
+If you have feedback or issues, please [send an email](mailto:vsointegration@microsoft.com) or file an issue on [GitHub](https://github.com/Microsoft/vsts-extension-build-release-tasks/issues)
