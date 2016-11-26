@@ -21,7 +21,7 @@ If you plan to publish to the Marketplace, you will need to [create a personal a
 
 ## Learn more
 
-The [source](https://github.com/Microsoft/vsts-extension-build-release-tasks) for this extension is on GitHub. Take, fork, and extend.
+The [source](https://github.com/Microsoft/vsts-extension-build-release-tasks) for this extension is on GitHub. Take, fork and extend and send us a pull request with your improvements.
 
 ## Contributors
 
