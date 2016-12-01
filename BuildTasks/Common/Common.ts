@@ -9,6 +9,7 @@ import * as path from "path";
 import * as stream from "stream";
 import * as fs from "fs";
 import * as Q from "q";
+import * as mkdirp from "mkdirp";
 import * as tl from "vsts-task-lib/task";
 import * as trl from "vsts-task-lib/toolrunner";
 import ToolRunner = trl.ToolRunner;
@@ -149,26 +150,35 @@ export function runTfx(cmd: (tfx: ToolRunner) => void) {
         }
     }
 
-    // Check the local tfx to see if it is included in task
-    let tfxLocalPath = "node_modules/.bin/tfx";
+    // Check the local tfx to see if it is installed in the workfolder/_tools folder
+    let agentToolsPath = path.join(tl.getVariable("Agent.Workfolder"), "_tools");
+    let tfxLocalPath = path.join(agentToolsPath, "node_modules/.bin/tfx");
+
     // On windows we are looking for tfx.cmd
     if (os.platform().toLowerCase().indexOf("win") >= 0) {
         tfxLocalPath += ".cmd";
     }
 
-    console.log("Checking tfx in current task folder");
+    console.log(`Checking tfx under: ${tfxLocalPath}`);
     tfxPath = tl.which(tfxLocalPath);
     if (tfxPath) {
-        console.log(`Found tfx in current task folder ${tfxPath}`);
+        console.log(`Found tfx under: ${tfxPath}`);
         tfx = new trl.ToolRunner(tfxPath);
         tryRunCmd(tfx);
         return;
     }
 
-    console.log(`Could not find tfx command. Preparing to install it in current task folder`);
+    console.log(`Could not find tfx command. Preparing to install it under: ${agentToolsPath}`);
+    mkdirp(path.join(agentToolsPath, "node_modules"), function (err) {
+        if (err) {
+            if (err.code !== "EEXIST") {
+                tl.setResult(tl.TaskResult.Failed, `Could not create tfx installation directory: ${err}`);
+            }
+        }
+    });
 
     const npm = new trl.ToolRunner(tl.which("npm", true));
-    npm.arg(["install", "tfx-cli"]);
+    npm.arg(["install", "tfx-cli", "--prefix", agentToolsPath]);
 
     npm.exec().then(code => {
         tfx = new trl.ToolRunner(tl.which(tfxLocalPath, true));
