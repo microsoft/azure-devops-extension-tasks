@@ -1,6 +1,7 @@
 {
     "globalDependencies": {
         "adm-zip": "registry:dt/adm-zip#0.0.0+20160317120654",
+        "mkdirp": "registry:dt/mkdirp#0.3.0+20160317120654",
         "node": "registry:dt/node#6.0.0+20161110151007",
         "q": "registry:dt/q#0.0.0+20161004185634",
         "temp": "registry:dt/temp#0.8.3+20160105142454"
