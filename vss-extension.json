@@ -44,6 +44,10 @@
       "uri": "mailto:vsointegration@microsoft.com"
     }
   },
+  "repository": {
+    "type": "git",
+    "uri": "https://github.com/Microsoft/vsts-extension-build-release-tasks"
+  },
   "files": [
     {
       "path": "BuildTasks"
