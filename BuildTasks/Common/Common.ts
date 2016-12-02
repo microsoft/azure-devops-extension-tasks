@@ -155,8 +155,14 @@ export function runTfx(cmd: (tfx: ToolRunner) => void) {
     let tfxLocalPathBin = path.join(agentToolsPath, "/node_modules/.bin/tfx");
     let tfxLocalPath = path.join(agentToolsPath, "/tfx");
 
+    // On windows we are looking for tfx.cmd
+    if (os.platform().toLowerCase().indexOf("win") >= 0) {
+        tfxLocalPathBin += ".cmd";
+        tfxLocalPath += ".cmd";
+    }
+
     console.log(`Checking tfx under: ${tfxLocalPath}`);
-    tfxPath = tl.which(tl.which(tfxLocalPath) || tl.which(tfxLocalPathBin, true));
+    tfxPath = tl.which(tfxLocalPath) || tl.which(tfxLocalPathBin);
     if (tfxPath) {
         console.log(`Found tfx under: ${tfxPath}`);
         tfx = new trl.ToolRunner(tfxPath);
