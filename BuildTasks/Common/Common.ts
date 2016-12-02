@@ -151,16 +151,12 @@ export function runTfx(cmd: (tfx: ToolRunner) => void) {
     }
 
     // Check the local tfx to see if it is installed in the workfolder/_tools folder
-    let agentToolsPath = path.join(tl.getVariable("Agent.Workfolder"), "_tools");
-    let tfxLocalPath = path.join(agentToolsPath, "node_modules/.bin/tfx");
-
-    // On windows we are looking for tfx.cmd
-    if (os.platform().toLowerCase().indexOf("win") >= 0) {
-        tfxLocalPath += ".cmd";
-    }
+    let agentToolsPath = path.join(tl.getVariable("Agent.Workfolder"), "/_tools/");
+    let tfxLocalPathBin = path.join(agentToolsPath, "/node_modules/.bin/tfx");
+    let tfxLocalPath = path.join(agentToolsPath, "/tfx");
 
     console.log(`Checking tfx under: ${tfxLocalPath}`);
-    tfxPath = tl.which(tfxLocalPath);
+    tfxPath = tl.which(tl.which(tfxLocalPath) || tl.which(tfxLocalPathBin, true));
     if (tfxPath) {
         console.log(`Found tfx under: ${tfxPath}`);
         tfx = new trl.ToolRunner(tfxPath);
@@ -169,8 +165,9 @@ export function runTfx(cmd: (tfx: ToolRunner) => void) {
     }
 
     console.log(`Could not find tfx command. Preparing to install it under: ${agentToolsPath}`);
-    mkdirp(path.join(agentToolsPath, "node_modules"), function (err) {
+    mkdirp(path.join(agentToolsPath, "/node_modules/"), function (err) {
         if (err) {
+            tl.debug(err);
             if (err.code !== "EEXIST") {
                 tl.setResult(tl.TaskResult.Failed, `Could not create tfx installation directory: ${err}`);
             }
@@ -181,7 +178,7 @@ export function runTfx(cmd: (tfx: ToolRunner) => void) {
     npm.arg(["install", "tfx-cli", "--prefix", agentToolsPath]);
 
     npm.exec().then(code => {
-        tfx = new trl.ToolRunner(tl.which(tfxLocalPath, true));
+        tfx = new trl.ToolRunner(tl.which(tfxLocalPath) || tl.which(tfxLocalPathBin, true));
         tryRunCmd(tfx);
     }).fail(err => {
         tl.setResult(tl.TaskResult.Failed, `Error installing tfx: ${err}`);
