@@ -39,6 +39,11 @@ common.runTfx(tfx => {
     tfx.exec().then(code => {
         tl.setResult(tl.TaskResult.Succeeded, `tfx exited with return code: ${code}`);
     }).fail(err => {
-        tl.setResult(tl.TaskResult.Failed, `tfx failed with error: ${err}`);
+        if (err.message.contains("TF1590010")) {
+            tl.setResult(tl.TaskResult.Succeeded, "Extension is already installed in the specified account.");
+        }
+        else {
+            tl.setResult(tl.TaskResult.Failed, `tfx failed with error: ${err}`);
+        }
     });
 });
