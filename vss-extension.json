@@ -132,7 +132,7 @@
           "displayName": "Marketplace URL",
           "value": "https://marketplace.visualstudio.com"
         },
-        "helpMarkDown": "Your Personal Access Token must be created for **all accessible accounts** and have at least **Marketplace (publish), Marketplace (manage)** and **Extension (read and manage)** permission. <br/>[More information](https://www.visualstudio.com/docs/setup-admin/team-services/use-personal-access-tokens-to-authenticate)",
+        "helpMarkDown": "Required permissions: <ul><li><b>Publish</b>: All Accounts, Marketplace Publish</li><li><b>Share</b>: All Accounts, Marketplace Publish</li><li><b>Install</b>: All Accounts or a Specific Account, Extensions (read and manage)</li><li><b>Query Version</b>: All Accounts, Marketplace</li></ul><br/><a href='https://www.visualstudio.com/docs/setup-admin/team-services/use-personal-access-tokens-to-authenticate'>More information</a>.",
         "authenticationSchemes": [
           {
             "type": "ms.vss-endpoint.endpoint-auth-scheme-basic",
@@ -180,7 +180,7 @@
       "properties": {
         "name": "TFSMarketplacePublishing",
         "displayName": "TFS Local Gallery",
-        "helpMarkDown": "Your Personal Access Token must have at least **Marketplace (publish), Marketplace (manage)** and **Extension (read and manage)** permission. <br/>[More information](https://www.visualstudio.com/docs/setup-admin/team-services/use-personal-access-tokens-to-authenticate)",
+        "helpMarkDown": "Required permissions: <ul><li><b>Publish</b>: Marketplace Publish</li><li><b>Share</b>: Marketplace Publish</li><li><b>Install</b>: Extensions (read and manage)</li><li><b>Query Version</b>: Marketplace</li></ul><br/><a href='https://www.visualstudio.com/docs/setup-admin/team-services/use-personal-access-tokens-to-authenticate'>More information</a>.",
         "url": {
           "displayName": "TFS Server Url",
           "description": "The TFS Server Url, e.g. `https://servername.domain.local/tfs`."
