@@ -333,10 +333,9 @@ function getTasksManifestPaths(manifestFile?: string): Q.Promise<string[]> {
         rootFolder = tl.getInput("rootFolder", false) || tl.getInput("System.DefaultWorkingDirectory");
         const manifestsPattern = tl.getInput("patternManifest", false) || "vss-extension.json";
 
-        const globPattern = path.join(rootFolder, manifestsPattern);
-        tl.debug(`Searching for extension manifests ${globPattern}`);
+        tl.debug(`Searching for extension manifests ${manifestsPattern}`);
 
-        extensionManifestFiles = tl.glob(globPattern);
+        extensionManifestFiles = tl.findMatch(rootFolder, manifestsPattern);
     }
     else {
         rootFolder = path.dirname(manifestFile);

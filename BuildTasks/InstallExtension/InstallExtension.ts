@@ -17,7 +17,26 @@ common.runTfx(tfx => {
             break;
 
         case "vsix":
-            tfx.arg(["--vsix", tl.getInput("vsixFile", true)]);
+            let vsixFilePattern = tl.getPathInput("vsixFile", true);
+            let matchingVsixFile: string[];
+            if (vsixFilePattern.indexOf("*") >= 0 || vsixFilePattern.indexOf("?") >= 0) {
+                tl.debug("Pattern found in vsixFile parameter.");
+                matchingVsixFile = tl.findMatch(process.cwd(), vsixFilePattern);
+            }
+            else {
+                tl.debug("No pattern found in vsixFile parameter.");
+                matchingVsixFile = [vsixFilePattern];
+            }
+
+            if (!matchingVsixFile || matchingVsixFile.length === 0) {
+                tl.setResult(tl.TaskResult.Failed, `Found no vsix files matching: ${vsixFilePattern}.`);
+                return false;
+            }
+            if (matchingVsixFile.length !== 1) {
+                tl.setResult(tl.TaskResult.Failed, `Found multiple vsix files matching: ${vsixFilePattern}.`);
+                return false;
+            }
+            tfx.arg(["--vsix", matchingVsixFile[0]]);
             break;
     }
 
@@ -25,7 +44,7 @@ common.runTfx(tfx => {
     const accountsArg = tl.getInput("accounts", true);
 
     // Sanitize accounts list
-    const accounts = accountsArg.split(",").map(a => a.replace(/\s/g, "")).filter(a => a.length > 0);
+    const accounts = accountsArg.split(",").map((a) => a.replace(/\s/g, "")).filter(a => a.length > 0);
     tfx.arg(["--accounts"].concat(accounts));
 
     // Aditional arguments

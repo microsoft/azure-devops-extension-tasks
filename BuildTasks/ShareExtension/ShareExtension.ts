@@ -16,7 +16,30 @@ common.runTfx(tfx => {
             break;
 
         case "vsix":
-            tfx.arg(["--vsix", tl.getInput("vsixFile", true)]);
+            let vsixFilePattern = tl.getPathInput("vsixFile", true);
+            let matchingVsixFile: string[];
+            if (vsixFilePattern.indexOf("*") >= 0 || vsixFilePattern.indexOf("?") >= 0) {
+                tl.debug("Pattern found in vsixFile parameter");
+                matchingVsixFile = tl.findMatch(process.cwd(), vsixFilePattern);
+            }
+            else {
+                tl.debug("No pattern found in vsixFile parameter");
+                matchingVsixFile = [vsixFilePattern];
+            }
+
+            if (!matchingVsixFile || matchingVsixFile.length === 0) {
+                tl.setResult(tl.TaskResult.Failed, `Found no vsix files matching: ${vsixFilePattern}.`);
+                return false;
+            }
+            if (matchingVsixFile.length !== 1) {
+                tl.setResult(tl.TaskResult.Failed, `Found multiple vsix files matching: ${vsixFilePattern}.`);
+                return false;
+            }
+
+            const vsixFile = matchingVsixFile[0];
+            tl.checkPath(vsixFile, "vsixPath");
+
+            tfx.arg(["--vsix", vsixFile]);
             break;
     }
 

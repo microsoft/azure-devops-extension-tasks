@@ -4,6 +4,7 @@ import * as tl from "vsts-task-lib/task";
 import * as common from "./common";
 import * as vsixeditor from "./vsixeditor";
 import * as path from "path";
+import * as os from "os";
 
 common.runTfx(tfx => {
     tfx.arg(["extension", "publish", "--json"]);
@@ -25,7 +26,29 @@ common.runTfx(tfx => {
         runBeforeTfx = runBeforeTfx.then(() => common.checkUpdateTasksVersion());
     } else {
         // Set vsix file argument
-        let vsixFile = tl.getInput("vsixFile", true);
+        let vsixFilePattern = tl.getPathInput("vsixFile", true);
+        let matchingVsixFile: string[];
+        if (vsixFilePattern.indexOf("*") >= 0 || vsixFilePattern.indexOf("?") >= 0) {
+            tl.debug("Pattern found in vsixFile parameter");
+            matchingVsixFile = tl.findMatch(process.cwd(), vsixFilePattern);
+        }
+        else {
+            tl.debug("No pattern found in vsixFile parameter");
+            matchingVsixFile = [vsixFilePattern];
+        }
+
+        if (!matchingVsixFile || matchingVsixFile.length === 0) {
+            tl.setResult(tl.TaskResult.Failed, `Found no vsix files matching: ${vsixFilePattern}.`);
+            return false;
+        }
+        if (matchingVsixFile.length !== 1) {
+            tl.setResult(tl.TaskResult.Failed, `Found multiple vsix files matching: ${vsixFilePattern}.`);
+            return false;
+        }
+
+        const vsixFile = matchingVsixFile[0];
+        tl.checkPath(vsixFile, "vsixPath");
+
         vsixOutput = tl.getVariable("System.DefaultWorkingDirectory");
 
         const publisher = tl.getInput("publisherId", false);
