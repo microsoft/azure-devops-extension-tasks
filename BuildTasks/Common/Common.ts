@@ -195,6 +195,11 @@ export function runTfx(cmd: (tfx: ToolRunner) => void) {
     let tfxLocalPathBin = path.join(agentToolsPath, "/node_modules/.bin/tfx");
     let tfxLocalPath = path.join(agentToolsPath, "/tfx");
 
+    if (tl.osType() === "Windows_NT") {
+        tfxLocalPathBin += ".cmd";
+        tfxLocalPath += ".cmd";
+    }
+
     console.log(`Checking tfx under: ${tfxLocalPath}`);
     tfxPath = tl.which(tfxLocalPath) || tl.which(tfxLocalPathBin);
     if (tfxPath) {
@@ -336,16 +341,24 @@ export class TfxJsonOutputStream extends stream.Writable {
 }
 
 function getTaskPathContributions(manifestFile: string): Q.Promise<string[]> {
-    tl.debug(`Reading manifest file: ${manifestFile}`);
+    tl.debug(`Reading extension manifest file: ${manifestFile}`);
 
-    return Q.nfcall(fs.readFile, manifestFile).then((data: string) => {
-        tl.debug(`Looking for task contributions in ${manifestFile}`);
-        const manifestJson: any = JSON.parse(data);
+    return Q.nfcall(fs.readFile, manifestFile, "utf8").then((data: string) => {
+        tl.debug(`Looking for task contributions in: ${manifestFile}`);
+        // BOM check
+        let manifestJSON;
+        try {
+            data = data.replace(/^\uFEFF/, "");
+            manifestJSON = JSON.parse(data);
+        }
+        catch (jsonError) {
+            throw new Error(`Error parsing extension manifest: ${manifestFile} - ${jsonError}`);
+        }
 
         // Check for task contributions
-        if (!manifestJson.contributions) { return []; }
+        if (!manifestJSON.contributions) { return []; }
 
-        return manifestJson.contributions
+        return manifestJSON.contributions
             .filter(c => c.type === "ms.vss-distributed-task.task" && c.properties && c.properties["name"])
             .map(c => c.properties["name"]);
     });
@@ -383,21 +396,21 @@ function getTasksManifestPaths(manifestFile?: string): Q.Promise<string[]> {
 }
 
 function updateTaskVersion(manifestFilePath: string, version: { Major: string, Minor: string, Patch: string }): Q.Promise<void> {
-    tl.debug(`Reading task manifest ${manifestFilePath}`);
+    tl.debug(`Reading task manifest file: ${manifestFilePath}`);
     return Q.nfcall(fs.readFile, manifestFilePath, "utf8").then((data: string) => {
-        // BOM check
-        data = data.replace(/^\uFEFF/, "");
         let manifestJSON;
         try {
+            // BOM check
+            data = data.replace(/^\uFEFF/, "");
             manifestJSON = JSON.parse(data);
         }
         catch (jsonError) {
-            throw new Error(`Error parsing JSON task manifest ${manifestFilePath}: ${jsonError}`);
+            throw new Error(`Error parsing task manifest: ${manifestFilePath} - ${jsonError}`);
         }
         manifestJSON.version = version;
         const newContent = JSON.stringify(manifestJSON, null, "\t");
         return Q.nfcall(fs.writeFile, manifestFilePath, newContent).then(() => {
-            tl.debug(`Task manifest ${manifestFilePath} version updated to  ${JSON.stringify(version)}`);
+            tl.debug(`Task manifest ${manifestFilePath} version updated to ${JSON.stringify(version)}`);
         });
     });
 }
