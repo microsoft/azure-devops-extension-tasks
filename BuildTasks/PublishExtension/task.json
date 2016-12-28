@@ -79,7 +79,7 @@
       "label": "VSIX file",
       "defaultValue": "",
       "required": true,
-      "helpMarkDown": "VSIX file to publish.",
+      "helpMarkDown": "VSIX file to publish. Supports wildcards.",
       "visibleRule": "fileType = vsix",
       "groupName": "manifest"
     },
