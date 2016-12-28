@@ -17,8 +17,14 @@ After installing the extension, you can add one (or more) of the tasks to a new 
 ![add-task](add-task.png)
 
 If you plan to publish to the Marketplace, you will need to [create a personal access token](https://www.visualstudio.com/docs/setup-admin/team-services/use-personal-access-tokens-to-authenticate). 
- > **Important**: choose **All accessible accounts** and at least the **Marketplace (publish)** scope.
-
+ 
+### Required permissions
+ 
+ * **Publish**: All Accounts, Marketplace Publish</li>
+ * **Share**: All Accounts, Marketplace Publish</li>
+ * **Install**: All Accounts or a Specific Account, Extensions (read and manage), Marketplace</li>
+ * **Query Version**: All Accounts, Marketplace
+ 
 ## Learn more
 
 The [source](https://github.com/Microsoft/vsts-extension-build-release-tasks) for this extension is on GitHub. Take, fork, and extend.

@@ -131,7 +131,7 @@
           "displayName": "Marketplace URL",
           "value": "https://marketplace.visualstudio.com"
         },
-        "helpMarkDown": "Required permissions: <ul><li><b>Publish</b>: All Accounts, Marketplace Publish</li><li><b>Share</b>: All Accounts, Marketplace Publish</li><li><b>Install</b>: All Accounts or a Specific Account, Extensions (read and manage)</li><li><b>Query Version</b>: All Accounts, Marketplace</li></ul><br/><a href='https://www.visualstudio.com/docs/setup-admin/team-services/use-personal-access-tokens-to-authenticate'>More information</a>.",
+        "helpMarkDown": "Required permissions: <ul><li><b>Publish</b>: All Accounts, Marketplace Publish</li><li><b>Share</b>: All Accounts, Marketplace Publish</li><li><b>Install</b>: All Accounts or a Specific Account, Extensions (read and manage), Marketplace</li><li><b>Query Version</b>: All Accounts, Marketplace</li></ul><br/><a href='https://www.visualstudio.com/docs/setup-admin/team-services/use-personal-access-tokens-to-authenticate'>More information</a>.",
         "authenticationSchemes": [
           {
             "type": "ms.vss-endpoint.endpoint-auth-scheme-basic",
