@@ -9,7 +9,6 @@ import * as path from "path";
 import * as stream from "stream";
 import * as fs from "fs";
 import * as Q from "q";
-import * as mkdirp from "mkdirp";
 import * as tl from "vsts-task-lib/task";
 import * as trl from "vsts-task-lib/toolrunner";
 import ToolRunner = trl.ToolRunner;
@@ -171,14 +170,7 @@ export function runTfx(cmd: (tfx: ToolRunner) => void) {
     }
 
     console.log(`Could not find tfx command. Preparing to install it under: ${agentToolsPath}`);
-    mkdirp(path.join(agentToolsPath, "/node_modules/"), function (err) {
-        if (err) {
-            tl.debug(err);
-            if (err.code !== "EEXIST") {
-                tl.setResult(tl.TaskResult.Failed, `Could not create tfx installation directory: ${err}`);
-            }
-        }
-    });
+    tl.mkdirP(path.join(agentToolsPath, "/node_modules/"));
 
     const npm = new trl.ToolRunner(tl.which("npm", true));
     npm.arg(["install", "tfx-cli", "--prefix", agentToolsPath]);
