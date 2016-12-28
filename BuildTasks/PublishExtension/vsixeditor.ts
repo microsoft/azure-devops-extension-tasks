@@ -86,10 +86,7 @@ export class VSIXEditor {
                 archive.on("error", err => deferred.reject(err));
 
                 archive.pipe(output);
-
-                archive.bulk([
-                    { expand: true, cwd: manifestData.dirPath, src: ["**/*"] }
-                ]);
+                archive.addLocalFolder(manifestData.dirPath, "/");
                 archive.finalize();
                 tl.debug("Final archive file created");
             })
