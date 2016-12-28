@@ -20,7 +20,7 @@ common.runTfx(tfx => {
 
     if (fileType === "manifest") {
         // Set tfx manifest arguments
-        cleanupTfxArgs = common.setTfxManifestArguments(tfx);
+        cleanupTfxArgs = common.validateAndSetTfxManifestArguments(tfx);
 
         // Update tasks version if needed
         runBeforeTfx = runBeforeTfx.then(() => common.checkUpdateTasksVersion());
@@ -99,7 +99,7 @@ common.runTfx(tfx => {
     }
 
     // Share with
-    const shareWith = tl.getInput("shareWith");
+    const shareWith = tl.getDelimitedInput("shareWith", ",", false);
     const extensionVisibility = tl.getInput("extensionVisibility", false);
     const connectTo = tl.getInput("connectTo", true);
     if (shareWith) {
@@ -108,20 +108,11 @@ common.runTfx(tfx => {
         }
         else if (extensionVisibility.indexOf("public") < 0) {
             // Only handle shareWith if the extension is not public
-            // Sanitize accounts to share with
-            let accounts = shareWith.split(",").map(a => a.replace(/\s/g, "")).filter(a => a.length > 0);
-            tfx.argIf(accounts && accounts.length > 0, ["--share-with"].concat(accounts));
+            tfx.argIf(shareWith && shareWith.length > 0, ["--share-with"].concat(shareWith));
         } else {
             tl.warning("Ignoring Share - Not available on public extensions.");
         }
     }
-
-    // Aditional arguments
-    tfx.arg(tl.getInput("arguments", false));
-
-    // Set working folder
-    const cwd = tl.getInput("cwd", false);
-    if (cwd) { tl.cd(cwd); }
 
     runBeforeTfx.then(() => {
         const outputStream = new common.TfxJsonOutputStream(true);

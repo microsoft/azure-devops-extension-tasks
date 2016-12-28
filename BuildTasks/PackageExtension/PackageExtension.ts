@@ -7,18 +7,11 @@ common.runTfx(tfx => {
     const outputVariable = tl.getInput("outputVariable", false);
 
     // Set tfx manifest arguments
-    const cleanupTfxArgs = common.setTfxManifestArguments(tfx);
+    const cleanupTfxArgs = common.validateAndSetTfxManifestArguments(tfx);
 
     // Set vsix output path
     const outputPath = tl.getInput("outputPath", false);
     tfx.argIf(outputPath, ["--output-path", outputPath]);
-
-    // Aditional arguments
-    tfx.arg(tl.getInput("arguments", false));
-
-    // Set working directory
-    const cwd = tl.getInput("cwd", false);
-    if (cwd) { tl.cd(cwd); }
 
     // Before executing check update on tasks version
     common.checkUpdateTasksVersion().then(() => {
