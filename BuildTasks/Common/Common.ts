@@ -39,7 +39,7 @@ function deleteBuildTempFile(tempFile: string) {
  * @param  {ToolRunner} tfx
  * @returns {() => void} Cleaner function that the caller should use to cleanup temporary files created to be used as arguments
  */
-export function setTfxManifestArguments(tfx: ToolRunner): (() => void) {
+export function validateAndSetTfxManifestArguments(tfx: ToolRunner): (() => void) {
     const rootFolder = tl.getInput("rootFolder", false);
     tfx.argIf(rootFolder, ["--root", rootFolder]);
 
@@ -48,7 +48,6 @@ export function setTfxManifestArguments(tfx: ToolRunner): (() => void) {
 
     // Overrides manifest file
     const publisher = tl.getInput("publisherId", false);
-    tfx.argIf(publisher, ["--publisher", publisher]);
 
     const localizationRoot = tl.getInput("localizationRoot", false);
     tfx.argIf(localizationRoot, ["--loc-root", localizationRoot]);
@@ -60,7 +59,40 @@ export function setTfxManifestArguments(tfx: ToolRunner): (() => void) {
         extensionId += extensionTag;
         tl.debug(`Overriding extension id to: ${extensionId}`);
     }
-    tfx.argIf(extensionId, ["--extension-id", extensionId]);
+
+    // for backwards compat check both "method" and "fileType"
+    switch (tl.getInput("method", false) || tl.getInput("fileType", false)) {
+        // for backwards compat trigger on both "manifest" and "id"
+        case "manifest":
+        case "id":
+        default:
+            tfx.argIf(publisher, ["--publisher", publisher]);
+            tfx.argIf(extensionId, ["--extension-id", extensionId]);
+            break;
+
+        case "vsix":
+            let vsixFilePattern = tl.getPathInput("vsixFile", true);
+            let matchingVsixFile: string[];
+            if (vsixFilePattern.indexOf("*") >= 0 || vsixFilePattern.indexOf("?") >= 0) {
+                tl.debug("Pattern found in vsixFile parameter.");
+                matchingVsixFile = tl.findMatch(process.cwd(), vsixFilePattern);
+            }
+            else {
+                tl.debug("No pattern found in vsixFile parameter.");
+                matchingVsixFile = [vsixFilePattern];
+            }
+
+            if (!matchingVsixFile || matchingVsixFile.length === 0) {
+                tl.setResult(tl.TaskResult.Failed, `Found no vsix files matching: ${vsixFilePattern}.`);
+                throw "failed";
+            }
+            if (matchingVsixFile.length !== 1) {
+                tl.setResult(tl.TaskResult.Failed, `Found multiple vsix files matching: ${vsixFilePattern}.`);
+                throw "failed";
+            }
+            tfx.arg(["--vsix", matchingVsixFile[0]]);
+            break;
+    }
 
     let jsonOverrides: any;
     const extensionName = tl.getInput("extensionName", false);
@@ -116,8 +148,11 @@ export function setTfxManifestArguments(tfx: ToolRunner): (() => void) {
         tfx.arg(["--overrides-file", overrideFilePath]);
     }
 
+    tfx.line(tl.getInput("arguments", false));
+
     return () => deleteBuildTempFile(overrideFilePath);
 }
+
 /**
  * Run a tfx command by ensuring that "tfx" exists, installing it on the fly if needed.
  * @param  {(tfx:ToolRunner)=>void} cmd
@@ -128,6 +163,12 @@ export function runTfx(cmd: (tfx: ToolRunner) => void) {
 
     const tryRunCmd = (tfx: ToolRunner) => {
         try {
+            // Set working folder
+            const cwd = tl.getInput("cwd", false);
+            if (cwd) {
+                tl.cd(cwd);
+            }
+
             cmd(tfx);
             return true;
         }
@@ -153,12 +194,6 @@ export function runTfx(cmd: (tfx: ToolRunner) => void) {
     let agentToolsPath = path.join(tl.getVariable("Agent.Workfolder"), "/_tools/");
     let tfxLocalPathBin = path.join(agentToolsPath, "/node_modules/.bin/tfx");
     let tfxLocalPath = path.join(agentToolsPath, "/tfx");
-
-    // On windows we are looking for tfx.cmd
-    if (os.platform().toLowerCase().indexOf("win") >= 0) {
-        tfxLocalPathBin += ".cmd";
-        tfxLocalPath += ".cmd";
-    }
 
     console.log(`Checking tfx under: ${tfxLocalPath}`);
     tfxPath = tl.which(tfxLocalPath) || tl.which(tfxLocalPathBin);

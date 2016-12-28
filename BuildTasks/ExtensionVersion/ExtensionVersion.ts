@@ -23,21 +23,9 @@ if (!usingOverride) {
         tfx.arg(["extension", "show", "--json"]);
 
         common.setTfxMarketplaceArguments(tfx);
-
-        // Extension name
-        tfx.arg(["--publisher", tl.getInput("publisherId", true)]);
-        tfx.arg(["--extension-id", tl.getInput("extensionId", true)]);
+        common.validateAndSetTfxManifestArguments(tfx);
 
         const versionAction = tl.getInput("versionAction", false);
-
-        // Aditional arguments
-        tfx.arg(tl.getInput("arguments", false));
-
-        // Set working folder
-        const cwd = tl.getInput("cwd", false);
-        if (cwd) {
-            tl.cd(cwd);
-        }
 
         const outputStream = new common.TfxJsonOutputStream(false);
         tfx.exec(<any>{ outStream: outputStream, failOnStdErr: true }).then(code => {
