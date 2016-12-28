@@ -114,7 +114,7 @@
       "label": "VSIX file",
       "defaultValue": "",
       "required": true,
-      "helpMarkDown": "VSIX file of the extension to be installed.",
+      "helpMarkDown": "VSIX file of the extension to be installed. Supports wildcards.",
       "visibleRule": "method = vsix",
       "groupName": "extension"
     },
