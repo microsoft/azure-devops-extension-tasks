@@ -13,11 +13,6 @@
   "demands": [
     "npm"
   ],
-  "version": {
-    "Major": "0",
-    "Minor": "7",
-    "Patch": "6"
-  },
   "minimumAgentVersion": "1.83.0",
   "groups": [
     {
