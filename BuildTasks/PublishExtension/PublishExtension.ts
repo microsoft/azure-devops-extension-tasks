@@ -30,7 +30,7 @@ common.runTfx(tfx => {
         let matchingVsixFile: string[];
         if (vsixFilePattern.indexOf("*") >= 0 || vsixFilePattern.indexOf("?") >= 0) {
             tl.debug("Pattern found in vsixFile parameter");
-            matchingVsixFile = tl.findMatch(process.cwd(), vsixFilePattern);
+            matchingVsixFile = tl.findMatch(tl.getInput("cwd", false) || process.cwd(), vsixFilePattern);
         }
         else {
             tl.debug("No pattern found in vsixFile parameter");
