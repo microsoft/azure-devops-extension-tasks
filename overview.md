@@ -20,9 +20,9 @@ If you plan to publish to the Marketplace, you will need to [create a personal a
  
 ### Required permissions
  
- * **Publish**: All Accounts, Marketplace Publish</li>
- * **Share**: All Accounts, Marketplace Publish</li>
- * **Install**: All Accounts or a Specific Account, Extensions (read and manage), Marketplace</li>
+ * **Publish**: All Accounts, Marketplace Publish
+ * **Share**: All Accounts, Marketplace Publish
+ * **Install**: All Accounts or a Specific Account, Extensions (read and manage), Marketplace
  * **Query Version**: All Accounts, Marketplace
  
 ## Learn more
