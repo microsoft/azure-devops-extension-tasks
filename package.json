@@ -14,11 +14,11 @@
     "initdev:typings": "pushd BuildTasks && typings install && popd",
     "initdev": "npm run initdev:npm  && npm run initdev:typings ",
     "clean": "rimraf dist",
-    "precompile:tasks": "node scripts/copyFilesToBuildTasks -u 2 BuildTasks/Common/common.ts BuildTasks",
+    "precompile:tasks": "node scripts/copyFilesToBuildTasks -u 2 BuildTasks/Common/Common.ts BuildTasks",
     "compile:tasks": "tsc --project BuildTasks",
     "postcompile:tasks": "npm run lint:tasks",
     "lint:tasks": "tslint -c tslint.json \"BuildTasks/!(typings)/*.ts",
-    "prelink:tasks": "mkdirp dist/_temp/node_modules && pushd \"dist/_temp\" && npm install vsts-task-lib@2.0.0-preview && npm install q@1.4.1 && popd",
+    "prelink:tasks": "mkdirp dist/_temp/node_modules && pushd \"dist/_temp\" && npm install vsts-task-lib@2.0.0-preview && npm install q@1.4.1 && npm install uuidv5@0.0.1 && pushd \"node_modules/uuidv5\" && prepend \"uuid.js\" \"\"\"use strict\"\";\" && popd && popd",
     "link:tasks": "node scripts/copyfilesToBuildTasks -u 2 dist/_temp/node_modules/**/* dist/BuildTasks",
     "postlink:tasks": "rimraf dist/_temp",
     "link:tasks:publish": "pushd \"dist/BuildTasks/PublishExtension\" && npm install && popd",
@@ -40,11 +40,13 @@
     "tfx-cli": "^0.3.40",
     "tsconfig-glob": "^0.4.3",
     "tslint": "^3.15.1",
-    "typescript": "^2.0.9",
-    "typings": "^2.0.0"
+    "typescript": "^2.1.5",
+    "typings": "^2.1.0",
+    "prepend-file-cli": "^1.0.6"
   },
   "dependencies": {
     "q": "^1.4.1",
-    "vsts-task-lib": "^2.0.0-preview"
+    "vsts-task-lib": "^2.0.0-preview",
+    "uuidv5": "^0.0.1"
   }
 }

@@ -14,7 +14,7 @@ common.runTfx(tfx => {
     tfx.argIf(outputPath, ["--output-path", outputPath]);
 
     // Before executing check update on tasks version
-    common.checkUpdateTasksVersion().then(() => {
+    common.checkUpdateTasksManifests().then(() => {
         const outputStream = new common.TfxJsonOutputStream(false);
 
         tfx.exec(<any>{ outStream: outputStream, failOnStdErr: true }).then(code => {
