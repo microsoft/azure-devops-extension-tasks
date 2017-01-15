@@ -24,7 +24,7 @@ common.runTfx(tfx => {
         cleanupTfxArgs = common.validateAndSetTfxManifestArguments(tfx);
 
         // Update tasks version if needed
-        runBeforeTfx = runBeforeTfx.then(() => common.checkUpdateTasksVersion());
+        runBeforeTfx = runBeforeTfx.then(() => common.checkUpdateTasksManifests());
     } else {
         // Set vsix file argument
         let vsixFilePattern = tl.getPathInput("vsixFile", true);

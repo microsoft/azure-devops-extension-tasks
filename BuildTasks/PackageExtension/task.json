@@ -143,6 +143,15 @@
       "groupName": "overrides"
     },
     {
+      "name": "updateTasksId",
+      "type": "boolean",
+      "label": "Override task id",
+      "defaultValue": "true",
+      "required": false,
+      "helpMarkDown": "Search for contributed tasks in extension manifests and updates the id specified in each Build and Release task found.",
+      "groupName": "overrides"
+    },
+    {
       "name": "extensionVisibility",
       "type": "pickList",
       "label": "Extension visibility",

@@ -17,7 +17,7 @@ async function run() {
             tfx.argIf(outputPath, ["--output-path", outputPath]);
 
             // Before executing check update on tasks version
-            await common.checkUpdateTasksVersion();
+            await common.checkUpdateTasksManifests();
             const outputStream = new common.TfxJsonOutputStream(false);
 
             tfx.exec(<any>{ outStream: outputStream, failOnStdErr: true }).then(code => {
