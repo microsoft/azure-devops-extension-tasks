@@ -52,7 +52,7 @@ export class VSIXEditor {
                 if (this.versionNumber && this.updateTasksVersion) {
                     tl.debug("Look for build tasks manifest");
                     const extensionManifest = path.join(dirPath, "extension.vsomanifest");
-                    return common.checkUpdateTasksVersion(extensionManifest).then(() => dirPath);
+                    return common.checkUpdateTasksManifests(extensionManifest).then(() => dirPath);
                 }
                 else {
                     return dirPath;
