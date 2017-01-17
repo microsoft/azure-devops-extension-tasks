@@ -1,18 +1,17 @@
-declare module uuidv5 {
+declare module 'uuidv5' {
     type uuid = string | Buffer
     enum space { dns, url, oid, x500, null, default }
     type ns = uuid | space
 
-    export interface createUUIDv5 {
+    interface createUUIDv5 {
         (namespace: ns, name: uuid): uuid;
         (namespace: ns, name: uuid, binary: boolean): uuid;
 
-		uuidToString(uuid: Buffer): string;
+        uuidToString(uuid: Buffer): string;
         uuidFromString(uuid: string): Buffer;
-        createUUIDv5: uuidv5.createUUIDv5;
-        space: uuidv5.space;
-	}
+        createUUIDv5: createUUIDv5;
+        spaces: typeof space;
+    }
+    var exp: createUUIDv5
+    export = exp
 }
-
-declare const exp: uuidv5.createUUIDv5;
-export = exp;
