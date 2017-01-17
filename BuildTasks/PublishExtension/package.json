@@ -6,6 +6,6 @@
     "vsts-task-lib": "^2.0.0-preview",
     "x2js": "^3.0.1",
     "xmldom": "^0.1.22",
-    "uuidv5": "^0.0.1"
+    "uuidv5": "^1.0.0"
   }
 }
