@@ -35,6 +35,20 @@
   "categories": [
     "Build and release"
   ],
+  "screenshots": [
+    {
+      "path": "screenshot-pipeline.png"
+    },
+    {
+      "path": "screenshot-packagetask.png"
+    },
+    {
+      "path": "screenshot-vstsmarketplace.png"
+    },
+    {
+      "path": "screenshot-tfsmarketplace.png"
+    }
+  ],
   "content": {
     "details": {
       "path": "overview.md"
