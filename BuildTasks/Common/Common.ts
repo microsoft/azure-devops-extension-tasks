@@ -461,8 +461,8 @@ async function updateTaskId(manifestFilePath: string, ns: { publisher: string, e
             throw new Error(`Error parsing task manifest: ${manifestFilePath} - ${jsonError}`);
         }
 
-        const extensionNs = uuidv5("null", `${ns.publisher}.${ns.extensionId}`, true);
-        manifestJSON.id = uuidv5(extensionNs, manifestJSON.name, false);
+        let extensionNs = uuidv5(uuidv5.spaces.url, "https://marketplace.visualstudio.com/vsts", true);
+        manifestJSON.id = uuidv5(extensionNs, `${ns.publisher}.${ns.extensionId}.${manifestJSON.name}`, false);
         const newContent = JSON.stringify(manifestJSON, null, "\t");
         return Q.nfcall(fs.writeFile, manifestFilePath, newContent).then(() => {
             tl.debug(`Task manifest ${manifestFilePath} id updated to ${manifestJSON.id}`);
