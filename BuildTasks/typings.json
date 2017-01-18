@@ -4,5 +4,8 @@
         "node": "registry:dt/node#6.0.0+20161121110008",
         "q": "registry:dt/q#0.0.0+20161004185634",
         "temp": "registry:dt/temp#0.8.3+20160105142454"
+    },
+    "dependencies": {
+        "archiver": "registry:dt/archiver#0.15.0+20161124045926"
     }
 }

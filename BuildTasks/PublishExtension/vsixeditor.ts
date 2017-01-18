@@ -6,6 +6,7 @@ import path = require("path");
 import Q = require("q");
 import tl = require("vsts-task-lib/task");
 import common = require("./common");
+import archiver = require("archiver");
 
 export class VSIXEditor {
     private zip: AdmZip;
@@ -72,13 +73,11 @@ export class VSIXEditor {
                 let outputFile = manifestData.outputFileName;
                 let output = fs.createWriteStream(outputFile);
 
-                let archiver = require("archiver");
                 let archive = archiver("zip");
 
                 tl.debug("Creating final archive file at " + this.outputPath);
 
                 output.on("close", function() {
-                    tl.debug(archive.pointer() + " total bytes");
                     tl.debug("archiver has been finalized and the output file descriptor has closed.");
                     deferred.resolve(outputFile);
                 });
@@ -86,9 +85,7 @@ export class VSIXEditor {
                 archive.on("error", err => deferred.reject(err));
 
                 archive.pipe(output);
-                archive.bulk([
-                    { expand: true, cwd: manifestData.dirPath, src: ["**/*"] }
-                ]);
+                archive.directory(manifestData.dirPath, "/");
                 archive.finalize();
                 tl.debug("Final archive file created");
             })
