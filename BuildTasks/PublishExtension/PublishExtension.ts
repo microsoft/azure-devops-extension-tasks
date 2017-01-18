@@ -99,7 +99,7 @@ common.runTfx(tfx => {
     }
 
     // Share with
-    const shareWith = tl.getDelimitedInput("shareWith", ",", false);
+    const shareWith = tl.getDelimitedInput("shareWith", ",", false).map((value, index) => { return value.trim(); });
     const extensionVisibility = tl.getInput("extensionVisibility", false);
     const connectTo = tl.getInput("connectTo", true);
     if (shareWith) {
