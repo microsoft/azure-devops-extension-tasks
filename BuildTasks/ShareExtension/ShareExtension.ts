@@ -10,7 +10,7 @@ common.runTfx(tfx => {
 
     // Installation targets
     const accounts = tl.getDelimitedInput("accounts", ",", true);
-    tfx.arg(["--share-with"].concat(accounts));
+    tfx.arg(["--share-with"].concat(accounts).map((value, index) => { return value.trim(); }));
 
     tfx.exec().then(code => {
         tl.setResult(tl.TaskResult.Succeeded, `tfx exited with return code: ${code}`);

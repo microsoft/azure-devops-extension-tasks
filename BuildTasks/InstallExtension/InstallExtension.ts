@@ -11,7 +11,7 @@ common.runTfx(tfx => {
 
     // Installation targets
     const accounts = tl.getDelimitedInput("accounts", ",", true);
-    tfx.arg(["--accounts"].concat(accounts));
+    tfx.arg(["--accounts"].concat(accounts).map((value, index) => { return value.trim(); }));
 
     const result = tfx.execSync(<any>{ silent: false, failOnStdErr: false });
     if (result.stderr.search("error: Error: (?=.*TF1590010)") >= 0) {
