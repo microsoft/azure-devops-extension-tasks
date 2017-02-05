@@ -1,7 +1,7 @@
 declare module 'uuidv5' {
-    type uuid = string | Buffer
+    type uuid = string | Buffer;
     enum space { dns, url, oid, x500, null, default }
-    type ns = uuid | space
+    type ns = uuid | space;
 
     interface createUUIDv5 {
         (namespace: ns, name: uuid): uuid;
@@ -12,6 +12,6 @@ declare module 'uuidv5' {
         createUUIDv5: createUUIDv5;
         spaces: typeof space;
     }
-    var exp: createUUIDv5
-    export = exp
+    var exp: createUUIDv5;
+    export = exp;
 }
