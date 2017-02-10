@@ -448,6 +448,7 @@ export function checkUpdateTasksManifests(manifestFile?: string): Q.Promise<any>
     // Check if we need to touch in tasks manifest before packaging
     const updateTasksVersion = tl.getBoolInput("updateTasksVersion", false);
     const updateTasksId = tl.getBoolInput("updateTasksId", false);
+
     let updateTasksFinished = Q.defer();
 
     if (updateTasksVersion || updateTasksId) {
@@ -495,6 +496,10 @@ export function checkUpdateTasksManifests(manifestFile?: string): Q.Promise<any>
                     if (extensionId && extensionTag) {
                         extensionId += extensionTag;
                         tl.debug(`Overriding extension id to: ${extensionId}`);
+                    }
+
+                    if (!(publisher && extensionId)) {
+                        tl.error("Currently only supported when 'Publisher' and 'Extension Id' are specified.");
                     }
 
                     const ns = { Publisher: publisher, ExtensionId: extensionId };
