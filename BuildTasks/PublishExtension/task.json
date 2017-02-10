@@ -186,11 +186,10 @@
       "name": "updateTasksId",
       "type": "boolean",
       "label": "Override task id",
-      "defaultValue": "true",
+      "defaultValue": "false",
       "required": false,
       "helpMarkDown": "Search for contributed tasks in extension manifests and updates the id specified in each Build and Release task found.",
-      "groupName": "manifest",
-      "visibleRule": "fileType = manifest"
+      "groupName": "manifest"
     },
     {
       "name": "extensionVisibility",
