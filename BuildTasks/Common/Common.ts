@@ -580,6 +580,10 @@ export async function checkUpdateTasksManifests(manifestFile?: string): Promise<
                         tl.debug(`Overriding extension id to: ${extensionId}`);
                     }
 
+                    if (!(publisher && extensionId)) {
+                        tl.error("Currently only supported when 'Publisher' and 'Extension Id' are specified.");
+                    }
+
                     const ns = { publisher: publisher, extensionId: extensionId };
 
                     tl.debug(`Processing the following task manifest ${taskManifests}`);
