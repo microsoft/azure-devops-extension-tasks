@@ -10,7 +10,7 @@ declare module 'uuidv5' {
         uuidToString(uuid: Buffer): string;
         uuidFromString(uuid: string): Buffer;
         createUUIDv5: createUUIDv5;
-        spaces: typeof space;
+        spaces: space;
     }
     var exp: createUUIDv5;
     export = exp;
