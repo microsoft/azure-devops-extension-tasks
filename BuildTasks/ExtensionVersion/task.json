@@ -1,5 +1,5 @@
 {
-  "id": "97d92268-f076-4bca-a330-af6db25e6855",
+  "id": "5c6fa59e-1d5a-4516-9127-b9efd05df306",
   "name": "ExtensionVersion",
   "friendlyName": "Query Extension Version",
   "description": "Queries the current version from the Visual Studio Marketplace",
@@ -67,82 +67,82 @@
       "visibleRule": "connectTo=TFS"
     },
     {
-      "name": "publisherId",
-      "type": "string",
-      "label": "Publisher ID",
-      "defaultValue": "",
-      "required": true,
-      "helpMarkDown": "Publisher ID of the extension to be installed.",
-      "groupName": "extension"
+        "name": "publisherId",
+        "type": "string",
+        "label": "Publisher ID",
+        "defaultValue": "",
+        "required": true,
+        "helpMarkDown": "Publisher ID of the extension to be installed.",
+        "groupName": "extension"
     },
     {
-      "name": "extensionId",
-      "type": "string",
-      "label": "Extension ID",
-      "defaultValue": "",
-      "helpMarkDown": "Extension ID of the extension to be installed",
-      "required": true,
-      "groupName": "extension"
+        "name": "extensionId",
+        "type": "string",
+        "label": "Extension ID",
+        "defaultValue": "",
+        "helpMarkDown": "Extension ID of the extension to be installed",
+        "required": true,
+        "groupName": "extension"
     },
     {
-      "name": "extensionTag",
-      "type": "string",
-      "label": "Extension Tag",
-      "defaultValue": "",
-      "helpMarkDown": "Extension Tag to append to the extension ID",
-      "required": false,
-      "groupName": "extension"
+        "name": "extensionTag",
+        "type": "string",
+        "label": "Extension Tag",
+        "defaultValue": "",
+        "helpMarkDown": "Extension Tag to append to the extension ID",
+        "required": false,
+        "groupName": "extension"
     },
     {
-      "defaultValue": "None",
-      "helpMarkdown": "Increase a part of the version.",
-      "label": "Increase version",
-      "name": "versionAction",
-      "required": true,
-      "options": {
-        "None": "None",
-        "Patch": "Patch",
-        "Minor": "Minor",
-        "Major": "Major"
-      },
-      "type": "pickList",
-      "groupName": "version"
+        "defaultValue": "None",
+        "helpMarkdown": "Increase a part of the version.",
+        "label": "Increase version",
+        "name": "versionAction",
+        "required": true,
+        "options": {
+            "None":  "None",
+            "Patch": "Patch",
+            "Minor": "Minor",
+            "Major": "Major"
+        },
+        "type": "pickList",
+        "groupName": "version"
     },
     {
-      "name": "outputVariable",
-      "type": "string",
-      "label": "Output Variable",
-      "defaultValue": "Extension.Version",
-      "required": true,
-      "helpMarkDown": "The variable name to assign the version to.",
-      "groupName": "version"
+        "name": "outputVariable",
+        "type": "string",
+        "label": "Output Variable",
+        "defaultValue": "Extension.Version",
+        "required": true,
+        "helpMarkDown": "The variable name to assign the version to.",
+        "groupName": "version"
     },
     {
-      "name": "extensionVersionOverride",
-      "type": "string",
-      "label": "Override Variable",
-      "defaultValue": "Extension.VersionOverride",
-      "helpMarkDown": "When this value is specified the extension version task will take it regardless of the version returned from the marketplace. You can use this variable at Queue time to move to the next major version. When the variable value is empty or when the variable doesn't exist the Marketplace will be queried.",
-      "required": false,
-      "groupName": "version"
+        "name": "extensionVersionOverride",
+        "type": "string",
+        "label": "Override Variable",
+        "defaultValue": "Extension.VersionOverride",
+        "helpMarkDown": "When this value is specified the extension version task will take it regardless of the version returned from the marketplace. You can use this variable at Queue time to move to the next major version. When the variable value is empty or when the variable doesn't exist the Marketplace will be queried.",
+        "required": false,
+        "groupName": "version"
     },
     {
-      "name": "arguments",
-      "type": "string",
-      "label": "Arguments",
-      "defaultValue": "",
-      "helpMarkDown": "Additional arguments passed to the package and publishing tool.",
-      "required": false,
-      "groupName": "advanced"
+        "name": "arguments",
+        "type": "string",
+        "label": "Arguments",
+        "defaultValue": "",
+        "helpMarkDown": "Additional arguments passed to the package and publishing tool.",
+        "required": false,
+        "groupName": "advanced"
     },
     {
-      "name": "cwd",
-      "type": "filePath",
-      "label": "Working Directory",
-      "defaultValue": "",
-      "required": false,
-      "helpMarkDown": "Working directory to run the package and publishing process from. Defaults to the folder where the manifest is located.",
-      "groupName": "advanced"
+        "name": "cwd",
+        "type": "filePath",
+        "label": "Working Directory",
+        "defaultValue": "",
+        "required": false,
+        "helpMarkDown": "Working directory to run the package and publishing process from. Defaults to the folder where the manifest is located.",
+        "groupName": "advanced"
     }
   ],
   "execution": {
