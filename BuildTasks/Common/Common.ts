@@ -571,8 +571,9 @@ export async function checkUpdateTasksManifests(manifestFile?: string): Promise<
                 }
 
                 if (updateTasksId) {
-                    const publisher = tl.getInput("publisherId", false);
-                    let extensionId = tl.getInput("extensionId", false);
+                    tl.error("EXPERIMENTAL - Currently only supported when 'Publisher' and 'Extension Id' are specified.");
+                    const publisher = tl.getInput("publisherId", true);
+                    let extensionId = tl.getInput("extensionId", true);
                     const extensionTag = tl.getInput("extensionTag", false);
 
                     if (extensionId && extensionTag) {
