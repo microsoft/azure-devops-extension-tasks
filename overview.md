@@ -2,6 +2,10 @@
 
 Tasks to help you simplify and automate the delivery of Team Services extensions. Package, publish, share, and install your Team Services extensions to the Visual Studio Marketplace.
 
+## Release Notes
+
+* EXPERIMENTAL - Added support for generating build task Id's based on publisher, extension id and taskname.
+
 ## Tasks included
 
 * **Package**: package a Team Services extension into an extension package (.VSIX) file
