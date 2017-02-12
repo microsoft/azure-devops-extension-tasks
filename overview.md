@@ -1,7 +1,11 @@
 
 This extension provides build and release tasks for packaging and publishing Visual Studio Team Services (VSTS) extensions to the [Visual Studio Marketplace](https://marketplace.visualstudio.com). There are also tasks to share and install your extension to your VSTS account.
 
-## What you can do
+## Release Notes
+
+* EXPERIMENTAL - Added support for generating build task Id's based on publisher, extension id and taskname.
+
+## Tasks included
 
 * **Package**: package a VSTS extension into an extension package (.VSIX) file
 * **Publish**: publish an extension (either privately or publicly) to the Visual Studio Marketplace
