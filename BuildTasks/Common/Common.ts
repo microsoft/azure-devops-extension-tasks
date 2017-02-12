@@ -489,17 +489,14 @@ export function checkUpdateTasksManifests(manifestFile?: string): Q.Promise<any>
                 }
 
                 if (updateTasksId) {
-                    const publisher = tl.getInput("publisherId", false);
-                    let extensionId = tl.getInput("extensionId", false);
+                    tl.error("EXPERIMENTAL - Currently only supported when 'Publisher' and 'Extension Id' are specified.");
+                    const publisher = tl.getInput("publisherId", true);
+                    let extensionId = tl.getInput("extensionId", true);
                     const extensionTag = tl.getInput("extensionTag", false);
 
                     if (extensionId && extensionTag) {
                         extensionId += extensionTag;
                         tl.debug(`Overriding extension id to: ${extensionId}`);
-                    }
-
-                    if (!(publisher && extensionId)) {
-                        tl.error("Currently only supported when 'Publisher' and 'Extension Id' are specified.");
                     }
 
                     const ns = { Publisher: publisher, ExtensionId: extensionId };
