@@ -407,7 +407,19 @@ function updateTaskVersion(manifestFilePath: string, version: { Major: string, M
         catch (jsonError) {
             throw new Error(`Error parsing task manifest: ${manifestFilePath} - ${jsonError}`);
         }
-        manifestJSON.version = version;
+
+        if (onlyPatch) {
+            const taskVersionParts = manifestJSON.version.split(".");
+            if (taskVersionParts.length > 3) {
+                tl.warning("Detected a task version that consists of more than 3 parts. Build tasks support only 3 parts, ignoring the rest.");
+            }
+
+            const taskVersion = { Major: taskVersionParts[0], Minor: taskVersionParts[1], Patch: version.Patch };
+            manifestJSON.version = taskVersion;
+        } else {
+            manifestJSON.version = version;
+        }
+
         const newContent = JSON.stringify(manifestJSON, null, "\t");
         return Q.nfcall(fs.writeFile, manifestFilePath, newContent).then(() => {
             tl.debug(`Task manifest ${manifestFilePath} version updated to ${JSON.stringify(version)}`);
@@ -424,6 +436,9 @@ function updateTaskVersion(manifestFilePath: string, version: { Major: string, M
 export function checkUpdateTasksVersion(manifestFile?: string): Q.Promise<any> {
     // Check if we need to touch in tasks manifest before packaging
     const updateTasksVersion = tl.getBoolInput("updateTasksVersion", false);
+    const updateTasksVersionOnlyPatch = tl.getBoolInput("updateTasksVersionOnlyPatch", false);
+    const updateTasksId = tl.getBoolInput("updateTasksId", false);
+
     let updateTasksFinished = Q.defer();
 
     if (updateTasksVersion) {
@@ -454,8 +469,8 @@ export function checkUpdateTasksVersion(manifestFile?: string): Q.Promise<any> {
 
                 const taskVersion = { Major: versionParts[0], Minor: versionParts[1], Patch: versionParts[2] };
 
-                tl.debug(`Processing the following task manifest ${taskManifests}`);
-                const taskUpdates = taskManifests.map(manifest => updateTaskVersion(manifest, taskVersion));
+                    tl.debug(`Processing the following task manifest ${taskManifests}`);
+                    const taskUpdates = taskManifests.map(manifest => updateTaskVersion(manifest, taskVersion, updateTasksVersionOnlyPatch));
 
                 Q.all(taskUpdates)
                     .then(() => updateTasksFinished.resolve(null))
