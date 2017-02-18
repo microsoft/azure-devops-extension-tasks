@@ -117,9 +117,24 @@
       "name": "updateTasksVersion",
       "type": "boolean",
       "label": "Override tasks version",
-      "defaultValue": "true",
-      "required": false,
+      "defaultValue": "false",
+      "required": true,
       "helpMarkDown": "Search for contributed tasks in extension manifests and updates the version specified in each Build and Release task found.",
+      "groupName": "overrides"
+    },
+    {
+      "name": "updateTasksVersionType",
+      "type": "picklist",
+      "label": "Override Type",
+      "defaultValue": "majorminorpatch",
+      "options": {
+          "Replace Major, Minor & Patch (x.y.r)": "majorminorpatch",
+          "Replace Minor & Patch (1.y.r)": "minorpatch",
+          "Replace Only Patch (1.0.r)": "patch"
+      },
+      "required": false,
+      "helpMarkDown": "The Task version replacement format. You can select which part(s) of the version number to update (Major, Minor or Patch)",
+      "visibleRule": "updateTasksVersion=true",
       "groupName": "overrides"
     },
     {
