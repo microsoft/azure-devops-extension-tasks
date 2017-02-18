@@ -163,6 +163,15 @@
       "groupName": "manifest"
     },
     {
+      "name": "updateTasksVersionOnlyPatch",
+      "type": "boolean",
+      "label": "Override just the tasks version Patch",
+      "defaultValue": "false",
+      "required": false,
+      "helpMarkDown": "Updates only the patch number of the version, leaving the Major.Minor as specified in the task.json.",
+      "groupName": "overrides"
+    },
+    {
       "name": "updateTasksId",
       "type": "boolean",
       "label": "Override task id",
