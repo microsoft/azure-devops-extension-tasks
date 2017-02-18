@@ -156,19 +156,25 @@
     {
       "name": "updateTasksVersion",
       "type": "boolean",
-      "label": "Override task version",
-      "defaultValue": "true",
-      "required": false,
+      "label": "Override tasks version",
+      "defaultValue": "false",
+      "required": true,
       "helpMarkDown": "Search for contributed tasks in extension manifests and updates the version specified in each Build and Release task found.",
-      "groupName": "manifest"
+      "groupName": "overrides"
     },
     {
-      "name": "updateTasksVersionOnlyPatch",
-      "type": "boolean",
-      "label": "Override just the tasks version Patch",
-      "defaultValue": "false",
+      "name": "updateTasksVersionType",
+      "type": "picklist",
+      "label": "Override Type",
+      "defaultValue": "majorminorpatch",
+      "options": {
+          "Replace Major, Minor & Patch (x.y.r)": "majorminorpatch",
+          "Replace Minor & Patch (1.y.r)": "minorpatch",
+          "Replace Only Patch (1.0.r)": "patch"
+      },
       "required": false,
-      "helpMarkDown": "Updates only the patch number of the version, leaving the Major.Minor as specified in the task.json.",
+      "helpMarkDown": "The Task version replacement format. You can select which part(s) of the version number to update (Major, Minor or Patch)",
+      "visibleRule": "updateTasksVersion=true",
       "groupName": "overrides"
     },
     {
