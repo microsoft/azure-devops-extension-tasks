@@ -348,7 +348,10 @@ function getTaskPathContributions(manifestFile: string): Q.Promise<string[]> {
         // BOM check
         let manifestJSON;
         try {
-            data = data.replace(/^\uFEFF/, "");
+            data = data.replace(/^\uFEFF/, (x) => {
+                tl.warning(`Removing Unicode BOM from manifest file: ${manifestFile}.`);
+                return "";
+            });
             manifestJSON = JSON.parse(data);
         }
         catch (jsonError) {
@@ -400,8 +403,10 @@ function updateTaskVersion(manifestFilePath: string, version: { Major: string, M
     return Q.nfcall(fs.readFile, manifestFilePath, "utf8").then((data: string) => {
         let manifestJSON;
         try {
-            // BOM check
-            data = data.replace(/^\uFEFF/, "");
+            data = data.replace(/^\uFEFF/, (x) => {
+                tl.warning(`Removing Unicode BOM from manifest file: ${manifestFilePath}.`);
+                return "";
+            });
             manifestJSON = JSON.parse(data);
         }
         catch (jsonError) {

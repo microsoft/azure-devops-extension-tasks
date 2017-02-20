@@ -160,7 +160,7 @@
       "defaultValue": "true",
       "required": false,
       "helpMarkDown": "Search for contributed tasks in extension manifests and updates the version specified in each Build and Release task found.",
-      "groupName": "overrides"
+      "groupName": "manifest"
     },
     {
       "name": "updateTasksVersionType",
@@ -175,7 +175,7 @@
       "required": false,
       "helpMarkDown": "The Task version replacement format. You can select which part(s) of the version number to update (Major, Minor or Patch)",
       "visibleRule": "updateTasksVersion=true",
-      "groupName": "overrides"
+      "groupName": "manifest"
     },
     {
       "name": "extensionVisibility",
