@@ -128,9 +128,9 @@
       "label": "Override Type",
       "defaultValue": "majorminorpatch",
       "options": {
-          "Replace Major, Minor & Patch (x.y.r)": "majorminorpatch",
-          "Replace Minor & Patch (1.y.r)": "minorpatch",
-          "Replace Only Patch (1.0.r)": "patch"
+        "majorminorpatch": "Replace Major, Minor & Patch (x.y.r)",
+        "minorpatch": "Replace Minor & Patch (1.y.r)",
+        "patch": "Replace Only Patch (1.0.r)"
       },
       "required": false,
       "helpMarkDown": "The Task version replacement format. You can select which part(s) of the version number to update (Major, Minor or Patch)",
