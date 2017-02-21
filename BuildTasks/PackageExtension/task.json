@@ -124,12 +124,12 @@
     },
     {
       "name": "updateTasksVersionType",
-      "type": "picklist",
+      "type": "pickList",
       "label": "Override Type",
-      "defaultValue": "majorminorpatch",
+      "defaultValue": "major",
       "options": {
-        "majorminorpatch": "Replace Major, Minor & Patch (x.y.r)",
-        "minorpatch": "Replace Minor & Patch (1.y.r)",
+        "major": "Replace Major, Minor, Patch (x.y.r)",
+        "minor": "Replace Minor, Patch (1.y.r)",
         "patch": "Replace Only Patch (1.0.r)"
       },
       "required": false,
