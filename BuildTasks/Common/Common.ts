@@ -413,16 +413,21 @@ function updateTaskVersion(manifestFilePath: string, version: { Major: string, M
             throw new Error(`Error parsing task manifest: ${manifestFilePath} - ${jsonError}`);
         }
 
-        const taskVersionParts = manifestJSON.version.split(".");
-        if (taskVersionParts.length > 3) {
-            tl.warning("Detected a task version that consists of more than 3 parts. Build tasks support only 3 parts, ignoring the rest.");
+        if (!manifestJSON.version && replacementType !== "major") {
+            tl.warning("Task manifest doesn't specify a version, defaulting to replacement type: major.");
+            replacementType = "major";
+            manifestJSON.version = {};
         }
 
-        manifestJSON.version = {
-            Major: replacementType.indexOf("major") < 0 ? taskVersionParts[0] : version.Major,
-            Minor: replacementType.indexOf("minor") < 0 ? taskVersionParts[1] : version.Minor,
-            Patch: replacementType.indexOf("patch") < 0 ? taskVersionParts[2] : version.Patch
-        };
+        switch (replacementType) {
+            default:
+            case "major":
+                manifestJSON.version.Major = version.Major;
+            case "minor":
+                manifestJSON.version.Major = version.Minor;
+            case "patch":
+                manifestJSON.version.Patch = version.Patch;
+        }
 
         const newContent = JSON.stringify(manifestJSON, null, "\t");
         return Q.nfcall(fs.writeFile, manifestFilePath, newContent).then(() => {
