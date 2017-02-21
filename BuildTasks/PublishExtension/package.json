@@ -1,10 +1,11 @@
 {
-    "dependencies": {
-        "adm-zip": "^0.4.7",
-        "archiver": "^1.2.0",
-        "temp": "^0.8.3",
-        "vsts-task-lib": "^2.0.0-preview",
-        "x2js": "^3.0.1",
-        "xmldom": "^0.1.22"
-    }
+  "dependencies": {
+    "adm-zip": "^0.4.7",
+    "archiver": "^1.2.0",
+    "temp": "^0.8.3",
+    "vsts-task-lib": "^2.0.0-preview",
+    "x2js": "^3.0.1",
+    "xmldom": "^0.1.22",
+    "uuidv5": "^1.0.0"
+  }
 }

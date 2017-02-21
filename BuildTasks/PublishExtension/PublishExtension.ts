@@ -23,7 +23,7 @@ common.runTfx(tfx => {
         cleanupTfxArgs = common.validateAndSetTfxManifestArguments(tfx);
 
         // Update tasks version if needed
-        runBeforeTfx = runBeforeTfx.then(() => common.checkUpdateTasksVersion());
+        runBeforeTfx = runBeforeTfx.then(() => common.checkUpdateTasksManifests());
     } else {
         // Set vsix file argument
         let vsixFilePattern = tl.getPathInput("vsixFile", true);
@@ -60,7 +60,7 @@ common.runTfx(tfx => {
         const extensionVisibility = tl.getInput("extensionVisibility", false);
         const extensionPricing = tl.getInput("extensionPricing", false);
         const extensionVersion = common.getExtensionVersion();
-
+        const updateTasksId = tl.getBoolInput("updateTasksId", false);
         const updateTasksVersion = tl.getBoolInput("updateTasksVersion", false);
 
         if (publisher
@@ -69,7 +69,8 @@ common.runTfx(tfx => {
             || extensionName
             || (extensionPricing && extensionPricing !== "default")
             || (extensionVisibility && extensionVisibility !== "default")
-            || extensionVersion) {
+            || extensionVersion
+            || updateTasksId ) {
 
             tl.debug("Start editing of VSIX");
             let ve = new vsixeditor.VSIXEditor(vsixFile, vsixOutput);
@@ -84,6 +85,9 @@ common.runTfx(tfx => {
             if (extensionVersion) {
                 ve.editVersion(extensionVersion);
                 ve.editUpdateTasksVersion(updateTasksVersion);
+            }
+            if (updateTasksId) {
+                ve.editUpdateTasksId(updateTasksId);
             }
 
             runBeforeTfx = runBeforeTfx.then(() => ve.endEdit().then(vsixGeneratedFile => {

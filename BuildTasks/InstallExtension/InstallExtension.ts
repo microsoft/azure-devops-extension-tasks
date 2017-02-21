@@ -14,9 +14,12 @@ common.runTfx(tfx => {
     tfx.arg(["--accounts"].concat(accounts).map((value, index) => { return value.trim(); }));
 
     const result = tfx.execSync(<any>{ silent: false, failOnStdErr: false });
+    if (result.stderr.search("error: Error: (?=.*TF1590010)") >= 0) {
+        tl.warning("Task already installed in target account - Ignoring error TF1590010 returned by tfx.");
+        tl.setResult(tl.TaskResult.Succeeded, "Ignored");
+    }
+
     if (result.stderr.search("error: Error: (?!.*TF1590010)") >= 0) {
         tl.setResult(tl.TaskResult.Failed, "Failed");
-    } else {
-        tl.setResult(tl.TaskResult.Succeeded, "Succeeded");
     }
 });

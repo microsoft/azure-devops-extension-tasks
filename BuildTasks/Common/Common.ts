@@ -12,6 +12,7 @@ import * as Q from "q";
 import * as tl from "vsts-task-lib/task";
 import * as trl from "vsts-task-lib/toolrunner";
 import ToolRunner = trl.ToolRunner;
+import * as uuidv5 from "uuidv5";
 
 function writeBuildTempFile(taskName: string, data: any): string {
     let tempFile: string;
@@ -395,7 +396,7 @@ function getTasksManifestPaths(manifestFile?: string): Q.Promise<string[]> {
     });
 }
 
-function updateTaskVersion(manifestFilePath: string, version: { Major: string, Minor: string, Patch: string }): Q.Promise<void> {
+function updateTaskId(manifestFilePath: string, ns: { Publisher: string, ExtensionId: string }): Q.Promise<void> {
     tl.debug(`Reading task manifest file: ${manifestFilePath}`);
     return Q.nfcall(fs.readFile, manifestFilePath, "utf8").then((data: string) => {
         let manifestJSON;
@@ -407,10 +408,43 @@ function updateTaskVersion(manifestFilePath: string, version: { Major: string, M
         catch (jsonError) {
             throw new Error(`Error parsing task manifest: ${manifestFilePath} - ${jsonError}`);
         }
-        manifestJSON.version = version;
+
+        let extensionNs = uuidv5("url", "https://marketplace.visualstudio.com/vsts", true);
+        manifestJSON.id = uuidv5(extensionNs, `${ns.Publisher}.${ns.ExtensionId}.${manifestJSON.name}`, false);
         const newContent = JSON.stringify(manifestJSON, null, "\t");
         return Q.nfcall(fs.writeFile, manifestFilePath, newContent).then(() => {
-            tl.debug(`Task manifest ${manifestFilePath} version updated to ${JSON.stringify(version)}`);
+            tl.debug(`Task manifest ${manifestFilePath} id updated to ${manifestJSON.id}`);
+        });
+    });
+}
+
+function updateTaskVersion(manifestFilePath: string, version: { Major: string, Minor: string, Patch: string }, replacementType: string): Q.Promise<void> {
+    tl.debug(`Reading task manifest file: ${manifestFilePath}`);
+    return Q.nfcall(fs.readFile, manifestFilePath, "utf8").then((data: string) => {
+        let manifestJSON;
+        try {
+            // BOM check
+            data = data.replace(/^\uFEFF/, "");
+            manifestJSON = JSON.parse(data);
+        }
+        catch (jsonError) {
+            throw new Error(`Error parsing task manifest: ${manifestFilePath} - ${jsonError}`);
+        }
+
+        const taskVersionParts = manifestJSON.version.split(".");
+        if (taskVersionParts.length > 3) {
+            tl.warning("Detected a task version that consists of more than 3 parts. Build tasks support only 3 parts, ignoring the rest.");
+        }
+
+        manifestJSON.version = {
+            Major: replacementType.indexOf("major") < 0 ? taskVersionParts[0] : version.Major,
+            Minor: replacementType.indexOf("minor") < 0 ? taskVersionParts[1] : version.Minor,
+            Patch: replacementType.indexOf("patch") < 0 ? taskVersionParts[2] : version.Patch
+        };
+
+        const newContent = JSON.stringify(manifestJSON, null, "\t");
+        return Q.nfcall(fs.writeFile, manifestFilePath, newContent).then(() => {
+            tl.debug(`Task manifest ${manifestFilePath} version updated to ${JSON.stringify(manifestJSON.version)}`);
         });
     });
 }
@@ -421,12 +455,18 @@ function updateTaskVersion(manifestFilePath: string, version: { Major: string, M
  * in the extension.
  *
  */
-export function checkUpdateTasksVersion(manifestFile?: string): Q.Promise<any> {
+export function checkUpdateTasksManifests(manifestFile?: string): Q.Promise<any> {
     // Check if we need to touch in tasks manifest before packaging
     const updateTasksVersion = tl.getBoolInput("updateTasksVersion", false);
+    let versionReplacementType = tl.getInput("updateTasksVersionType", false);
+    if (!versionReplacementType || versionReplacementType.length === 0) {
+        versionReplacementType = "majorminorpatch";
+    }
+    const updateTasksId = tl.getBoolInput("updateTasksId", false);
+
     let updateTasksFinished = Q.defer();
 
-    if (updateTasksVersion) {
+    if (updateTasksVersion || updateTasksId) {
         // Extract the extension version
         let extensionVersion;
         try {
@@ -437,7 +477,7 @@ export function checkUpdateTasksVersion(manifestFile?: string): Q.Promise<any> {
         }
 
         // If extension version specified, let's search for build tasks
-        if (extensionVersion) {
+        if (extensionVersion || updateTasksId) {
             getTasksManifestPaths(manifestFile).then(taskManifests => {
 
                 if (taskManifests == null || taskManifests.length === 0) {
@@ -446,21 +486,43 @@ export function checkUpdateTasksVersion(manifestFile?: string): Q.Promise<any> {
                     return;
                 }
 
-                // Extract version parts Major, Minor, Patch
-                const versionParts = extensionVersion.split(".");
-                if (versionParts.length > 3) {
-                    tl.warning("Detected a version that consists of more than 3 parts. Build tasks support only 3 parts, ignoring the rest.");
+                if (extensionVersion) {
+                    // Extract version parts Major, Minor, Patch
+                    const versionParts = extensionVersion.split(".");
+                    if (versionParts.length > 3) {
+                        tl.warning("Detected a version that consists of more than 3 parts. Build tasks support only 3 parts, ignoring the rest.");
+                    }
+
+                    const taskVersion = { Major: versionParts[0], Minor: versionParts[1], Patch: versionParts[2] };
+
+                    tl.debug(`Processing the following task manifest ${taskManifests}`);
+                    const taskUpdates = taskManifests.map(manifest => updateTaskVersion(manifest, taskVersion, versionReplacementType));
+
+                    Q.all(taskUpdates)
+                        .then(() => updateTasksFinished.resolve(null))
+                        .fail(err => updateTasksFinished.reject(`Error updating version in task manifests: ${err}`));
                 }
 
-                const taskVersion = { Major: versionParts[0], Minor: versionParts[1], Patch: versionParts[2] };
+                if (updateTasksId) {
+                    tl.error("EXPERIMENTAL - Currently only supported when 'Publisher' and 'Extension Id' are specified.");
+                    const publisher = tl.getInput("publisherId", true);
+                    let extensionId = tl.getInput("extensionId", true);
+                    const extensionTag = tl.getInput("extensionTag", false);
 
-                tl.debug(`Processing the following task manifest ${taskManifests}`);
-                const taskUpdates = taskManifests.map(manifest => updateTaskVersion(manifest, taskVersion));
+                    if (extensionId && extensionTag) {
+                        extensionId += extensionTag;
+                        tl.debug(`Overriding extension id to: ${extensionId}`);
+                    }
 
-                Q.all(taskUpdates)
-                    .then(() => updateTasksFinished.resolve(null))
-                    .fail(err => updateTasksFinished.reject(`Error updating version in task manifests: ${err}`));
+                    const ns = { Publisher: publisher, ExtensionId: extensionId };
 
+                    tl.debug(`Processing the following task manifest ${taskManifests}`);
+                    const taskUpdates = taskManifests.map(manifest => updateTaskId(manifest, ns));
+
+                    Q.all(taskUpdates)
+                        .then(() => updateTasksFinished.resolve(null))
+                        .fail(err => updateTasksFinished.reject(`Error updating version in task manifests: ${err}`));
+                }
             }).fail(err => updateTasksFinished.reject(`Error determining tasks manifest paths: ${err}`));
         }
         else {
