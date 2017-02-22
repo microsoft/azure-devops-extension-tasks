@@ -398,7 +398,7 @@ function getTasksManifestPaths(manifestFile?: string): Q.Promise<string[]> {
     });
 }
 
-function updateTaskVersion(manifestFilePath: string, version: { Major: string, Minor: string, Patch: string }, replacementType: string): Q.Promise<void> {
+function updateTaskVersion(manifestFilePath: string, version: { Major: number, Minor: number, Patch: number }, replacementType: string): Q.Promise<void> {
     tl.debug(`Reading task manifest file: ${manifestFilePath}`);
     return Q.nfcall(fs.readFile, manifestFilePath, "utf8").then((data: string) => {
         let manifestJSON;
@@ -482,7 +482,7 @@ export function checkUpdateTasksVersion(manifestFile?: string): Q.Promise<any> {
                     tl.warning("Detected a version that consists of more than 3 parts. Build tasks support only 3 parts, ignoring the rest.");
                 }
 
-                const taskVersion = { Major: versionParts[0], Minor: versionParts[1], Patch: versionParts[2] };
+                const taskVersion = { Major: +versionParts[0], Minor: +versionParts[1], Patch: +versionParts[2] };
 
                 tl.debug(`Processing the following task manifest ${taskManifests}`);
                 const taskUpdates = taskManifests.map(manifest => updateTaskVersion(manifest, taskVersion, versionReplacementType));
