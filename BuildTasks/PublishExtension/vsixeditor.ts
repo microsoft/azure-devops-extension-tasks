@@ -34,7 +34,7 @@ export class VSIXEditor {
         const zip = new tr.ToolRunner(sevenZip.path7za);
         zip.arg("x");
         zip.arg(input);
-        zip.arg(`-o"${output}`); // redirect output to dir
+        zip.arg(`-o${output}`); // redirect output to dir
         zip.arg("-y");           // assume yes on all queries
         zip.arg("-spd");         // disable wildcards
         zip.arg("-aoa");         // overwrite all
