@@ -49,6 +49,7 @@ export class VSIXEditor {
         zip.arg("-r");           // recursive
         zip.arg("-y");           // assume yes on all queries
         zip.arg("-tzip");        // zip format
+        zip.arg("-mx9");         // max compression level
         zip.execSync();
     }
 
