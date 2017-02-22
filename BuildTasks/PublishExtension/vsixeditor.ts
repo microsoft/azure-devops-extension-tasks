@@ -1,17 +1,15 @@
 /// <reference path="../typings/index.d.ts" />
-import AdmZip = require("adm-zip");
 import temp = require("temp");
 import fs = require("fs");
 import path = require("path");
 import Q = require("q");
 import tl = require("vsts-task-lib/task");
+import tr = require("vsts-task-lib/toolrunner");
 import common = require("./common");
-import archiver = require("archiver");
+import sevenZip = require("7zip-bin");
 
 export class VSIXEditor {
-    private zip: AdmZip;
     private edit: boolean = false;
-
     private versionNumber: string = null;
     private id: string = null;
     private idTag: string = null;
@@ -21,15 +19,37 @@ export class VSIXEditor {
     private extensionPricing: string = null;
     private updateTasksVersion: boolean = true;
 
-    constructor(public inputFile: string,
+    constructor(
+        public inputFile: string,
         public outputPath: string) {
-        this.zip = new AdmZip(inputFile);
     }
 
     public startEdit() {
         if (this.edit) { throw new Error("Edit is already started"); }
         this.edit = true;
         tl.debug("Editing started");
+    }
+
+    private extractArchive(input: string, output: string): void {
+        const zip = new tr.ToolRunner(sevenZip.path7za);
+        zip.arg("x");
+        zip.arg(input);
+        zip.arg(`-o"${output}`); // redirect output to dir
+        zip.arg("-y");           // assume yes on all queries
+        zip.arg("-spd");         // disable wildcards
+        zip.arg("-aoa");         // overwrite all
+        zip.execSync();
+    }
+
+    private createArchive(input: string, output: string): void {
+        const zip = new tr.ToolRunner(sevenZip.path7za);
+        zip.arg("a");
+        zip.arg(output);         // redirect output to file
+        zip.arg(path.join(input, "\*"));
+        zip.arg("-r");           // recursive
+        zip.arg("-y");           // assume yes on all queries
+        zip.arg("-tzip");        // zip format
+        zip.execSync();
     }
 
     public endEdit(): Q.Promise<string> {
@@ -45,7 +65,8 @@ export class VSIXEditor {
             .then((dirPath: string) => {
                 tl.debug("Finalizing edit");
                 tl.debug("Extracting files to " + dirPath);
-                this.zip.extractAllTo(dirPath, true);
+
+                this.extractArchive(this.inputFile, dirPath);
                 return dirPath;
             })
             .then(dirPath => {
@@ -70,23 +91,9 @@ export class VSIXEditor {
                 });
             })
             .then((manifestData: ManifestData) => {
-                let outputFile = manifestData.outputFileName;
-                let output = fs.createWriteStream(outputFile);
-
-                let archive = archiver("zip");
-
                 tl.debug("Creating final archive file at " + this.outputPath);
-
-                output.on("close", function() {
-                    tl.debug("archiver has been finalized and the output file descriptor has closed.");
-                    deferred.resolve(outputFile);
-                });
-
-                archive.on("error", err => deferred.reject(err));
-
-                archive.pipe(output);
-                archive.directory(manifestData.dirPath, "/");
-                archive.finalize();
+                this.createArchive(manifestData.dirPath, manifestData.outputFileName);
+                deferred.resolve(manifestData.outputFileName);
                 tl.debug("Final archive file created");
             })
             .fail(err => deferred.reject(err));
