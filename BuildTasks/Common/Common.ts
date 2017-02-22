@@ -415,22 +415,21 @@ function updateTaskVersion(manifestFilePath: string, version: { Major: string, M
 
         tl.debug(`Task manifest ${manifestFilePath} replacement type: ${replacementType}`);
         if (!manifestJSON.version && replacementType !== "major") {
-            tl.warning("Task manifest doesn't specify a version, defaulting to replacement type: major.");
+            tl.warning(`Task manifest ${manifestFilePath} doesn't specify a version, defaulting to replacement type: major.`);
             replacementType = "major";
-            manifestJSON.version = {};
+            manifestJSON.version = version;
         }
         else {
             tl.debug(`Task manifest ${manifestFilePath} current version: ${JSON.stringify(manifestJSON.version)}`);
-        }
-
-        switch (replacementType) {
-            default:
-            case "major":
-                manifestJSON.version.Major = version.Major;
-            case "minor":
-                manifestJSON.version.Minor = version.Minor;
-            case "patch":
-                manifestJSON.version.Patch = version.Patch;
+            switch (replacementType) {
+                default:
+                case "major":
+                    manifestJSON.version.Major = version.Major;
+                case "minor":
+                    manifestJSON.version.Minor = version.Minor;
+                case "patch":
+                    manifestJSON.version.Patch = version.Patch;
+            }
         }
 
         const newContent = JSON.stringify(manifestJSON, null, "\t");
