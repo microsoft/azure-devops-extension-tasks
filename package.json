@@ -10,7 +10,7 @@
     "tfs"
   ],
   "scripts": {
-    "initdev:npm": "npm install && pushd \"BuildTasks/PublishExtension/\" && npm install --force && popd",
+    "initdev:npm": "npm install && pushd \"BuildTasks/PublishExtension/\" && npm install && popd",
     "initdev:typings": "pushd BuildTasks && typings install && popd",
     "initdev": "npm run initdev:npm  && npm run initdev:typings ",
     "clean": "rimraf dist",
@@ -21,7 +21,7 @@
     "prelink:tasks": "mkdirp dist/_temp/node_modules && pushd \"dist/_temp\" && npm install vsts-task-lib@2.0.0-preview && npm install q@1.4.1 && popd",
     "link:tasks": "node scripts/copyfilesToBuildTasks -u 2 dist/_temp/node_modules/**/* dist/BuildTasks",
     "postlink:tasks": "rimraf dist/_temp",
-    "link:tasks:publish": "pushd \"dist/BuildTasks/PublishExtension\" && npm install --force && popd",
+    "link:tasks:publish": "pushd \"dist/BuildTasks/PublishExtension\" && npm install && popd",
     "content:tasks": "copyfiles \"./BuildTasks/*Extension*/**/!(*.ts)\" dist",
     "content:extension:tasks": "copyfiles vss-extension.json *.md license.txt *.png dist",
     "build:tasks": "npm run clean && npm run build:tasks:noclean",
