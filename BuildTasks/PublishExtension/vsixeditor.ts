@@ -167,7 +167,7 @@ export class VSIXEditor {
                 vsixmanifest.PackageManifest.Metadata.DisplayName,
                 dirPath);
 
-            fs.writeFile(vsixManifestPath, vsixManifestData, () => {
+            fs.writeFile(vsixManifestPath, vsixManifestData, { encoding: "utf8" }, () => {
                 deferred.resolve(manifestData);
             });
         });

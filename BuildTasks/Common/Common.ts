@@ -433,7 +433,7 @@ function updateTaskVersion(manifestFilePath: string, version: { Major: number, M
         }
 
         const newContent = JSON.stringify(manifestJSON, null, "\t");
-        return Q.nfcall(fs.writeFile, manifestFilePath, newContent).then(() => {
+        return Q.nfcall(fs.writeFile, manifestFilePath, newContent, { encoding: "utf8" }).then(() => {
             tl.debug(`Task manifest ${manifestFilePath} version updated to: ${JSON.stringify(manifestJSON.version)}`);
         });
     });
