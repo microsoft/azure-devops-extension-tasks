@@ -10,7 +10,7 @@
     "tfs"
   ],
   "scripts": {
-    "initdev:npm": "npm install",
+    "initdev:npm": "npm install && pushd \"BuildTasks/PublishExtension/\" && npm install && popd",
     "initdev:typings": "pushd BuildTasks && typings install && popd",
     "initdev": "npm run initdev:npm  && npm run initdev:typings ",
     "clean": "rimraf dist",

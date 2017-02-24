@@ -398,7 +398,7 @@ function getTasksManifestPaths(manifestFile?: string): Q.Promise<string[]> {
     });
 }
 
-function updateTaskVersion(manifestFilePath: string, version: { Major: string, Minor: string, Patch: string }, replacementType: string): Q.Promise<void> {
+function updateTaskVersion(manifestFilePath: string, version: { Major: number, Minor: number, Patch: number }, replacementType: string): Q.Promise<void> {
     tl.debug(`Reading task manifest file: ${manifestFilePath}`);
     return Q.nfcall(fs.readFile, manifestFilePath, "utf8").then((data: string) => {
         let manifestJSON;
@@ -415,26 +415,25 @@ function updateTaskVersion(manifestFilePath: string, version: { Major: string, M
 
         tl.debug(`Task manifest ${manifestFilePath} replacement type: ${replacementType}`);
         if (!manifestJSON.version && replacementType !== "major") {
-            tl.warning("Task manifest doesn't specify a version, defaulting to replacement type: major.");
+            tl.warning(`Task manifest ${manifestFilePath} doesn't specify a version, defaulting to replacement type: major.`);
             replacementType = "major";
-            manifestJSON.version = {};
+            manifestJSON.version = version;
         }
         else {
             tl.debug(`Task manifest ${manifestFilePath} current version: ${JSON.stringify(manifestJSON.version)}`);
-        }
-
-        switch (replacementType) {
-            default:
-            case "major":
-                manifestJSON.version.Major = version.Major;
-            case "minor":
-                manifestJSON.version.Minor = version.Minor;
-            case "patch":
-                manifestJSON.version.Patch = version.Patch;
+            switch (replacementType) {
+                default:
+                case "major":
+                    manifestJSON.version.Major = version.Major;
+                case "minor":
+                    manifestJSON.version.Minor = version.Minor;
+                case "patch":
+                    manifestJSON.version.Patch = version.Patch;
+            }
         }
 
         const newContent = JSON.stringify(manifestJSON, null, "\t");
-        return Q.nfcall(fs.writeFile, manifestFilePath, newContent).then(() => {
+        return Q.nfcall(fs.writeFile, manifestFilePath, newContent, { encoding: "utf8" }).then(() => {
             tl.debug(`Task manifest ${manifestFilePath} version updated to: ${JSON.stringify(manifestJSON.version)}`);
         });
     });
@@ -483,7 +482,7 @@ export function checkUpdateTasksVersion(manifestFile?: string): Q.Promise<any> {
                     tl.warning("Detected a version that consists of more than 3 parts. Build tasks support only 3 parts, ignoring the rest.");
                 }
 
-                const taskVersion = { Major: versionParts[0], Minor: versionParts[1], Patch: versionParts[2] };
+                const taskVersion = { Major: +versionParts[0], Minor: +versionParts[1], Patch: +versionParts[2] };
 
                 tl.debug(`Processing the following task manifest ${taskManifests}`);
                 const taskUpdates = taskManifests.map(manifest => updateTaskVersion(manifest, taskVersion, versionReplacementType));

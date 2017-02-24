@@ -2,9 +2,9 @@
 import * as Q from "q";
 import * as tl from "vsts-task-lib/task";
 import * as common from "./common";
-import * as vsixeditor from "./vsixeditor";
 import * as path from "path";
 import * as os from "os";
+import * as vsixeditor from "./vsixeditor";
 
 common.runTfx(tfx => {
     tfx.arg(["extension", "publish", "--json"]);

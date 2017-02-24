@@ -6,6 +6,11 @@
   "author": "Microsoft Corporation",
   "helpMarkDown": "",
   "category": "Package",
+  "version": {
+    "Major": 0,
+    "Minor": 0,
+    "Patch": 0
+  },
   "visibility": [
     "Build",
     "Release"
