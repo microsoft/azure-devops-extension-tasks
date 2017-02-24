@@ -1,7 +1,6 @@
 ///<reference path="../typings/index.d.ts" />
 import * as Q from "q";
 import * as tl from "vsts-task-lib/task";
-import * as tr from "vsts-task-lib/toolrunner";
 import * as common from "./common";
 import * as path from "path";
 import * as os from "os";
