@@ -26,7 +26,6 @@ if (tl.osType() !== "Windows_NT") {
 
 import * as vsixeditor from "./vsixeditor";
 
-
 common.runTfx(tfx => {
     tfx.arg(["extension", "publish", "--json"]);
     const outputVariable = tl.getInput("outputVariable", false);
