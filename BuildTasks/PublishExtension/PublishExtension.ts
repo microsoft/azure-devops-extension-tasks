@@ -5,25 +5,6 @@ import * as tr from "vsts-task-lib/toolrunner";
 import * as common from "./common";
 import * as path from "path";
 import * as os from "os";
-
-if (tl.osType() !== "Windows_NT") {
-    let postfix = "";
-    switch (tl.osType()) {
-        case "Linux":
-            postfix = "linux";
-            break;
-        case "Darwin":
-            postfix = "mac";
-            break;
-    }
-
-    tl.cd(__dirname);
-    const npmRunner = new tr.ToolRunner(tl.which("npm", true));
-    npmRunner.arg("install");
-    npmRunner.arg(`7zip-bin-${postfix}`);
-    npmRunner.execSync();
-}
-
 import * as vsixeditor from "./vsixeditor";
 
 common.runTfx(tfx => {

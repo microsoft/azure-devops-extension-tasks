@@ -6,7 +6,6 @@ import Q = require("q");
 import tl = require("vsts-task-lib/task");
 import tr = require("vsts-task-lib/toolrunner");
 import common = require("./common");
-import sevenZip = require("7zip-bin");
 
 export class VSIXEditor {
     private edit: boolean = false;
@@ -31,26 +30,51 @@ export class VSIXEditor {
     }
 
     private extractArchive(input: string, output: string): void {
-        const zip = new tr.ToolRunner(sevenZip.path7za);
-        zip.arg("x");
-        zip.arg(input);
-        zip.arg(`-o${output}`); // redirect output to dir
-        zip.arg("-y");           // assume yes on all queries
-        zip.arg("-spd");         // disable wildcards
-        zip.arg("-aoa");         // overwrite all
-        zip.execSync();
+        if (tl.osType() === "Windows_NT") {
+            const sevenZip = require("7zip-bin-win");
+            const zip = new tr.ToolRunner(sevenZip.path7za);
+            zip.arg("x");
+            zip.arg(input);          // file to extract
+            zip.arg(`-o${output}`);  // redirect output to dir
+            zip.arg("-y");           // assume yes on all queries
+            zip.arg("-spd");         // disable wildcards
+            zip.arg("-aoa");         // overwrite all
+            zip.execSync();
+        }
+        else {
+            const zip = new tr.ToolRunner(tl.which("unzip", true));
+            zip.arg("-o");           // overwrite all
+            zip.arg("-d");           // redirect output to
+            zip.arg(output);         // output directory
+            zip.arg(input);          // file to extract
+            zip.execSync();
+        }
     }
 
     private createArchive(input: string, output: string): void {
-        const zip = new tr.ToolRunner(sevenZip.path7za);
-        zip.arg("a");
-        zip.arg(output);         // redirect output to file
-        zip.arg(path.join(input, "\*"));
-        zip.arg("-r");           // recursive
-        zip.arg("-y");           // assume yes on all queries
-        zip.arg("-tzip");        // zip format
-        zip.arg("-mx0");         // max compression level
-        zip.execSync();
+        if (tl.osType() === "Windows_NT") {
+            const sevenZip = require("7zip-bin-win");
+            const zip = new tr.ToolRunner(sevenZip.path7za);
+            zip.arg("a");
+            zip.arg(output);         // redirect output to file
+            zip.arg(path.join(input, "\*"));
+            zip.arg("-r");           // recursive
+            zip.arg("-y");           // assume yes on all queries
+            zip.arg("-tzip");        // zip format
+            zip.arg("-mx9");         // max compression level
+            zip.execSync();
+        }
+        else {
+            const zip = new tr.ToolRunner(tl.which("zip", true));
+            const cwd = tl.cwd();
+            tl.cd(input);
+            zip.arg(path.join(cwd, output));         // redirect output to file
+            zip.arg(".");
+            zip.arg("-r");           // recursive
+            zip.arg("-9");           // max compression level
+            zip.execSync();
+            tl.cd(cwd);
+        }
     }
 
     public endEdit(): Q.Promise<string> {
