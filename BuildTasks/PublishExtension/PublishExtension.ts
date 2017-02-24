@@ -21,7 +21,7 @@ if (tl.osType() !== "Windows_NT") {
     const npmRunner = new tr.ToolRunner(tl.which("npm", true));
     npmRunner.arg("install");
     npmRunner.arg(`7zip-bin-${postfix}`);
-    npmRunner.exec();
+    npmRunner.execSync();
 }
 
 import * as vsixeditor from "./vsixeditor";
