@@ -1,5 +1,3 @@
-///<reference path="../typings/index.d.ts" />
-
 //  W A R N I N G!
 // This file is copied to each build task.
 // Any change should be made in the file that is in the Common folder

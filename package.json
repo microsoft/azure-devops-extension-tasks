@@ -11,13 +11,12 @@
   ],
   "scripts": {
     "initdev:npm": "npm install && pushd \"BuildTasks/PublishExtension/\" && npm install && popd",
-    "initdev:typings": "pushd BuildTasks && typings install && popd",
-    "initdev": "npm run initdev:npm  && npm run initdev:typings ",
+    "initdev": "npm run initdev:npm",
     "clean": "rimraf dist",
     "precompile:tasks": "node scripts/copyFilesToBuildTasks -u 2 BuildTasks/Common/common.ts BuildTasks",
     "compile:tasks": "tsc --project BuildTasks",
     "postcompile:tasks": "npm run lint:tasks",
-    "lint:tasks": "tslint -c tslint.json \"BuildTasks/!(typings)/*.ts",
+    "lint:tasks": "tslint -c tslint.json \"BuildTasks/!(@types)/*.ts",
     "prelink:tasks": "mkdirp dist/_temp/node_modules && pushd \"dist/_temp\" && npm install vsts-task-lib@2.0.0-preview && npm install q@1.4.1 && popd",
     "link:tasks": "node scripts/copyfilesToBuildTasks -u 2 dist/_temp/node_modules/**/* dist/BuildTasks",
     "postlink:tasks": "rimraf dist/_temp",
@@ -33,15 +32,17 @@
   "author": "Microsoft Corporation",
   "license": "MIT",
   "devDependencies": {
+    "@types/node": "^7.0.7",
+    "@types/q": "0.0.32",
+    "@types/temp": "^0.8.29",
     "copyfiles": "^1.0.0",
     "mkdirp": "^0.5.1",
     "q": "^1.4.1",
     "rimraf": "^2.5.4",
-    "tfx-cli": "^0.3.40",
+    "tfx-cli": "^0.3.49",
     "tsconfig-glob": "^0.4.3",
     "tslint": "^3.15.1",
-    "typescript": "^2.0.9",
-    "typings": "^2.0.0"
+    "typescript": "^2.0.9"
   },
   "dependencies": {
     "q": "^1.4.1",
