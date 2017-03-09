@@ -35,6 +35,8 @@
     "@types/node": "^7.0.7",
     "@types/q": "0.0.32",
     "@types/temp": "^0.8.29",
+    "@types/x2js": "0.0.27",
+    "@types/xmldom": "^0.1.28",
     "copyfiles": "^1.0.0",
     "mkdirp": "^0.5.1",
     "q": "^1.4.1",
