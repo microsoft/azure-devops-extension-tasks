@@ -1,4 +1,5 @@
 import * as tl from "vsts-task-lib/task";
+import * as til from "vsts-task-lib/internal";
 import * as common from "./common";
 import * as stream from "stream";
 
@@ -11,7 +12,7 @@ if (extensionVersionOverrideVariable) {
     const extensionVersionOverride = tl.getVariable(extensionVersionOverrideVariable);
 
     if (extensionVersionOverride) {
-        tl._writeLine(`Ignoring Marketplace version and using supplied override: ${extensionVersionOverride}.`);
+        til._writeLine(`Ignoring Marketplace version and using supplied override: ${extensionVersionOverride}.`);
         tl.setVariable(outputVariable, extensionVersionOverride);
         usingOverride = true;
     }
@@ -31,8 +32,8 @@ if (!usingOverride) {
             const json = JSON.parse(outputStream.jsonString);
             let version: string = json.versions[0].version;
 
-            tl._writeLine(`Latest version   : ${version}.`);
-            tl._writeLine(`Requested action : ${versionAction}.`);
+            til._writeLine(`Latest version   : ${version}.`);
+            til._writeLine(`Requested action : ${versionAction}.`);
 
             if (versionAction !== "None") {
                 let versionparts: number[] = version.split(".").map(v => +v);
@@ -48,7 +49,7 @@ if (!usingOverride) {
                         break;
                 }
                 version = versionparts.join(".");
-                tl._writeLine(`Updated to       : ${version}.`);
+                til._writeLine(`Updated to       : ${version}.`);
             }
 
             tl.setVariable(outputVariable, version);

@@ -1,5 +1,6 @@
 import * as Q from "q";
 import * as tl from "vsts-task-lib/task";
+import * as til from "vsts-task-lib/internal";
 import * as common from "./common";
 import * as path from "path";
 import * as os from "os";
@@ -124,7 +125,7 @@ common.runTfx(tfx => {
                 tl.setVariable(outputVariable, publishedVsix);
             }
 
-            tl._writeLine(`Published VSIX: ${publishedVsix}.`);
+            til._writeLine(`Published VSIX: ${publishedVsix}.`);
             tl.setResult(tl.TaskResult.Succeeded, `tfx exited with return code: ${code}`);
         }).fail(err => {
             tl.setResult(tl.TaskResult.Failed, `tfx failed with error: ${err}`);

@@ -1,4 +1,5 @@
 import * as tl from "vsts-task-lib/task";
+import * as til from "vsts-task-lib/internal";
 import * as common from "./common";
 
 common.runTfx(tfx => {
@@ -23,7 +24,7 @@ common.runTfx(tfx => {
                 tl.setVariable(outputVariable, json.path);
             }
 
-            tl._writeLine(`Packaged extension: ${json.path}.`);
+            til._writeLine(`Packaged extension: ${json.path}.`);
             tl.setResult(tl.TaskResult.Succeeded, `tfx exited with return code: ${code}`);
         }).fail(err => {
             tl.setResult(tl.TaskResult.Failed, `tfx failed with error: ${err}`);
