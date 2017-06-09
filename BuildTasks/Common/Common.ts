@@ -8,6 +8,7 @@ import * as stream from "stream";
 import * as fs from "fs";
 import * as Q from "q";
 import * as tl from "vsts-task-lib/task";
+import * as til from "vsts-task-lib/internal";
 import * as trl from "vsts-task-lib/toolrunner";
 import ToolRunner = trl.ToolRunner;
 
@@ -316,7 +317,7 @@ export class TfxJsonOutputStream extends stream.Writable {
 
         if (!this.commandline) {
             this.commandline = chunkStr;
-            if (!this.silent) { this.taskOutput(chunkStr, tl._writeLine); }
+            if (!this.silent) { this.taskOutput(chunkStr, til._writeLine); }
         }
         else if (!this.jsonString && (chunkStr.toString()[0] !== "{" && chunkStr.toString()[0] !== "[")) {
             this.messages.push(chunkStr);
