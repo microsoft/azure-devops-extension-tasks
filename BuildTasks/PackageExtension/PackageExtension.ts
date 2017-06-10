@@ -23,7 +23,7 @@ common.runTfx(tfx => {
                 tl.setVariable(outputVariable, json.path);
             }
 
-            tl._writeLine(`Packaged extension: ${json.path}.`);
+            console.log(`Packaged extension: ${json.path}.`);
             tl.setResult(tl.TaskResult.Succeeded, `tfx exited with return code: ${code}`);
         }).fail(err => {
             tl.setResult(tl.TaskResult.Failed, `tfx failed with error: ${err}`);

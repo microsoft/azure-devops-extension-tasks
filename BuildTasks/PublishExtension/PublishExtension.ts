@@ -124,7 +124,7 @@ common.runTfx(tfx => {
                 tl.setVariable(outputVariable, publishedVsix);
             }
 
-            tl._writeLine(`Published VSIX: ${publishedVsix}.`);
+            console.log(`Published VSIX: ${publishedVsix}.`);
             tl.setResult(tl.TaskResult.Succeeded, `tfx exited with return code: ${code}`);
         }).fail(err => {
             tl.setResult(tl.TaskResult.Failed, `tfx failed with error: ${err}`);

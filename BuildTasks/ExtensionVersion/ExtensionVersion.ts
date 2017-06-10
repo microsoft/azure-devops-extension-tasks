@@ -11,7 +11,7 @@ if (extensionVersionOverrideVariable) {
     const extensionVersionOverride = tl.getVariable(extensionVersionOverrideVariable);
 
     if (extensionVersionOverride) {
-        tl._writeLine(`Ignoring Marketplace version and using supplied override: ${extensionVersionOverride}.`);
+        console.log(`Ignoring Marketplace version and using supplied override: ${extensionVersionOverride}.`);
         tl.setVariable(outputVariable, extensionVersionOverride);
         usingOverride = true;
     }
@@ -31,8 +31,8 @@ if (!usingOverride) {
             const json = JSON.parse(outputStream.jsonString);
             let version: string = json.versions[0].version;
 
-            tl._writeLine(`Latest version   : ${version}.`);
-            tl._writeLine(`Requested action : ${versionAction}.`);
+            console.log(`Latest version   : ${version}.`);
+            console.log(`Requested action : ${versionAction}.`);
 
             if (versionAction !== "None") {
                 let versionparts: number[] = version.split(".").map(v => +v);
@@ -48,7 +48,7 @@ if (!usingOverride) {
                         break;
                 }
                 version = versionparts.join(".");
-                tl._writeLine(`Updated to       : ${version}.`);
+                console.log(`Updated to       : ${version}.`);
             }
 
             tl.setVariable(outputVariable, version);
