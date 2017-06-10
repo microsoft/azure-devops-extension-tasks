@@ -211,7 +211,7 @@ export function runTfx(cmd: (tfx: ToolRunner) => void) {
     tl.mkdirP(path.join(agentToolsPath, "/node_modules/"));
 
     const npm = new trl.ToolRunner(tl.which("npm", true));
-    npm.arg(["install", "tfx-cli@0.3.49", "--prefix", agentToolsPath]);
+    npm.arg(["install", "tfx-cli@0.4.8", "--prefix", agentToolsPath]);
 
     npm.exec().then(code => {
         tfx = new trl.ToolRunner(tl.which(tfxLocalPath) || tl.which(tfxLocalPathBin, true));
