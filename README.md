@@ -1,20 +1,23 @@
 ![cistatus](https://mseng.visualstudio.com/_apis/public/build/definitions/b924d696-3eae-4116-8443-9a18392d8544/3646/badge)
 
-# Build and release tasks for Team Services extensions
+# CI/CD Tools for VSTS extensions
 
-Tasks to help you simplify and automate the delivery of Team Services extensions. Package, publish, share, and install your Team Services extensions to the Visual Studio Marketplace.
+This extension provides build and release tasks for packaging and publishing Visual Studio Team Services (VSTS) extensions to the [Visual Studio Marketplace](https://marketplace.visualstudio.com). There are also tasks to share and install your extension to your VSTS account.
 
-## Tasks included
+## To use
 
-* **Package**: package a Team Services extension into an extension package (.VSIX) file
+[Learn more](https://marketplace.visualstudio.com/items?itemName=ms-devlabs.vsts-developer-tools-build-tasks) about this extension about and install the extension into your VSTS account via the Visual Studio Marketplace. 
+
+
+## Available tasks
+
+* **Package**: package a VSTS extension into an extension package (.VSIX) file
 * **Publish**: optionally package and publish an extension (either privately or publicly) to the Visual Studio Marketplace
-* **Share**: share an extension with a Team Services account
-* **Install**: install an extension to a Team Services account
+* **Share**: share an extension with a VSTS account
+* **Install**: install an extension to a VSTS account
 * **Query version**: query an extension's version (to make it easy to increment on your next package or publish)
 
-[Learn more](https://marketplace.visualstudio.com/items?itemName=ms-devlabs.vsts-developer-tools-build-tasks) about this extension
-
-## To contribute
+## Contribute
 
 1. From the root of the repo run `npm run initdev`. This will pull down the necessary modules and TypeScript declare files.
 2. Run `npm run build:tasks` to compile the build tasks

@@ -2,8 +2,8 @@
   "manifestVersion": 1,
   "id": "vsts-developer-tools-build-tasks",
   "publisher": "ms-devlabs",
-  "name": "Extension Build and Release Tasks",
-  "description": "Tasks for packaging and publishing Team Services extensions to the Visual Studio Marketplace.",
+  "name": "CI/CD Tools for VSTS Extensions",
+  "description": "CI/CD tasks for packaging and publishing VSTS extensions to the Visual Studio Marketplace.",
   "tags": [
     "Extension",
     "Marketplace",
@@ -28,10 +28,6 @@
     "vso.build_execute",
     "vso.gallery_manage"
   ],
-  "branding": {
-    "theme": "dark",
-    "color": "rgb(164,34,11)"
-  },
   "categories": [
     "Build and release"
   ],
