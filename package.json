@@ -44,7 +44,8 @@
     "tfx-cli": "^0.4.8",
     "tsconfig-glob": "^0.4.3",
     "tslint": "^3.15.1",
-    "typescript": "^2.0.9"
+    "typescript": "^2.0.9",
+    "jsonfile": "4.0.0"
   },
   "dependencies": {
     "q": "^1.4.1",

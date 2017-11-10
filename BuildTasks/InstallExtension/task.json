@@ -7,9 +7,9 @@
   "helpMarkDown": "",
   "category": "Deploy",
   "version": {
-    "Major": 0,
-    "Minor": 0,
-    "Patch": 0
+    "Major": 1,
+    "Minor": 1,
+    "Patch": 44
   },
   "visibility": [
     "Build",

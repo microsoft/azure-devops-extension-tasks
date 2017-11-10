@@ -3,6 +3,7 @@
   "id": "vsts-developer-tools-build-tasks",
   "publisher": "ms-devlabs",
   "name": "CI/CD Tools for VSTS Extensions",
+  "version": "1.1.46",
   "description": "CI/CD tasks for packaging and publishing VSTS extensions to the Visual Studio Marketplace.",
   "tags": [
     "Extension",
@@ -30,20 +31,6 @@
   ],
   "categories": [
     "Build and release"
-  ],
-  "screenshots": [
-    {
-      "path": "screenshot-pipeline.png"
-    },
-    {
-      "path": "screenshot-packagetask.png"
-    },
-    {
-      "path": "screenshot-vstsmarketplace.png"
-    },
-    {
-      "path": "screenshot-tfsmarketplace.png"
-    }
   ],
   "content": {
     "details": {
