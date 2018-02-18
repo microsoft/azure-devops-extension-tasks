@@ -232,6 +232,24 @@
       "visibleRule": "extensionVisibility = private || extensionVisibility = privatepreview || extensionVisibility = default"
     },
     {
+      "name": "bypassLocalValidation",
+      "type": "boolean",
+      "label": "Bypass local validation",
+      "defaultValue": "false",
+      "helpMarkDown": "Bypass local validation.",
+      "required": false,
+      "groupName": "advanced"
+    },
+    {
+      "name": "noWaitValidation",
+      "type": "boolean",
+      "label": "Don't wait for validation",
+      "defaultValue": "false",
+      "helpMarkDown": "Don't block command for extension validation.",
+      "required": false,
+      "groupName": "advanced"
+    },
+    {
       "name": "arguments",
       "type": "string",
       "label": "Arguments",

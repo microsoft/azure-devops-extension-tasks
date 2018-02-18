@@ -173,6 +173,15 @@
       }
     },
     {
+      "name": "bypassLocalValidation",
+      "type": "boolean",
+      "label": "Bypass local validation",
+      "defaultValue": "false",
+      "helpMarkDown": "Bypass local validation.",
+      "required": false,
+      "groupName": "advanced"
+    },
+    {
       "name": "arguments",
       "type": "string",
       "label": "Arguments",
