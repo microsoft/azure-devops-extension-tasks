@@ -137,6 +137,18 @@ export function validateAndSetTfxManifestArguments(tfx: ToolRunner): (() => void
         jsonOverrides.version = extensionVersion;
     }
 
+    const noWaitValidation = tl.getBoolInput("noWaitValidation", false);
+    if (noWaitValidation) {
+        tl.debug(`Not waiting for validation.`);
+        tfx.arg("--no-wait-validation");
+    }
+
+    const bypassLocalValidation = tl.getBoolInput("bypassLocalValidation", false);
+    if (bypassLocalValidation) {
+        tl.debug(`Bypassing local validation.`);
+        tfx.arg("--bypass-validation");
+    }
+
     let overrideFilePath: string;
     if (jsonOverrides) {
         // Generate a temp file
@@ -146,7 +158,11 @@ export function validateAndSetTfxManifestArguments(tfx: ToolRunner): (() => void
         tfx.arg(["--overrides-file", overrideFilePath]);
     }
 
-    tfx.line(tl.getInput("arguments", false));
+    const args = tl.getInput("arguments", false);
+    if (args) {
+        tl.debug(`Adding additional arguments: ${args}.`);
+        tfx.line(args);
+    }
 
     return () => deleteBuildTempFile(overrideFilePath);
 }
