@@ -113,6 +113,24 @@ common.runTfx(tfx => {
         }
     }
 
+    const noWaitValidation = tl.getBoolInput("noWaitValidation", false);
+    if (noWaitValidation) {
+        tl.debug(`Not waiting for validation.`);
+        tfx.arg("--no-wait-validation");
+    }
+
+    const bypassLocalValidation = tl.getBoolInput("bypassLocalValidation", false);
+    if (bypassLocalValidation) {
+        tl.debug(`Bypassing local validation.`);
+        tfx.arg("--bypass-validation");
+    }
+
+    const args = tl.getInput("arguments", false);
+    if (args) {
+        tl.debug(`Adding additional arguments: ${args}.`);
+        tfx.line(args);
+    }
+
     runBeforeTfx.then(() => {
         const outputStream = new common.TfxJsonOutputStream(true);
         tfx.exec(<any>{ outStream: outputStream, failOnStdErr: true }).then(code => {
