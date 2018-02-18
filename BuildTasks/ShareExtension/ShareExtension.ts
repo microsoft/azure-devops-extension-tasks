@@ -1,6 +1,8 @@
 import * as tl from "vsts-task-lib/task";
 import * as common from "./common";
 
+common.setProxy();
+
 common.runTfx(tfx => {
     tfx.arg(["extension", "share"]);
 

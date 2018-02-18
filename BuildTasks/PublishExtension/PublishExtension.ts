@@ -5,6 +5,8 @@ import * as path from "path";
 import * as os from "os";
 import * as vsixeditor from "./vsixeditor";
 
+common.setProxy();
+
 common.runTfx(tfx => {
     tfx.arg(["extension", "publish", "--json"]);
     const outputVariable = tl.getInput("outputVariable", false);

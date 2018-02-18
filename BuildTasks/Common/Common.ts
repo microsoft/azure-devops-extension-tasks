@@ -9,6 +9,8 @@ import * as fs from "fs";
 import * as Q from "q";
 import * as tl from "vsts-task-lib/task";
 import * as trl from "vsts-task-lib/toolrunner";
+import * as uri from "urijs";
+
 import ToolRunner = trl.ToolRunner;
 
 function writeBuildTempFile(taskName: string, data: any): string {
@@ -31,6 +33,25 @@ function deleteBuildTempFile(tempFile: string) {
         fs.unlinkSync(tempFile);
     }
 }
+
+export function setProxy() {
+    const proxy = tl.getHttpProxyConfiguration();
+
+    if (proxy && !(process.env["HTTP_PROXY"] || process.env["HTTPS_PROXY"])) {
+        let proxyUrl = new uri(proxy.proxyUrl);
+        if (proxy.proxyUsername) {
+            proxyUrl = proxyUrl.username(proxy.proxyUsername);
+            proxyUrl = proxyUrl.password(proxy.proxyPassword);
+        }
+        process.env["HTTP_PROXY"] = proxyUrl;
+        process.env["HTTPS_PROXY"] = proxyUrl;
+
+        if (!process.env["NO_PROXY"]) {
+            process.env["NO_PROXY"] = proxy.proxyBypassHosts.join(",");
+        }
+    }
+}
+
 /**
  * Set manifest related arguments for "tfx extension" command, such as
  * the  --root or the --manifest-globs switches.
@@ -113,7 +134,7 @@ export function validateAndSetTfxManifestArguments(tfx: ToolRunner): (() => void
         if (isPreview) {
             jsonOverrides.galleryFlags = jsonOverrides.galleryFlags || [];
             jsonOverrides.galleryFlags.push("Preview");
-        };
+        }
     }
 
     const extensionPricing = tl.getInput("extensionPricing", false);
@@ -379,7 +400,7 @@ function getTaskPathContributions(manifestFile: string): Q.Promise<string[]> {
             .filter(c => c.type === "ms.vss-distributed-task.task" && c.properties && c.properties["name"])
             .map(c => c.properties["name"]);
     });
-};
+}
 
 function getTasksManifestPaths(manifestFile?: string): Q.Promise<string[]> {
     let rootFolder: string;
