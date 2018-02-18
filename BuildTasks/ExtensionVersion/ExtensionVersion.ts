@@ -17,6 +17,8 @@ if (extensionVersionOverrideVariable) {
     }
 }
 
+common.setProxy();
+
 if (!usingOverride) {
     common.runTfx(tfx => {
         tfx.arg(["extension", "show", "--json"]);

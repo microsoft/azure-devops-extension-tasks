@@ -302,7 +302,7 @@ class GalleryFlagsEditor {
 
     private removeFlag(flag: string) {
         const index = this.flags.indexOf(flag);
-        if (index >= 0) { this.flags.splice(index, 1); };
+        if (index >= 0) { this.flags.splice(index, 1); }
     }
 
     addPublicFlag() {
