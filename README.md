@@ -26,6 +26,6 @@ This extension provides build and release tasks for packaging and publishing Vis
 If you make a change to one or more of the actual tasks, you need to update the task(s) version in the appropriate task.json file. You can also run `setTaskVersion.js` and pass version to apply to all tasks, for example:
 
 ```
-node scripts/setTaskVersion.js 1.1.44
+node scripts/setTaskVersion.js 1.1.47
 ```
 
