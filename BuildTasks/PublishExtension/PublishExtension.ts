@@ -17,7 +17,7 @@ common.runTfx(tfx => {
     const fileType = tl.getInput("fileType", true);
     let vsixOutput;
     let cleanupTfxArgs: () => void;
-    let runBeforeTfx = Q(null);
+    let runBeforeTfx = new Promise<boolean>((resolve, reject) => { resolve(true); });
 
     if (fileType === "manifest") {
         // Set tfx manifest arguments
@@ -58,7 +58,7 @@ common.runTfx(tfx => {
         const extensionTag = tl.getInput("extensionTag", false);
 
         const extensionName = tl.getInput("extensionName", false);
-        const extensionVisibility = tl.getInput("extensionVisibility", false);
+        const extensionVisibility = tl.getInput("extensionVisibility", false) || "";
         const extensionPricing = tl.getInput("extensionPricing", false);
         const extensionVersion = common.getExtensionVersion();
 
@@ -101,7 +101,7 @@ common.runTfx(tfx => {
 
     // Share with
     const shareWith = tl.getDelimitedInput("shareWith", ",", false).map((value, index) => { return value.trim(); });
-    const extensionVisibility = tl.getInput("extensionVisibility", false);
+    const extensionVisibility = tl.getInput("extensionVisibility", false) || "";
     const connectTo = tl.getInput("connectTo", true);
     if (shareWith) {
         if (connectTo === "TFS") {
@@ -133,27 +133,33 @@ common.runTfx(tfx => {
         tfx.line(args);
     }
 
-    runBeforeTfx.then(() => {
-        const outputStream = new common.TfxJsonOutputStream(true);
-        tfx.exec(<any>{ outStream: outputStream, failOnStdErr: true }).then(code => {
-            const json = JSON.parse(outputStream.jsonString);
+    try {
+        runBeforeTfx.then(() => {
+            tl.debug(`Run tfx.`);
+            const outputStream = new common.TfxJsonOutputStream(true);
+            tfx.exec({ outStream: outputStream, failOnStdErr: true } as any).then(code => {
+                const json = JSON.parse(outputStream.jsonString);
 
-            const publishedVsix = fileType === "manifest" ? json.packaged : vsixOutput;
+                const publishedVsix = fileType === "manifest" ? json.packaged : vsixOutput;
 
-            if (outputVariable) {
-                tl.setVariable(outputVariable, publishedVsix);
-            }
+                if (outputVariable) {
+                    tl.setVariable(outputVariable, publishedVsix);
+                }
 
-            console.log(`Published VSIX: ${publishedVsix}.`);
-            tl.setResult(tl.TaskResult.Succeeded, `tfx exited with return code: ${code}`);
-        }).fail(err => {
-            tl.setResult(tl.TaskResult.Failed, `tfx failed with error: ${err}`);
-        }).finally(() => {
-            if (cleanupTfxArgs) {
-                cleanupTfxArgs();
-            }
+                console.log(`Published VSIX: ${publishedVsix}.`);
+                tl.setResult(tl.TaskResult.Succeeded, `tfx exited with return code: ${code}`);
+            }).fail(err => {
+                tl.setResult(tl.TaskResult.Failed, `tfx failed with error: ${err}`);
+                return false;
+            }).finally(() => {
+                if (cleanupTfxArgs) {
+                    cleanupTfxArgs();
+                }
+            });
         });
-    }).fail(err => {
+    } catch (err) {
         tl.setResult(tl.TaskResult.Failed, `Error occurred before preparing to run tfx: ${err}`);
-    });
+        return false;
+    }
+    return true;
 });

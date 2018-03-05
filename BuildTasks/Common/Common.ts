@@ -192,7 +192,7 @@ export function validateAndSetTfxManifestArguments(tfx: ToolRunner): (() => void
  * Run a tfx command by ensuring that "tfx" exists, installing it on the fly if needed.
  * @param  {(tfx:ToolRunner)=>void} cmd
  */
-export function runTfx(cmd: (tfx: ToolRunner) => void) {
+export async function runTfx(cmd: (tfx: ToolRunner) => void) {
     let tfx: ToolRunner;
     let tfxPath: string;
 
@@ -402,7 +402,7 @@ function getTaskPathContributions(manifestFile: string): Q.Promise<string[]> {
     });
 }
 
-function getTasksManifestPaths(manifestFile?: string): Q.Promise<string[]> {
+async function getTasksManifestPaths(manifestFile?: string): Promise<string[]> {
     let rootFolder: string;
     let extensionManifestFiles: string[];
 
@@ -420,20 +420,31 @@ function getTasksManifestPaths(manifestFile?: string): Q.Promise<string[]> {
         extensionManifestFiles = [manifestFile];
     }
 
-    return Q.all(
-        extensionManifestFiles.map(manifest => {
-            return getTaskPathContributions(manifest).then(taskPaths => {
-                tl.debug(`Found task contributions: ${taskPaths}`);
-                return taskPaths.map(taskPath => path.join(rootFolder, taskPath, "task.json"));
-            });
-        })
-    ).spread((results: string[][]) => {
-        // Merge the different contributions from different manifests
-        return [].concat.apply([], results);
-    });
+    let result: string[] = new Array<string>();
+    for (let m = 0; m < extensionManifestFiles.length; m++) {
+        const manifest = extensionManifestFiles[m];
+        tl.debug(`Found extension manifest: ${manifest}`);
+        const tasks = await getTaskPathContributions(manifest);
+        for (let t = 0; t < tasks.length; t++) {
+            const task = tasks[t];
+            tl.debug(`Found task: ${task}`);
+            const taskRoot: string = path.join(rootFolder, task);
+            const rootManifest: string = path.join(taskRoot, "task.json");
+            if (fs.existsSync(rootManifest)) {
+                tl.debug(`Found task manifest: ${rootManifest}`);
+                result.push(rootManifest);
+            } else {
+                const versionManifests = tl.findMatch(taskRoot, `${task}V*/task.json`);
+                tl.debug(`Found multi-version manifests: ${versionManifests.join(", ")}`);
+                result = result.concat(versionManifests);
+            }
+        }
+    }
+
+    return result;
 }
 
-function updateTaskVersion(manifestFilePath: string, version: { Major: number, Minor: number, Patch: number }, replacementType: string): Q.Promise<void> {
+async function updateTaskVersion(manifestFilePath: string, version: { major: number, minor: number, patch: number }, replacementType: string): Promise<void> {
     tl.debug(`Reading task manifest file: ${manifestFilePath}`);
     return Q.nfcall(fs.readFile, manifestFilePath, "utf8").then((data: string) => {
         let manifestJSON;
@@ -459,11 +470,11 @@ function updateTaskVersion(manifestFilePath: string, version: { Major: number, M
             switch (replacementType) {
                 default:
                 case "major":
-                    manifestJSON.version.Major = version.Major;
+                    manifestJSON.version.Major = version.major;
                 case "minor":
-                    manifestJSON.version.Minor = version.Minor;
+                    manifestJSON.version.Minor = version.minor;
                 case "patch":
-                    manifestJSON.version.Patch = version.Patch;
+                    manifestJSON.version.Patch = version.patch;
             }
         }
 
@@ -480,14 +491,13 @@ function updateTaskVersion(manifestFilePath: string, version: { Major: number, M
  * in the extension.
  *
  */
-export function checkUpdateTasksVersion(manifestFile?: string): Q.Promise<any> {
+export async function checkUpdateTasksVersion(manifestFile?: string): Promise<any> {
     // Check if we need to touch in tasks manifest before packaging
     const updateTasksVersion = tl.getBoolInput("updateTasksVersion", false);
     let versionReplacementType = tl.getInput("updateTasksVersionType", false);
     if (!versionReplacementType || versionReplacementType.length === 0) {
         versionReplacementType = "majorminorpatch";
     }
-    const updateTasksId = tl.getBoolInput("updateTasksId", false);
 
     let updateTasksFinished = Q.defer();
 
@@ -503,30 +513,32 @@ export function checkUpdateTasksVersion(manifestFile?: string): Q.Promise<any> {
 
         // If extension version specified, let's search for build tasks
         if (extensionVersion) {
-            getTasksManifestPaths(manifestFile).then(taskManifests => {
+            // Extract version parts Major, Minor, Patch
+            const versionParts = extensionVersion.split(".");
+            if (versionParts.length > 3) {
+                tl.warning(
+                    "Detected a version that consists of more than 3 parts. Build tasks support only 3 parts, ignoring the rest.");
+            }
+
+            try {
+                const taskManifests: string[] = await getTasksManifestPaths(manifestFile);
 
                 if (taskManifests == null || taskManifests.length === 0) {
                     tl.debug("This extension has no build tasks on it.");
                     updateTasksFinished.resolve(null);
-                    return;
+                    return updateTasksFinished.promise;
                 }
 
-                // Extract version parts Major, Minor, Patch
-                const versionParts = extensionVersion.split(".");
-                if (versionParts.length > 3) {
-                    tl.warning("Detected a version that consists of more than 3 parts. Build tasks support only 3 parts, ignoring the rest.");
-                }
-
-                const taskVersion = { Major: +versionParts[0], Minor: +versionParts[1], Patch: +versionParts[2] };
+                const taskVersion = { major: +versionParts[0], minor: +versionParts[1], patch: +versionParts[2] };
 
                 tl.debug(`Processing the following task manifest ${taskManifests}`);
-                const taskUpdates = taskManifests.map(manifest => updateTaskVersion(manifest, taskVersion, versionReplacementType));
+                const taskUpdates =
+                    taskManifests.map(manifest => updateTaskVersion(manifest, taskVersion, versionReplacementType));
 
-                Q.all(taskUpdates)
-                    .then(() => updateTasksFinished.resolve(null))
-                    .fail(err => updateTasksFinished.reject(`Error updating version in task manifests: ${err}`));
-
-            }).fail(err => updateTasksFinished.reject(`Error determining tasks manifest paths: ${err}`));
+                await taskUpdates.forEach(() => updateTasksFinished.resolve(null));
+            } catch (err) {
+                updateTasksFinished.reject(`Error determining tasks manifest paths: ${err}`);
+            }
         }
         else {
             tl.debug("No update tasks version required (No extension version specified)");
