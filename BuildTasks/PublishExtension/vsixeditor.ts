@@ -76,7 +76,7 @@ export class VSIXEditor {
         }
     }
 
-    public endEdit(): Q.Promise<string> {
+    public async endEdit(): Promise<string> {
         this.validateEditMode();
 
         if (!this.hasEdits()) { return Q(this.inputFile); }
@@ -85,47 +85,51 @@ export class VSIXEditor {
 
         temp.track();
 
-        Q.nfcall(temp.mkdir, "vsixeditor")
-            .then((dirPath: string) => {
-                tl.debug("Finalizing edit");
-                tl.debug("Extracting files to " + dirPath);
+        try {
+            new Promise<string>((resolve, reject) => {
+                    let tmpPath: string;
+                    temp.mkdir("vsixeditor", (ex, dirPath) => { tmpPath = dirPath; });
+                    resolve(tmpPath);
+                })
+                .then((dirPath) => {
+                    tl.debug("Finalizing edit");
+                    tl.debug("Extracting files to " + dirPath);
 
-                this.extractArchive(this.inputFile, dirPath);
-                return dirPath;
-            })
-            .then(dirPath => {
-                if (this.versionNumber && this.updateTasksVersion) {
-                    tl.debug("Look for build tasks manifest");
-                    const extensionManifest = path.join(dirPath, "extension.vsomanifest");
-                    return common.checkUpdateTasksVersion(extensionManifest).then(() => dirPath);
-                }
-                else {
+                    this.extractArchive(this.inputFile, dirPath);
                     return dirPath;
-                }
-            })
-            .then(dirPath => {
-                tl.debug("Editing VSIX manifest");
-                return this.editVsixManifest(dirPath).then((manifestData: ManifestData) => manifestData);
-            })
-            .then((manifestData: ManifestData) => {
-                let dirPath = manifestData.dirPath;
-                return manifestData.createOutputFilePath(this.outputPath).then((outputFile) => {
-                    manifestData.outputFileName = outputFile;
-                    return manifestData;
+                })
+                .then(async dirPath => {
+                    if (this.versionNumber && this.updateTasksVersion) {
+                        tl.debug("Look for build tasks manifest");
+                        const extensionManifest = path.join(dirPath, "extension.vsomanifest");
+                        await common.checkUpdateTasksVersion(extensionManifest);
+                    }
+                    return dirPath;
+                })
+                .then(dirPath => {
+                    tl.debug("Editing VSIX manifest");
+                    return this.editVsixManifest(dirPath).then((manifestData: ManifestData) => manifestData);
+                })
+                .then((manifestData: ManifestData) => {
+                    return manifestData.createOutputFilePath(this.outputPath).then((outputFile) => {
+                        manifestData.outputFileName = outputFile;
+                        return manifestData;
+                    });
+                })
+                .then((manifestData: ManifestData) => {
+                    tl.debug(`Creating final archive file at ${this.outputPath}`);
+                    this.createArchive(manifestData.dirPath, manifestData.outputFileName);
+                    deferred.resolve(manifestData.outputFileName);
+                    tl.debug("Final archive file created");
                 });
-            })
-            .then((manifestData: ManifestData) => {
-                tl.debug("Creating final archive file at " + this.outputPath);
-                this.createArchive(manifestData.dirPath, manifestData.outputFileName);
-                deferred.resolve(manifestData.outputFileName);
-                tl.debug("Final archive file created");
-            })
-            .fail(err => deferred.reject(err));
+        } catch (err) {
+            deferred.reject(err);
+        }
 
         return deferred.promise;
     }
 
-    private editVsixManifest(dirPath: string) {
+    private async editVsixManifest(dirPath: string): Promise<ManifestData> {
         let deferred = Q.defer<ManifestData>();
         let x2jsLib = require("x2js");
         let x2js = new x2jsLib();
@@ -263,7 +267,7 @@ class ManifestData {
         public name: string,
         public dirPath: string) { }
 
-    public createOutputFilePath(outputPath: string): Q.Promise<string> {
+    public async createOutputFilePath(outputPath: string): Promise<string> {
         let deferred = Q.defer<string>();
         let fileName = `${this.publisher}.${this.id}-${this.version}.gen.vsix`;
 
