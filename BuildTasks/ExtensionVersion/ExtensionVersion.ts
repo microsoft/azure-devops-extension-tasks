@@ -21,7 +21,7 @@ common.setProxy();
 
 if (!usingOverride) {
     common.runTfx(tfx => {
-        tfx.arg(["extension", "show", "--json"]);
+        tfx.arg(["extension", "show", "--json", "--no-color"]);
 
         common.setTfxMarketplaceArguments(tfx);
         common.validateAndSetTfxManifestArguments(tfx);
