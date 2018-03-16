@@ -46,7 +46,8 @@
       "defaultValue": "VsTeam",
       "helpMarkDown": "Publish to Visual Studio Team Services.",
       "options": {
-        "VsTeam": "Visual Studio Team Services"
+        "VsTeam": "Visual Studio Team Services",
+        "TFS": "Visual Studio Team Foundation Server"
       }
     },
     {
@@ -62,7 +63,7 @@
       "type": "connectedService:TFSMarketplacePublishing",
       "label": "TFS Local Gallery connection",
       "required": true,
-      "helpMarkDown": "Service endpoint connection to install the extension. Temporarily unavailable.",
+      "helpMarkDown": "Service endpoint connection to install the extension.",
       "visibleRule": "connectTo=TFS"
     },
     {
@@ -123,7 +124,7 @@
       "type": "string",
       "label": "Install in",
       "defaultValue": "",
-      "helpMarkDown": "Comma separated list of accounts where to install the extension (e.g. account_x,account_y,account_z)",
+      "helpMarkDown": "Comma separated list of accounts where to install the extension (e.g. account_x,account_y,account_z) Or fully qualified TFS Collection URL (e.g. `https://yourserver/tfs/DefaultCollection`).",
       "required": true,
       "groupName": "installation"
     },
