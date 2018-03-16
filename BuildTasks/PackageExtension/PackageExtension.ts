@@ -6,7 +6,7 @@ common.setProxy();
 async function run() {
     try {
         common.runTfx(async tfx => {
-            tfx.arg(["extension", "create", "--json"]);
+            tfx.arg(["extension", "create", "--json", "--no-color"]);
             const outputVariable = tl.getInput("outputVariable", false);
 
             // Set tfx manifest arguments

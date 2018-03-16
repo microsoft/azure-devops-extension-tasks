@@ -8,7 +8,7 @@ import * as vsixeditor from "./vsixeditor";
 common.setProxy();
 
 common.runTfx(tfx => {
-    tfx.arg(["extension", "publish", "--json"]);
+    tfx.arg(["extension", "publish", "--json", "--no-color"]);
     const outputVariable = tl.getInput("outputVariable", false);
 
     common.setTfxMarketplaceArguments(tfx);
