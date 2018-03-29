@@ -1,7 +1,7 @@
 import * as tl from "vsts-task-lib/task";
 import * as common from "./common";
 
-common.setProxy();
+//common.setProxy();
 
 async function run() {
     try {

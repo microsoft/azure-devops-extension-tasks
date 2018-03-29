@@ -2,7 +2,7 @@ import * as tl from "vsts-task-lib/task";
 import * as common from "./common";
 import * as os from "os";
 
-common.setProxy();
+//common.setProxy();
 
 common.runTfx(tfx => {
     tfx.arg(["extension", "install"]);
