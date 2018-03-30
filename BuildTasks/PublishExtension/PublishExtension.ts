@@ -5,7 +5,7 @@ import * as path from "path";
 import * as os from "os";
 import * as vsixeditor from "./vsixeditor";
 
-//common.setProxy();
+// common.setProxy();
 
 common.runTfx(tfx => {
     tfx.arg(["extension", "publish", "--json", "--no-color"]);

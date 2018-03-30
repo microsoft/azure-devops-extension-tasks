@@ -17,7 +17,7 @@ if (extensionVersionOverrideVariable) {
     }
 }
 
-//common.setProxy();
+// common.setProxy();
 
 if (!usingOverride) {
     common.runTfx(tfx => {
