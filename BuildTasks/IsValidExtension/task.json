@@ -1,0 +1,167 @@
+{
+  "id": "231decda-22cb-4e83-b2f4-31fc86a0de1f",
+  "name": "Is Valid Extension",
+  "friendlyName": "Is valid Extension",
+  "description": "Wait for extension validation.",
+  "author": "Microsoft Corporation",
+  "helpMarkDown": "",
+  "category": "Deploy",
+  "version": {
+    "Major": 1,
+    "Minor": 1,
+    "Patch": 47
+  },
+  "visibility": [
+    "Build",
+    "Release"
+  ],
+  "runsOn": [
+    "Agent",
+    "Server",
+    "ServerGate"
+  ],
+  "demands": [
+    "npm"
+  ],
+  "minimumAgentVersion": "1.83.0",
+  "groups": [
+    {
+      "name": "extension",
+      "displayName": "Extension",
+      "isExpanded": true
+    },
+    {
+      "name": "advanced",
+      "displayName": "Advanced",
+      "isExpanded": false
+    }
+  ],
+  "instanceNameFormat": "Wait for validation",
+  "inputs": [
+    {
+      "name": "connectTo",
+      "type": "radio",
+      "label": "Connect to",
+      "required": true,
+      "defaultValue": "VsTeam",
+      "helpMarkDown": "Publish to Visual Studio Team Services.",
+      "options": {
+        "VsTeam": "Visual Studio Team Services"
+      }
+    },
+    {
+      "name": "connectedServiceName",
+      "type": "connectedService:VstsMarketplacePublishing",
+      "label": "VSTS Marketplace connection",
+      "required": true,
+      "helpMarkDown": "Service endpoint connection to install the extension.",
+      "visibleRule": "connectTo=VsTeam"
+    },
+    {
+      "name": "connectedServiceNameTFS",
+      "type": "connectedService:TFSMarketplacePublishing",
+      "label": "TFS Local Gallery connection",
+      "required": true,
+      "helpMarkDown": "Service endpoint connection to install the extension.",
+      "visibleRule": "connectTo=TFS"
+    },
+    {
+      "name": "method",
+      "type": "radio",
+      "label": "Install using",
+      "required": true,
+      "defaultValue": "id",
+      "helpMarkDown": "Install using either an existing VSIX or using the Publisher and Extension ID.",
+      "options": {
+        "id": "Publisher + Extension ID",
+        "vsix": "VSIX file"
+      },
+      "groupName": "extension"
+    },
+    {
+      "name": "publisherId",
+      "type": "string",
+      "label": "Publisher ID",
+      "defaultValue": "",
+      "required": true,
+      "helpMarkDown": "Publisher ID of the extension to be installed.",
+      "groupName": "extension",
+      "visibleRule": "method = id"
+    },
+    {
+      "name": "extensionId",
+      "type": "string",
+      "label": "Extension ID",
+      "defaultValue": "",
+      "helpMarkDown": "Extension ID of the extension to be installed",
+      "required": true,
+      "groupName": "extension",
+      "visibleRule": "method = id"
+    },
+    {
+      "name": "extensionTag",
+      "type": "string",
+      "label": "Extension Tag",
+      "defaultValue": "",
+      "helpMarkDown": "Extension Tag to append to the extension ID",
+      "required": false,
+      "groupName": "extension",
+      "visibleRule": "method = id"
+    },
+    {
+      "name": "extensionVersion",
+      "type": "string",
+      "label": "Extension Version",
+      "defaultValue": "",
+      "helpMarkDown": "Extension version",
+      "required": true,
+      "groupName": "extension",
+      "visibleRule": "method = id"
+    },
+    {
+      "name": "vsixFile",
+      "type": "filePath",
+      "label": "VSIX file",
+      "defaultValue": "",
+      "required": true,
+      "helpMarkDown": "VSIX file of the extension to be installed. Supports wildcards.",
+      "visibleRule": "method = vsix",
+      "groupName": "extension"
+    },
+    {
+      "name": "arguments",
+      "type": "string",
+      "label": "Arguments",
+      "defaultValue": "",
+      "helpMarkDown": "Additional arguments passed to the package and publishing tool.",
+      "required": false,
+      "groupName": "advanced"
+    },
+    {
+      "name": "cwd",
+      "type": "filePath",
+      "label": "Working Directory",
+      "defaultValue": "",
+      "required": false,
+      "helpMarkDown": "Working directory to run the package and publishing process from. Defaults to the folder where the manifest is located.",
+      "groupName": "advanced"
+    }
+  ],
+  "execution": {
+    "Node": {
+      "target": "IsValidExtension.js",
+      "argumentFormat": ""
+    },
+    "HttpRequest": {
+      "Execute": {
+        "EndpointId": "$(connectedServiceName)",
+        "EndpointUrl": "$(endpoint.url)/_apis/gallery/publishers/$(publisherId)/extensions/$(extensionId)$(extensionTag)?flags=1",
+        "Method": "GET",
+        "Body": "",
+        "Headers": "{\"Content-Type\":\"application/json\"}",
+        "WaitForCompletion": "true",
+        "Expression": "eq(jsonpath('$.versions[?(@.version==$(extensionVersion))].flags'), 'validated')"
+      }
+    }
+  }
+}
