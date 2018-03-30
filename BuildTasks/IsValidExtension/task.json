@@ -20,20 +20,11 @@
     "Server",
     "ServerGate"
   ],
-  "demands": [
-    "npm"
-  ],
-  "minimumAgentVersion": "1.83.0",
   "groups": [
     {
       "name": "extension",
       "displayName": "Extension",
       "isExpanded": true
-    },
-    {
-      "name": "advanced",
-      "displayName": "Advanced",
-      "isExpanded": false
     }
   ],
   "instanceNameFormat": "Wait for validation",
@@ -58,14 +49,6 @@
       "visibleRule": "connectTo=VsTeam"
     },
     {
-      "name": "connectedServiceNameTFS",
-      "type": "connectedService:TFSMarketplacePublishing",
-      "label": "TFS Local Gallery connection",
-      "required": true,
-      "helpMarkDown": "Service endpoint connection to install the extension.",
-      "visibleRule": "connectTo=TFS"
-    },
-    {
       "name": "method",
       "type": "radio",
       "label": "Install using",
@@ -73,8 +56,7 @@
       "defaultValue": "id",
       "helpMarkDown": "Install using either an existing VSIX or using the Publisher and Extension ID.",
       "options": {
-        "id": "Publisher + Extension ID",
-        "vsix": "VSIX file"
+        "id": "Publisher + Extension ID"
       },
       "groupName": "extension"
     },
@@ -112,55 +94,23 @@
       "name": "extensionVersion",
       "type": "string",
       "label": "Extension Version",
-      "defaultValue": "",
-      "helpMarkDown": "Extension version",
-      "required": true,
+      "defaultValue": "latest",
+      "helpMarkDown": "Extension version (enter 'latest' or leave the value empty to check the last submitted version).",
+      "required": false,
       "groupName": "extension",
       "visibleRule": "method = id"
-    },
-    {
-      "name": "vsixFile",
-      "type": "filePath",
-      "label": "VSIX file",
-      "defaultValue": "",
-      "required": true,
-      "helpMarkDown": "VSIX file of the extension to be installed. Supports wildcards.",
-      "visibleRule": "method = vsix",
-      "groupName": "extension"
-    },
-    {
-      "name": "arguments",
-      "type": "string",
-      "label": "Arguments",
-      "defaultValue": "",
-      "helpMarkDown": "Additional arguments passed to the package and publishing tool.",
-      "required": false,
-      "groupName": "advanced"
-    },
-    {
-      "name": "cwd",
-      "type": "filePath",
-      "label": "Working Directory",
-      "defaultValue": "",
-      "required": false,
-      "helpMarkDown": "Working directory to run the package and publishing process from. Defaults to the folder where the manifest is located.",
-      "groupName": "advanced"
     }
   ],
   "execution": {
-    "Node": {
-      "target": "IsValidExtension.js",
-      "argumentFormat": ""
-    },
     "HttpRequest": {
       "Execute": {
         "EndpointId": "$(connectedServiceName)",
-        "EndpointUrl": "$(endpoint.url)/_apis/gallery/publishers/$(publisherId)/extensions/$(extensionId)$(extensionTag)?flags=1",
+        "EndpointUrl": "$(endpoint.url)_apis/gallery/publishers/$(publisherId)/extensions/$(extensionId)$(extensionTag)?flags=1",
         "Method": "GET",
         "Body": "",
         "Headers": "{\"Content-Type\":\"application/json\"}",
-        "WaitForCompletion": "true",
-        "Expression": "eq(jsonpath('$.versions[?(@.version==$(extensionVersion))].flags'), 'validated')"
+        "WaitForCompletion": "false",
+        "Expression": "or(   eq(jsonpath('$.versions[?(@.version==$(extensionVersion))].flags'), 'validated'),   and(     or(       eq('$(extensionVersion)', ''),       eq('$(extensionVersion)', 'latest')    ),     eq(jsonpath($.versions[0].flags), 'validated')  ))"
       }
     }
   }
