@@ -109,7 +109,7 @@
         "Body": "",
         "Headers": "{\"Content-Type\":\"application/json\"}",
         "WaitForCompletion": "false",
-        "Expression": "eq(count(jsonpath('$.versions[?(@.version==''$(extensionVersion)' && @.flags==''validated'')]')), 1)"
+        "Expression": "or(eq(count(jsonpath('$.versions[?(@.version==''$(extensionVersion)'' && @.flags==''validated'')]')), 1), and(eq('$(extensionVersion)', 'latest'), jsonpath('$.versions[0][?(@.flags == ''validated'')]')))"
       }
     }
   }
