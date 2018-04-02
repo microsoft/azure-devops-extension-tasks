@@ -1,8 +1,8 @@
 {
   "id": "231decda-22cb-4e83-b2f4-31fc86a0de1f",
-  "name": "Is Valid Extension",
+  "name": "Check Marketplace validation status.",
   "friendlyName": "Is valid Extension",
-  "description": "Wait for extension validation.",
+  "description": "Check Marketplace validation status.",
   "author": "Microsoft Corporation",
   "helpMarkDown": "",
   "category": "Deploy",
@@ -16,7 +16,6 @@
     "Release"
   ],
   "runsOn": [
-    "Agent",
     "Server",
     "ServerGate"
   ],
@@ -27,7 +26,7 @@
       "isExpanded": true
     }
   ],
-  "instanceNameFormat": "Wait for validation",
+  "instanceNameFormat": "Check Marketplace validation status: $(extensionId)",
   "inputs": [
     {
       "name": "connectTo",
@@ -110,7 +109,7 @@
         "Body": "",
         "Headers": "{\"Content-Type\":\"application/json\"}",
         "WaitForCompletion": "false",
-        "Expression": "eq(jsonpath('$.versions[?(@.version==$(extensionVersion))].flags'), 'validated')"
+        "Expression": "eq(count(jsonpath('$.versions[?(@.version==''$(extensionVersion)' && @.flags==''validated'')]')), 1)"
       }
     }
   }
