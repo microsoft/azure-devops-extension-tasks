@@ -1,6 +1,8 @@
 import * as tl from "vsts-task-lib/task";
 import * as common from "./common";
 import * as stream from "stream";
+import promiseRetry = require("promise-retry");
+
 
 // common.setProxy();
 
@@ -16,18 +18,32 @@ function run() {
         common.setTfxMarketplaceArguments(tfx);
         common.validateAndSetTfxManifestArguments(tfx);
 
-        const outputStream = new common.TfxJsonOutputStream(false);
-        tfx.exec(<any>{ outStream: outputStream, failOnStdErr: true }).then(code => {
-            const json = JSON.parse(outputStream.jsonString);
-            if (json.status === "success") {
-                console.log("Extension is valid.");
-                tl.setResult(tl.TaskResult.Succeeded, `tfx exited with return code: ${code}`);
-            } else {
-                console.log("Extension is invalid.");
-                tl.setResult(tl.TaskResult.Failed, `tfx exited with return code: ${code}`);
-            }
-        }).fail(err => {
-            tl.setResult(tl.TaskResult.Failed, `tfx failed with error: ${err}`);
+        const options = {
+            retries: +tl.getInput("maxRetries", false) || 10,
+            factor: 1,
+            minTimeout: 1000 * (+tl.getInput("minTimeout", false) || 0),
+            maxTimeout: 1000 * 60 * (+tl.getInput("maxTimeout", false) || 15),
+            randomize: false
+        };
+
+        promiseRetry(options,
+            (retry, attempt) => {
+                tl.debug(`Attempt: ${attempt}`);
+                const result = tfx.execSync(<any>{ silent: false, failOnStdErr: false });
+                const json = JSON.parse(result.stdout);
+                switch (json.status) {
+                case "pending":
+                    return retry(json.status);
+                case "success":
+                    return json.status;
+                default:
+                    throw json.status;
+                }
+        }).then(status => {
+            tl.setResult(tl.TaskResult.Succeeded, "Extension is valid.");
+            return status;
+        }).catch(err => {
+            tl.setResult(tl.TaskResult.Failed, `Extension validation failed: ${err}`);
         });
     });
 }

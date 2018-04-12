@@ -27,6 +27,11 @@
       "name": "extension",
       "displayName": "Extension",
       "isExpanded": true
+    },
+    {
+      "name": "retry",
+      "displayName": "Retry",
+      "isExpanded": true
     }
   ],
   "instanceNameFormat": "Check Marketplace validation status: $(extensionId)",
@@ -53,12 +58,13 @@
     {
       "name": "method",
       "type": "radio",
-      "label": "Install using",
+      "label": "Validate using",
       "required": true,
       "defaultValue": "id",
       "helpMarkDown": "Install using either an existing VSIX or using the Publisher and Extension ID.",
       "options": {
-        "id": "Publisher + Extension ID"
+        "id": "Publisher + Extension ID",
+        "vsix": "Publisher + Extension ID"
       },
       "groupName": "extension"
     },
@@ -101,6 +107,36 @@
       "required": false,
       "groupName": "extension",
       "visibleRule": "method = id"
+    },
+    {
+      "name": "vsixFile",
+      "type": "filePath",
+      "label": "VSIX file",
+      "defaultValue": "",
+      "required": true,
+      "helpMarkDown": "VSIX file of the extension to be installed. Supports wildcards.",
+      "visibleRule": "method = vsix",
+      "groupName": "extension"
+    },
+    {
+      "name": "maxRetries",
+      "type": "string",
+      "label": "Maximum number of retries",
+      "defaultValue": "10",
+      "required": false,
+      "helpMarkDown": "Maximum number of retries.",
+      "visibleRule": "method = vsix",
+      "groupName": "retry"
+    },
+    {
+      "name": "maxTimeout",
+      "type": "string",
+      "label": "Timeout after (minutes)",
+      "defaultValue": "15",
+      "required": false,
+      "helpMarkDown": "Timeout after (minutes).",
+      "visibleRule": "method = vsix",
+      "groupName": "retry"
     }
   ],
   "execution": {

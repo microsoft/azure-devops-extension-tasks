@@ -38,6 +38,7 @@
     "@types/urijs": "^1.15.36",
     "@types/x2js": "0.0.27",
     "@types/xmldom": "^0.1.28",
+    "@types/promise-retry": "^1.1.1",
     "copyfiles": "^1.0.0",
     "jsonfile": "4.0.0",
     "mkdirp": "^0.5.1",
@@ -51,6 +52,7 @@
   "dependencies": {
     "q": "^1.5.1",
     "urijs": "^1.19.1",
-    "vsts-task-lib": "^2.2.1"
+    "vsts-task-lib": "^2.2.1",
+    "promise-retry": "^1.1.1"
   }
 }
