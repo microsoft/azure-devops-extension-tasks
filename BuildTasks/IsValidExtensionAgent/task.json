@@ -64,7 +64,7 @@
       "helpMarkDown": "Install using either an existing VSIX or using the Publisher and Extension ID.",
       "options": {
         "id": "Publisher + Extension ID",
-        "vsix": "Publisher + Extension ID"
+        "vsix": "VSIX"
       },
       "groupName": "extension"
     },
