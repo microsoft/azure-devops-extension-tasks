@@ -28,7 +28,7 @@ function run() {
         promiseRetry(options,
             (retry, attempt) => {
                 tl.debug(`Attempt: ${attempt}`);
-                const result = tfx.execSync(<any>{ silent: false, failOnStdErr: false });
+                const result = tfx.execSync({ silent: false, failOnStdErr: false } as any);
                 const json = JSON.parse(result.stdout);
                 switch (json.status) {
                 case "pending":

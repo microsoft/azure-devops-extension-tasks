@@ -102,8 +102,8 @@
       "name": "extensionVersion",
       "type": "string",
       "label": "Extension Version",
-      "defaultValue": "latest",
-      "helpMarkDown": "Extension version (enter 'latest' or leave the value empty to check the last submitted version).",
+      "defaultValue": "",
+      "helpMarkDown": "Extension version (leave the value empty to check the last submitted version).",
       "required": false,
       "groupName": "extension",
       "visibleRule": "method = id"
