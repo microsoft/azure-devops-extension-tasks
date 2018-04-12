@@ -125,7 +125,6 @@
       "defaultValue": "10",
       "required": false,
       "helpMarkDown": "Maximum number of retries.",
-      "visibleRule": "method = vsix",
       "groupName": "retry"
     },
     {
@@ -135,7 +134,6 @@
       "defaultValue": "15",
       "required": false,
       "helpMarkDown": "Timeout after (minutes).",
-      "visibleRule": "method = vsix",
       "groupName": "retry"
     }
   ],
