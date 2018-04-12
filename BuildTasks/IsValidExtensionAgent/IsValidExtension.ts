@@ -3,7 +3,6 @@ import * as common from "./common";
 import * as stream from "stream";
 import promiseRetry = require("promise-retry");
 
-
 // common.setProxy();
 
 function run() {

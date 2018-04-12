@@ -17,7 +17,7 @@
     "compile:tasks": "tsc --project BuildTasks",
     "postcompile:tasks": "npm run lint:tasks",
     "lint:tasks": "tslint -c tslint.json \"BuildTasks/!(@types)/*.ts",
-    "prelink:tasks": "mkdirp dist/_temp/node_modules && pushd \"dist/_temp\" && npm install vsts-task-lib@2.2.1 && npm install q@1.5.1 && npm install urijs@1.19.1 && popd",
+    "prelink:tasks": "mkdirp dist/_temp/node_modules && pushd \"dist/_temp\" && npm install vsts-task-lib@2.2.1 && npm install q@1.5.1 && npm install urijs@1.19.1 && npm install promise-retry@1.1.1 && popd",
     "link:tasks": "node scripts/copyfilesToBuildTasks -u 2 dist/_temp/node_modules/**/* dist/BuildTasks",
     "postlink:tasks": "rimraf dist/_temp",
     "link:tasks:publish": "pushd \"dist/BuildTasks/PublishExtension\" && npm install && popd",
