@@ -129,12 +129,12 @@
       "groupName": "retry"
     },
     {
-      "name": "maxTimeout",
+      "name": "minTimeout",
       "type": "string",
-      "label": "Timeout after (minutes)",
-      "defaultValue": "15",
+      "label": "Time between retries",
+      "defaultValue": "1",
       "required": false,
-      "helpMarkDown": "Timeout after (minutes).",
+      "helpMarkDown": "Time between retries (minutes).",
       "groupName": "retry"
     }
   ],

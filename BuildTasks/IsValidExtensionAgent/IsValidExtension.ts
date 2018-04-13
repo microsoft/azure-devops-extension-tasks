@@ -20,7 +20,7 @@ function run() {
         const options = {
             retries: +tl.getInput("maxRetries", false) || 10,
             factor: 1,
-            minTimeout: 1000 * (+tl.getInput("minTimeout", false) || 0),
+            minTimeout: 1000 * 60 * (+tl.getInput("minTimeout", false) || 1),
             maxTimeout: 1000 * 60 * (+tl.getInput("maxTimeout", false) || 15),
             randomize: false
         };
