@@ -15,3 +15,5 @@ BuildTasks/*Extension*/common.ts
 /slnx.VC.VC.opendb
 /slnx.VC.db
 .taskkey
+/BuildTasks/PublishExtension/debug.cmd
+/BuildTasks/IsValidExtensionAgent/debug.cmd
