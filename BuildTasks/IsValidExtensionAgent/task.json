@@ -15,6 +15,7 @@
     "Build",
     "Release"
   ],
+  "preview":  true, 
   "demands": [
     "npm"
   ],
