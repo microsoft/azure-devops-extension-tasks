@@ -1,0 +1,147 @@
+{
+  "id": "b86cdd2a-0579-4d40-b28f-18197ffaf520",
+  "name": "Check Marketplace validation status.",
+  "friendlyName": "Is valid Extension",
+  "description": "Check Marketplace validation status.",
+  "author": "Microsoft Corporation",
+  "helpMarkDown": "",
+  "category": "Deploy",
+  "version": {
+    "Major": 1,
+    "Minor": 1,
+    "Patch": 47
+  },
+  "visibility": [
+    "Build",
+    "Release"
+  ],
+  "preview":  true, 
+  "demands": [
+    "npm"
+  ],
+  "minimumAgentVersion": "1.83.0",
+  "runsOn": [
+    "Agent"
+  ],
+  "groups": [
+    {
+      "name": "extension",
+      "displayName": "Extension",
+      "isExpanded": true
+    },
+    {
+      "name": "retry",
+      "displayName": "Retry",
+      "isExpanded": true
+    }
+  ],
+  "instanceNameFormat": "Check Marketplace validation status: $(extensionId)",
+  "inputs": [
+    {
+      "name": "connectTo",
+      "type": "radio",
+      "label": "Connect to",
+      "required": true,
+      "defaultValue": "VsTeam",
+      "helpMarkDown": "Publish to Visual Studio Team Services.",
+      "options": {
+        "VsTeam": "Visual Studio Team Services"
+      }
+    },
+    {
+      "name": "connectedServiceName",
+      "type": "connectedService:VstsMarketplacePublishing",
+      "label": "VSTS Marketplace connection",
+      "required": true,
+      "helpMarkDown": "Service endpoint connection to install the extension.",
+      "visibleRule": "connectTo=VsTeam"
+    },
+    {
+      "name": "method",
+      "type": "radio",
+      "label": "Validate using",
+      "required": true,
+      "defaultValue": "id",
+      "helpMarkDown": "Install using either an existing VSIX or using the Publisher and Extension ID.",
+      "options": {
+        "id": "Publisher + Extension ID",
+        "vsix": "VSIX"
+      },
+      "groupName": "extension"
+    },
+    {
+      "name": "publisherId",
+      "type": "string",
+      "label": "Publisher ID",
+      "defaultValue": "",
+      "required": true,
+      "helpMarkDown": "Publisher ID of the extension to be installed.",
+      "groupName": "extension",
+      "visibleRule": "method = id"
+    },
+    {
+      "name": "extensionId",
+      "type": "string",
+      "label": "Extension ID",
+      "defaultValue": "",
+      "helpMarkDown": "Extension ID of the extension to be installed",
+      "required": true,
+      "groupName": "extension",
+      "visibleRule": "method = id"
+    },
+    {
+      "name": "extensionTag",
+      "type": "string",
+      "label": "Extension Tag",
+      "defaultValue": "",
+      "helpMarkDown": "Extension Tag to append to the extension ID",
+      "required": false,
+      "groupName": "extension",
+      "visibleRule": "method = id"
+    },
+    {
+      "name": "extensionVersion",
+      "type": "string",
+      "label": "Extension Version",
+      "defaultValue": "",
+      "helpMarkDown": "Extension version (leave the value empty to check the last submitted version).",
+      "required": false,
+      "groupName": "extension",
+      "visibleRule": "method = id"
+    },
+    {
+      "name": "vsixFile",
+      "type": "filePath",
+      "label": "VSIX file",
+      "defaultValue": "",
+      "required": true,
+      "helpMarkDown": "VSIX file of the extension to be installed. Supports wildcards.",
+      "visibleRule": "method = vsix",
+      "groupName": "extension"
+    },
+    {
+      "name": "maxRetries",
+      "type": "string",
+      "label": "Maximum number of retries",
+      "defaultValue": "10",
+      "required": false,
+      "helpMarkDown": "Maximum number of retries.",
+      "groupName": "retry"
+    },
+    {
+      "name": "maxTimeout",
+      "type": "string",
+      "label": "Timeout after (minutes)",
+      "defaultValue": "15",
+      "required": false,
+      "helpMarkDown": "Timeout after (minutes).",
+      "groupName": "retry"
+    }
+  ],
+  "execution": {
+    "Node": {
+      "target": "IsValidExtension.js",
+      "argumentFormat": ""
+    }
+  }
+}

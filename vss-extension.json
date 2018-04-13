@@ -96,6 +96,26 @@
       }
     },
     {
+      "id": "is-valid-extension-build-task",
+      "type": "ms.vss-distributed-task.task",
+      "targets": [
+        "ms.vss-distributed-task.tasks"
+      ],
+      "properties": {
+        "name": "BuildTasks/IsValidExtension"
+      }
+    },
+    {
+      "id": "is-valid-extension-agent-build-task",
+      "type": "ms.vss-distributed-task.task",
+      "targets": [
+        "ms.vss-distributed-task.tasks"
+      ],
+      "properties": {
+        "name": "BuildTasks/IsValidExtensionAgent"
+      }
+    },
+    {
       "id": "extension-version-build-task",
       "type": "ms.vss-distributed-task.task",
       "targets": [
