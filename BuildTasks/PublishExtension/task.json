@@ -188,7 +188,7 @@
       "label": "Override task id",
       "defaultValue": "false",
       "required": false,
-      "helpMarkDown": "EXPERIMENTAL - Search for contributed tasks in extension manifests and updates the id specified in each Build and Release task found.",
+      "helpMarkDown": "EXPERIMENTAL - Search for contributed tasks in extension manifests and updates the id specified in each Build and Release task found based on the Publisher, ExtensionId and TaskName.",
       "groupName": "manifest"
     },
     {
