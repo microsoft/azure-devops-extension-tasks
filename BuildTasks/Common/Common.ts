@@ -540,13 +540,6 @@ export async function checkUpdateTasksManifests(manifestFile?: string): Promise<
 
         // If extension version specified, let's search for build tasks
         if (extensionVersion || updateTasksId) {
-            // Extract version parts Major, Minor, Patch
-            const versionParts = extensionVersion.split(".");
-            if (versionParts.length > 3) {
-                tl.warning(
-                    "Detected a version that consists of more than 3 parts. Build tasks support only 3 parts, ignoring the rest.");
-            }
-
             try {
                 const taskManifests: string[] = await getTasksManifestPaths(manifestFile);
 
@@ -571,7 +564,6 @@ export async function checkUpdateTasksManifests(manifestFile?: string): Promise<
                 }
 
                 if (updateTasksId) {
-                    tl.error("EXPERIMENTAL - Currently only supported when 'Publisher' and 'Extension Id' are specified.");
                     const publisher = tl.getInput("publisherId", true);
                     let extensionId = tl.getInput("extensionId", true);
                     const extensionTag = tl.getInput("extensionTag", false);
@@ -582,7 +574,9 @@ export async function checkUpdateTasksManifests(manifestFile?: string): Promise<
                     }
 
                     if (!(publisher && extensionId)) {
-                        tl.error("Currently only supported when 'Publisher' and 'Extension Id' are specified.");
+                        const err = "Currently only supported when 'Publisher' and 'Extension Id' are specified.";
+                        tl.setResult(tl.TaskResult.Failed, `${err}`);
+                        throw err;
                     }
 
                     const ns = { publisher: publisher, extensionId: extensionId };
