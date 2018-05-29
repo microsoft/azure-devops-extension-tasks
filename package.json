@@ -46,8 +46,7 @@
     "tfx-cli": "^0.4.8",
     "tsconfig-glob": "^0.4.3",
     "tslint": "^5.9.1",
-    "typescript": "^2.7.2",
-    "prepend-file-cli": "^1.0.6"
+    "typescript": "^2.7.2"
   },
   "dependencies": {
     "q": "^1.5.1",
