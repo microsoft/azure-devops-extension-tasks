@@ -1,18 +1,27 @@
 import * as tl from "vsts-task-lib/task";
 import * as common from "./common";
-import * as stream from "stream";
 
 const extensionVersionOverrideVariable = tl.getInput("extensionVersionOverride", false);
-const outputVariable = tl.getInput("outputVariable", true);
 let usingOverride = false;
+
+function setVersion(version: string) {
+    if (tl.getBoolInput("setBuildNumber", false)) {
+        tl.command("build.updatebuildnumber", null, version);
+    }
+
+    const outputVariable = tl.getInput("outputVariable", false);
+    if (outputVariable) {
+        tl.setVariable(outputVariable, version);
+    }
+}
 
 if (extensionVersionOverrideVariable) {
     tl.debug(`Override variable specified checking for value.`);
-    const extensionVersionOverride = tl.getVariable(extensionVersionOverrideVariable);
+    const version = tl.getVariable(extensionVersionOverrideVariable);
 
-    if (extensionVersionOverride) {
-        console.log(`Ignoring Marketplace version and using supplied override: ${extensionVersionOverride}.`);
-        tl.setVariable(outputVariable, extensionVersionOverride);
+    if (version) {
+        console.log(`Ignoring Marketplace version and using supplied override: ${version}.`);
+        setVersion(version);
         usingOverride = true;
     }
 }
@@ -53,7 +62,7 @@ if (!usingOverride) {
                 console.log(`Updated to       : ${version}.`);
             }
 
-            tl.setVariable(outputVariable, version);
+            setVersion(version);
             tl.setResult(tl.TaskResult.Succeeded, `tfx exited with return code: ${code}`);
         }).fail(err => {
             tl.setResult(tl.TaskResult.Failed, `tfx failed with error: ${err}`);
