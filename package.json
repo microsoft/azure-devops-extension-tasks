@@ -43,9 +43,9 @@
     "jsonfile": "4.0.0",
     "mkdirp": "^0.5.1",
     "rimraf": "^2.5.4",
-    "tfx-cli": "^0.5.10",
+    "tfx-cli": "^0.5.12",
     "tsconfig-glob": "^0.4.3",
-    "tslint": "^5.9.1",
+    "tslint": "^5.10.0",
     "typescript": "^2.7.2"
   },
   "dependencies": {
