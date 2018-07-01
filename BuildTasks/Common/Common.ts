@@ -44,8 +44,8 @@ export function setProxy() {
             proxyUrl = proxyUrl.username(proxy.proxyUsername);
             proxyUrl = proxyUrl.password(proxy.proxyPassword);
         }
-        process.env["HTTP_PROXY"] = proxyUrl;
-        process.env["HTTPS_PROXY"] = proxyUrl;
+        process.env["HTTP_PROXY"] = proxyUrl.toString();
+        process.env["HTTPS_PROXY"] = proxyUrl.toString();
 
         if (!process.env["NO_PROXY"]) {
             process.env["NO_PROXY"] = proxy.proxyBypassHosts.join(",");
