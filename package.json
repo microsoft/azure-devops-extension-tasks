@@ -17,7 +17,7 @@
     "compile:tasks": "tsc --project BuildTasks",
     "postcompile:tasks": "npm run lint:tasks",
     "lint:tasks": "tslint -c tslint.json \"BuildTasks/!(@types)/*.ts",
-    "prelink:tasks": "mkdirp dist/_temp/node_modules && pushd \"dist/_temp\" && npm install vsts-task-lib@2.2.1 && npm install q@1.5.1 && npm install urijs@1.19.1 && npm install promise-retry@1.1.1 && popd",
+    "prelink:tasks": "mkdirp dist/_temp/node_modules && pushd \"dist/_temp\" && npm install vsts-task-lib@2.2.1 && npm install q@1.5.1 && npm install urijs@1.19.1 && npm install promise-retry@1.1.1 && npm install uuidv5@1.0.0 && popd",
     "link:tasks": "node scripts/copyfilesToBuildTasks -u 2 dist/_temp/node_modules/**/* dist/BuildTasks",
     "postlink:tasks": "rimraf dist/_temp",
     "link:tasks:publish": "pushd \"dist/BuildTasks/PublishExtension\" && npm install && popd",
@@ -33,18 +33,17 @@
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^7.0.7",
+    "@types/promise-retry": "^1.1.1",
     "@types/q": "0.0.32",
     "@types/temp": "^0.8.29",
     "@types/urijs": "^1.15.36",
     "@types/x2js": "0.0.27",
     "@types/xmldom": "^0.1.28",
-    "@types/promise-retry": "^1.1.1",
     "copyfiles": "^1.0.0",
     "jsonfile": "4.0.0",
     "mkdirp": "^0.5.1",
-    "q": "^1.5.1",
     "rimraf": "^2.5.4",
-    "tfx-cli": "^0.4.8",
+    "tfx-cli": "^0.5.10",
     "tsconfig-glob": "^0.4.3",
     "tslint": "^5.9.1",
     "typescript": "^2.7.2"
@@ -53,6 +52,7 @@
     "q": "^1.5.1",
     "urijs": "^1.19.1",
     "vsts-task-lib": "^2.2.1",
-    "promise-retry": "^1.1.1"
+    "promise-retry": "^1.1.1",
+    "uuidv5": "^1.0.0"
   }
 }

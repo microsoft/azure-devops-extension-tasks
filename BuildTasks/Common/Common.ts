@@ -12,6 +12,7 @@ import * as trl from "vsts-task-lib/toolrunner";
 import * as uri from "urijs";
 
 import ToolRunner = trl.ToolRunner;
+import * as uuidv5 from "uuidv5";
 
 function writeBuildTempFile(taskName: string, data: any): string {
     let tempFile: string;
@@ -444,6 +445,31 @@ async function getTasksManifestPaths(manifestFile?: string): Promise<string[]> {
     return result;
 }
 
+async function updateTaskId(manifestFilePath: string, ns: { publisher: string, extensionId: string }): Promise<void> {
+    tl.debug(`Reading task manifest file: ${manifestFilePath}`);
+    return Q.nfcall(fs.readFile, manifestFilePath, "utf8").then((data: string) => {
+        let manifestJSON;
+        try {
+            // BOM check
+            data = data.replace(/^\uFEFF/, (x) => {
+                tl.warning(`Removing Unicode BOM from manifest file: ${manifestFilePath}.`);
+                return "";
+            });
+            manifestJSON = JSON.parse(data);
+        }
+        catch (jsonError) {
+            throw new Error(`Error parsing task manifest: ${manifestFilePath} - ${jsonError}`);
+        }
+
+        let extensionNs = uuidv5("url", "https://marketplace.visualstudio.com/vsts", true);
+        manifestJSON.id = uuidv5(extensionNs, `${ns.publisher}.${ns.extensionId}.${manifestJSON.name}`, false);
+        const newContent = JSON.stringify(manifestJSON, null, "\t");
+        return Q.nfcall(fs.writeFile, manifestFilePath, newContent).then(() => {
+            tl.debug(`Task manifest ${manifestFilePath} id updated to ${manifestJSON.id}`);
+        });
+    });
+}
+
 async function updateTaskVersion(manifestFilePath: string, version: { major: number, minor: number, patch: number }, replacementType: string): Promise<void> {
     tl.debug(`Reading task manifest file: ${manifestFilePath}`);
     return Q.nfcall(fs.readFile, manifestFilePath, "utf8").then((data: string) => {
@@ -491,9 +517,10 @@ async function updateTaskVersion(manifestFilePath: string, version: { major: num
  * in the extension.
  *
  */
-export async function checkUpdateTasksVersion(manifestFile?: string): Promise<any> {
+export async function checkUpdateTasksManifests(manifestFile?: string): Promise<any> {
     // Check if we need to touch in tasks manifest before packaging
     const updateTasksVersion = tl.getBoolInput("updateTasksVersion", false);
+    const updateTasksId = tl.getBoolInput("updateTasksId", false);
     let versionReplacementType = tl.getInput("updateTasksVersionType", false);
     if (!versionReplacementType || versionReplacementType.length === 0) {
         versionReplacementType = "majorminorpatch";
@@ -501,7 +528,7 @@ export async function checkUpdateTasksVersion(manifestFile?: string): Promise<an
 
     let updateTasksFinished = Q.defer();
 
-    if (updateTasksVersion) {
+    if (updateTasksVersion || updateTasksId) {
         // Extract the extension version
         let extensionVersion;
         try {
@@ -512,14 +539,7 @@ export async function checkUpdateTasksVersion(manifestFile?: string): Promise<an
         }
 
         // If extension version specified, let's search for build tasks
-        if (extensionVersion) {
-            // Extract version parts Major, Minor, Patch
-            const versionParts = extensionVersion.split(".");
-            if (versionParts.length > 3) {
-                tl.warning(
-                    "Detected a version that consists of more than 3 parts. Build tasks support only 3 parts, ignoring the rest.");
-            }
-
+        if (extensionVersion || updateTasksId) {
             try {
                 const taskManifests: string[] = await getTasksManifestPaths(manifestFile);
 
@@ -529,13 +549,44 @@ export async function checkUpdateTasksVersion(manifestFile?: string): Promise<an
                     return updateTasksFinished.promise;
                 }
 
-                const taskVersion = { major: +versionParts[0], minor: +versionParts[1], patch: +versionParts[2] };
+                let taskUpdates = [];
+                if (extensionVersion) {
+                    // Extract version parts Major, Minor, Patch
+                    const versionParts = extensionVersion.split(".");
+                    if (versionParts.length > 3) {
+                        tl.warning("Detected a version that consists of more than 3 parts. Build tasks support only 3 parts, ignoring the rest.");
+                    }
 
-                tl.debug(`Processing the following task manifest ${taskManifests}`);
-                const taskUpdates =
-                    taskManifests.map(manifest => updateTaskVersion(manifest, taskVersion, versionReplacementType));
+                    const taskVersion = { major: +versionParts[0], minor: +versionParts[1], patch: +versionParts[2] };
+
+                    tl.debug(`Processing the following task manifest ${taskManifests}`);
+                    taskUpdates = taskUpdates.concat(taskManifests.map(manifest => updateTaskVersion(manifest, taskVersion, versionReplacementType)));
+                }
+
+                if (updateTasksId) {
+                    const publisher = tl.getInput("publisherId", true);
+                    let extensionId = tl.getInput("extensionId", true);
+                    const extensionTag = tl.getInput("extensionTag", false);
+
+                    if (extensionId && extensionTag) {
+                        extensionId += extensionTag;
+                        tl.debug(`Overriding extension id to: ${extensionId}`);
+                    }
+
+                    if (!(publisher && extensionId)) {
+                        const err = "Currently only supported when 'Publisher' and 'Extension Id' are specified.";
+                        tl.setResult(tl.TaskResult.Failed, `${err}`);
+                        throw err;
+                    }
+
+                    const ns = { publisher: publisher, extensionId: extensionId };
+
+                    tl.debug(`Processing the following task manifest ${taskManifests}`);
+                    taskUpdates = taskUpdates.concat(taskManifests.map(manifest => updateTaskId(manifest, ns)));
+                }
 
                 await taskUpdates.forEach(() => updateTasksFinished.resolve(null));
+
             } catch (err) {
                 updateTasksFinished.reject(`Error determining tasks manifest paths: ${err}`);
             }

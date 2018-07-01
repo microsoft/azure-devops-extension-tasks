@@ -16,6 +16,7 @@ export class VSIXEditor {
     private extensionVisibility: string = null;
     private extensionPricing: string = null;
     private updateTasksVersion: boolean = true;
+    private updateTasksId: boolean = true;
 
     constructor(
         public inputFile: string,
@@ -97,10 +98,10 @@ export class VSIXEditor {
                     return dirPath;
                 })
                 .then(async dirPath => {
-                    if (this.versionNumber && this.updateTasksVersion) {
+                    if (this.versionNumber && this.updateTasksVersion || this.updateTasksId) {
                         tl.debug("Look for build tasks manifest");
                         const extensionManifest = path.join(dirPath, "extension.vsomanifest");
-                        await common.checkUpdateTasksVersion(extensionManifest);
+                        await common.checkUpdateTasksManifests(extensionManifest);
                     }
                     return dirPath;
                 })
@@ -207,7 +208,8 @@ export class VSIXEditor {
             || this.publisher
             || this.extensionName
             || (this.extensionVisibility && this.extensionVisibility !== "default")
-            || (this.extensionPricing && this.extensionPricing !== "default"));
+            || (this.extensionPricing && this.extensionPricing !== "default"))
+            || this.updateTasksId;
     }
 
     public editVersion(version: string) {
@@ -248,6 +250,11 @@ export class VSIXEditor {
     public editUpdateTasksVersion(updateTasksVersion: boolean) {
         this.validateEditMode();
         this.updateTasksVersion = updateTasksVersion;
+    }
+
+    public editUpdateTasksId(updateTasksId: boolean) {
+        this.validateEditMode();
+        this.updateTasksId = updateTasksId;
     }
 
     private validateEditMode() {
