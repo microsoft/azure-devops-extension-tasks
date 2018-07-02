@@ -114,7 +114,7 @@ common.runTfx(tfx => {
         else if (extensionVisibility.indexOf("public") < 0) {
             // Only handle shareWith if the extension is not public
             tfx.argIf(shareWith && shareWith.length > 0, ["--share-with"].concat(shareWith));
-        } else {
+        } else if (shareWith && shareWith.length > 0) {
             tl.warning("Ignoring Share - Not available on public extensions.");
         }
     }
