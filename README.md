@@ -1,6 +1,3 @@
-# EXPERIMENTAL
---
-
 ![cistatus](https://mseng.visualstudio.com/_apis/public/build/definitions/b924d696-3eae-4116-8443-9a18392d8544/3646/badge)
 
 # CI/CD Tools for VSTS extensions
@@ -19,6 +16,7 @@ This extension provides build and release tasks for packaging and publishing Vis
 * **Share**: share an extension with a VSTS account
 * **Install**: install an extension to a VSTS account
 * **Query version**: query an extension's version (to make it easy to increment on your next package or publish)
+* **Wait for validation**: waits for the Marketplace validation to come through.
 
 ## Contribute
 
@@ -29,6 +27,6 @@ This extension provides build and release tasks for packaging and publishing Vis
 If you make a change to one or more of the actual tasks, you need to update the task(s) version in the appropriate task.json file. You can also run `setTaskVersion.js` and pass version to apply to all tasks, for example:
 
 ```
-node scripts/setTaskVersion.js 1.1.47
+node scripts/setTaskVersion.js 1.1.71
 ```
 
