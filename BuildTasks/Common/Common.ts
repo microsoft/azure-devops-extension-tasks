@@ -496,11 +496,11 @@ async function updateTaskVersion(manifestFilePath: string, version: { major: num
             switch (replacementType) {
                 default:
                 case "major":
-                    manifestJSON.version.Major = version.major;
+                    manifestJSON.version.Major = `${version.major}`;
                 case "minor":
-                    manifestJSON.version.Minor = version.minor;
+                    manifestJSON.version.Minor = `${version.minor}`;
                 case "patch":
-                    manifestJSON.version.Patch = version.patch;
+                    manifestJSON.version.Patch = `${version.patch}`;
             }
         }
 
@@ -565,8 +565,8 @@ export async function checkUpdateTasksManifests(manifestFile?: string): Promise<
 
                 let taskIdUpdates = [];
                 if (updateTasksId) {
-                    const publisher = tl.getInput("publisherId", true);
-                    let extensionId = tl.getInput("extensionId", true);
+                    const publisher = tl.getInput("publisherId", false);
+                    let extensionId = tl.getInput("extensionId", false);
                     const extensionTag = tl.getInput("extensionTag", false);
 
                     if (extensionId && extensionTag) {
@@ -589,6 +589,7 @@ export async function checkUpdateTasksManifests(manifestFile?: string): Promise<
                 return Q.all(taskVersionUpdates).then(() => Q.all(taskIdUpdates)).then(() => updateTasksFinished.resolve(null));
             } catch (err) {
                 updateTasksFinished.reject(`Error determining tasks manifest paths: ${err}`);
+                tl.setResult(tl.TaskResult.Failed, err);
             }
         }
         else {
