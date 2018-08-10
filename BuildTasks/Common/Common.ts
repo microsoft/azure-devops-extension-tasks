@@ -549,7 +549,7 @@ export async function checkUpdateTasksManifests(manifestFile?: string): Promise<
                     return updateTasksFinished.promise;
                 }
 
-                let taskUpdates = [];
+                let taskVersionUpdates = [];
                 if (extensionVersion) {
                     // Extract version parts Major, Minor, Patch
                     const versionParts = extensionVersion.split(".");
@@ -560,9 +560,10 @@ export async function checkUpdateTasksManifests(manifestFile?: string): Promise<
                     const taskVersion = { major: +versionParts[0], minor: +versionParts[1], patch: +versionParts[2] };
 
                     tl.debug(`Processing the following task manifest ${taskManifests}`);
-                    taskUpdates = taskUpdates.concat(taskManifests.map(manifest => updateTaskVersion(manifest, taskVersion, versionReplacementType)));
+                    taskVersionUpdates = taskManifests.map(manifest => updateTaskVersion(manifest, taskVersion, versionReplacementType));
                 }
 
+                let taskIdUpdates = [];
                 if (updateTasksId) {
                     const publisher = tl.getInput("publisherId", true);
                     let extensionId = tl.getInput("extensionId", true);
@@ -582,12 +583,10 @@ export async function checkUpdateTasksManifests(manifestFile?: string): Promise<
                     const ns = { publisher: publisher, extensionId: extensionId };
 
                     tl.debug(`Processing the following task manifest ${taskManifests}`);
-                    taskUpdates = taskUpdates.concat(taskManifests.map(manifest => updateTaskId(manifest, ns)));
+                    taskIdUpdates = taskManifests.map(manifest => updateTaskId(manifest, ns));
                 }
 
-                await Q.all(taskUpdates);
-                updateTasksFinished.resolve(null);
-
+                return Q.all(taskVersionUpdates).then(() => Q.all(taskIdUpdates)).then(() => updateTasksFinished.resolve(null));
             } catch (err) {
                 updateTasksFinished.reject(`Error determining tasks manifest paths: ${err}`);
             }
