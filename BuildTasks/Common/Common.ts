@@ -585,7 +585,8 @@ export async function checkUpdateTasksManifests(manifestFile?: string): Promise<
                     taskUpdates = taskUpdates.concat(taskManifests.map(manifest => updateTaskId(manifest, ns)));
                 }
 
-                await taskUpdates.forEach(() => updateTasksFinished.resolve(null));
+                await Q.all(taskUpdates);
+                updateTasksFinished.resolve(null);
 
             } catch (err) {
                 updateTasksFinished.reject(`Error determining tasks manifest paths: ${err}`);
