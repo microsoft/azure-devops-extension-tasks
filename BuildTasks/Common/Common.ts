@@ -10,7 +10,7 @@ import * as Q from "q";
 import * as tl from "vsts-task-lib/task";
 import * as trl from "vsts-task-lib/toolrunner";
 import * as uri from "urijs";
-import * as util from "util";
+import * as fse from "fs-extra";
 
 import ToolRunner = trl.ToolRunner;
 import * as uuidv5 from "uuidv5";
@@ -449,10 +449,7 @@ async function getTasksManifestPaths(manifestFile?: string): Promise<string[]> {
 async function updateTaskId(manifestFilePath: string, ns: { publisher: string, extensionId: string }): Promise<any> {
     tl.debug(`Reading task manifest file: ${manifestFilePath}`);
 
-    const readfile = util.promisify(fs.readFile);
-    const writefile = util.promisify(fs.writeFile);
-
-    return readfile(manifestFilePath, "utf8").then((data: string) => {
+    return fse.readFile(manifestFilePath, "utf8").then((data: string) => {
         let manifestJSON;
         try {
             // BOM check
@@ -471,8 +468,7 @@ async function updateTaskId(manifestFilePath: string, ns: { publisher: string, e
 
         return manifestJSON;
     }).then((manifestJSON) => {
-        const newContent = JSON.stringify(manifestJSON, null, "\t");
-        return writefile(manifestFilePath, newContent, { encoding: "utf8" })
+        return fse.writeJSON(manifestFilePath, manifestJSON, { encoding: "utf8" })
             .then(() => tl.debug(`Task manifest ${manifestFilePath} id updated to ${manifestJSON.id}`));
     });
 }
@@ -480,10 +476,7 @@ async function updateTaskId(manifestFilePath: string, ns: { publisher: string, e
 async function updateTaskVersion(manifestFilePath: string, version: { major: number, minor: number, patch: number }, replacementType: string): Promise<any> {
     tl.debug(`Reading task manifest file: ${manifestFilePath}`);
 
-    const readfile = util.promisify(fs.readFile);
-    const writefile = util.promisify(fs.writeFile);
-
-    return readfile(manifestFilePath, "utf8").then((data: string) => {
+    return fse.readFile(manifestFilePath, "utf8").then((data: string) => {
         let manifestJSON;
         try {
             data = data.replace(/^\uFEFF/,
@@ -516,8 +509,7 @@ async function updateTaskVersion(manifestFilePath: string, version: { major: num
         }
         return manifestJSON;
     }).then((manifestJSON) => {
-        const newContent = JSON.stringify(manifestJSON, null, "\t");
-        return writefile(manifestFilePath, newContent, { encoding: "utf8" })
+        return fse.writeJSON(manifestFilePath, manifestJSON, { encoding: "utf8" })
             .then(() => tl.debug(`Task manifest ${manifestFilePath} version updated to: ${JSON.stringify(manifestJSON.version)}`));
     });
 }
