@@ -10,6 +10,7 @@ import * as Q from "q";
 import * as tl from "vsts-task-lib/task";
 import * as trl from "vsts-task-lib/toolrunner";
 import * as uri from "urijs";
+import * as util from "util";
 
 import ToolRunner = trl.ToolRunner;
 import * as uuidv5 from "uuidv5";
@@ -445,9 +446,13 @@ async function getTasksManifestPaths(manifestFile?: string): Promise<string[]> {
     return result;
 }
 
-async function updateTaskId(manifestFilePath: string, ns: { publisher: string, extensionId: string }): Promise<void> {
+async function updateTaskId(manifestFilePath: string, ns: { publisher: string, extensionId: string }): Promise<any> {
     tl.debug(`Reading task manifest file: ${manifestFilePath}`);
-    return Q.nfcall(fs.readFile, manifestFilePath, "utf8").then((data: string) => {
+
+    const readfile = util.promisify(fs.readFile);
+    const writefile = util.promisify(fs.writeFile);
+
+    return readfile(manifestFilePath, "utf8").then((data: string) => {
         let manifestJSON;
         try {
             // BOM check
@@ -463,51 +468,57 @@ async function updateTaskId(manifestFilePath: string, ns: { publisher: string, e
 
         let extensionNs = uuidv5("url", "https://marketplace.visualstudio.com/vsts", true);
         manifestJSON.id = uuidv5(extensionNs, `${ns.publisher}.${ns.extensionId}.${manifestJSON.name}`, false);
+
+        return manifestJSON;
+    }).then((manifestJSON) => {
         const newContent = JSON.stringify(manifestJSON, null, "\t");
-        return Q.nfcall(fs.writeFile, manifestFilePath, newContent).then(() => {
-            tl.debug(`Task manifest ${manifestFilePath} id updated to ${manifestJSON.id}`);
-        });
+        return writefile(manifestFilePath, newContent, { encoding: "utf8" })
+            .then(() => tl.debug(`Task manifest ${manifestFilePath} id updated to ${manifestJSON.id}`));
     });
 }
 
-async function updateTaskVersion(manifestFilePath: string, version: { major: number, minor: number, patch: number }, replacementType: string): Promise<void> {
+async function updateTaskVersion(manifestFilePath: string, version: { major: number, minor: number, patch: number }, replacementType: string): Promise<any> {
     tl.debug(`Reading task manifest file: ${manifestFilePath}`);
-    return Q.nfcall(fs.readFile, manifestFilePath, "utf8").then((data: string) => {
+
+    const readfile = util.promisify(fs.readFile);
+    const writefile = util.promisify(fs.writeFile);
+
+    return readfile(manifestFilePath, "utf8").then((data: string) => {
         let manifestJSON;
         try {
-            data = data.replace(/^\uFEFF/, (x) => {
-                tl.warning(`Removing Unicode BOM from manifest file: ${manifestFilePath}.`);
-                return "";
-            });
+            data = data.replace(/^\uFEFF/,
+                (x) => {
+                    tl.warning(`Removing Unicode BOM from manifest file: ${manifestFilePath}.`);
+                    return "";
+                });
             manifestJSON = JSON.parse(data);
-        }
-        catch (jsonError) {
+        } catch (jsonError) {
             throw new Error(`Error parsing task manifest: ${manifestFilePath} - ${jsonError}`);
         }
 
         tl.debug(`Task manifest ${manifestFilePath} replacement type: ${replacementType}`);
         if (!manifestJSON.version && replacementType !== "major") {
-            tl.warning(`Task manifest ${manifestFilePath} doesn't specify a version, defaulting to replacement type: major.`);
+            tl.warning(
+                `Task manifest ${manifestFilePath} doesn't specify a version, defaulting to replacement type: major.`);
             replacementType = "major";
             manifestJSON.version = version;
-        }
-        else {
+        } else {
             tl.debug(`Task manifest ${manifestFilePath} current version: ${JSON.stringify(manifestJSON.version)}`);
             switch (replacementType) {
-                default:
-                case "major":
-                    manifestJSON.version.Major = `${version.major}`;
-                case "minor":
-                    manifestJSON.version.Minor = `${version.minor}`;
-                case "patch":
-                    manifestJSON.version.Patch = `${version.patch}`;
+            default:
+            case "major":
+                manifestJSON.version.Major = `${version.major}`;
+            case "minor":
+                manifestJSON.version.Minor = `${version.minor}`;
+            case "patch":
+                manifestJSON.version.Patch = `${version.patch}`;
             }
         }
-
+        return manifestJSON;
+    }).then((manifestJSON) => {
         const newContent = JSON.stringify(manifestJSON, null, "\t");
-        return Q.nfcall(fs.writeFile, manifestFilePath, newContent, { encoding: "utf8" }).then(() => {
-            tl.debug(`Task manifest ${manifestFilePath} version updated to: ${JSON.stringify(manifestJSON.version)}`);
-        });
+        return writefile(manifestFilePath, newContent, { encoding: "utf8" })
+            .then(() => tl.debug(`Task manifest ${manifestFilePath} version updated to: ${JSON.stringify(manifestJSON.version)}`));
     });
 }
 
@@ -526,17 +537,10 @@ export async function checkUpdateTasksManifests(manifestFile?: string): Promise<
         versionReplacementType = "majorminorpatch";
     }
 
-    let updateTasksFinished = Q.defer();
-
     if (updateTasksVersion || updateTasksId) {
         // Extract the extension version
         let extensionVersion;
-        try {
-            extensionVersion = getExtensionVersion();
-        }
-        catch (err) {
-            return Q.reject(err);
-        }
+        extensionVersion = getExtensionVersion();
 
         // If extension version specified, let's search for build tasks
         if (extensionVersion || updateTasksId) {
@@ -545,8 +549,7 @@ export async function checkUpdateTasksManifests(manifestFile?: string): Promise<
 
                 if (taskManifests == null || taskManifests.length === 0) {
                     tl.debug("This extension has no build tasks on it.");
-                    updateTasksFinished.resolve(null);
-                    return updateTasksFinished.promise;
+                    return Promise.resolve();
                 }
 
                 let taskVersionUpdates = [];
@@ -586,21 +589,20 @@ export async function checkUpdateTasksManifests(manifestFile?: string): Promise<
                     taskIdUpdates = taskManifests.map(manifest => updateTaskId(manifest, ns));
                 }
 
-                return Q.all(taskVersionUpdates).then(() => Q.all(taskIdUpdates)).then(() => updateTasksFinished.resolve(null));
+                return Promise.all(taskVersionUpdates)
+                    .then((result) => { return Promise.all(taskIdUpdates); })
+                    .catch((err) => tl.setResult(tl.TaskResult.Failed, err));
             } catch (err) {
-                updateTasksFinished.reject(`Error determining tasks manifest paths: ${err}`);
                 tl.setResult(tl.TaskResult.Failed, err);
             }
         }
         else {
             tl.debug("No update tasks version required (No extension version specified)");
-            updateTasksFinished.resolve(null);
         }
     }
     else {
         tl.debug("No update tasks version required");
-        updateTasksFinished.resolve(null);
     }
 
-    return updateTasksFinished.promise;
+    return Promise.resolve();
 }
