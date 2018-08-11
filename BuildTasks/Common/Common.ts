@@ -439,12 +439,12 @@ export async function updateManifests(manifestPaths: string[]): Promise<void> {
 
         tl.debug(`Found manifests: ${manifestPaths.join(", ")}`);
 
-        await manifestPaths.map(async (extensionPath) => {
+        await Promise.all(manifestPaths.map(async (extensionPath) => {
             const manifest: any = await getManifest(extensionPath);
             const taskManifestPaths: string[] = await getTaskManifestPaths(extensionPath, manifest);
 
             if (taskManifestPaths && taskManifestPaths.length) {
-                await taskManifestPaths.map(async (taskPath) => {
+                await Promise.all(taskManifestPaths.map(async (taskPath) => {
                     tl.debug(`Patching: ${taskPath}.`);
                     const taskManifest = await getManifest(taskPath);
 
@@ -467,9 +467,9 @@ export async function updateManifests(manifestPaths: string[]): Promise<void> {
 
                     await writeTaskmanifest(taskManifest, taskPath);
                     tl.debug(`Updated: ${taskPath}.`);
-                });
+                }));
             }
-        });
+        }));
     }
 }
 
@@ -526,7 +526,7 @@ export async function getTaskManifestPaths(manifestPath: string, manifest: objec
 }
 
 export async function writeTaskmanifest(manifest: object, path: string): Promise<void> {
-    return fse.writeJSON(path, manifest);
+    return await fse.writeJSON(path, manifest);
 }
 
 export async function checkUpdateTasksManifests(manifestFile?: string): Promise<any> {

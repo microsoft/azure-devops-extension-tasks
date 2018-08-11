@@ -8,7 +8,7 @@ set INPUT_UPDATETASKSVERSIONTYPE=minor
 
 set AGENT_WORKFOLDER=c:\temp
 
-npm run build:tasks
+cmd /c "npm run build:tasks"
 
 pushd dist\BuildTasks\PackageExtension
 node packageextension.js
