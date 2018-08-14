@@ -377,10 +377,10 @@ export class TfxJsonOutputStream extends stream.Writable {
     }
 }
 
-function getTaskPathContributions(manifest: any): Promise<string[]> {
+function getTaskPathContributions(manifest: any): string[] {
         // Check for task contributions
     if (!manifest.contributions) {
-        return null;
+        return [];
     }
 
     return manifest.contributions
@@ -388,7 +388,7 @@ function getTaskPathContributions(manifest: any): Promise<string[]> {
         .map(c => c.properties["name"]);
 }
 
-async function updateTaskId(manifest: any, publisherId: string, extensionId: string): Promise<any> {
+function updateTaskId(manifest: any, publisherId: string, extensionId: string): Object {
     tl.debug(`Task manifest ${manifest.name} id before: ${manifest.id}`);
 
     let extensionNs = uuidv5("url", "https://marketplace.visualstudio.com/vsts", true);
@@ -398,7 +398,7 @@ async function updateTaskId(manifest: any, publisherId: string, extensionId: str
     return manifest;
 }
 
-async function updateTaskVersion(manifest: any, extensionVersionString: string, extensionVersionType: string): Promise<any> {
+function updateTaskVersion(manifest: any, extensionVersionString: string, extensionVersionType: string): Object {
     const versionParts = extensionVersionString.split(".");
     if (versionParts.length > 3) {
         tl.warning("Detected a version that consists of more than 3 parts. Build tasks support only 3 parts, ignoring the rest.");
@@ -446,7 +446,7 @@ export async function updateManifests(manifestPaths: string[]): Promise<void> {
             if (taskManifestPaths && taskManifestPaths.length) {
                 await Promise.all(taskManifestPaths.map(async (taskPath) => {
                     tl.debug(`Patching: ${taskPath}.`);
-                    const taskManifest = await getManifest(taskPath);
+                    let taskManifest = await getManifest(taskPath);
 
                     if (updateTasksId) {
                         tl.debug(`Updating Id...`);
@@ -454,7 +454,7 @@ export async function updateManifests(manifestPaths: string[]): Promise<void> {
                         const extensionTag = tl.getInput("extensionTag", false) || "";
                         const extensionId = (tl.getInput("extensionId", false) || manifest.id) + extensionTag;
 
-                        await updateTaskId(taskManifest, publisherId, extensionId);
+                        taskManifest = await updateTaskId(taskManifest, publisherId, extensionId);
                     }
 
                     if (updateTasksVersion) {
@@ -462,7 +462,7 @@ export async function updateManifests(manifestPaths: string[]): Promise<void> {
                         const extensionVersion = tl.getInput("extensionVersion", false) || manifest.version;
                         const extensionVersionType = tl.getInput("updateTasksVersionType", false) || "major";
 
-                        await updateTaskVersion(taskManifest, extensionVersion, extensionVersionType);
+                        taskManifest = await updateTaskVersion(taskManifest, extensionVersion, extensionVersionType);
                     }
 
                     await writeTaskmanifest(taskManifest, taskPath);
@@ -473,7 +473,7 @@ export async function updateManifests(manifestPaths: string[]): Promise<void> {
     }
 }
 
-export async function getExtensionManifestPaths(): Promise<string[]> {
+function getExtensionManifestPaths(): string[] {
     let rootFolder: string;
 
     // Search for extension manifests given the rootFolder and patternManifest inputs
@@ -485,7 +485,7 @@ export async function getExtensionManifestPaths(): Promise<string[]> {
     return tl.findMatch(rootFolder, manifestsPattern);
 }
 
-export async function getManifest(path: string): Promise<object> {
+function getManifest(path: string): Promise<Object> {
     return fse.readFile(path, "utf8").then((data: string) => {
         try {
             data = data.replace(/^\uFEFF/,
@@ -502,33 +502,27 @@ export async function getManifest(path: string): Promise<object> {
 
 export async function getTaskManifestPaths(manifestPath: string, manifest: object): Promise<string[]> {
     const tasks = await getTaskPathContributions(manifest);
-    let result: string[] = [];
-
     const rootFolder = path.dirname(manifestPath);
 
-    for (let t = 0; t < tasks.length; t++) {
-        const task = tasks[t];
+    return tasks.reduce(async (result: Promise<string[]>, task: string) => {
         tl.debug(`Found task: ${task}`);
         const taskRoot: string = path.join(rootFolder, task);
         const rootManifest: string = path.join(taskRoot, "task.json");
-
         if (await fse.pathExists(rootManifest)) {
             tl.debug(`Found single-task manifest: ${rootManifest}`);
-            result.push(rootManifest);
+            return (await result).concat([rootManifest]);
         } else {
             const versionManifests = tl.findMatch(taskRoot, `${task}V*/task.json`);
             tl.debug(`Found multi-task manifests: ${versionManifests.join(", ")}`);
-            result = result.concat(versionManifests);
+            return (await result).concat(versionManifests);
         }
-    }
-
-    return result;
+    }, Promise.resolve([]));
 }
 
-export async function writeTaskmanifest(manifest: object, path: string): Promise<void> {
-    return await fse.writeJSON(path, manifest);
+export function writeTaskmanifest(manifest: object, path: string): Promise<void> {
+    return fse.writeJSON(path, manifest);
 }
 
-export async function checkUpdateTasksManifests(manifestFile?: string): Promise<any> {
+export function checkUpdateTasksManifests(manifestFile?: string): Promise<void> {
     return updateManifests(manifestFile ? [manifestFile] : []);
 }
