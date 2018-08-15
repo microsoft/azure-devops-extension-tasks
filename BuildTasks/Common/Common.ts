@@ -460,6 +460,10 @@ export async function updateManifests(manifestPaths: string[]): Promise<void> {
                     if (updateTasksVersion) {
                         tl.debug(`Updating version...`);
                         const extensionVersion = tl.getInput("extensionVersion", false) || manifest.version;
+                        if (!extensionVersion) {
+                            throw new Error(
+                                "Extension Version was not supplied nor does the extension manifest define one.");
+                        }
                         const extensionVersionType = tl.getInput("updateTasksVersionType", false) || "major";
 
                         taskManifest = await updateTaskVersion(taskManifest, extensionVersion, extensionVersionType);
@@ -512,7 +516,7 @@ export async function getTaskManifestPaths(manifestPath: string, manifest: objec
             tl.debug(`Found single-task manifest: ${rootManifest}`);
             return (await result).concat([rootManifest]);
         } else {
-            const versionManifests = tl.findMatch(taskRoot, `${task}V*/task.json`);
+            const versionManifests = tl.findMatch(taskRoot, "*/task.json");
             tl.debug(`Found multi-task manifests: ${versionManifests.join(", ")}`);
             return (await result).concat(versionManifests);
         }
