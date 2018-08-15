@@ -516,7 +516,7 @@ export async function getTaskManifestPaths(manifestPath: string, manifest: objec
             tl.debug(`Found single-task manifest: ${rootManifest}`);
             result.push(rootManifest);
         } else {
-            const versionManifests = tl.findMatch(taskRoot, `${task}V*/task.json`);
+            const versionManifests = tl.findMatch(taskRoot, "**/task.json");
             tl.debug(`Found multi-task manifests: ${versionManifests.join(", ")}`);
             result = result.concat(versionManifests);
         }
