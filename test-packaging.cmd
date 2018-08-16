@@ -11,5 +11,7 @@ set AGENT_WORKFOLDER=c:\temp
 cmd /c "npm run build:tasks"
 
 pushd dist\BuildTasks\PackageExtension
-node packageextension.js
+c:\TfsData\jessehouwing\externals.2.111.1\node\bin\node.exe PackageExtension.js
+c:\TfsData\jessehouwing\externals.2.136.1\node\bin\node.exe PackageExtension.js
+node PackageExtension.json
 popd
