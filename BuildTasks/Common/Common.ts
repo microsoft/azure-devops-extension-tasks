@@ -252,12 +252,13 @@ export async function runTfx(cmd: (tfx: ToolRunner) => void) {
     const npm = new trl.ToolRunner(tl.which("npm", true));
     npm.arg(["install", "tfx-cli", "--prefix", agentToolsPath]);
 
-    npm.exec().then(code => {
+    try {
+        await npm.exec();
         tfx = new trl.ToolRunner(tl.which(tfxLocalPath) || tl.which(tfxLocalPathBin, true));
         tryRunCmd(tfx);
-    }).fail(err => {
+    } catch (err) {
         tl.setResult(tl.TaskResult.Failed, `Error installing tfx: ${err}`);
-    });
+    }
 }
 
 /**

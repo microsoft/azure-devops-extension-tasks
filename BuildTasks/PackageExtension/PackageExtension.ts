@@ -5,22 +5,24 @@ import * as common from "./common";
 
 async function run() {
     try {
-        common.runTfx(async tfx => {
-            tfx.arg(["extension", "create", "--json", "--no-color"]);
-            const outputVariable = tl.getInput("outputVariable", false);
+        await common.runTfx(async tfx => {
+            let cleanupTfxArgs: () => void = null;
+            try {
+                tfx.arg(["extension", "create", "--json", "--no-color"]);
+                const outputVariable = tl.getInput("outputVariable", false);
 
-            // Set tfx manifest arguments
-            const cleanupTfxArgs = common.validateAndSetTfxManifestArguments(tfx);
+                // Set tfx manifest arguments
+                cleanupTfxArgs = common.validateAndSetTfxManifestArguments(tfx);
 
-            // Set vsix output path
-            const outputPath = tl.getInput("outputPath", false);
-            tfx.argIf(outputPath, ["--output-path", outputPath]);
+                // Set vsix output path
+                const outputPath = tl.getInput("outputPath", false);
+                tfx.argIf(outputPath, ["--output-path", outputPath]);
 
-            // Before executing check update on tasks version
-            await common.checkUpdateTasksManifests();
-            const outputStream = new common.TfxJsonOutputStream(false);
+                // Before executing check update on tasks version
+                await common.checkUpdateTasksManifests();
+                const outputStream = new common.TfxJsonOutputStream(false);
 
-            tfx.exec(<any>{ outStream: outputStream, failOnStdErr: true }).then(code => {
+                const code = await tfx.exec(<any>{ outStream: outputStream, failOnStdErr: true });
                 const json = JSON.parse(outputStream.jsonString);
 
                 if (outputVariable) {
@@ -29,16 +31,21 @@ async function run() {
 
                 console.log(`Packaged extension: ${json.path}.`);
                 tl.setResult(tl.TaskResult.Succeeded, `tfx exited with return code: ${code}`);
-            }).fail(err => {
-                tl.setResult(tl.TaskResult.Failed, `tfx failed with error: ${err}`);
-            }).finally(() => {
-                cleanupTfxArgs();
-            });
+            }
+            catch (err) {
+                tl.setResult(tl.TaskResult.Failed, `${err}`);
+            }
+            finally {
+                if (cleanupTfxArgs) {
+                    cleanupTfxArgs();
+                }
+            }
         });
     }
     catch (err) {
-        tl.setResult(tl.TaskResult.Failed, `Error occurred while updating tasks version: ${err}`);
+        console.log(`Error packaging extension: ${err}.`);
+        tl.setResult(tl.TaskResult.Failed, `Error packaging extension: ${err}`);
     }
 }
 
-run();
+void run();

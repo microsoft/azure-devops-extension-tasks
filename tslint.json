@@ -10,6 +10,14 @@
       true,
       "spaces"
     ],
+    "no-floating-promises": {
+      "severity": "warning",
+      "options": [
+        true,
+        "Promise",
+        "Q.Promise"
+      ]
+    },
     "no-consecutive-blank-lines": [ true ],
     "no-console": [ false ],
     "no-duplicate-variable": true,
