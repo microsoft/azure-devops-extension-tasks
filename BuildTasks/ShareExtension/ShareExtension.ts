@@ -1,9 +1,7 @@
 import * as tl from "vsts-task-lib/task";
 import * as common from "./common";
 
-// common.setProxy();
-
-common.runTfx(tfx => {
+void common.runTfx(async tfx => {
     tfx.arg(["extension", "share"]);
 
     common.setTfxMarketplaceArguments(tfx);
@@ -13,9 +11,11 @@ common.runTfx(tfx => {
     const accounts = tl.getDelimitedInput("accounts", ",", true);
     tfx.arg(["--share-with"].concat(accounts).map((value, index) => { return value.trim(); }));
 
-    tfx.exec().then(code => {
+    try{
+        const code = await tfx.exec();
         tl.setResult(tl.TaskResult.Succeeded, `tfx exited with return code: ${code}`);
-    }).fail(err => {
+    } catch (err)
+    {
         tl.setResult(tl.TaskResult.Failed, `tfx failed with error: ${err}`);
-    });
+    }
 });
