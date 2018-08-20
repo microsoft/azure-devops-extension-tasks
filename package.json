@@ -17,7 +17,7 @@
     "compile:tasks": "tsc --project BuildTasks",
     "postcompile:tasks": "npm run lint:tasks",
     "lint:tasks": "tslint -c tslint.json \"BuildTasks/!(@types)/*.ts",
-    "prelink:tasks": "mkdirp dist/_temp/node_modules && pushd \"dist/_temp\" && npm install vsts-task-lib@2.2.1 && npm install q@1.5.1 && npm install urijs@1.19.1 && npm install promise-retry@1.1.1 && npm install uuidv5@1.0.0 && npm install fs-extra@5.0.0 && popd",
+    "prelink:tasks": "mkdirp dist/_temp/node_modules && pushd \"dist/_temp\" && npm install vsts-task-lib@2.2.1 && npm install q@1.5.1 && npm install promise-retry@1.1.1 && npm install uuidv5@1.0.0 && npm install fs-extra@5.0.0 && popd",
     "link:tasks": "node scripts/copyfilesToBuildTasks -u 2 dist/_temp/node_modules/**/* dist/BuildTasks",
     "postlink:tasks": "rimraf dist/_temp",
     "link:tasks:publish": "pushd \"dist/BuildTasks/PublishExtension\" && npm install && popd",
@@ -32,12 +32,12 @@
   "author": "Microsoft Corporation",
   "license": "MIT",
   "devDependencies": {
+    "@types/core-js": "^2.5.0",
     "@types/fs-extra": "^5.0.4",
     "@types/node": "^8.10.25",
     "@types/promise-retry": "^1.1.1",
     "@types/q": "0.0.32",
     "@types/temp": "^0.8.29",
-    "@types/urijs": "^1.15.36",
     "@types/x2js": "0.0.27",
     "@types/xmldom": "^0.1.28",
     "copyfiles": "^1.0.0",
@@ -47,13 +47,13 @@
     "tfx-cli": "^0.5.14",
     "tsconfig-glob": "^0.4.3",
     "tslint": "^5.10.0",
-    "typescript": "^2.7.2"
+    "typescript": "^2.7.2",
+    "typestrict": "^1.0.0"
   },
   "dependencies": {
     "fs-extra": "^5.0.0",
     "promise-retry": "^1.1.1",
     "q": "^1.5.1",
-    "urijs": "^1.19.1",
     "util.promisify": "1.0.0",
     "uuidv5": "^1.0.0",
     "vsts-task-lib": "^2.2.1"

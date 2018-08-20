@@ -6,10 +6,8 @@ import * as os from "os";
 import * as path from "path";
 import * as stream from "stream";
 import * as fs from "fs";
-import * as Q from "q";
 import * as tl from "vsts-task-lib/task";
 import * as trl from "vsts-task-lib/toolrunner";
-import * as uri from "urijs";
 import * as fse from "fs-extra";
 
 import ToolRunner = trl.ToolRunner;
@@ -33,24 +31,6 @@ function deleteBuildTempFile(tempFile: string) {
     if (tempFile && fs.existsSync(tempFile)) {
         tl.debug(`Deleting temp file: ${tempFile}`);
         fs.unlinkSync(tempFile);
-    }
-}
-
-export function setProxy() {
-    const proxy = tl.getHttpProxyConfiguration();
-
-    if (proxy && !(process.env["HTTP_PROXY"] || process.env["HTTPS_PROXY"])) {
-        let proxyUrl = new uri(proxy.proxyUrl);
-        if (proxy.proxyUsername) {
-            proxyUrl = proxyUrl.username(proxy.proxyUsername);
-            proxyUrl = proxyUrl.password(proxy.proxyPassword);
-        }
-        process.env["HTTP_PROXY"] = proxyUrl.toString();
-        process.env["HTTPS_PROXY"] = proxyUrl.toString();
-
-        if (!process.env["NO_PROXY"]) {
-            process.env["NO_PROXY"] = proxy.proxyBypassHosts.join(",");
-        }
     }
 }
 
@@ -144,7 +124,6 @@ export function validateAndSetTfxManifestArguments(tfx: ToolRunner): (() => void
         tl.debug(`Overriding extension pricing to: ${extensionPricing}`);
         jsonOverrides = (jsonOverrides || {});
 
-        const isFree = extensionPricing.indexOf("free") >= 0;
         const isPaid = extensionPricing.indexOf("paid") >= 0;
 
         if (isPaid) {
@@ -198,7 +177,7 @@ export async function runTfx(cmd: (tfx: ToolRunner) => void) {
     let tfx: ToolRunner;
     let tfxPath: string;
 
-    const tryRunCmd = (tfx: ToolRunner) => {
+    const tryRunCmd = async (tfx: ToolRunner) => {
         try {
             // Set working folder
             const cwd = tl.getInput("cwd", false);
@@ -222,7 +201,7 @@ export async function runTfx(cmd: (tfx: ToolRunner) => void) {
         if (tfxPath) {
             console.log(`Found tfx globally ${tfxPath}`);
             tfx = new trl.ToolRunner(tfxPath);
-            tryRunCmd(tfx);
+            await tryRunCmd(tfx);
             return;
         }
     }
@@ -242,7 +221,7 @@ export async function runTfx(cmd: (tfx: ToolRunner) => void) {
     if (tfxPath) {
         console.log(`Found tfx under: ${tfxPath}`);
         tfx = new trl.ToolRunner(tfxPath);
-        tryRunCmd(tfx);
+        await tryRunCmd(tfx);
         return;
     }
 
@@ -255,7 +234,7 @@ export async function runTfx(cmd: (tfx: ToolRunner) => void) {
     try {
         await npm.exec();
         tfx = new trl.ToolRunner(tl.which(tfxLocalPath) || tl.which(tfxLocalPathBin, true));
-        tryRunCmd(tfx);
+        await tryRunCmd(tfx);
     } catch (err) {
         tl.setResult(tl.TaskResult.Failed, `Error installing tfx: ${err}`);
     }
@@ -435,14 +414,14 @@ export async function updateManifests(manifestPaths: string[]): Promise<void> {
 
     if (updateTasksVersion || updateTasksId) {
         if (!(manifestPaths && manifestPaths.length)) {
-            manifestPaths = await getExtensionManifestPaths();
+            manifestPaths = getExtensionManifestPaths();
         }
 
         tl.debug(`Found manifests: ${manifestPaths.join(", ")}`);
 
         await Promise.all(manifestPaths.map(async (extensionPath) => {
             const manifest: any = await getManifest(extensionPath);
-            const taskManifestPaths: string[] = await getTaskManifestPaths(extensionPath, manifest);
+            const taskManifestPaths: string[] = getTaskManifestPaths(extensionPath, manifest);
 
             if (taskManifestPaths && taskManifestPaths.length) {
                 await Promise.all(taskManifestPaths.map(async (taskPath) => {
@@ -453,9 +432,9 @@ export async function updateManifests(manifestPaths: string[]): Promise<void> {
                         tl.debug(`Updating Id...`);
                         const publisherId = tl.getInput("publisherId", false) || manifest.publisher;
                         const extensionTag = tl.getInput("extensionTag", false) || "";
-                        const extensionId = (tl.getInput("extensionId", false) || manifest.id) + extensionTag;
+                        const extensionId = `${(tl.getInput("extensionId", false) || manifest.id)}${extensionTag}`;
 
-                        taskManifest = await updateTaskId(taskManifest, publisherId, extensionId);
+                        taskManifest = updateTaskId(taskManifest, publisherId, extensionId);
                     }
 
                     if (updateTasksVersion) {
@@ -467,7 +446,7 @@ export async function updateManifests(manifestPaths: string[]): Promise<void> {
                         }
                         const extensionVersionType = tl.getInput("updateTasksVersionType", false) || "major";
 
-                        taskManifest = await updateTaskVersion(taskManifest, extensionVersion, extensionVersionType);
+                        taskManifest = updateTaskVersion(taskManifest, extensionVersion, extensionVersionType);
                     }
 
                     await writeTaskmanifest(taskManifest, taskPath);

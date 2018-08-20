@@ -26,19 +26,20 @@ if (extensionVersionOverrideVariable) {
     }
 }
 
-// common.setProxy();
+export async function run() {
+    try {
+        await common.runTfx(async tfx => {
+            tfx.arg(["extension", "show", "--json", "--no-color"]);
 
-if (!usingOverride) {
-    common.runTfx(tfx => {
-        tfx.arg(["extension", "show", "--json", "--no-color"]);
+            common.setTfxMarketplaceArguments(tfx);
+            common.validateAndSetTfxManifestArguments(tfx);
 
-        common.setTfxMarketplaceArguments(tfx);
-        common.validateAndSetTfxManifestArguments(tfx);
+            const versionAction = tl.getInput("versionAction", false);
 
-        const versionAction = tl.getInput("versionAction", false);
+            const outputStream = new common.TfxJsonOutputStream(false);
+            const errStream = new common.TfxJsonOutputStream(false);
+            const code = await tfx.exec(<any>{ outStream: outputStream, errStream: errStream, failOnStdErr: true });
 
-        const outputStream = new common.TfxJsonOutputStream(false);
-        tfx.exec(<any>{ outStream: outputStream, failOnStdErr: true }).then(code => {
             const json = JSON.parse(outputStream.jsonString);
             let version: string = json.versions[0].version;
 
@@ -49,13 +50,13 @@ if (!usingOverride) {
                 let versionparts: number[] = version.split(".").map(v => +v);
                 switch (versionAction) {
                     case "Major":
-                        versionparts = [versionparts[0] + 1, 0, 0];
+                        versionparts = [++versionparts[0], 0, 0];
                         break;
                     case "Minor":
-                        versionparts = [versionparts[0], versionparts[1] + 1, 0];
+                        versionparts = [versionparts[0], ++versionparts[1], 0];
                         break;
                     case "Patch":
-                        versionparts = [versionparts[0], versionparts[1], versionparts[2] + 1];
+                        versionparts = [versionparts[0], versionparts[1], ++versionparts[2]];
                         break;
                 }
                 version = versionparts.join(".");
@@ -64,8 +65,12 @@ if (!usingOverride) {
 
             setVersion(version);
             tl.setResult(tl.TaskResult.Succeeded, `tfx exited with return code: ${code}`);
-        }).fail(err => {
-            tl.setResult(tl.TaskResult.Failed, `tfx failed with error: ${err}`);
         });
-    });
+    } catch (err) {
+        tl.setResult(tl.TaskResult.Failed, `Extension Version task failed: ${err}`);
+    }
+}
+
+if (!usingOverride) {
+    void run();
 }

@@ -6,6 +6,87 @@ import tl = require("vsts-task-lib/task");
 import tr = require("vsts-task-lib/toolrunner");
 import common = require("./common");
 
+class ManifestData {
+    public outputFileName: string;
+    constructor(public version: string,
+        public id: string,
+        public publisher: string,
+        public visibility: string,
+        public pricing: string,
+        public name: string,
+        public dirPath: string) { }
+
+    public async createOutputFilePath(outputPath: string): Promise<string> {
+        let deferred = Q.defer<string>();
+        let fileName = `${this.publisher}.${this.id}-${this.version}.gen.vsix`;
+
+        const updateFileName = (fileName: string, iteration: number) => {
+            if (iteration > 0) {
+                let gen = iteration.toString().padStart(2, "0");
+                fileName = `${this.publisher}.${this.id}-${this.version}.gen${gen}.vsix`;
+            }
+            fs.exists(path.join(outputPath, fileName), result => {
+                if (result) {
+                    updateFileName(fileName, ++iteration);
+                } else {
+                    tl.debug("Generated filename: " + fileName);
+                    deferred.resolve(fileName);
+                }
+            });
+        };
+
+        updateFileName(fileName, 0);
+
+        return deferred.promise;
+    }
+}
+
+class GalleryFlagsEditor {
+    flags: string[] = [];
+    constructor(galleryFlagsEditor: string) {
+        if (galleryFlagsEditor) {
+            this.flags = galleryFlagsEditor.split(" ").filter(f => f != null && f !== "");
+        }
+    }
+
+    private addFlag(flag: string) {
+        if (this.flags.indexOf(flag) < 0) { this.flags.push(flag); }
+    }
+
+    private removeFlag(flag: string) {
+        const index = this.flags.indexOf(flag);
+        if (index >= 0) { this.flags.splice(index, 1); }
+    }
+
+    addPublicFlag() {
+        this.addFlag("Public");
+    }
+
+    removePublicFlag() {
+        this.removeFlag("Public");
+    }
+
+    removePaidFlag() {
+        this.removeFlag("Paid");
+    }
+
+    addPaidFlag() {
+        this.addFlag("Paid");
+    }
+
+    addPreviewFlag() {
+        this.addFlag("Preview");
+    }
+
+    removePreviewFlag() {
+        this.removeFlag("Preview");
+    }
+
+    toString(): string {
+        return this.flags.join(" ");
+    }
+}
+
 export class VSIXEditor {
     private edit: boolean = false;
     private versionNumber: string = null;
@@ -86,45 +167,40 @@ export class VSIXEditor {
 
         temp.track();
 
-        try {
-            new Promise<string>((resolve, reject) => {
-                    temp.mkdir("vsixeditor", (ex, dirPath) => { resolve(dirPath); });
-                })
-                .then((dirPath) => {
-                    tl.debug("Finalizing edit");
-                    tl.debug("Extracting files to " + dirPath);
+        new Promise<string>((resolve, reject) => {
+                temp.mkdir("vsixeditor", (ex, dirPath) => { resolve(dirPath); });
+            })
+            .then((dirPath) => {
+                tl.debug("Finalizing edit");
+                tl.debug("Extracting files to " + dirPath);
 
-                    this.extractArchive(this.inputFile, dirPath);
-                    return dirPath;
-                })
-                .then(async dirPath => {
-                    if (this.versionNumber && this.updateTasksVersion || this.updateTasksId) {
-                        tl.debug("Look for build tasks manifest");
-                        const extensionManifest = path.join(dirPath, "extension.vsomanifest");
-                        await common.checkUpdateTasksManifests(extensionManifest);
-                    }
-                    return dirPath;
-                })
-                .then(dirPath => {
-                    tl.debug("Editing VSIX manifest");
-                    return this.editVsixManifest(dirPath).then((manifestData: ManifestData) => manifestData);
-                })
-                .then((manifestData: ManifestData) => {
-                    return manifestData.createOutputFilePath(this.outputPath).then((outputFile) => {
-                        manifestData.outputFileName = outputFile;
-                        return manifestData;
-                    });
-                })
-                .then((manifestData: ManifestData) => {
-                    tl.debug(`Creating final archive file at ${this.outputPath}`);
-                    this.createArchive(manifestData.dirPath, manifestData.outputFileName);
-                    deferred.resolve(manifestData.outputFileName);
-                    tl.debug("Final archive file created");
+                this.extractArchive(this.inputFile, dirPath);
+                return dirPath;
+            })
+            .then(async dirPath => {
+                if (this.versionNumber && this.updateTasksVersion || this.updateTasksId) {
+                    tl.debug("Look for build tasks manifest");
+                    const extensionManifest = path.join(dirPath, "extension.vsomanifest");
+                    await common.checkUpdateTasksManifests(extensionManifest);
+                }
+                return dirPath;
+            })
+            .then(dirPath => {
+                tl.debug("Editing VSIX manifest");
+                return this.editVsixManifest(dirPath).then((manifestData: ManifestData) => manifestData);
+            })
+            .then((manifestData: ManifestData) => {
+                return manifestData.createOutputFilePath(this.outputPath).then((outputFile) => {
+                    manifestData.outputFileName = outputFile;
+                    return manifestData;
                 });
-        } catch (err) {
-            deferred.reject(err);
-        }
-
+            })
+            .then((manifestData: ManifestData) => {
+                tl.debug(`Creating final archive file at ${this.outputPath}`);
+                this.createArchive(manifestData.dirPath, manifestData.outputFileName);
+                deferred.resolve(manifestData.outputFileName);
+                tl.debug("Final archive file created");
+            }).catch(err => { deferred.reject(err); });
         return deferred.promise;
     }
 
@@ -262,83 +338,4 @@ export class VSIXEditor {
     }
 }
 
-class ManifestData {
-    public outputFileName: string;
-    constructor(public version: string,
-        public id: string,
-        public publisher: string,
-        public visibility: string,
-        public pricing: string,
-        public name: string,
-        public dirPath: string) { }
 
-    public async createOutputFilePath(outputPath: string): Promise<string> {
-        let deferred = Q.defer<string>();
-        let fileName = `${this.publisher}.${this.id}-${this.version}.gen.vsix`;
-
-        const updateFileName = (fileName: string, iteration: number) => {
-            if (iteration > 0) {
-                let gen = "00".substring(0, "00".length - iteration.toString().length) + iteration;
-                fileName = `${this.publisher}.${this.id}-${this.version}.gen${gen}.vsix`;
-            }
-            fs.exists(path.join(outputPath, fileName), result => {
-                if (result) {
-                    updateFileName(fileName, ++iteration);
-                } else {
-                    tl.debug("Generated filename: " + fileName);
-                    deferred.resolve(fileName);
-                }
-            });
-        };
-
-        updateFileName(fileName, 0);
-
-        return deferred.promise;
-    }
-}
-
-class GalleryFlagsEditor {
-    flags: string[] = [];
-    constructor(galleryFlagsEditor: string) {
-        if (galleryFlagsEditor) {
-            this.flags = galleryFlagsEditor.split(" ").filter(f => f != null && f !== "");
-        }
-    }
-
-    private addFlag(flag: string) {
-        if (this.flags.indexOf(flag) < 0) { this.flags.push(flag); }
-    }
-
-    private removeFlag(flag: string) {
-        const index = this.flags.indexOf(flag);
-        if (index >= 0) { this.flags.splice(index, 1); }
-    }
-
-    addPublicFlag() {
-        this.addFlag("Public");
-    }
-
-    removePublicFlag() {
-        this.removeFlag("Public");
-    }
-
-    removePaidFlag() {
-        this.removeFlag("Paid");
-    }
-
-    addPaidFlag() {
-        this.addFlag("Paid");
-    }
-
-    addPreviewFlag() {
-        this.addFlag("Preview");
-    }
-
-    removePreviewFlag() {
-        this.removeFlag("Preview");
-    }
-
-    toString(): string {
-        return this.flags.join(" ");
-    }
-}
