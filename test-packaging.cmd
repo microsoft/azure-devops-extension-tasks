@@ -8,9 +8,11 @@ set INPUT_UPDATETASKSVERSIONTYPE=minor
 
 set AGENT_WORKFOLDER=c:\temp
 
+set NO_UPDATE_NOTIFIER=true
+
 cmd /c "npm run build:tasks"
 
-pushd dist\BuildTasks\PackageExtension
+pushd BuildTasks\PackageExtension\PackageExtension
 c:\TfsData\jessehouwing\externals.2.111.1\node\bin\node.exe PackageExtension.js
 c:\TfsData\jessehouwing\externals.2.136.1\node\bin\node.exe PackageExtension.js
 node PackageExtension.js

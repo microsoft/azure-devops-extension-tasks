@@ -7,7 +7,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "vsts-task-lib": "^2.2.1",
+    "vsts-task-lib": "^2.6.0",
     "uuidv5": "^1.0.0",
     "fs-extra": "^5.0.0"
   }
