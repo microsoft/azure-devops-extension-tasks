@@ -54,9 +54,13 @@
     "uri": "https://github.com/Microsoft/vsts-extension-build-release-tasks"
   },
   "files": [
-    {
-      "path": "BuildTasks"
-    },
+    { "path": "BuildTasks/ExtensionVersion" },
+    { "path": "BuildTasks/InstallExtension" },
+    { "path": "BuildTasks/IsValidExtension" },
+    { "path": "BuildTasks/IsValidExtensionAgent" },
+    { "path": "BuildTasks/PackageExtension" },
+    { "path": "BuildTasks/PublishExtension" },
+    { "path": "BuildTasks/ShareExtension" },
     {
       "path": "add-task.png",
       "addressable": true

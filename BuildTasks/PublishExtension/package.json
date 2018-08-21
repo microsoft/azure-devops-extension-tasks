@@ -1,4 +1,5 @@
 {
+  "name": "vsts-developer-tools.publishextension",
   "description": "Publish Extension Task",
   "repository": {
     "type": "git",

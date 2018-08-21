@@ -5,10 +5,11 @@
     "target": "es6",
     "sourceMap": true,
     "strict": false,
-    "strictNullChecks": true,
+    "strictNullChecks": false,
     "removeComments": true
   },
   "files": [
+    "./Common/uuidv5.d.ts",
     "./Common/Common.ts"
   ]
 }
