@@ -156,7 +156,7 @@
   ],
   "execution": {
     "Node": {
-      "target": "ExtensionVersion.js",
+      "target": "ExtensionVersion/ExtensionVersion.js",
       "argumentFormat": ""
     }
   }

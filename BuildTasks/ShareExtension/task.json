@@ -140,7 +140,7 @@
   ],
   "execution": {
     "Node": {
-      "target": "ShareExtension.js",
+      "target": "ShareExtension/ShareExtension.js",
       "argumentFormat": ""
     }
   }

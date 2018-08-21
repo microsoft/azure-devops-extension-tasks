@@ -26,8 +26,6 @@
     }
   ],
   "scopes": [
-    "vso.build_execute",
-    "vso.gallery_manage"
   ],
   "categories": [
     "Build and release"

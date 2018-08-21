@@ -140,7 +140,7 @@
   ],
   "execution": {
     "Node": {
-      "target": "IsValidExtension.js",
+      "target": "IsValidExtensionAgent/IsValidExtension.js",
       "argumentFormat": ""
     }
   }

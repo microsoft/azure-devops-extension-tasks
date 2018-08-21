@@ -1,7 +1,7 @@
-import * as tl from "vsts-task-lib/task";
-import * as common from "./common";
+///<reference path="../Common/Common.ts"/>
 
-// common.setProxy();
+import * as tl from "vsts-task-lib/task";
+import * as common from "../Common/Common";
 
 async function run() {
     try {
