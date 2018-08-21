@@ -1,5 +1,3 @@
-var System = require('systemjs');
-
 import * as os from "os";
 import * as path from "path";
 import * as stream from "stream";
@@ -17,16 +15,16 @@ function writeBuildTempFile(taskName: string, data: any): string {
         // Let's add a random suffix
         let randomSuffix = Math.random().toFixed(6);
         tempFile = path.join(os.tmpdir(), `${taskName}-${randomSuffix}.tmp`);
-    } while (fs.existsSync(tempFile));
+    } while (tl.exist(tempFile));
 
     tl.debug(`Generating Build temp file: ${tempFile}`);
-    fs.writeFileSync(tempFile, data);
+    tl.writeFile(tempFile, data);
 
     return tempFile;
 }
 
 function deleteBuildTempFile(tempFile: string) {
-    if (tempFile && fs.existsSync(tempFile)) {
+    if (tempFile && tl.exist(tempFile)) {
         tl.debug(`Deleting temp file: ${tempFile}`);
         fs.unlinkSync(tempFile);
     }
