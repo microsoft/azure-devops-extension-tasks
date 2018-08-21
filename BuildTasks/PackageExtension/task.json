@@ -211,7 +211,7 @@
   ],
   "execution": {
     "Node": {
-      "target": "PackageExtension.js",
+      "target": "PackageExtension/PackageExtension.js",
       "argumentFormat": ""
     }
   }

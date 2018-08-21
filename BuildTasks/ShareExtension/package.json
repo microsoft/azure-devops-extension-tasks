@@ -1,16 +1,12 @@
 {
-  "description": "Publish Extension Task",
+  "description": "Share Extension Task",
   "repository": {
     "type": "git",
     "url": "https://github.com/Microsoft/vsts-extension-build-release-tasks.git"
   },
   "license": "MIT",
   "dependencies": {
-    "temp": "^0.8.3",
     "vsts-task-lib": "^2.2.1",
-    "x2js": "^3.1.1",
-    "xmldom": "^0.1.27",
-    "7zip-bin-win": "^2.1.0",
     "uuidv5": "^1.0.0",
     "fs-extra": "^5.0.0"
   }

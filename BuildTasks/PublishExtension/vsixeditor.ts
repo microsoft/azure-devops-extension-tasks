@@ -1,10 +1,12 @@
+///<reference path="../Common/Common.ts"/>
+
 import temp = require("temp");
 import fs = require("fs");
 import path = require("path");
 import Q = require("q");
 import tl = require("vsts-task-lib/task");
 import tr = require("vsts-task-lib/toolrunner");
-import common = require("./common");
+import common = require("../Common/Common");
 
 class ManifestData {
     public outputFileName: string;

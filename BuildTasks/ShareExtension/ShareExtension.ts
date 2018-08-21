@@ -1,5 +1,7 @@
+///<reference path="../Common/Common.ts"/>
+
 import * as tl from "vsts-task-lib/task";
-import * as common from "./common";
+import * as common from "../Common/Common";
 
 void common.runTfx(async tfx => {
     tfx.arg(["extension", "share"]);

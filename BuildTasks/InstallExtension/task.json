@@ -149,7 +149,7 @@
   ],
   "execution": {
     "Node": {
-      "target": "InstallExtension.js",
+      "target": "InstallExtension/InstallExtension.js",
       "argumentFormat": ""
     }
   }

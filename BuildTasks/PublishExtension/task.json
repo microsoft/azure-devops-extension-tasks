@@ -279,7 +279,7 @@
   ],
   "execution": {
     "Node": {
-      "target": "PublishExtension.js",
+      "target": "PublishExtension/PublishExtension.js",
       "argumentFormat": ""
     }
   }

@@ -1,5 +1,7 @@
+///<reference path="../Common/Common.ts"/>
+
 import * as tl from "vsts-task-lib/task";
-import * as common from "./common";
+import * as common from "../Common/Common";
 
 const extensionVersionOverrideVariable = tl.getInput("extensionVersionOverride", false);
 let usingOverride = false;

@@ -1,5 +1,7 @@
+///<reference path="../Common/Common.ts"/>
+
 import * as tl from "vsts-task-lib/task";
-import * as common from "./common";
+import * as common from "../Common/Common";
 import * as vsixeditor from "./vsixeditor";
 
 void common.runTfx(async tfx => {

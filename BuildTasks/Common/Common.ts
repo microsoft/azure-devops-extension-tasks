@@ -1,6 +1,4 @@
-//  W A R N I N G!
-// This file is copied to each build task.
-// Any change should be made in the file that is in the Common folder
+var System = require('systemjs');
 
 import * as os from "os";
 import * as path from "path";
@@ -257,7 +255,7 @@ export function getExtensionVersion(): string {
             throw new Error(`Supplied ExtensionVersion must contain a string matching '##.##.##(.##)'.`);
         }
     }
-    return null;
+    return "";
 }
 
 /**
@@ -266,7 +264,7 @@ export function getExtensionVersion(): string {
  * @param  {string="connectedServiceName"} inputFieldName
  * @returns string
  */
-export function getMarketplaceEndpointDetails(inputFieldName): any {
+export function getMarketplaceEndpointDetails(inputFieldName: string): any {
     const marketplaceEndpoint = tl.getInput(inputFieldName, true);
 
     const hostUrl = tl.getEndpointUrl(marketplaceEndpoint, false);
@@ -364,8 +362,8 @@ function getTaskPathContributions(manifest: any): string[] {
     }
 
     return manifest.contributions
-        .filter(c => c.type === "ms.vss-distributed-task.task" && c.properties && c.properties["name"])
-        .map(c => c.properties["name"]);
+        .filter((c: any) => c.type === "ms.vss-distributed-task.task" && c.properties && c.properties["name"])
+        .map((c: any) => c.properties["name"]);
 }
 
 function updateTaskId(manifest: any, publisherId: string, extensionId: string): Object {
