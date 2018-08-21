@@ -1,4 +1,5 @@
 {
+  "name": "vsts-developer-tools.shareextension",
   "description": "Share Extension Task",
   "repository": {
     "type": "git",

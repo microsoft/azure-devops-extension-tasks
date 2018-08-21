@@ -1,6 +1,6 @@
 {
-  "name": "vsts-developer-tools.packageextension",
-  "description": "Package Extension Task",
+  "name": "vsts-developer-tools.common",
+  "description": "common",
   "repository": {
     "type": "git",
     "url": "https://github.com/Microsoft/vsts-extension-build-release-tasks.git"
