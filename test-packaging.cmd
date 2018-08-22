@@ -8,6 +8,7 @@ set INPUT_UPDATETASKSVERSIONTYPE=minor
 
 set AGENT_WORKFOLDER=c:\temp
 
+set NODE_ENV=production
 set NO_UPDATE_NOTIFIER=true
 
 cmd /c "npm run build:tasks"
