@@ -20,8 +20,7 @@
     "build:clean": "npm run clean && npm run initdev && npm run build",
     "build:tasks": "npm run compile:tasks",
     "package": "npm run build:clean && npm run package:tasks",
-    "clean": "git clean -fdX",
-    "watch": "glob-exec \"BuildTasks/*/tsconfig.json\" -- \"tsc -b {{files.join(' ')}} -w\" & glob-exec --parallel --foreach \"BuildTasks/*/tsconfig.json\" -- \"tslint -w -p {{file}}\""
+    "clean": "git clean -fdX"
   },
   "author": "Microsoft Corporation",
   "license": "MIT",
