@@ -13,6 +13,7 @@ SET ENDPOINT_URL_A=https://marketplace.visualstudio.com
 SET ENDPOINT_AUTH_A={ "parameters": { "apitoken": "token", "username": "user", "password": "password" }, "Scheme": "basic" }
 SET INPUT_VSIXFILE=C:\Users\JesseHouwing\Source\Repos\vsts-ping-task-demo\jessehouwing.jessehouwing-vsts-ping-task-2.1.2.vsix
 
+set NODE_ENV=production
 set NO_UPDATE_NOTIFIER=true
 
 cmd /c "npm run build:tasks"

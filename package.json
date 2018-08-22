@@ -17,8 +17,10 @@
     "lint:tasks": "glob-exec --parallel --foreach \"BuildTasks/*/tsconfig.json\" -- \"tslint -p {{file}}\"",
     "package:tasks": "tfx extension create --root . --output-path dist --manifest-globs vss-extension.json",
     "build": "npm run build:tasks",
+    "build:clean": "npm run clean && npm run initdev && npm run build",
     "build:tasks": "npm run compile:tasks && npm run postcompile:tasks",
-    "package": "npm run package:tasks"
+    "package": "npm run build:clean && npm run package:tasks",
+    "clean": "git clean -fdX"
   },
   "author": "Microsoft Corporation",
   "license": "MIT",
