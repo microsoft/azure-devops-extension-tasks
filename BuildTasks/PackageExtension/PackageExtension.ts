@@ -20,7 +20,7 @@ async function run() {
 
                 // Before executing check update on tasks version
                 await common.checkUpdateTasksManifests();
-                const outputStream = new common.TfxJsonOutputStream(false);
+                const outputStream = new common.TfxJsonOutputStream(false, false);
 
                 const code = await tfx.exec(<any>{ outStream: outputStream, failOnStdErr: true });
                 const json = JSON.parse(outputStream.jsonString);

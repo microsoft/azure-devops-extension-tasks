@@ -1,7 +1,9 @@
 ///<reference path="../Common/Common.ts"/>
 
+import "core-js";
 import temp = require("temp");
 import fs = require("fs");
+import fse = require("fs-extra"); 
 import path = require("path");
 import Q = require("q");
 import tl = require("vsts-task-lib/task");
@@ -18,8 +20,7 @@ class ManifestData {
         public name: string,
         public dirPath: string) { }
 
-    public async createOutputFilePath(outputPath: string): Promise<string> {
-        let deferred = Q.defer<string>();
+    public createOutputFilePath(outputPath: string): string {
         let fileName = `${this.publisher}.${this.id}-${this.version}.gen.vsix`;
 
         const updateFileName = (fileName: string, iteration: number) => {
@@ -32,14 +33,13 @@ class ManifestData {
                     updateFileName(fileName, ++iteration);
                 } else {
                     tl.debug("Generated filename: " + fileName);
-                    deferred.resolve(fileName);
                 }
             });
         };
 
         updateFileName(fileName, 0);
 
-        return deferred.promise;
+        return fileName;
     }
 }
 
@@ -165,15 +165,12 @@ export class VSIXEditor {
 
         if (!this.hasEdits()) { return Q(this.inputFile); }
 
-        const deferred = Q.defer<string>();
-
         temp.track();
 
-        new Promise<string>((resolve, reject) => {
+        return new Promise<string>((resolve, reject) => {
                 temp.mkdir("vsixeditor", (ex, dirPath) => { resolve(dirPath); });
             })
             .then((dirPath) => {
-                tl.debug("Finalizing edit");
                 tl.debug("Extracting files to " + dirPath);
 
                 this.extractArchive(this.inputFile, dirPath);
@@ -192,28 +189,25 @@ export class VSIXEditor {
                 return this.editVsixManifest(dirPath).then((manifestData: ManifestData) => manifestData);
             })
             .then((manifestData: ManifestData) => {
-                return manifestData.createOutputFilePath(this.outputPath).then((outputFile) => {
-                    manifestData.outputFileName = outputFile;
-                    return manifestData;
-                });
+                manifestData.outputFileName = manifestData.createOutputFilePath(this.outputPath);
+                return manifestData;
             })
             .then((manifestData: ManifestData) => {
                 tl.debug(`Creating final archive file at ${this.outputPath}`);
                 this.createArchive(manifestData.dirPath, manifestData.outputFileName);
-                deferred.resolve(manifestData.outputFileName);
                 tl.debug("Final archive file created");
-            }).catch(err => { deferred.reject(err); });
-        return deferred.promise;
+                return Promise.resolve(manifestData.outputFileName);
+            }).catch(err => { return Promise.reject(err); });
     }
 
     private async editVsixManifest(dirPath: string): Promise<ManifestData> {
-        let deferred = Q.defer<ManifestData>();
         let x2jsLib = require("x2js");
         let x2js = new x2jsLib();
 
         let vsixManifestPath = path.join(dirPath, "extension.vsixmanifest");
-        fs.readFile(vsixManifestPath, "utf8", (err, vsixManifestData) => {
-            if (err) { throw err; }
+
+        try {
+            let vsixManifestData = await fse.readFile(vsixManifestPath, "utf8");
 
             let vsixmanifest = x2js.xml2js(vsixManifestData);
             let identity = vsixmanifest.PackageManifest.Metadata.Identity;
@@ -271,12 +265,12 @@ export class VSIXEditor {
                 vsixmanifest.PackageManifest.Metadata.DisplayName,
                 dirPath);
 
-            fs.writeFile(vsixManifestPath, vsixManifestData, { encoding: "utf8" }, () => {
-                deferred.resolve(manifestData);
-            });
-        });
-
-        return deferred.promise;
+            await fse.writeFile(vsixManifestPath, vsixManifestData, { encoding: "utf8" });
+            return Promise.resolve(manifestData);
+        }
+        catch (err) {
+            return Promise.reject(err);
+        }
     }
 
     public hasEdits(): boolean {

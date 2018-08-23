@@ -322,12 +322,13 @@ export class TfxJsonOutputStream extends stream.Writable {
     messages: string[] = [];
     commandline: string = "";
 
-    constructor(public silent: boolean) {
+    constructor(public silent: boolean, public isErrorStream: boolean) {
         super();
     }
 
     _write(chunk: any, enc: string, cb: Function) {
         const chunkStr: string = chunk.toString();
+        const logger = this.isErrorStream ? tl.error : tl.warning;
 
         if (!this.commandline) {
             this.commandline = chunkStr;
@@ -335,7 +336,7 @@ export class TfxJsonOutputStream extends stream.Writable {
         }
         else if (!this.jsonString && (chunkStr.toString()[0] !== "{" && chunkStr.toString()[0] !== "[")) {
             this.messages.push(chunkStr);
-            if (!this.silent) { this.taskOutput(chunkStr, tl.warning); }
+            if (!this.silent) { this.taskOutput(chunkStr, logger); }
         }
         else {
             this.jsonString += chunkStr;
