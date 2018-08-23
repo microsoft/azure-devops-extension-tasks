@@ -1,5 +1,6 @@
 ///<reference path="../Common/Common.ts"/>
 
+import "core-js";
 import * as tl from "vsts-task-lib/task";
 import * as common from "../Common/Common";
 import * as vsixeditor from "./vsixeditor";
@@ -14,14 +15,13 @@ void common.runTfx(async tfx => {
     const fileType = tl.getInput("fileType", true);
     let vsixOutput;
     let cleanupTfxArgs: () => void;
-    let runBeforeTfx: Promise<boolean> = Promise.resolve(true);
 
     if (fileType === "manifest") {
         // Set tfx manifest arguments
         cleanupTfxArgs = common.validateAndSetTfxManifestArguments(tfx);
 
         // Update tasks version if needed
-        runBeforeTfx = runBeforeTfx.then(() => { common.checkUpdateTasksManifests(); return true; });
+        await common.checkUpdateTasksManifests();
     } else {
         // Set vsix file argument
         let vsixFilePattern = tl.getPathInput("vsixFile", true);
@@ -71,7 +71,7 @@ void common.runTfx(async tfx => {
             || updateTasksId ) {
 
             tl.debug("Start editing of VSIX");
-            let ve = new vsixeditor.VSIXEditor(vsixFile, vsixOutput);
+            const ve = new vsixeditor.VSIXEditor(vsixFile, vsixOutput);
             ve.startEdit();
 
             if (publisher) { ve.editPublisher(publisher); }
@@ -88,11 +88,9 @@ void common.runTfx(async tfx => {
                 ve.editUpdateTasksId(updateTasksId);
             }
 
-            runBeforeTfx = runBeforeTfx.then(() => ve.endEdit().then(vsixGeneratedFile => {
-                tfx.arg(["--vsix", vsixGeneratedFile]);
-                vsixOutput = vsixGeneratedFile;
-                return true;
-            }));
+            const vsixGeneratedFile = await ve.endEdit();
+            tfx.arg(["--vsix", vsixGeneratedFile]);
+            vsixOutput = vsixGeneratedFile;
         }
         else {
             vsixOutput = vsixFile;
@@ -136,9 +134,9 @@ void common.runTfx(async tfx => {
 
     try {
         tl.debug(`Run tfx.`);
-        await runBeforeTfx;
-        const outputStream = new common.TfxJsonOutputStream(true);
-        const code = await tfx.exec({ outStream: outputStream, failOnStdErr: true } as any);
+        const outputStream = new common.TfxJsonOutputStream(true, false);
+        const errorStream = new common.TfxJsonOutputStream(false, true);
+        const code = await tfx.exec({ outStream: outputStream, errorStream: errorStream, failOnStdErr: true } as any);
         const json = JSON.parse(outputStream.jsonString);
 
         const publishedVsix = fileType === "manifest" ? json.packaged : vsixOutput;
@@ -151,9 +149,8 @@ void common.runTfx(async tfx => {
         tl.setResult(tl.TaskResult.Succeeded, `tfx exited with return code: ${code}`);
     }catch (err) {
         tl.setResult(tl.TaskResult.Failed, `tfx failed with error: ${err}`);
-        return false;
     } finally {
         if (cleanupTfxArgs) { cleanupTfxArgs(); }
     }
-    return true;
+    return Promise.resolve(true);
 });
