@@ -250,7 +250,7 @@ export async function runTfx(cmd: (tfx: ToolRunner) => void) {
     tl.mkdirP(path.join(agentToolsPath, "/node_modules/"));
 
     const npm = new trl.ToolRunner(tl.which("npm", true));
-    npm.arg(["install", "tfx-cli", "--prefix", agentToolsPath]);
+    npm.arg(["install", "tfx-cli@0.5.14", "--prefix", agentToolsPath]);
 
     try {
         await npm.exec();
