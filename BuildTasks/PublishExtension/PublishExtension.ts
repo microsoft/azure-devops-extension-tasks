@@ -132,21 +132,31 @@ void common.runTfx(async tfx => {
         tfx.line(args);
     }
 
+    tl.debug(`Redirecting output to stderr.`);
+    tfx.arg(['--debug-log-stream', 'stderr']);
+
     try {
         tl.debug(`Run tfx.`);
-        const outputStream = new common.TfxJsonOutputStream(true, false);
-        const errorStream = new common.TfxJsonOutputStream(false, true);
-        const code = await tfx.exec({ outStream: outputStream, errorStream: errorStream, failOnStdErr: true } as any);
+        const outputStream = new common.TfxJsonOutputStream(console.log);
+        const errorStream = new common.TfxJsonOutputStream(tl.error);
+        
+        const code = await tfx.exec({ outStream: outputStream, errorStream: errorStream, failOnStdErr: false } as any);
         const json = JSON.parse(outputStream.jsonString);
 
-        const publishedVsix = fileType === "manifest" ? json.packaged : vsixOutput;
+        if (json && json.published) {
+            const publishedVsix = fileType === "manifest" ? json.packaged : vsixOutput;
 
-        if (outputVariable) {
-            tl.setVariable(outputVariable, publishedVsix);
+            if (outputVariable) {
+                tl.setVariable(outputVariable, publishedVsix);
+            }
+
+            console.log(`Published VSIX: ${publishedVsix}.`);
+            tl.setResult(tl.TaskResult.Succeeded, `tfx exited with return code: ${code}`);
         }
-
-        console.log(`Published VSIX: ${publishedVsix}.`);
-        tl.setResult(tl.TaskResult.Succeeded, `tfx exited with return code: ${code}`);
+        else
+        {
+            tl.setResult(tl.TaskResult.Failed, `Publishing failed`);    
+        }
     }catch (err) {
         tl.setResult(tl.TaskResult.Failed, `tfx failed with error: ${err}`);
     } finally {

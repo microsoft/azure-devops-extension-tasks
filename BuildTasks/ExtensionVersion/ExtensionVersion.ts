@@ -38,8 +38,8 @@ export async function run() {
 
             const versionAction = tl.getInput("versionAction", false);
 
-            const outputStream = new common.TfxJsonOutputStream(false, false);
-            const errorStream = new common.TfxJsonOutputStream(false, true);
+            const outputStream = new common.TfxJsonOutputStream(console.log);
+            const errorStream = new common.TfxJsonOutputStream(tl.error);
             const code = await tfx.exec(<any>{ outStream: outputStream, errorStream: errorStream, failOnStdErr: true });
 
             const json = JSON.parse(outputStream.jsonString);
