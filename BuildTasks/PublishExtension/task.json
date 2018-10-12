@@ -2,7 +2,7 @@
   "id": "631511B4-50AB-47C8-B766-7AE2AA672733",
   "name": "PublishExtension",
   "friendlyName": "Publish Extension",
-  "description": "Publish a Team Services extension to the Visual Studio Marketplace",
+  "description": "Publish an Azure DevOps extension to the Visual Studio Marketplace",
   "author": "Microsoft Corporation",
   "helpMarkDown": "",
   "category": "Deploy",
@@ -39,16 +39,16 @@
       "label": "Connect to",
       "required": true,
       "defaultValue": "VsTeam",
-      "helpMarkDown": "Publish to Visual Studio Team Services or a local TFS server.",
+      "helpMarkDown": "Publish to Visual Studio Marketplace or a local TFS server.",
       "options": {
-        "VsTeam": "Visual Studio Team Services",
+        "VsTeam": "Visual Studio Marketplace",
         "TFS": "Team Foundation Server"
       }
     },
     {
       "name": "connectedServiceName",
       "type": "connectedService:VstsMarketplacePublishing",
-      "label": "VSTS Marketplace connection",
+      "label": "Visual Studio Marketplace connection",
       "required": true,
       "helpMarkDown": "Service endpoint connection to install the extension.",
       "visibleRule": "connectTo=VsTeam"
@@ -235,7 +235,7 @@
       "type": "string",
       "label": "Share with",
       "defaultValue": "",
-      "helpMarkDown": "Comma separated list of accounts with which to share the extension if it's private (e.g. account_x,account_y,account_z). Share is ignored for public extensions and when publishing to TFS.",
+      "helpMarkDown": "Comma separated list of organisations with which to share the extension if it's private (e.g. org_x,org_y,org_z). Share is ignored for public extensions and when publishing to TFS.",
       "required": false,
       "groupName": "manifest",
       "visibleRule": "extensionVisibility = private || extensionVisibility = privatepreview || extensionVisibility = default"

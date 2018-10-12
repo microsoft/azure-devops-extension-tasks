@@ -2,9 +2,9 @@
   "manifestVersion": 1,
   "id": "vsts-developer-tools-build-tasks",
   "publisher": "ms-devlabs",
-  "name": "CI/CD Tools for VSTS Extensions",
-  "version": "1.1.47",
-  "description": "CI/CD tasks for packaging and publishing VSTS extensions to the Visual Studio Marketplace.",
+  "name": "Azure DevOps Extension Tasks",
+  "version": "1.2.0",
+  "description": "Azure Pipelines tasks for packaging and publishing Azure Devops and Visual Studio (coming soon) extensions to the Visual Studio Marketplace.",
   "tags": [
     "Extension",
     "Marketplace",
@@ -14,7 +14,9 @@
     "Continuous Integration",
     "Continuous Delivery",
     "Build",
-    "Release"
+    "Release",
+    "Azure Pipelines",
+    "Visual Studio Extensions"
   ],
   "icons": {
     "default": "tools-icon.png"
@@ -53,6 +55,19 @@
     "type": "git",
     "uri": "https://github.com/Microsoft/vsts-extension-build-release-tasks"
   },
+  "badges": [
+
+    {
+      "href": "https://almrangers.visualstudio.com/ALM/_build?definitionId=127",
+      "uri": "https://almrangers.visualstudio.com/ALM/_apis/build/status/Extensions/Azure%20DevOps%20Extension%20Tasks",
+      "description": "Build"
+    },
+    {
+      "href": "https://almrangers.visualstudio.com/ALM/_releaseDefinition?definitionId=25",
+      "uri": "https://almrangers.vsrm.visualstudio.com/_apis/public/Release/badge/7f3cfb9a-d1cb-4e66-9d36-1af87b906fe9/25/70",
+      "description": "Release"
+    }
+  ],
   "files": [
     { "path": "BuildTasks/ExtensionVersion" },
     { "path": "BuildTasks/InstallExtension" },
@@ -63,6 +78,10 @@
     { "path": "BuildTasks/ShareExtension" },
     {
       "path": "add-task.png",
+      "addressable": true
+    },
+    {
+      "path": "permissions.png",
       "addressable": true
     }
   ],
@@ -145,12 +164,12 @@
       ],
       "properties": {
         "name": "VstsMarketplacePublishing",
-        "displayName": "VSTS Marketplace",
+        "displayName": "Visual Studio Marketplace",
         "url": {
           "displayName": "Marketplace URL",
           "value": "https://marketplace.visualstudio.com"
         },
-        "helpMarkDown": "Required permissions: <ul><li><b>Publish</b>: All Accounts, Marketplace Publish</li><li><b>Share</b>: All Accounts, Marketplace Publish</li><li><b>Install</b>: All Accounts or a Specific Account, Extensions (read and manage), Marketplace</li><li><b>Query Version</b>: All Accounts, Marketplace</li></ul><br/><a href='https://www.visualstudio.com/docs/setup-admin/team-services/use-personal-access-tokens-to-authenticate'>More information</a>.",
+        "helpMarkDown": "Required permissions: <ul><li><b>Publish</b>: All accessible organisations, Marketplace (Publish)</li><li><b>Share</b>: All accessible organisations, Marketplace Publish</li><li><b>Install</b>: All accessible organisations or a specific organisation, Extensions (read and manage), Marketplace (acquire)</li><li><b>Query Version</b>: All accessible organisations, Marketplace (read)</li><li><b>Is Valid Extension</b>: All accessible organisations, Marketplace (read)</li></ul><br/><a href='https://www.visualstudio.com/docs/setup-admin/team-services/use-personal-access-tokens-to-authenticate'>More information</a>.",
         "authenticationSchemes": [
           {
             "type": "ms.vss-endpoint.endpoint-auth-scheme-basic",
@@ -175,7 +194,7 @@
               {
                 "id": "password",
                 "name": "Personal access token",
-                "description": "Team Services personal access token. Requires at least the Marketplace (publish) scope.",
+                "description": "Azure DevOps personal access token.",
                 "inputMode": "passwordbox",
                 "isConfidential": true,
                 "validation": {
@@ -197,8 +216,8 @@
       ],
       "properties": {
         "name": "TFSMarketplacePublishing",
-        "displayName": "TFS Local Gallery",
-        "helpMarkDown": "Required permissions: <ul><li><b>Publish</b>: Marketplace Publish</li><li><b>Share</b>: Marketplace Publish</li><li><b>Install</b>: Extensions (read and manage)</li><li><b>Query Version</b>: Marketplace</li></ul><br/><a href='https://www.visualstudio.com/docs/setup-admin/team-services/use-personal-access-tokens-to-authenticate'>More information</a>.",
+        "displayName": "TFS Extension Local Gallery",
+        "helpMarkDown": "",
         "url": {
           "displayName": "TFS Server Url",
           "description": "The TFS Server Url, e.g. `https://servername.domain.local/tfs`."

@@ -2,7 +2,7 @@
   "id": "b86cdd2a-0579-4d40-b28f-18197ffaf520",
   "name": "Check Marketplace validation status.",
   "friendlyName": "Is valid Extension",
-  "description": "Check Marketplace validation status.",
+  "description": "Check Visual Studio Marketplace validation status.",
   "author": "Microsoft Corporation",
   "helpMarkDown": "",
   "category": "Deploy",
@@ -43,15 +43,15 @@
       "label": "Connect to",
       "required": true,
       "defaultValue": "VsTeam",
-      "helpMarkDown": "Publish to Visual Studio Team Services.",
+      "helpMarkDown": "Connect to Visual Studio Marketplace.",
       "options": {
-        "VsTeam": "Visual Studio Team Services"
+        "VsTeam": "Azure DevOps"
       }
     },
     {
       "name": "connectedServiceName",
       "type": "connectedService:VstsMarketplacePublishing",
-      "label": "VSTS Marketplace connection",
+      "label": "Visual Studio Marketplace connection",
       "required": true,
       "helpMarkDown": "Service endpoint connection to install the extension.",
       "visibleRule": "connectTo=VsTeam"
