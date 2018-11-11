@@ -124,7 +124,7 @@
       "type": "string",
       "label": "Install in",
       "defaultValue": "",
-      "helpMarkDown": "Comma separated list of organisations where to install the extension (e.g. org_x,org_y,org_z) Or fully qualified TFS Collection URL (e.g. `https://yourserver/tfs/DefaultCollection`).",
+      "helpMarkDown": "Comma separated list of organisation urls where to install the extension (e.g. `https://devops.azure.com/org_a,https://devops.azure.com/org_b`) Or fully qualified TFS Collection URL (e.g. `https://yourserver/tfs/DefaultCollection`).",
       "required": true,
       "groupName": "installation"
     },
