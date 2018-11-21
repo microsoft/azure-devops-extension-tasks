@@ -27,8 +27,7 @@
       "id": "Microsoft.VisualStudio.Services"
     }
   ],
-  "scopes": [
-  ],
+  "scopes": [],
   "categories": [
     "Azure Pipelines"
   ],
@@ -56,7 +55,6 @@
     "uri": "https://github.com/Microsoft/vsts-extension-build-release-tasks"
   },
   "badges": [
-
     {
       "href": "https://almrangers.visualstudio.com/ALM/_build?definitionId=127",
       "uri": "https://almrangers.visualstudio.com/ALM/_apis/build/status/Extensions/Azure%20DevOps%20Extension%20Tasks",
@@ -69,13 +67,27 @@
     }
   ],
   "files": [
-    { "path": "BuildTasks/ExtensionVersion" },
-    { "path": "BuildTasks/InstallExtension" },
-    { "path": "BuildTasks/IsValidExtension" },
-    { "path": "BuildTasks/IsValidExtensionAgent" },
-    { "path": "BuildTasks/PackageExtension" },
-    { "path": "BuildTasks/PublishExtension" },
-    { "path": "BuildTasks/ShareExtension" },
+    {
+      "path": "BuildTasks/ExtensionVersion"
+    },
+    {
+      "path": "BuildTasks/InstallExtension"
+    },
+    {
+      "path": "BuildTasks/IsValidExtension"
+    },
+    {
+      "path": "BuildTasks/IsValidExtensionAgent"
+    },
+    {
+      "path": "BuildTasks/PackageExtension"
+    },
+    {
+      "path": "BuildTasks/PublishExtension"
+    },
+    {
+      "path": "BuildTasks/ShareExtension"
+    },
     {
       "path": "add-task.png",
       "addressable": true
@@ -164,7 +176,7 @@
       ],
       "properties": {
         "name": "VstsMarketplacePublishing",
-        "displayName": "Visual Studio Marketplace",
+        "displayName": "VS Marketplace",
         "url": {
           "displayName": "Marketplace URL",
           "value": "https://marketplace.visualstudio.com"
@@ -194,7 +206,7 @@
               {
                 "id": "password",
                 "name": "Personal access token",
-                "description": "Azure DevOps personal access token.",
+                "description": "Azure DevOps personal access token. Requires at least the Marketplace (publish) scope.",
                 "inputMode": "passwordbox",
                 "isConfidential": true,
                 "validation": {
