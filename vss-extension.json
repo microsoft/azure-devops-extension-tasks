@@ -145,7 +145,7 @@
       ],
       "properties": {
         "name": "VstsMarketplacePublishing",
-        "displayName": "VSTS Marketplace",
+        "displayName": "VS Marketplace",
         "url": {
           "displayName": "Marketplace URL",
           "value": "https://marketplace.visualstudio.com"
@@ -175,7 +175,7 @@
               {
                 "id": "password",
                 "name": "Personal access token",
-                "description": "Team Services personal access token. Requires at least the Marketplace (publish) scope.",
+                "description": "Azure DevOps personal access token. Requires at least the Marketplace (publish) scope.",
                 "inputMode": "passwordbox",
                 "isConfidential": true,
                 "validation": {
