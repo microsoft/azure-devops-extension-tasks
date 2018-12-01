@@ -2,7 +2,7 @@
   "id": "22683a08-0dbe-4fe8-8c53-4606fcb32752",
   "name": "ShareExtension",
   "friendlyName": "Share Extension",
-  "description": "Share a published extension with a Team Services account",
+  "description": "Share a published extension with a Azure Devops organisation",
   "author": "Microsoft Corporation",
   "helpMarkDown": "",
   "category": "Deploy",
@@ -44,15 +44,15 @@
       "label": "Connect to",
       "required": true,
       "defaultValue": "VsTeam",
-      "helpMarkDown": "Connect to Visual Studio Team Services. TFS is not supported for the Share command.",
+      "helpMarkDown": "Connect to Visual Studio Marketplace. TFS is not supported for the Share command.",
       "options": {
-        "VsTeam": "Visual Studio Team Services"
+        "VsTeam": "Visual Studio Marketplace"
       }
     },
     {
       "name": "connectedServiceName",
       "type": "connectedService:VstsMarketplacePublishing",
-      "label": "VSTS Marketplace connection",
+      "label": "Visual Studio Marketplace connection",
       "required": true,
       "helpMarkDown": "Service endpoint connection to install the extension.",
       "visibleRule": "connectTo=VsTeam"
@@ -115,7 +115,7 @@
       "type": "string",
       "label": "Share with",
       "defaultValue": "",
-      "helpMarkDown": "Comma separated list of accounts where to install the extension (e.g. account_x,account_y,account_z)",
+      "helpMarkDown": "Comma separated list of organisations where to install the extension (e.g. org_x,org_y,org_z)",
       "required": true,
       "groupName": "share"
     },

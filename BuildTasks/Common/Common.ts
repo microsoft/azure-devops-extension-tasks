@@ -225,7 +225,7 @@ export async function runTfx(cmd: (tfx: ToolRunner) => void) {
     tl.mkdirP(path.join(agentToolsPath, "/node_modules/"));
 
     const npm = new trl.ToolRunner(tl.which("npm", true));
-    npm.arg(["install", "tfx-cli@0.5.14", "--prefix", agentToolsPath]);
+    npm.arg(["install", "tfx-cli@^0.6", "--prefix", agentToolsPath]);
 
     try {
         await npm.exec();
@@ -285,18 +285,18 @@ export function getMarketplaceEndpointDetails(inputFieldName: string): any {
  * @param  {ToolRunner} tfx
  * @returns string
  */
-export function setTfxMarketplaceArguments(tfx: ToolRunner) {
+export function setTfxMarketplaceArguments(tfx: ToolRunner, setServiceUrl: boolean = true) {
     const connectTo = tl.getInput("connectTo", false) || "VsTeam";
     let galleryEndpoint;
 
     if (connectTo === "VsTeam") {
         galleryEndpoint = getMarketplaceEndpointDetails("connectedServiceName");
-        tfx.arg(["--service-url", galleryEndpoint.url]);
+        tfx.argIf(setServiceUrl, ["--service-url", galleryEndpoint.url]);
         tfx.arg(["--auth-type", "pat"]);
         tfx.arg(["--token", galleryEndpoint.password]);
     } else {
         galleryEndpoint = getMarketplaceEndpointDetails("connectedServiceNameTFS");
-        tfx.arg(["--service-url", galleryEndpoint.url]);
+        tfx.argIf(setServiceUrl, ["--service-url", galleryEndpoint.url]);
 
         if (galleryEndpoint.username) {
             tfx.arg(["--auth-type", "basic"]);

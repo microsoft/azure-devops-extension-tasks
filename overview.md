@@ -1,17 +1,4 @@
-
-This extension provides build and release tasks for packaging and publishing Visual Studio Team Services (VSTS) extensions to the [Visual Studio Marketplace](https://marketplace.visualstudio.com). There are also tasks to share and install your extension to your VSTS account.
-
-## Release Notes
-
-* EXPERIMENTAL - Added support for generating build task Id's based on publisher, extension id and taskname.
-
-## Tasks included
-
-* **Package**: package a VSTS extension into an extension package (.VSIX) file
-* **Publish**: publish an extension (either privately or publicly) to the Visual Studio Marketplace
-* **Share**: share a private extension with a VSTS account so it can be installed
-* **Install**: install an extension to a VSTS account
-* **Query version**: query an extension's version (to make it easy to increment on your next package or publish)
+This extension provides build and release tasks for packaging and publishing Azure Devops Extensions to the [Visual Studio Marketplace](https://marketplace.visualstudio.com). There are also tasks to share and install your extension to your Azure Devops organisation or Team Foundation Server.
 
 ## How to use
 
@@ -19,24 +6,42 @@ After installing the extension, you can add one (or more) of the tasks to a new 
 
 ![add-task](add-task.png)
 
-If you plan to publish to the Marketplace, you will need to [create a personal access token](https://www.visualstudio.com/docs/setup-admin/team-services/use-personal-access-tokens-to-authenticate). 
- 
-### Required scopes
- 
- When creating a personal access token for use by your build/release, make sure the token has at least the following scopes for the task(s) you are using:
+If you plan to publish to the Marketplace, you will need to [create a personal access token](https://www.visualstudio.com/docs/setup-admin/team-services/use-personal-access-tokens-to-authenticate).
 
- * **Publish**: All Accounts, `Marketplace (publish)`
- * **Share**: All Accounts, `Marketplace (publish)`
- * **Install**: All Accounts or a Specific Account, `Extensions (read and manage)`, `Marketplace`
- * **Query Version**: All Accounts, `Marketplace`
- 
+## Available tasks
+
+Azure DevOps
+
+* **Package**: package a VSTS extension into an extension package (.VSIX) file
+* **Publish**: optionally package and publish an extension (either privately or publicly) to the Visual Studio Marketplace
+* **Share**: share an extension with an Azure DevOps organisation
+* **Install**: install an extension to an Azure DevOps organisation or Team Foundation Server
+* **Query version**: query an extension's version (to make it easy to increment on your next package or publish)
+* **Wait for validation**: waits for the Marketplace validation to come through.
+
+Visual Studio (Coming soon...)
+
+* **Publish**: Publish a Visual Studio extension to the Visual Studio Marketplace
+
+### Required scopes
+
+ When creating a personal access token for use by your pipeline, make sure the token has at least the following scopes for the task(s) you are using:
+
+* **Publish**: `All accessible organisations`, `Marketplace (publish)`
+* **Share**: `All accessible organisations`, `Marketplace (publish)`
+* **Install**: `All accessible organisations` or a specific Organisation, `Extensions (read and manage)`, `Marketplace (acquire)`
+* **Query Version**: `All accessible organisations`, `Marketplace (read)`
+* **Is Valid**: `All accessible organisations`, `Marketplace (read)`
+
+![Permissions](permissions.png)
+
 ## Get the source
 
 The [source](https://github.com/Microsoft/vsts-extension-build-release-tasks) for this extension is on GitHub. Take, fork, and extend.
 
 ## Contribute
 
-This extension was created by Microsoft with help from the community. We'd like to thank Wouter de Kort and Jesse Houwing for their contributions.
+This extension was created by Microsoft with help from the community. We'd like to thank [Wouter de Kort](https://wouterdekort.com/) and [Jesse Houwing](https://jessehouwing.net/) for their contributions.
 
 ## Feedback and issues
 

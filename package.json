@@ -1,6 +1,6 @@
 {
   "name": "vsts-developer-tools",
-  "description": "Visual Studio Team Services Build and Release Tasks for Extensions",
+  "description": "Azure DevOps Extension Tasks",
   "repository": {
     "type": "git",
     "url": "https://github.com/Microsoft/vsts-extension-build-release-tasks.git"
