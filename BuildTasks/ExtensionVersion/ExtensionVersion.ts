@@ -40,33 +40,38 @@ export async function run() {
 
             const outputStream = new common.TfxJsonOutputStream(console.log);
             const errorStream = new common.TfxJsonOutputStream(tl.error);
-            const code = await tfx.exec(<any>{ outStream: outputStream, errorStream: errorStream, failOnStdErr: true });
 
-            const json = JSON.parse(outputStream.jsonString);
-            let version: string = json.versions[0].version;
+            try {
+                const code = await tfx.exec(<any>{ outStream: outputStream, errorStream: errorStream, failOnStdErr: true });
+                const json = JSON.parse(outputStream.jsonString);
+                let version: string = json.versions[0].version;
 
-            console.log(`Latest version   : ${version}.`);
-            console.log(`Requested action : ${versionAction}.`);
+                console.log(`Latest version   : ${version}.`);
+                console.log(`Requested action : ${versionAction}.`);
 
-            if (versionAction !== "None") {
-                let versionparts: number[] = version.split(".").map(v => +v);
-                switch (versionAction) {
-                    case "Major":
-                        versionparts = [++versionparts[0], 0, 0];
-                        break;
-                    case "Minor":
-                        versionparts = [versionparts[0], ++versionparts[1], 0];
-                        break;
-                    case "Patch":
-                        versionparts = [versionparts[0], versionparts[1], ++versionparts[2]];
-                        break;
+                if (versionAction !== "None") {
+                    let versionparts: number[] = version.split(".").map(v => +v);
+                    switch (versionAction) {
+                        case "Major":
+                            versionparts = [++versionparts[0], 0, 0];
+                            break;
+                        case "Minor":
+                            versionparts = [versionparts[0], ++versionparts[1], 0];
+                            break;
+                        case "Patch":
+                            versionparts = [versionparts[0], versionparts[1], ++versionparts[2]];
+                            break;
+                    }
+                    version = versionparts.join(".");
+                    console.log(`Updated to       : ${version}.`);
                 }
-                version = versionparts.join(".");
-                console.log(`Updated to       : ${version}.`);
-            }
 
-            setVersion(version);
-            tl.setResult(tl.TaskResult.Succeeded, `tfx exited with return code: ${code}`);
+                setVersion(version);
+                tl.setResult(tl.TaskResult.Succeeded, `tfx exited with return code: ${code}`);
+            }
+            catch (err){
+                tl.setResult(tl.TaskResult.Failed, err);
+            }
         });
     } catch (err) {
         tl.setResult(tl.TaskResult.Failed, `Extension Version task failed: ${err}`);
