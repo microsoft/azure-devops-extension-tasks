@@ -189,7 +189,7 @@
       ],
       "properties": {
         "name": "VstsMarketplacePublishing",
-        "displayName": "VS Marketplace",
+        "displayName": "Visual Studio Marketplace",
         "url": {
           "displayName": "Marketplace URL",
           "value": "https://marketplace.visualstudio.com"
