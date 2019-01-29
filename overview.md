@@ -19,7 +19,7 @@ Azure DevOps
 * **Query version**: query an extension's version (to make it easy to increment on your next package or publish)
 * **Wait for validation**: waits for the Marketplace validation to come through.
 
-Visual Studio (Coming soon...)
+Visual Studio
 
 * **Publish**: Publish a Visual Studio extension to the Visual Studio Marketplace
 
@@ -41,7 +41,7 @@ The [source](https://github.com/Microsoft/vsts-extension-build-release-tasks) fo
 
 ## Contribute
 
-This extension was created by Microsoft with help from the community. We'd like to thank [Wouter de Kort](https://wouterdekort.com/) and [Jesse Houwing](https://jessehouwing.net/) for their contributions.
+This extension was created by Microsoft with help from the community. We'd like to thank [Wouter de Kort](https://wouterdekort.com/), [Utkarsh Shigihalli](https://www.visualstudiogeeks.com/), [Jesse Houwing](https://jessehouwing.net/) for their contributions.
 
 ## Feedback and issues
 
