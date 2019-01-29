@@ -17,6 +17,9 @@ Azure DevOps
 * **Install**: install an extension to an Azure DevOps organisation
 * **Query version**: query an extension's version (to make it easy to increment on your next package or publish)
 * **Wait for validation**: waits for the Visual Studio Marketplace validation to come through.
+
+Visual Studio
+
 * **Publish**: Publish a Visual Studio extension to the Visual Studio Marketplace
 
 ## Contribute
