@@ -16,6 +16,7 @@
     "Build",
     "Release",
     "Azure Pipelines",
+    "Azure DevOps Extensions"
     "Visual Studio Extensions"
   ],
   "icons": {
