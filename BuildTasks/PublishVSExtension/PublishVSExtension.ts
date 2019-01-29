@@ -6,7 +6,6 @@ let publisher = "";
 
 try {
     let connectedService = tl.getInput("ConnectedServiceName", true);
-    let marketplaceUrl = tl.getEndpointUrl(connectedService, false);
     let token = tl.getEndpointAuthorizationParameter(connectedService, "password", true);
 
     let vsixFile = tl.getPathInput("vsixFile", true, false);
