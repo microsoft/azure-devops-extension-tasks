@@ -1,0 +1,24 @@
+{
+  "name": "publishvsextension",
+  "version": "1.0.0",
+  "description": "Publish Visual Studio Extension Task",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Microsoft/vsts-extension-build-release-tasks.git"
+  },
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "license": "MIT",
+  "dependencies": {
+    "azure-pipelines-task-lib": "^2.7.7",
+    "core-js": "^2.6.3",
+    "path": "~0.12.7"
+  },
+  "devDependencies": {
+    "@types/node": "10.12.19",
+    "@types/q": "~1.5.1"
+  }
+}
