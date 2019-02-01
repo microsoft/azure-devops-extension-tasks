@@ -488,9 +488,16 @@ function getTaskManifestPaths(manifestPath: string, manifest: object): string[] 
         const rootManifest: string = path.join(taskRoot, "task.json");
         if (tl.exist(rootManifest)) {
             tl.debug(`Found single-task manifest: ${rootManifest}`);
-            return (result).concat([rootManifest]);
+            let rootManifests: string[] = [rootManifest];
+            const rootLocManifest: string = path.join(taskRoot, "task.loc.json");
+            if (tl.exist(rootLocManifest)) {
+                tl.debug(`Found localized single-task manifest: ${rootLocManifest}`);
+                rootManifests.push(rootLocManifest);
+            }
+            return (result).concat(rootManifests);
         } else {
-            const versionManifests = tl.findMatch(taskRoot, "*/task.json");
+            const taskJsonPatterns: string[] = ["*/task.json", "*/task.loc.json"];
+            const versionManifests = tl.findMatch(taskRoot, taskJsonPatterns);
             tl.debug(`Found multi-task manifests: ${versionManifests.join(", ")}`);
             return (result).concat(versionManifests);
         }
