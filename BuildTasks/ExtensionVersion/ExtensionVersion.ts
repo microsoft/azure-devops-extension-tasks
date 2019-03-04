@@ -1,6 +1,7 @@
 ///<reference path="../Common/Common.ts"/>
 
 import * as tl from "vsts-task-lib/task";
+import * as tr from "vsts-task-lib/toolrunner";
 import * as common from "../Common/Common";
 
 const extensionVersionOverrideVariable = tl.getInput("extensionVersionOverride", false);
@@ -31,18 +32,22 @@ if (extensionVersionOverrideVariable) {
 export async function run() {
     try {
         await common.runTfx(async tfx => {
-            tfx.arg(["extension", "show", "--json", "--no-color"]);
-
-            common.setTfxMarketplaceArguments(tfx);
-            common.validateAndSetTfxManifestArguments(tfx);
-
-            const versionAction = tl.getInput("versionAction", false);
-
-            const outputStream = new common.TfxJsonOutputStream(console.log);
-            const errorStream = new common.TfxJsonOutputStream(tl.error);
-
             try {
-                const code = await tfx.exec(<any>{ outStream: outputStream, errorStream: errorStream, failOnStdErr: true });
+                tfx.arg(["extension", "show", "--json", "--no-color"]);
+
+                common.setTfxMarketplaceArguments(tfx);
+                common.validateAndSetTfxManifestArguments(tfx);
+
+                const versionAction = tl.getInput("versionAction", false);
+
+                const outputStream = new common.TfxJsonOutputStream(console.log);
+                const errorStream = new common.TfxJsonOutputStream(tl.error);
+            
+                const code: number = await tfx.exec(<any>{ outStream: outputStream, errorStream: errorStream, failOnStdErr: false, ignoreReturnCode: false } as tr.IExecOptions);
+                if (code !== 0)
+                {
+                    throw `tfx exited with return code: ${code}`
+                }
                 const json = JSON.parse(outputStream.jsonString);
                 let version: string = json.versions[0].version;
 
