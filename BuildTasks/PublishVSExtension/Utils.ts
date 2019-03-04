@@ -53,7 +53,10 @@ export function login(publisher: string, token: string) {
     vsixPublisher.arg(["-personalAccessToken", token]);
     vsixPublisher.arg(["-publisherName", publisher]);
 
-    vsixPublisher.execSync({ failOnStdErr: true } as tr.IExecOptions);
+    if (vsixPublisher.execSync({ failOnStdErr: true } as tr.IExecOptions).code !== 0)
+    {
+        throw new Error("Login failed.");
+    }
 
     console.info(`Login successful.`)
 }
@@ -65,8 +68,11 @@ export function logout(publisher: string) {
     vsixPublisher.arg(["-publisherName", publisher]);
     vsixPublisher.arg("-ignoreMissingPublisher");
 
-    vsixPublisher.execSync({ failOnStdErr: true } as tr.IExecOptions);
-
+    if (vsixPublisher.execSync({ failOnStdErr: true } as tr.IExecOptions).code !== 0)
+    {
+        throw new Error("Logout failed.");
+    }
+    
     console.info(`Logout successful.`)
 }
 
@@ -79,7 +85,10 @@ export function publish(vsixPath: string, manifestPath: string, warningsToIgnore
     vsixPublisher.arg(["-publishManifest", manifestPath]);
     vsixPublisher.arg(["-ignoreWarnings", warningsToIgnore]);
 
-    vsixPublisher.execSync({ failOnStdErr: true } as tr.IExecOptions);
+    if (vsixPublisher.execSync({ failOnStdErr: true } as tr.IExecOptions).code !== 0)
+    {
+        throw new Error("Publish failed.");
+    }
 
     console.info(`Published successfully.`)
 }

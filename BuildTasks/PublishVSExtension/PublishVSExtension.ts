@@ -13,9 +13,6 @@ try {
     let manifestPattern = tl.getPathInput("manifestPattern", false, false) || "extension.manifest.json";
     let publisherId = tl.getInput("publisherId", true);
     publisher = publisherId;
-    let internalName = tl.getInput("internalName", false);
-    let extensionVisibility = tl.getInput("extensionVisibility", false);
-    let extensionPricing = tl.getInput("extensionPricing", false);
     let ignoreWarnings = tl.getInput("ignoreWarnings", false);
 
     console.info(`Logging in as '${publisherId}'`);
@@ -32,7 +29,6 @@ try {
 
     console.info(`Publishing '${vsixFile}' to Visual Studio marketplace`)
     util.publish(vsixFile, manifestPath, ignoreWarnings);
-
 } catch (error) {
     tl.error(error);
     tl.setResult(tl.TaskResult.Failed, error);
@@ -42,4 +38,3 @@ finally {
     util.logout(publisher);
     console.log("All done");
 }
-
