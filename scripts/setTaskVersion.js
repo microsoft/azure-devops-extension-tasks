@@ -24,14 +24,20 @@ console.log("Setting all task versions to: " + JSON.stringify(newVersion));
 var buildTasksDir = path.join(__dirname, "../BuildTasks");
 var buildTaskNames = getBuildTasks();
 buildTaskNames.forEach(function(name) {
-    var taskJsonFile = path.join(buildTasksDir, name, "task.json");
-    console.log("Updating: " + taskJsonFile);
-    if (fs.existsSync(taskJsonFile)) {
-        var task = jsonfile.readFileSync(taskJsonFile);
+    var taskJsonFiles = [
+        path.join(buildTasksDir, name, "task.json"),
+        path.join(buildTasksDir, name, "task.loc.json")
+    ];
 
-        task["version"] = newVersion;
-
-        jsonfile.writeFileSync(taskJsonFile, task, {spaces: 2, EOL: '\r\n'});
-    }
+    taskJsonFiles.forEach(function(taskJsonFile) {
+        console.log("Updating: " + taskJsonFile);
+        if (fs.existsSync(taskJsonFile)) {
+            var task = jsonfile.readFileSync(taskJsonFile);
+    
+            task["version"] = newVersion;
+    
+            jsonfile.writeFileSync(taskJsonFile, task, {spaces: 2, EOL: '\r\n'});
+        }
+    });
 });
 

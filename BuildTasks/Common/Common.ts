@@ -486,13 +486,27 @@ function getTaskManifestPaths(manifestPath: string, manifest: object): string[] 
         tl.debug(`Found task: ${task}`);
         const taskRoot: string = path.join(rootFolder, task);
         const rootManifest: string = path.join(taskRoot, "task.json");
+
+        let localizationRoot = tl.getInput("localizationRoot", false);
+        if (localizationRoot) {
+            localizationRoot = path.resolve(localizationRoot);
+        }
+
         if (tl.exist(rootManifest)) {
             tl.debug(`Found single-task manifest: ${rootManifest}`);
-            return (result).concat([rootManifest]);
+            let rootManifests: string[] = [rootManifest];
+            const rootLocManifest: string = path.join(localizationRoot || taskRoot, "task.loc.json");
+            if (tl.exist(rootLocManifest)) {
+                tl.debug(`Found localized single-task manifest: ${rootLocManifest}`);
+                rootManifests.push(rootLocManifest);
+            }
+            return (result).concat(rootManifests);
         } else {
             const versionManifests = tl.findMatch(taskRoot, "*/task.json");
+            const locVersionManifests = tl.findMatch(localizationRoot || taskRoot, "*/task.loc.json");
             tl.debug(`Found multi-task manifests: ${versionManifests.join(", ")}`);
-            return (result).concat(versionManifests);
+            tl.debug(`Found multi-task localized manifests: ${locVersionManifests.join(", ")}`);
+            return (result).concat(versionManifests).concat(locVersionManifests);
         }
     }, []);
 }
