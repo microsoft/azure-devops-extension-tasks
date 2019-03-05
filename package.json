@@ -36,8 +36,8 @@
     "@types/xmldom": "^0.1.28",
     "glob-exec": "^0.1.1",
     "tfx-cli": "^0.6.4",
-    "tslint": "^5.10.0",
-    "typescript": "^3.0.1",
-    "typestrict": "^1.0.0"
+    "tslint": "^5.13.1",
+    "typescript": "^3.3.3333",
+    "typestrict": "^1.0.2"
   }
 }

@@ -1,6 +1,6 @@
 ///<reference path="../Common/Common.ts"/>
 
-import * as tl from "vsts-task-lib/task";
+import * as tl from "azure-pipelines-task-lib/task";
 import * as common from "../Common/Common";
 import promiseRetry = require("promise-retry");
 

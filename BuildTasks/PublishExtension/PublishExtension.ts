@@ -1,7 +1,7 @@
 ///<reference path="../Common/Common.ts"/>
 
 import "core-js";
-import * as tl from "vsts-task-lib/task";
+import * as tl from "azure-pipelines-task-lib/task";
 import * as common from "../Common/Common";
 import * as vsixeditor from "./vsixeditor";
 

@@ -3,6 +3,6 @@ version: v1.10.1
 # ignores vulnerabilities until expiry date; change duration by modifying expiry date
 ignore:
   'npm:shelljs:20140723':
-    - vsts-task-lib > shelljs:
+    - azure-pipelines-task-lib > shelljs:
         reason: n/a
 patch: {}

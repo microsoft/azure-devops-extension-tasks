@@ -6,8 +6,8 @@ import fs = require("fs");
 import fse = require("fs-extra"); 
 import path = require("path");
 import Q = require("q");
-import tl = require("vsts-task-lib/task");
-import tr = require("vsts-task-lib/toolrunner");
+import tl = require("azure-pipelines-task-lib/task");
+import tr = require("azure-pipelines-task-lib/toolrunner");
 import common = require("../Common/Common");
 
 class ManifestData {

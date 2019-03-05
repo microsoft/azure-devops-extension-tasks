@@ -2,8 +2,8 @@ import * as os from "os";
 import * as path from "path";
 import * as stream from "stream";
 import * as fs from "fs";
-import * as tl from "vsts-task-lib/task";
-import * as trl from "vsts-task-lib/toolrunner";
+import * as tl from "azure-pipelines-task-lib/task";
+import * as trl from "azure-pipelines-task-lib/toolrunner";
 import * as fse from "fs-extra";
 
 import ToolRunner = trl.ToolRunner;
@@ -346,7 +346,7 @@ export class TfxJsonOutputStream extends stream.Writable {
     private taskOutput(messages: string, lineWriter: (m: string) => void) {
         if (!messages) { return; }
         // Split messages to be sure that we are invoking the write lineWriter for each lineWriter
-        // Otherwise we could get messages in console with the wrong prefix used by vsts-task-lib
+        // Otherwise we could get messages in console with the wrong prefix used by azure-pipelines-task-lib
         messages.split("\n").forEach(lineWriter);
     }
 }
