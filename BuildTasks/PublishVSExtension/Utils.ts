@@ -55,6 +55,7 @@ export function logout(publisher: string) {
         {
             throw new Error("Logout failed.");
         }
+        loggedIn = false;
     }
     console.info(`Logout successful.`)
 }
