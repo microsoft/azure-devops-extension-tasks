@@ -19,7 +19,6 @@
     "Server",
     "ServerGate"
   ],
-  "preview": true,
   "groups": [
     {
       "name": "extension",
