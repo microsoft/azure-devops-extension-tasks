@@ -1,0 +1,40 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "VS-Extension",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/BuildTasks/PublishVSExtension/PublishVSExtension.ts",
+            "stopOnEntry": false,
+            "args": [],
+            "cwd": "${workspaceFolder}/BuildTasks/PublishVSExtension/",
+            "preLaunchTask": null,
+            "runtimeExecutable": null,
+            "runtimeArgs": [
+                "--nolazy"
+            ],
+            "envFile": "${workspaceFolder}/.env",
+            "console": "integratedTerminal",
+            "sourceMaps": true,
+            "outFiles": [
+                "${workspaceFolder}/BuildTasks/PublishVSExtension/PublishVSExtension.js"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Debug updatetasks.js",
+            "program": "${workspaceRoot}/scripts/uploadTask.js",
+            "args": [
+                "--task=PublishVSExtension",
+                "--patch=dev"
+            ],
+            "cwd": "${workspaceRoot}",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}

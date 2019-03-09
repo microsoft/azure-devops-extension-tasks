@@ -1,6 +1,5 @@
 dist/
 built/
-.vscode/
 
 node_modules/
 npm-debug.log
@@ -17,3 +16,4 @@ BuildTasks/*Extension*/common.ts
 .taskkey
 /BuildTasks/PublishExtension/debug.cmd
 /BuildTasks/IsValidExtensionAgent/debug.cmd
+*.env

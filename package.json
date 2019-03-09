@@ -22,7 +22,8 @@
     "build:clean": "npm run clean && npm run initdev && npm run build",
     "build:tasks": "npm run compile:tasks",
     "package": "npm run build:clean && npm run package:tasks",
-    "clean": "git clean -fdX"
+    "clean": "git clean -fdX",
+    "patchvspublish": "node ./scripts/patchTaskAsDev --task=PublishVSExtension --patch"
   },
   "author": "Microsoft Corporation",
   "license": "MIT",
@@ -34,10 +35,15 @@
     "@types/temp": "^0.8.29",
     "@types/x2js": "0.0.27",
     "@types/xmldom": "^0.1.28",
+    "chalk": "~2.4.2",
+    "fs-extra": "~7.0.1",
+    "glob": "~7.1.3",
     "glob-exec": "^0.1.1",
+    "path": "~0.12.7",
     "tfx-cli": "^0.6.4",
     "tslint": "^5.13.1",
     "typescript": "^3.3.3333",
-    "typestrict": "^1.0.2"
+    "typestrict": "^1.0.2",
+    "yargs": "~13.2.2"
   }
 }

@@ -1,0 +1,9 @@
+{
+    "tasks": [
+        {
+            "name": "PublishVSExtension",
+            "prodId": "17654839-813a-4e5f-a724-223a68ec647c",
+            "betaId": "e20d76ab-d99e-4947-bb7a-f095a2d81601"
+        }
+    ]
+}
