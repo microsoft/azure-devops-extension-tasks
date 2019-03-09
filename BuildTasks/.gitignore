@@ -1,3 +1,5 @@
 */Common/
 */*Extension*/
+*/*.js
+*/*.js.map
 */node_modules/
