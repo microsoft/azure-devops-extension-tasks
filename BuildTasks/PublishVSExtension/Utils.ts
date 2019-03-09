@@ -20,12 +20,9 @@ export function getVsixPublisherExe(): string {
         {
             throw new Error("Could not locate vsixpublisher.exe. Ensure the Visual Studio SDK is installed on the agent.");
         }
-        return vsixPublisherExe;
     }
-    else { 
-        return cacheVsixPublisherExe;
-    }
-}
+    return cacheVsixPublisherExe;
+ }
 
 export function login(publisher: string, token: string) {
     let vsixPublisherExe = getVsixPublisherExe();
