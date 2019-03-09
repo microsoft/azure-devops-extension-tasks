@@ -40,8 +40,10 @@ export function validateAndSetTfxManifestArguments(tfx: ToolRunner): (() => void
     const rootFolder = tl.getInput("rootFolder", false);
     tfx.argIf(rootFolder, ["--root", rootFolder]);
 
-    const globsManifest = tl.getInput("patternManifest", false);
-    tfx.argIf(globsManifest, ["--manifest-globs", globsManifest]);
+    
+    const globsManifest = tl.getDelimitedInput("patternManifest", "\n", false);
+    tfx.argIf(globsManifest, ["--manifest-globs"]);
+    tfx.argIf(globsManifest, globsManifest);
 
     // Overrides manifest file
     const publisher = tl.getInput("publisherId", false);

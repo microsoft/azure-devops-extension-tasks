@@ -51,11 +51,15 @@
     },
     {
       "name": "patternManifest",
-      "type": "string",
-      "label": "Manifest file",
+      "type": "multiLine",
+      "properties": {
+        "resizable": true,
+        "rows": "1"
+      },
+      "label": "Manifest file(s)",
       "defaultValue": "vss-extension.json",
       "required": false,
-      "helpMarkDown": "Specify the pattern for manifest files to join."
+      "helpMarkDown": "Specify the pattern for manifest files. One file per line."
     },
     {
       "name": "outputPath",
