@@ -44,7 +44,7 @@
       "label": "Connect to",
       "required": true,
       "defaultValue": "VsTeam",
-      "helpMarkDown": "Connect to Visual Studio Marketplace. TFS is not supported for the Share command.",
+      "helpMarkDown": "Connect to Visual Studio Marketplace.",
       "options": {
         "VsTeam": "Visual Studio Marketplace"
       }

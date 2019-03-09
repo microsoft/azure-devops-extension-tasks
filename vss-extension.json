@@ -242,11 +242,11 @@
       ],
       "properties": {
         "name": "TFSMarketplacePublishing",
-        "displayName": "TFS Extension Local Gallery",
+        "displayName": "Azure DevOps Server Extension Local Gallery",
         "helpMarkDown": "",
         "url": {
-          "displayName": "TFS Server Url",
-          "description": "The TFS Server Url, e.g. `https://servername.domain.local/tfs`."
+          "displayName": "Azure DevOps Server Url",
+          "description": "The Azure DevOps Server Url, e.g. `https://servername.domain.local/tfs`."
         },
         "authenticationSchemes": [
           {
@@ -255,7 +255,7 @@
               {
                 "id": "apitoken",
                 "name": "Personal Access Token",
-                "description": "Personal Access Token, supported on TFS 2017 and higher.",
+                "description": "Personal Access Token (TFS 2017+ and Azure DevOps Server 2019).",
                 "inputMode": "passwordbox",
                 "isConfidential": true,
                 "validation": {
@@ -272,7 +272,7 @@
               {
                 "id": "username",
                 "name": "Username",
-                "description": "Username, supported on TFS 2015 update 2 and higher when configured for Basic Authentication.",
+                "description": "Username (TFS 2015.2+ with Basic Authentication enabled)",
                 "inputMode": "textbox",
                 "isConfidential": false,
                 "validation": {
