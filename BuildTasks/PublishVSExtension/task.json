@@ -39,20 +39,12 @@
       "helpMarkDown": "VSIX file to publish."
     },
     {
-      "name": "rootFolder",
+      "name": "manifestFile",
       "type": "filePath",
-      "label": "Root manifest folder",
-      "defaultValue": "",
-      "required": false,
-      "helpMarkDown": "Folder where manifest file(s) exist."
-    },
-    {
-      "name": "manifestPattern",
-      "type": "string",
       "label": "Manifest file",
-      "defaultValue": "extension-manifest.json",
-      "required": false,
-      "helpMarkDown": "Pattern for the manifest file. If multiple manifest files are found, first one will be picked up."
+      "defaultValue": "",
+      "required": true,
+      "helpMarkDown": "Path for the manifest file. [more](https://docs.microsoft.com/en-us/visualstudio/extensibility/walkthrough-publishing-a-visual-studio-extension-via-command-line?view=vs-2017#publishmanifest-file)"
     },
     {
       "name": "publisherId",
