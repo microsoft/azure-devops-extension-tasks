@@ -39,10 +39,10 @@
       "label": "Connect to",
       "required": true,
       "defaultValue": "VsTeam",
-      "helpMarkDown": "Publish to Visual Studio Marketplace or a local TFS server.",
+      "helpMarkDown": "Publish to Visual Studio Marketplace or a local Azure DevOps Server.",
       "options": {
         "VsTeam": "Visual Studio Marketplace",
-        "TFS": "Team Foundation Server"
+        "TFS": "Azure DevOps Server"
       }
     },
     {
@@ -105,11 +105,15 @@
     },
     {
       "name": "patternManifest",
-      "type": "string",
-      "label": "Manifest file",
+      "type": "multiLine",
+      "properties": {
+        "resizable": true,
+        "rows": "1"
+      },
+      "label": "Manifest file(s)",
       "defaultValue": "vss-extension.json",
       "required": false,
-      "helpMarkDown": "Pattern for the manifest files to join.",
+      "helpMarkDown": "Specify the pattern for manifest files. One file per line.",
       "visibleRule": "fileType = manifest",
       "groupName": "manifest"
     },
