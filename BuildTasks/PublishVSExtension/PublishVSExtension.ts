@@ -5,7 +5,7 @@ import * as util from "./Utils";
 let publisher = "";
 
 try {
-    let connectedService = tl.getInput("connectedServiceName", true);
+    let connectedService = tl.getInput("ConnectedServiceName", true);
     let token = tl.getEndpointAuthorizationParameter(connectedService, "password", true);
 
     let vsixFile = tl.getPathInput("vsixFile", true, true);
