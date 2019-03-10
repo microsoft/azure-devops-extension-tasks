@@ -16,7 +16,7 @@
     "Release"
   ],
   "demands": [
-    "npm", "tfx-cli"
+    "npm" 
   ],
   "minimumAgentVersion": "1.83.0",
   "runsOn": [
