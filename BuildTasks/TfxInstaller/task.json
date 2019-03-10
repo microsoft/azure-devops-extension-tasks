@@ -1,0 +1,55 @@
+{
+  "id": "f7c56a03-d9d3-4019-b144-6283b88a66a8",
+  "name": "TfxInstaller",
+  "friendlyName": "Use Node CLI for Azure DevOps",
+  "description": "Use Node CLI for Azure DevOps",
+  "author": "Microsoft Corporation",
+  "helpMarkDown": "",
+  "category": "Deploy",
+  "version": {
+    "Major": 1,
+    "Minor": 2,
+    "Patch": 0
+  },
+  "visibility": [
+    "Build",
+    "Release"
+  ],
+  "demands": [
+    "npm"
+  ],
+  "preview": true,
+  "satisfies": [ "tfx-cli" ],
+  "minimumAgentVersion": "2.115.0",
+  "groups": [
+  ],
+  "instanceNameFormat": "Use Node CLI for Azure DevOps",
+  "inputs": [
+    {
+      "name": "version",
+      "type": "string",
+      "label": "Version",
+      "defaultValue": "v0.6.x",
+      "helpMarkDown": "",
+      "required": true
+    },
+    {
+      "name": "checkLatest",
+      "type": "boolean",
+      "label": "Auto update",
+      "defaultValue": "true",
+      "required": false,
+      "helpMarkDown": "Automatically download the latest version."
+    }
+  ],
+  "execution": {
+    "Node10": {
+      "target": "TfxInstaller/TfxInstaller.js",
+      "argumentFormat": ""
+    },
+    "Node": {
+      "target": "TfxInstaller/TfxInstaller.js",
+      "argumentFormat": ""
+    }
+  }
+}

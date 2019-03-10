@@ -93,6 +93,9 @@
       "path": "BuildTasks/ShareExtension"
     },
     {
+      "path": "BuildTasks/TfxInstaller"
+    },
+    {
       "path": "add-task.png",
       "addressable": true
     },
@@ -180,6 +183,16 @@
       ],
       "properties": {
         "name": "BuildTasks/ShareExtension"
+      }
+    },
+    {
+      "id": "tfx-installer-build-task",
+      "type": "ms.vss-distributed-task.task",
+      "targets": [
+        "ms.vss-distributed-task.tasks"
+      ],
+      "properties": {
+        "name": "BuildTasks/TfxInstaller"
       }
     },
     {

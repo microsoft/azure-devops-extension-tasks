@@ -1,5 +1,6 @@
 */Common/
 */*Extension*/
+*/*Installer*/
 */*.js
 */*.js.map
 */node_modules/
