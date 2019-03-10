@@ -93,6 +93,9 @@
       "path": "BuildTasks/ShareExtension"
     },
     {
+      "path": "BuildTasks/TfxInstaller"
+    },
+    {
       "path": "add-task.png",
       "addressable": true
     },
