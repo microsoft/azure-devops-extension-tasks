@@ -1,7 +1,7 @@
 set INPUT_EXTENSIONID=ext
 set INPUT_EXTENSIONVERSION=8.9.10
 set INPUT_PUBLISHERID=me
-set INPUT_ROOTFOLDER=C:\Users\JesseHouwing\Source\Repos\vsts-ping-task-demo
+set INPUT_ROOTFOLDER=C:\Users\jesse\source\repos\vsts-ping-task-demo
 set INPUT_UPDATETASKSID=true
 set INPUT_UPDATETASKSVERSION=true
 set INPUT_UPDATETASKSVERSIONTYPE=minor
