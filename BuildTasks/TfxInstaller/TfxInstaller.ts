@@ -41,7 +41,7 @@ async function getTfx(versionSpec: string, checkLatest: boolean) {
                 throw new Error(`Unable to find Tfx version '${versionSpec}'`);
             }
 
-            toolPath = toolLib.findLocalTool('tfx', version)
+            toolPath = toolLib.findLocalTool('tfx', version);
         }
 
         if (!toolPath) {
@@ -49,6 +49,7 @@ async function getTfx(versionSpec: string, checkLatest: boolean) {
         }
     }
 
+    taskLib.setVariable("__tfxpath", toolPath, false);
     toolLib.prependPath(toolPath);
 }
 

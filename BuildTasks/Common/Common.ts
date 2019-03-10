@@ -192,24 +192,34 @@ export async function runTfx(cmd: (tfx: ToolRunner) => void) {
         }
     };
 
+    const tfxInstallerPath = tl.getVariable("__tfxpath");
+    if (tfxInstallerPath)
+    {
+        tfxPath = tl.which(path.join(tfxInstallerPath, "/tfx"));
+    }
+
+    // backwards compat
     const checkTfxGlobalVar = tl.getVariable("vstsDevTools.buildTasks.checkGlobalTfx");
     if (checkTfxGlobalVar && checkTfxGlobalVar.toLowerCase() !== "false") {
         console.log("Checking tfx globally");
         tfxPath = tl.which("tfx");
-        if (tfxPath) {
-            console.log(`Found tfx globally ${tfxPath}`);
-            tfx = new trl.ToolRunner(tfxPath);
-            await tryRunCmd(tfx);
-            return;
-        }
     }
 
+    if (tfxPath) {
+        console.log(`Found tfx globally ${tfxPath}`);
+        tfx = new trl.ToolRunner(tfxPath);
+        await tryRunCmd(tfx);
+        return;
+    }
+
+    tl.warning("DEPRECATED: Please add the 'Use Node CLI for Azure DevOps' to install tfx.");
+    
     // Check the local tfx to see if it is installed in the workfolder/_tools folder
     let agentToolsPath = path.join(tl.getVariable("Agent.Workfolder"), "/_tools/");
     let tfxLocalPathBin = path.join(agentToolsPath, "/node_modules/.bin/tfx");
     let tfxLocalPath = path.join(agentToolsPath, "/tfx");
 
-    if (tl.osType() === "Windows_NT") {
+    if (os.platform() === "win32") {
         tfxLocalPathBin += ".cmd";
         tfxLocalPath += ".cmd";
     }
