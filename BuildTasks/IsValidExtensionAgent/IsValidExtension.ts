@@ -5,11 +5,6 @@ import * as common from "../Common/Common";
 import promiseRetry = require("promise-retry");
 
 export async function run() {
-    await common.runTfx(tfx => {
-        tfx.arg(["version"]);
-        return tfx.exec();
-    });
-
     await common.runTfx(async tfx => {
         try
         {

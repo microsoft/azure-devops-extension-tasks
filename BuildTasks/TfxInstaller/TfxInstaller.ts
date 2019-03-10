@@ -14,6 +14,7 @@ async function run()
         const checkLatest = taskLib.getBoolInput("checkLatest", false) || false;
         
         await getTfx(version, checkLatest);
+        await taskLib.tool("tfx").arg(["version", "--no-color"]).exec();
     }
     catch (error) {
         taskLib.setResult(taskLib.TaskResult.Failed, error.message);
@@ -54,7 +55,7 @@ async function getTfx(versionSpec: string, checkLatest: boolean) {
 }
 
 function queryLatestMatch(versionSpec: string): string {
-    const npmRunner = new tr.ToolRunner(taskLib.which("npm", true));
+    const npmRunner = new tr.ToolRunner("npm");
     npmRunner.arg(["show", "tfx-cli", "versions", "--json"]);
     const result = npmRunner.execSync({ failOnStdErr: false, silent: true, ignoreReturnCode: false} as tr.IExecOptions);
     if (result.code === 0)
@@ -79,7 +80,7 @@ async function acquireTfx(version: string): Promise<string> {
         extPath = path.join(extPath, 'tfx'); // use as short a path as possible due to nested node_modules folders
 
         taskLib.mkdirP(path.join(extPath));
-        const npmRunner = new tr.ToolRunner(taskLib.which("npm", true));
+        const npmRunner = new tr.ToolRunner("npm");
         npmRunner.arg(["install", "tfx-cli@" + version, "--prefix", extPath]);
 
         const result = npmRunner.execSync({ failOnStdErr: false, silent: true, ignoreReturnCode: false} as tr.IExecOptions);
