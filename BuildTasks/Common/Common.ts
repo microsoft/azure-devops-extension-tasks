@@ -468,11 +468,11 @@ function getExtensionManifestPaths(): string[] {
 
     // Search for extension manifests given the rootFolder and patternManifest inputs
     rootFolder = tl.getInput("rootFolder", false) || tl.getInput("System.DefaultWorkingDirectory");
-    const manifestsPattern = tl.getInput("patternManifest", false) || "vss-extension.json";
+    const manifestsPatterns = tl.getDelimitedInput("patternManifest", "\n", false) || ["vss-extension.json"];
 
-    tl.debug(`Searching for extension manifests: ${manifestsPattern}`);
+    tl.debug(`Searching for extension manifests: ${manifestsPatterns.join(", ")}`);
 
-    return tl.findMatch(rootFolder, manifestsPattern);
+    return tl.findMatch(rootFolder, manifestsPatterns);
 }
 
 function getManifest(path: string): Promise<Object> {
