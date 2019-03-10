@@ -16,7 +16,7 @@
     "Release"
   ],
   "demands": [
-    "npm"
+    "npm", "tfx-cli"
   ],
   "minimumAgentVersion": "1.83.0",
   "groups": [
@@ -47,7 +47,7 @@
       "helpMarkDown": "Connect to Visual Studio Marketplace.",
       "options": {
         "VsTeam": "Visual Studio Marketplace",
-        "TFS": "Team Foundation Server"
+        "TFS": "Azure DevOps Server"
       }
     },
     {
