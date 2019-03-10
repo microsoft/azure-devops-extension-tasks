@@ -16,7 +16,7 @@
     "initdev:npm:tasks": "glob-exec --parallel --foreach \"BuildTasks/*/tsconfig.json\" -- \"cd {{file.dir}} && npm install --no-update-notifier --no-progress\"",
     "compile:tasks": "glob-exec \"BuildTasks/*/tsconfig.json\" -- \"tsc -b {{files.join(' ')}}\"",
     "postcompile:tasks": "npm run lint:tasks",
-    "lint:tasks": "glob-exec --parallel --foreach \"BuildTasks/*/tsconfig.json\" -- \"tslint -p {{file}}\"",
+    "lint:tasks": "glob-exec --parallel --foreach \"BuildTasks/*/tsconfig.json\" -- \"tslint -p {{file}} -c tslint.json\"",
     "package:tasks": "tfx extension create --root . --output-path dist --manifest-globs vss-extension.json",
     "build": "npm run build:tasks",
     "build:clean": "npm run clean && npm run initdev && npm run build",
