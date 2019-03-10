@@ -1,0 +1,13 @@
+{
+  "name": "vsts-developer-tools.tfxinstaller",
+  "description": "Node CLI for Azure DevOps Installer Task",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Microsoft/vsts-extension-build-release-tasks.git"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "azure-pipelines-task-lib": "^2.7.7",
+    "azure-pipelines-tool-lib": "^0.11.0"
+  }
+}

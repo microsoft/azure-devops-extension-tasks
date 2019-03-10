@@ -183,6 +183,16 @@
       }
     },
     {
+      "id": "tfx-installer-build-task",
+      "type": "ms.vss-distributed-task.task",
+      "targets": [
+        "ms.vss-distributed-task.tasks"
+      ],
+      "properties": {
+        "name": "BuildTasks/TfxInstaller"
+      }
+    },
+    {
       "id": "vsts-marketplace-endpoint-type",
       "type": "ms.vss-endpoint.service-endpoint-type",
       "targets": [
