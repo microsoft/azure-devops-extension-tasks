@@ -18,7 +18,8 @@
   "demands": [
     "npm"
   ],
-  "satisfies": [ "tfx-cli"],
+  "preview": true,
+  "satisfies": [ "tfx-cli" ],
   "minimumAgentVersion": "2.115.0",
   "groups": [
   ],
