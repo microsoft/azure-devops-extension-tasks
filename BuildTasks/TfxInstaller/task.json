@@ -2,7 +2,7 @@
   "id": "f7c56a03-d9d3-4019-b144-6283b88a66a8",
   "name": "TfxInstaller",
   "friendlyName": "Use Node CLI for Azure DevOps",
-  "description": "Use Node CLI for Azure DevOps",
+  "description": "Installs the Node CLI for Azure DevOps on your agent.",
   "author": "Microsoft Corporation",
   "helpMarkDown": "",
   "category": "Deploy",
@@ -23,7 +23,7 @@
   "minimumAgentVersion": "2.115.0",
   "groups": [
   ],
-  "instanceNameFormat": "Use Node CLI for Azure DevOps $(version)",
+  "instanceNameFormat": "Use Node CLI for Azure DevOps: $(version)",
   "inputs": [
     {
       "name": "version",
