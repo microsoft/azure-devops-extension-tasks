@@ -1,4 +1,4 @@
-# CI/CD Tools for VSTS extensions
+# Azure DevOps Extension Tasks
 [![Build status](https://almrangers.visualstudio.com/ALM/_apis/build/status/Extensions/Azure%20DevOps%20Extension%20Tasks)](https://almrangers.visualstudio.com/ALM/_build/latest?definitionId=127) [![Release status](https://almrangers.vsrm.visualstudio.com/_apis/public/Release/badge/7f3cfb9a-d1cb-4e66-9d36-1af87b906fe9/25/70)](https://almrangers.visualstudio.com/ALM/_releaseDefinition?definitionId=25)
 
 This extension provides build and release tasks for packaging and publishing Azure Devops Extensions to the [Visual Studio Marketplace](https://marketplace.visualstudio.com). There are also tasks to share and install your extension to your Azure Devops organisation or Team Foundation Server.
