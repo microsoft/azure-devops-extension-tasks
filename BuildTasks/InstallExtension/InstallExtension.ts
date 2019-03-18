@@ -7,7 +7,7 @@ const accounts = tl.getDelimitedInput("accounts", ",", true).map((value, index) 
 
 void accounts.forEach(async (account) => await common.runTfx(tfx => {
     try {
-        tfx.arg(["extension", "install"]);
+        tfx.arg(["extension", "install", "--no-color"]);
 
         common.setTfxMarketplaceArguments(tfx, false);
         common.validateAndSetTfxManifestArguments(tfx);
