@@ -4,7 +4,7 @@ import * as tl from "azure-pipelines-task-lib/task";
 import * as common from "../Common/Common";
 
 void common.runTfx(async tfx => {
-    tfx.arg(["extension", "share"]);
+    tfx.arg(["extension", "share", "--no-color"]);
 
     common.setTfxMarketplaceArguments(tfx);
     common.validateAndSetTfxManifestArguments(tfx);
