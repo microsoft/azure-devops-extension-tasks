@@ -4,7 +4,7 @@
   "description": "Publish Visual Studio Extension Task",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Microsoft/vsts-extension-build-release-tasks.git"
+    "url": "https://github.com/Microsoft/azure-devops-extension-tasks.git"
   },
   "main": "index.js",
   "scripts": {

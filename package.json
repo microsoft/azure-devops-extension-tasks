@@ -3,7 +3,7 @@
   "description": "Azure DevOps Extension Tasks",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Microsoft/vsts-extension-build-release-tasks.git"
+    "url": "https://github.com/Microsoft/azure-devops-extension-tasks.git"
   },
   "keywords": [
     "vsts",

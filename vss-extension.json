@@ -42,18 +42,18 @@
   },
   "links": {
     "repository": {
-      "uri": "https://github.com/Microsoft/vsts-extension-build-release-tasks"
+      "uri": "https://github.com/Microsoft/azure-devops-extension-tasks"
     },
     "issues": {
-      "uri": "https://github.com/Microsoft/vsts-extension-build-release-tasks/issues"
+      "uri": "https://github.com/Microsoft/azure-devops-extension-tasks/issues"
     },
     "support": {
-      "uri": "mailto:vsointegration@microsoft.com"
+      "uri": "mailto:azdevopsintegrations@microsoft.com"
     }
   },
   "repository": {
     "type": "git",
-    "uri": "https://github.com/Microsoft/vsts-extension-build-release-tasks"
+    "uri": "https://github.com/Microsoft/azure-devops-extension-tasks"
   },
   "badges": [
     {
