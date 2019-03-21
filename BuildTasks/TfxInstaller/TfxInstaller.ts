@@ -51,6 +51,12 @@ async function getTfx(versionSpec: string, checkLatest: boolean) {
     }
 
     taskLib.setVariable("__tfxpath", toolPath, false);
+
+    if (os.platform() !== "win32")
+    {
+        toolPath = path.join(toolPath, "/node_modules/.bin/");
+    }
+    
     toolLib.prependPath(toolPath);
 }
 
