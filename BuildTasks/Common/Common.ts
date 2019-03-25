@@ -213,7 +213,7 @@ export async function runTfx(cmd: (tfx: ToolRunner) => void) {
     }
 
     tl.warning("DEPRECATED: Auto-installation of tfx-cli in this task will be removed in the future.");
-    tl.warning("DEPRECATED: To resolve, add the 'Use Node CLI for Azure DevOps' to your pipeline before this task.");
+    tl.warning("DEPRECATED: To resolve, add the 'Use Node CLI for Azure DevOps' task to your pipeline before this task.");
 
     // Check the local tfx to see if it is installed in the workfolder/_tools folder
     let agentToolsPath = path.join(tl.getVariable("Agent.Workfolder"), "/_tools/");
