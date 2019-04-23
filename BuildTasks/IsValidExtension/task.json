@@ -50,10 +50,10 @@
     {
       "name": "method",
       "type": "radio",
-      "label": "Install using",
+      "label": "Validate using",
       "required": true,
       "defaultValue": "id",
-      "helpMarkDown": "Install using either an existing VSIX or using the Publisher and Extension ID.",
+      "helpMarkDown": "Validate using either an existing VSIX or using the Publisher, Extension ID and version.",
       "options": {
         "id": "Publisher + Extension ID"
       },
