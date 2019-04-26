@@ -5,7 +5,7 @@
   "description": "Installs the Node CLI for Azure DevOps on your agent.",
   "author": "Microsoft Corporation",
   "helpMarkDown": "",
-  "category": "Deploy",
+  "category": "Tool",
   "version": {
     "Major": 1,
     "Minor": 2,
