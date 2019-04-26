@@ -23,7 +23,7 @@
   "minimumAgentVersion": "2.115.0",
   "groups": [
   ],
-  "instanceNameFormat": "Use Node CLI for Azure DevOps: $(version)",
+  "instanceNameFormat": "Use Node CLI for Azure DevOps (tfx-cli): $(version)",
   "inputs": [
     {
       "name": "version",
