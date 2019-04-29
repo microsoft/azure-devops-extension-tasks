@@ -30,7 +30,7 @@
       "type": "string",
       "label": "Version",
       "defaultValue": "v0.6.x",
-      "helpMarkDown": "",
+      "helpMarkDown": "Specify which `tfx-cli` version you want to use. Examples: `v0.6.x`, `>=v0.5.x`.",
       "required": true
     },
     {
