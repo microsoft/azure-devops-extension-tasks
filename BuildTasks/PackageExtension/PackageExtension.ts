@@ -28,6 +28,7 @@ async function run() {
                 if (outputVariable) {
                     tl.setVariable(outputVariable, json.path);
                 }
+                tl.setVariable("Extension.OutputPath", json.path);
 
                 console.log(`Packaged extension: ${json.path}.`);
                 tl.setResult(tl.TaskResult.Succeeded, `tfx exited with return code: ${code}`);

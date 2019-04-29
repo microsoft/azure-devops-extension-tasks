@@ -111,7 +111,7 @@
     {
       "name": "outputVariable",
       "type": "string",
-      "label": "Output Variable",
+      "label": "Output Variable (deprecated)",
       "defaultValue": "Extension.Version",
       "required": false,
       "helpMarkDown": "The variable name to assign the version to.",
@@ -152,6 +152,12 @@
         "required": false,
         "helpMarkDown": "Working directory to run the package and publishing process from. Defaults to the folder where the manifest is located.",
         "groupName": "advanced"
+    }
+  ],
+  "outputVariables": [
+    {
+        "name": "Extension.Version",
+        "description": "Is set with the calculated version number."
     }
   ],
   "execution": {

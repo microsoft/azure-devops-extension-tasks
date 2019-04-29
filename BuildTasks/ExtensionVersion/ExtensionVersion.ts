@@ -16,6 +16,7 @@ function setVersion(version: string) {
     if (outputVariable) {
         tl.setVariable(outputVariable, version);
     }
+    tl.setVariable("Extension.Version", version);
 }
 
 if (extensionVersionOverrideVariable) {

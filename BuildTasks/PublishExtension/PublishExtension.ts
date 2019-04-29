@@ -150,6 +150,7 @@ void common.runTfx(async tfx => {
             if (outputVariable) {
                 tl.setVariable(outputVariable, publishedVsix);
             }
+            tl.setVariable("Extension.OutputPath", json.path);
 
             console.log(`Published VSIX: ${publishedVsix}.`);
             tl.setResult(tl.TaskResult.Succeeded, `tfx exited with return code: ${code}`);
