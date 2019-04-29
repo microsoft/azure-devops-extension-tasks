@@ -1,6 +1,6 @@
 {
   "id": "17654839-813a-4e5f-a724-223a68ec647c",
-  "name": "PublishVSExtension",
+  "name": "PublishVisualStudioExtension",
   "friendlyName": "Publish Visual Studio Extension",
   "description": "Publish Visual Studio extension to the Visual Studio Marketplace",
   "author": "Microsoft Corporation",
@@ -8,7 +8,7 @@
   "preview": true,
   "category": "Deploy",
   "version": {
-    "Major": 1,
+    "Major": 2,
     "Minor": 0,
     "Patch": 0
   },

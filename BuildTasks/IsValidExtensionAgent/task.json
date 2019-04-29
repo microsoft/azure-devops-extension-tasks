@@ -1,14 +1,14 @@
 {
   "id": "b86cdd2a-0579-4d40-b28f-18197ffaf520",
-  "name": "Check Marketplace validation status.",
+  "name": "IsAzureDevOpsExtensionValid",
   "friendlyName": "Is valid Extension",
   "description": "Check Visual Studio Marketplace validation status.",
   "author": "Microsoft Corporation",
   "helpMarkDown": "",
   "category": "Deploy",
   "version": {
-    "Major": 1,
-    "Minor": 2,
+    "Major": 2,
+    "Minor": 0,
     "Patch": 0
   },
   "visibility": [

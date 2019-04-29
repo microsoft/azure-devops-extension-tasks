@@ -1,14 +1,14 @@
 {
   "id": "47a0f73c-f8e6-4fc5-a759-4d560031ef75",
-  "name": "InstallExtension",
+  "name": "InstallAzureDevOpsExtension",
   "friendlyName": "Install Extension",
   "description": "Install a published extension to an Azure DevOps organisation or Team Foundation Server",
   "author": "Microsoft Corporation",
   "helpMarkDown": "",
   "category": "Deploy",
   "version": {
-    "Major": 1,
-    "Minor": 2,
+    "Major": 2,
+    "Minor": 0,
     "Patch": 0
   },
   "visibility": [

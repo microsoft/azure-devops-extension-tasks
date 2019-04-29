@@ -1,14 +1,14 @@
 {
   "id": "631511B4-50AB-47C8-B766-7AE2AA672733",
-  "name": "PublishExtension",
+  "name": "PublishAzureDevOpsExtension",
   "friendlyName": "Publish Extension",
   "description": "Publish an Azure DevOps extension to the Visual Studio Marketplace",
   "author": "Microsoft Corporation",
   "helpMarkDown": "",
   "category": "Deploy",
   "version": {
-    "Major": 1,
-    "Minor": 2,
+    "Major": 2,
+    "Minor": 0,
     "Patch": 0
   },
   "visibility": [

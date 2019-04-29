@@ -1,14 +1,14 @@
 {
   "id": "22683a08-0dbe-4fe8-8c53-4606fcb32752",
-  "name": "ShareExtension",
+  "name": "ShareAzureDevOpsExtension",
   "friendlyName": "Share Extension",
   "description": "Share a published extension with a Azure Devops organisation",
   "author": "Microsoft Corporation",
   "helpMarkDown": "",
   "category": "Deploy",
   "version": {
-    "Major": 1,
-    "Minor": 2,
+    "Major": 2,
+    "Minor": 0,
     "Patch": 0
   },
   "visibility": [

@@ -1,14 +1,14 @@
 {
   "id": "e59022e0-667a-11e5-ad4c-dd75b69a0d2c",
-  "name": "PackageVSTSExtension",
+  "name": "PackageAzureDevOpsExtension",
   "friendlyName": "Package Extension",
   "description": "Package an Azure DevOps extension into a VSIX file",
   "author": "Microsoft Corporation",
   "helpMarkDown": "",
   "category": "Package",
   "version": {
-    "Major": 1,
-    "Minor": 2,
+    "Major": 2,
+    "Minor": 0,
     "Patch": 0
   },
   "visibility": [
