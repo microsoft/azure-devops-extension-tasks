@@ -34,6 +34,11 @@
       "name": "advanced",
       "displayName": "Advanced",
       "isExpanded": false
+    },
+    {
+      "name": "backcompat",
+      "displayName": "Backward Compatibility",
+      "isExpanded": false
     }
   ],
   "instanceNameFormat": "Query Extension Version: $(publisherId).$(extensionId)",
@@ -115,7 +120,7 @@
       "defaultValue": "Extension.Version",
       "required": false,
       "helpMarkDown": "The variable name to assign the version to.",
-      "groupName": "version"
+      "groupName": "backcompat"
     },
     {
       "name": "setBuildNumber",

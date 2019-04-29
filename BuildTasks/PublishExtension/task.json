@@ -29,6 +29,11 @@
       "name": "advanced",
       "displayName": "Advanced",
       "isExpanded": false
+    },
+    {
+      "name": "backcompat",
+      "displayName": "Backward Compatibility",
+      "isExpanded": false
     }
   ],
   "instanceNameFormat": "Publish Extension",
@@ -232,7 +237,7 @@
       "defaultValue": "Extension.OutputPath",
       "required": false,
       "helpMarkDown": "The variable name to assign the location of the generated package to.",
-      "groupName": "manifest"
+      "groupName": "backcompat"
     },
     {
       "name": "shareWith",

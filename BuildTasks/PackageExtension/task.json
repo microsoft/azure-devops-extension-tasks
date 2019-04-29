@@ -29,6 +29,11 @@
       "name": "advanced",
       "displayName": "Advanced",
       "isExpanded": false
+    },
+    {
+      "name": "backcompat",
+      "displayName": "Backward Compatibility",
+      "isExpanded": false
     }
   ],
   "instanceNameFormat": "Package Extension: $(rootFolder)",
@@ -75,7 +80,8 @@
       "label": "Output Variable (deprecated)",
       "defaultValue": "Extension.OutputPath",
       "required": false,
-      "helpMarkDown": "The variable name to assign the location of the generated package to."
+      "helpMarkDown": "The variable name to assign the location of the generated package to.",
+      "groupName": "backcompat"
     },
     {
       "name": "publisherId",
