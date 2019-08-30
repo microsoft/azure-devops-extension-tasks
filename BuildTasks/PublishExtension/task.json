@@ -236,7 +236,7 @@
       "label": "Output Variable (deprecated)",
       "defaultValue": "Extension.OutputPath",
       "required": false,
-      "helpMarkDown": "The variable name to assign the location of the generated package to.",
+      "helpMarkDown": "The variable name to assign the location of the generated package to. Specify only the name, e.g.: `Extension.OutputPath`, not `$(Extension.OutputPath)`.",
       "groupName": "backcompat"
     },
     {

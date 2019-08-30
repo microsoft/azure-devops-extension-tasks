@@ -119,7 +119,7 @@
       "label": "Output Variable (deprecated)",
       "defaultValue": "Extension.Version",
       "required": false,
-      "helpMarkDown": "The variable name to assign the version to.",
+      "helpMarkDown": "The variable name to assign the version to. Specify only the name, e.g.: `Extension.Version`, not `$(Extension.Version)`.",
       "groupName": "backcompat"
     },
     {
