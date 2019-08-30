@@ -148,7 +148,7 @@
         "patch": "Replace Only Patch (1.0.r)"
       },
       "required": false,
-      "helpMarkDown": "The Task version replacement format. You can select which part(s) of the version number to update (Major, Minor or Patch)",
+      "helpMarkDown": "The Task version replacement format. You can select which part(s) of the version number to update (Major (x.y.r), Minor (1.y.r), or Patch (1.0.r)). The value (x.y.r) is taken from the Extension Version input or the extension manifest.",
       "visibleRule": "updateTasksVersion=true",
       "groupName": "overrides"
     },
