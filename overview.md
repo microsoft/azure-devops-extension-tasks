@@ -45,4 +45,4 @@ This extension was created by Microsoft with help from the community. We'd like 
 
 ## Feedback and issues
 
-If you have feedback or issues, please [send an email](mailto:vsointegration@microsoft.com) or file an issue on [GitHub](https://github.com/Microsoft/azure-devops-extension-tasks/issues)
+If you have feedback or issues, please [send an email](mailto:azdevopsintegrations@microsoft.com) or file an issue on [GitHub](https://github.com/Microsoft/azure-devops-extension-tasks/issues)
