@@ -22,6 +22,18 @@ Visual Studio
 
 * **Publish**: Publish a Visual Studio extension to the Visual Studio Marketplace
 
+### Required scopes
+
+ When creating a personal access token for use by your pipeline, make sure the token has at least the following scopes for the task(s) you are using:
+
+* **Publish**: `All accessible organisations`, `Marketplace (publish)`
+* **Share**: `All accessible organisations`, `Marketplace (publish)`
+* **Install**: `All accessible organisations` or a specific Organisation, `Extensions (read and manage)`, `Marketplace (acquire)`
+* **Query Version**: `All accessible organisations`, `Marketplace (read)`
+* **Is Valid**: `All accessible organisations`, `Marketplace (read)`
+
+![Permissions](permissions.png)
+
 ## Contribute
 
 1. From the root of the repo run `npm run initdev`. This will pull down the necessary modules and TypeScript declare files.
