@@ -8,7 +8,7 @@
   "license": "MIT",
   "dependencies": {
     "7zip-bin-win": "^2.2.0",
-    "azure-pipelines-task-lib": "^2.9.3",
+    "azure-pipelines-task-lib": "^2.9.5",
     "core-js": "^2.5.3",
     "fs-extra": "^5.0.0",
     "temp": "^0.8.3",
