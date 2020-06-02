@@ -7,7 +7,7 @@
   "helpMarkDown": "",
   "category": "Tool",
   "version": {
-    "Major": 2,
+    "Major": 3,
     "Minor": 0,
     "Patch": 0
   },
@@ -18,7 +18,7 @@
   "demands": [
     "npm"
   ],
-  "preview": true,
+  "preview": false,
   "satisfies": [ "tfx-cli" ],
   "minimumAgentVersion": "2.115.0",
   "groups": [
@@ -29,8 +29,8 @@
       "name": "version",
       "type": "string",
       "label": "Version",
-      "defaultValue": "v0.6.x",
-      "helpMarkDown": "Specify which `tfx-cli` version you want to use. Examples: `v0.6.x`, `>=v0.5.x`.",
+      "defaultValue": "v0.7.x",
+      "helpMarkDown": "Specify which `tfx-cli` version you want to use. Examples: `v0.7.x`, `>=v0.5.x`.",
       "required": true
     },
     {

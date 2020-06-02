@@ -198,13 +198,6 @@ export async function runTfx(cmd: (tfx: ToolRunner) => void) {
         tfxPath = tl.which(path.join(tfxInstallerPath, "/tfx"));
     }
 
-    // backwards compat
-    const checkTfxGlobalVar = tl.getVariable("vstsDevTools.buildTasks.checkGlobalTfx");
-    if (checkTfxGlobalVar && checkTfxGlobalVar.toLowerCase() !== "false") {
-        tl.debug("Checking tfx globally");
-        tfxPath = tl.which("tfx");
-    }
-
     if (tfxPath) {
         tl.debug(`using: ${tfxPath}`);
         tfx = new trl.ToolRunner(tfxPath);
@@ -212,41 +205,7 @@ export async function runTfx(cmd: (tfx: ToolRunner) => void) {
         return;
     }
 
-    tl.warning("DEPRECATED: Auto-installation of tfx-cli in this task will be removed in the future.");
-    tl.warning("DEPRECATED: To resolve, add the 'Use Node CLI for Azure DevOps' task to your pipeline before this task.");
-
-    // Check the local tfx to see if it is installed in the workfolder/_tools folder
-    let agentToolsPath = path.join(tl.getVariable("Agent.Workfolder"), "/_tools/");
-    let tfxLocalPathBin = path.join(agentToolsPath, "/node_modules/.bin/tfx");
-    let tfxLocalPath = path.join(agentToolsPath, "/tfx");
-
-    if (os.platform() === "win32") {
-        tfxLocalPathBin += ".cmd";
-        tfxLocalPath += ".cmd";
-    }
-
-    console.log(`Checking tfx under: ${tfxLocalPath}`);
-    tfxPath = tl.which(tfxLocalPath) || tl.which(tfxLocalPathBin);
-    if (tfxPath) {
-        console.log(`Found tfx under: ${tfxPath}`);
-        tfx = new trl.ToolRunner(tfxPath);
-        await tryRunCmd(tfx);
-        return;
-    }
-
-    console.log(`Could not find tfx command. Preparing to install it under: ${agentToolsPath}`);
-    tl.mkdirP(path.join(agentToolsPath, "/node_modules/"));
-
-    const npm = new trl.ToolRunner(tl.which("npm", true));
-    npm.arg(["install", "tfx-cli@^0.6", "--prefix", agentToolsPath]);
-
-    try {
-        await npm.exec();
-        tfx = new trl.ToolRunner(tl.which(tfxLocalPath) || tl.which(tfxLocalPathBin, true));
-        await tryRunCmd(tfx);
-    } catch (err) {
-        tl.setResult(tl.TaskResult.Failed, `Error installing tfx: ${err}`);
-    }
+    tl.setResult(tl.TaskResult.Failed, "Could not find tfx. To resolve, add the 'Use Node CLI for Azure DevOps' task to your pipeline before this task.");
 }
 
 /**
