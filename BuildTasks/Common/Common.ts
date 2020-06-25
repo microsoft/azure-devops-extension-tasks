@@ -344,6 +344,34 @@ function updateTaskId(manifest: any, publisherId: string, extensionId: string): 
     return manifest;
 }
 
+function updateExtensionManifestTaskIds(manifest: any, originalTaskId: string, newTaskId: string): Object {
+    if (!manifest.contributions) {
+        tl.debug(`No contributions found`);
+        return manifest;
+    }
+    
+    tl.debug(`Before contributions loop`);
+    manifest.contributions
+    .filter((c: any) => c.type !== "ms.vss-distributed-task.task" && c.properties && c.properties.supportsTasks)
+    .forEach((c: any) => {
+        let supportsTasks = [...c.properties.supportsTasks];
+        var index = supportsTasks.indexOf(originalTaskId);
+        if(index != -1) {
+            
+            tl.debug(`Extension manifest supportsTasks before: ${c.properties.supportsTasks}`);
+
+            supportsTasks[index] = newTaskId;
+            c.properties.supportsTasks = supportsTasks;
+            
+            tl.debug(`Extension manifest supportsTasks after: ${c.properties.supportsTasks}`);
+        } else{
+            tl.debug(`No supportTasks entry found in manifest contribution`);
+        }
+    });
+
+    return manifest;
+}
+
 function updateTaskVersion(manifest: any, extensionVersionString: string, extensionVersionType: string): Object {
     const versionParts = extensionVersionString.split(".");
     if (versionParts.length > 3) {
@@ -386,21 +414,24 @@ export async function updateManifests(manifestPaths: string[]): Promise<void> {
         tl.debug(`Found manifests: ${manifestPaths.join(", ")}`);
 
         await Promise.all(manifestPaths.map(async (extensionPath) => {
-            const manifest: any = await getManifest(extensionPath);
+            let manifest: any = await getManifest(extensionPath);
             const taskManifestPaths: string[] = getTaskManifestPaths(extensionPath, manifest);
 
             if (taskManifestPaths && taskManifestPaths.length) {
                 await Promise.all(taskManifestPaths.map(async (taskPath) => {
                     tl.debug(`Patching: ${taskPath}.`);
-                    let taskManifest = await getManifest(taskPath);
+                    let taskManifest : any = await getManifest(taskPath);
 
                     if (updateTasksId) {
                         tl.debug(`Updating Id...`);
                         const publisherId = tl.getInput("publisherId", false) || manifest.publisher;
                         const extensionTag = tl.getInput("extensionTag", false) || "";
                         const extensionId = `${(tl.getInput("extensionId", false) || manifest.id)}${extensionTag}`;
-
+                        
+                        const originalTaskId = taskManifest.id || null;
                         taskManifest = updateTaskId(taskManifest, publisherId, extensionId);
+                        const newTaskId = taskManifest.id;
+                        manifest = updateExtensionManifestTaskIds(manifest, originalTaskId, newTaskId);
                     }
 
                     if (updateTasksVersion) {
