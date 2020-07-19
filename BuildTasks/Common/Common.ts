@@ -413,45 +413,63 @@ export async function updateManifests(manifestPaths: string[]): Promise<void> {
 
         tl.debug(`Found manifests: ${manifestPaths.join(", ")}`);
 
-        await Promise.all(manifestPaths.map(async (extensionPath) => {
-            let manifest: any = await getManifest(extensionPath);
-            const taskManifestPaths: string[] = getTaskManifestPaths(extensionPath, manifest);
-
-            if (taskManifestPaths && taskManifestPaths.length) {
-                await Promise.all(taskManifestPaths.map(async (taskPath) => {
-                    tl.debug(`Patching: ${taskPath}.`);
-                    let taskManifest : any = await getManifest(taskPath);
-
-                    if (updateTasksId) {
-                        tl.debug(`Updating Id...`);
-                        const publisherId = tl.getInput("publisherId", false) || manifest.publisher;
-                        const extensionTag = tl.getInput("extensionTag", false) || "";
-                        const extensionId = `${(tl.getInput("extensionId", false) || manifest.id)}${extensionTag}`;
-                        
-                        const originalTaskId = taskManifest.id || null;
-                        taskManifest = updateTaskId(taskManifest, publisherId, extensionId);
-                        const newTaskId = taskManifest.id;
-                        manifest = updateExtensionManifestTaskIds(manifest, originalTaskId, newTaskId);
-                    }
-
-                    if (updateTasksVersion) {
-                        tl.debug(`Updating version...`);
-                        const extensionVersion = tl.getInput("extensionVersion", false) || manifest.version;
-                        if (!extensionVersion) {
-                            throw new Error(
-                                "Extension Version was not supplied nor does the extension manifest define one.");
-                        }
-                        const extensionVersionType = tl.getInput("updateTasksVersionType", false) || "major";
-
-                        taskManifest = updateTaskVersion(taskManifest, extensionVersion, extensionVersionType);
-                    }
-
-                    await writeTaskmanifest(taskManifest, taskPath);
-                    tl.debug(`Updated: ${taskPath}.`);
-                }));
-            }
-        }));
+        const tasksVersions = await updateTaskManifests(manifestPaths, updateTasksId, updateTasksVersion);
+        Object.keys(tasksVersions).forEach(
+            originalTaskVersion => updateExtensionManifests(manifestPaths, originalTaskVersion, tasksVersions[originalTaskVersion]));
     }
+}
+
+async function updateTaskManifests(manifestPaths: string[], updateTasksId: boolean, updateTasksVersion: boolean) {
+    const tasksVersions: Record<string, string> = {};
+    await Promise.all(manifestPaths.map(async (extensionPath) => {
+        let manifest: any = await getManifest(extensionPath);
+        const taskManifestPaths: string[] = getTaskManifestPaths(extensionPath, manifest);
+
+        if (taskManifestPaths && taskManifestPaths.length) {
+            await Promise.all(taskManifestPaths.map(async (taskPath) => {
+                tl.debug(`Patching: ${taskPath}.`);
+                let taskManifest: any = await getManifest(taskPath);
+
+                if (updateTasksId) {
+                    tl.debug(`Updating Id...`);
+                    const publisherId = tl.getInput("publisherId", false) || manifest.publisher;
+                    const extensionTag = tl.getInput("extensionTag", false) || "";
+                    const extensionId = `${(tl.getInput("extensionId", false) || manifest.id)}${extensionTag}`;
+
+                    const originalTaskId = taskManifest.id || null;
+                    taskManifest = updateTaskId(taskManifest, publisherId, extensionId);
+                    const newTaskId = taskManifest.id;
+                    if(originalTaskId) {
+                        tasksVersions[originalTaskId] = newTaskId;
+                    }
+                }
+
+                if (updateTasksVersion) {
+                    tl.debug(`Updating version...`);
+                    const extensionVersion = tl.getInput("extensionVersion", false) || manifest.version;
+                    if (!extensionVersion) {
+                        throw new Error(
+                            "Extension Version was not supplied nor does the extension manifest define one.");
+                    }
+                    const extensionVersionType = tl.getInput("updateTasksVersionType", false) || "major";
+
+                    taskManifest = updateTaskVersion(taskManifest, extensionVersion, extensionVersionType);
+                }
+
+                await writeManifest(taskManifest, taskPath);
+                tl.debug(`Updated: ${taskPath}.`);
+            }));
+        }
+    }));
+
+    return tasksVersions;
+}
+
+function updateExtensionManifests(manifestPaths: string[], originalTaskId: string, newTaskId: string) {
+    manifestPaths.forEach(async path => { 
+        const manifest = updateExtensionManifestTaskIds(await getManifest(path), originalTaskId, newTaskId);
+        await writeManifest(manifest, path);
+    });
 }
 
 function getExtensionManifestPaths(): string[] {
@@ -514,7 +532,7 @@ function getTaskManifestPaths(manifestPath: string, manifest: object): string[] 
     }, []);
 }
 
-export function writeTaskmanifest(manifest: object, path: string): Promise<void> {
+export function writeManifest(manifest: object, path: string): Promise<void> {
     return fse.writeJSON(path, manifest);
 }
 
