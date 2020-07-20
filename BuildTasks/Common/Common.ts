@@ -415,7 +415,7 @@ export async function updateManifests(manifestPaths: string[]): Promise<void> {
 
         const tasksVersions = await updateTaskManifests(manifestPaths, updateTasksId, updateTasksVersion);
         for(let [originalTaskVersion, newTaskVersion] of tasksVersions) {
-            updateExtensionManifests(manifestPaths, originalTaskVersion, newTaskVersion);
+            await updateExtensionManifests(manifestPaths, originalTaskVersion, newTaskVersion);
         }
     }
 }
@@ -466,11 +466,12 @@ async function updateTaskManifests(manifestPaths: string[], updateTasksId: boole
     return tasksVersions;
 }
 
-function updateExtensionManifests(manifestPaths: string[], originalTaskId: string, newTaskId: string) {
-    manifestPaths.forEach(async path => { 
-        const manifest = updateExtensionManifestTaskIds(await getManifest(path), originalTaskId, newTaskId);
-        await writeManifest(manifest, path);
-    });
+async function updateExtensionManifests(manifestPaths: string[], originalTaskId: string, newTaskId: string): Promise<void> {
+    await Promise.all(manifestPaths.map(async (path) => { 
+        const originalManifest = await getManifest(path);
+        const newManifest = updateExtensionManifestTaskIds(originalManifest, originalTaskId, newTaskId);
+        await writeManifest(newManifest, path);
+    }));
 }
 
 function getExtensionManifestPaths(): string[] {
