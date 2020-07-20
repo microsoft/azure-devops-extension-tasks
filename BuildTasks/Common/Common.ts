@@ -414,13 +414,14 @@ export async function updateManifests(manifestPaths: string[]): Promise<void> {
         tl.debug(`Found manifests: ${manifestPaths.join(", ")}`);
 
         const tasksVersions = await updateTaskManifests(manifestPaths, updateTasksId, updateTasksVersion);
-        Object.keys(tasksVersions).forEach(
-            originalTaskVersion => updateExtensionManifests(manifestPaths, originalTaskVersion, tasksVersions[originalTaskVersion]));
+        for(let [originalTaskVersion, newTaskVersion] of tasksVersions) {
+            updateExtensionManifests(manifestPaths, originalTaskVersion, newTaskVersion);
+        }
     }
 }
 
-async function updateTaskManifests(manifestPaths: string[], updateTasksId: boolean, updateTasksVersion: boolean) : Promise<Record<string, string>> {
-    const tasksVersions: Record<string, string> = {};
+async function updateTaskManifests(manifestPaths: string[], updateTasksId: boolean, updateTasksVersion: boolean) : Promise<Map<string, string>> {
+    const tasksVersions: Map<string, string> = new Map<string, string>();
     await Promise.all(manifestPaths.map(async (extensionPath) => {
         let manifest: any = await getManifest(extensionPath);
         const taskManifestPaths: string[] = getTaskManifestPaths(extensionPath, manifest);
