@@ -352,7 +352,7 @@ function updateExtensionManifestTaskIds(manifest: any, originalTaskId: string, n
     
     tl.debug(`Before contributions loop`);
     manifest.contributions
-    .filter((c: any) => c.type !== "ms.vss-distributed-task.task" && c.properties && c.properties.supportsTasks)
+    .filter((c: any) => c.properties && c.properties.supportsTasks)
     .forEach((c: any) => {
         let supportsTasks = [...c.properties.supportsTasks];
         var index = supportsTasks.indexOf(originalTaskId);
@@ -419,7 +419,7 @@ export async function updateManifests(manifestPaths: string[]): Promise<void> {
     }
 }
 
-async function updateTaskManifests(manifestPaths: string[], updateTasksId: boolean, updateTasksVersion: boolean) {
+async function updateTaskManifests(manifestPaths: string[], updateTasksId: boolean, updateTasksVersion: boolean) : Promise<Record<string, string>> {
     const tasksVersions: Record<string, string> = {};
     await Promise.all(manifestPaths.map(async (extensionPath) => {
         let manifest: any = await getManifest(extensionPath);
