@@ -166,7 +166,7 @@ export class VSIXEditor {
 
         temp.track();
 
-        return new Promise<string>((resolve, reject) => {
+        return new Promise<string>((resolve) => {
                 temp.mkdir("vsixeditor", (ex, dirPath) => { resolve(dirPath); });
             })
             .then((dirPath) => {
