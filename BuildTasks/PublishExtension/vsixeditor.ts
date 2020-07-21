@@ -1,5 +1,4 @@
-///<reference path="../Common/Common.ts"/>
-
+/* eslint-disable @typescript-eslint/no-var-requires */
 import "core-js";
 import temp = require("temp");
 import fs = require("fs");
@@ -21,11 +20,11 @@ class ManifestData {
         public dirPath: string) { }
 
     public createOutputFilePath(outputPath: string): string {
-        let fileName = `${this.publisher}.${this.id}-${this.version}.gen.vsix`;
+        const fileName = `${this.publisher}.${this.id}-${this.version}.gen.vsix`;
 
         const updateFileName = (fileName: string, iteration: number) => {
             if (iteration > 0) {
-                let gen = iteration.toString().padStart(2, "0");
+                const gen = iteration.toString().padStart(2, "0");
                 fileName = `${this.publisher}.${this.id}-${this.version}.gen${gen}.vsix`;
             }
             fs.exists(path.join(outputPath, fileName), result => {
@@ -90,7 +89,7 @@ class GalleryFlagsEditor {
 }
 
 export class VSIXEditor {
-    private edit: boolean = false;
+    private edit = false;
     private versionNumber: string = null;
     private id: string = null;
     private idTag: string = null;
@@ -98,8 +97,8 @@ export class VSIXEditor {
     private extensionName: string = null;
     private extensionVisibility: string = null;
     private extensionPricing: string = null;
-    private updateTasksVersion: boolean = true;
-    private updateTasksId: boolean = true;
+    private updateTasksVersion = true;
+    private updateTasksId = true;
 
     constructor(
         public inputFile: string,
@@ -140,7 +139,7 @@ export class VSIXEditor {
             const zip = new tr.ToolRunner(sevenZip.path7za);
             zip.arg("a");
             zip.arg(output);         // redirect output to file
-            zip.arg(path.join(input, "\*"));
+            zip.arg(path.join(input, "\\*"));
             zip.arg("-r");           // recursive
             zip.arg("-y");           // assume yes on all queries
             zip.arg("-tzip");        // zip format
@@ -201,16 +200,16 @@ export class VSIXEditor {
     }
 
     private async editVsixManifest(dirPath: string): Promise<ManifestData> {
-        let x2jsLib = require("x2js");
-        let x2js = new x2jsLib();
+        const x2jsLib = require("x2js");
+        const x2js = new x2jsLib();
 
-        let vsixManifestPath = path.join(dirPath, "extension.vsixmanifest");
+        const vsixManifestPath = path.join(dirPath, "extension.vsixmanifest");
 
         try {
             let vsixManifestData = await fse.readFile(vsixManifestPath, "utf8");
 
-            let vsixmanifest = x2js.xml2js(vsixManifestData);
-            let identity = vsixmanifest.PackageManifest.Metadata.Identity;
+            const vsixmanifest = x2js.xml2js(vsixManifestData);
+            const identity = vsixmanifest.PackageManifest.Metadata.Identity;
 
             if (this.versionNumber) { identity._Version = this.versionNumber; }
             if (this.id) { identity._Id = this.id; }
@@ -257,7 +256,7 @@ export class VSIXEditor {
             }
 
             vsixManifestData = x2js.js2xml(vsixmanifest);
-            let manifestData = new ManifestData(identity._Version,
+            const manifestData = new ManifestData(identity._Version,
                 identity._Id,
                 identity._Publisher,
                 this.extensionVisibility,

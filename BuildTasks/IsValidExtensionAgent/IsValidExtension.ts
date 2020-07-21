@@ -1,10 +1,8 @@
-///<reference path="../Common/Common.ts"/>
-
 import * as tl from "azure-pipelines-task-lib/task";
 import * as common from "../Common/Common";
 import promiseRetry = require("promise-retry");
 
-export async function run() {
+async function run() {
     await common.runTfx(async tfx => {
         try
         {

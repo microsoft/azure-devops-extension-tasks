@@ -1,5 +1,3 @@
-///<reference path="../Common/Common.ts"/>
-
 import * as toolLib from 'azure-pipelines-tool-lib/tool';
 import * as taskLib from 'azure-pipelines-task-lib/task';
 import * as tr from 'azure-pipelines-task-lib/toolrunner';
@@ -65,8 +63,8 @@ function queryLatestMatch(versionSpec: string): string {
     const result = npmRunner.execSync({ failOnStdErr: false, silent: true, ignoreReturnCode: false} as tr.IExecOptions);
     if (result.code === 0)
     {
-        let versions: string[] = JSON.parse(result.stdout.trim());
-        let version: string = toolLib.evaluateVersions(versions, versionSpec);
+        const versions: string[] = JSON.parse(result.stdout.trim());
+        const version: string = toolLib.evaluateVersions(versions, versionSpec);
         return version;
     }
     return "";
