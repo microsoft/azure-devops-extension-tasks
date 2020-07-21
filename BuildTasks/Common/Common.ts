@@ -13,7 +13,7 @@ function writeBuildTempFile(taskName: string, data: any): string {
     let tempFile: string;
     do {
         // Let's add a random suffix
-        let randomSuffix = Math.random().toFixed(6);
+        const randomSuffix = Math.random().toFixed(6);
         tempFile = path.join(os.tmpdir(), `${taskName}-${randomSuffix}.tmp`);
     } while (tl.exist(tempFile));
 
@@ -64,13 +64,13 @@ export function validateAndSetTfxManifestArguments(tfx: ToolRunner): (() => void
         // for backwards compat trigger on both "manifest" and "id"
         case "manifest":
         case "id":
-        default:
+        default: {
             tfx.argIf(publisher, ["--publisher", publisher]);
             tfx.argIf(extensionId, ["--extension-id", extensionId]);
             break;
-
-        case "vsix":
-            let vsixFilePattern = tl.getPathInput("vsixFile", true);
+        }
+        case "vsix": {
+            const vsixFilePattern = tl.getPathInput("vsixFile", true);
             let matchingVsixFile: string[];
             if (vsixFilePattern.indexOf("*") >= 0 || vsixFilePattern.indexOf("?") >= 0) {
                 tl.debug("Pattern found in vsixFile parameter.");
@@ -91,6 +91,7 @@ export function validateAndSetTfxManifestArguments(tfx: ToolRunner): (() => void
             }
             tfx.arg(["--vsix", matchingVsixFile[0]]);
             break;
+        }
     }
 
     let jsonOverrides: any;
@@ -130,7 +131,7 @@ export function validateAndSetTfxManifestArguments(tfx: ToolRunner): (() => void
         }
     }
 
-    let extensionVersion = getExtensionVersion();
+    const extensionVersion = getExtensionVersion();
     if (extensionVersion) {
         tl.debug(`Overriding extension version to: ${extensionVersion}`);
         jsonOverrides = (jsonOverrides || {});
@@ -171,7 +172,7 @@ export function validateAndSetTfxManifestArguments(tfx: ToolRunner): (() => void
  * Run a tfx command by ensuring that "tfx" exists, installing it on the fly if needed.
  * @param  {(tfx:ToolRunner)=>void} cmd
  */
-export async function runTfx(cmd: (tfx: ToolRunner) => void) {
+export async function runTfx(cmd: (tfx: ToolRunner) => void) : Promise<boolean> {
     let tfx: ToolRunner;
     let tfxPath: string;
 
@@ -257,7 +258,7 @@ export function getMarketplaceEndpointDetails(inputFieldName: string): any {
  * @param  {ToolRunner} tfx
  * @returns string
  */
-export function setTfxMarketplaceArguments(tfx: ToolRunner, setServiceUrl: boolean = true) {
+export function setTfxMarketplaceArguments(tfx: ToolRunner, setServiceUrl = true) : void {
     const connectTo = tl.getInput("connectTo", false) || "VsTeam";
     let galleryEndpoint;
 
@@ -290,14 +291,15 @@ export function setTfxMarketplaceArguments(tfx: ToolRunner, setServiceUrl: boole
  */
 export class TfxJsonOutputStream extends stream.Writable {
 
-    jsonString: string = "";
+    jsonString = "";
     messages: string[] = [];
 
     constructor(public out: (message: string) => void) {
         super();
     }
 
-    _write(chunk: any, enc: string, cb: Function) {
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    _write(chunk: any, enc: string, cb: (Function)) : void {
         const chunkStr: string = chunk.toString();
         if (chunkStr.startsWith("[command]"))
         {
@@ -334,45 +336,44 @@ function getTaskPathContributions(manifest: any): string[] {
         .map((c: any) => c.properties["name"]);
 }
 
-function updateTaskId(manifest: any, publisherId: string, extensionId: string): Object {
+function updateTaskId(manifest: any, publisherId: string, extensionId: string): unknown {
     tl.debug(`Task manifest ${manifest.name} id before: ${manifest.id}`);
 
-    let extensionNs = uuidv5("url", "https://marketplace.visualstudio.com/vsts", true);
+    const extensionNs = uuidv5("url", "https://marketplace.visualstudio.com/vsts", true);
     manifest.id = uuidv5(extensionNs, `${publisherId}.${extensionId}.${manifest.name}`, false);
 
     tl.debug(`Task manifest ${manifest.name} id after: ${manifest.id}`);
     return manifest;
 }
 
-function updateExtensionManifestTaskIds(manifest: any, originalTaskId: string, newTaskId: string): Object {
+function updateExtensionManifestTaskIds(manifest: any, originalTaskId: string, newTaskId: string): unknown {
     if (!manifest.contributions) {
         tl.debug(`No contributions found`);
         return manifest;
     }
     
-    tl.debug(`Before contributions loop`);
     manifest.contributions
-    .filter((c: any) => c.properties && c.properties.supportsTasks)
-    .forEach((c: any) => {
-        let supportsTasks = [...c.properties.supportsTasks];
-        var index = supportsTasks.indexOf(originalTaskId);
-        if(index != -1) {
-            
-            tl.debug(`Extension manifest supportsTasks before: ${c.properties.supportsTasks}`);
+        .filter((c: any) => c.type !== "ms.vss-distributed-task.task" && c.properties && c.properties.supportsTasks)
+        .forEach((c: any) => {
+            const supportsTasks = [...c.properties.supportsTasks];
+            const index = supportsTasks.indexOf(originalTaskId);
+            if(index != -1) {
+                
+                tl.debug(`Extension manifest supportsTasks before: ${c.properties.supportsTasks}`);
 
-            supportsTasks[index] = newTaskId;
-            c.properties.supportsTasks = supportsTasks;
-            
-            tl.debug(`Extension manifest supportsTasks after: ${c.properties.supportsTasks}`);
-        } else{
-            tl.debug(`No supportTasks entry found in manifest contribution`);
-        }
-    });
+                supportsTasks[index] = newTaskId;
+                c.properties.supportsTasks = supportsTasks;
+                
+                tl.debug(`Extension manifest supportsTasks after: ${c.properties.supportsTasks}`);
+            } else{
+                tl.debug(`No supportTasks entry found in manifest contribution`);
+            }
+        });
 
     return manifest;
 }
 
-function updateTaskVersion(manifest: any, extensionVersionString: string, extensionVersionType: string): Object {
+function updateTaskVersion(manifest: any, extensionVersionString: string, extensionVersionType: string): unknown {
     const versionParts = extensionVersionString.split(".");
     if (versionParts.length > 3) {
         tl.warning("Detected a version that consists of more than 3 parts. Build tasks support only 3 parts, ignoring the rest.");
@@ -385,10 +386,13 @@ function updateTaskVersion(manifest: any, extensionVersionString: string, extens
         manifest.version = extensionversion;
     } else {
         tl.debug(`Task manifest ${manifest.name} version before: ${JSON.stringify(manifest.version)}`);
+
         switch (extensionVersionType) {
             default:
             case "major": manifest.version.Major = `${extensionversion.major}`;
+            // eslint-disable-next-line no-fallthrough
             case "minor": manifest.version.Minor = `${extensionversion.minor}`;
+            // eslint-disable-next-line no-fallthrough
             case "patch": manifest.version.Patch = `${extensionversion.patch}`;
         }
     }
@@ -414,7 +418,7 @@ export async function updateManifests(manifestPaths: string[]): Promise<void> {
         tl.debug(`Found manifests: ${manifestPaths.join(", ")}`);
 
         const tasksVersions = await updateTaskManifests(manifestPaths, updateTasksId, updateTasksVersion);
-        for(let [originalTaskVersion, newTaskVersion] of tasksVersions) {
+        for(const [originalTaskVersion, newTaskVersion] of tasksVersions) {
             await updateExtensionManifests(manifestPaths, originalTaskVersion, newTaskVersion);
         }
     }
@@ -423,7 +427,7 @@ export async function updateManifests(manifestPaths: string[]): Promise<void> {
 async function updateTaskManifests(manifestPaths: string[], updateTasksId: boolean, updateTasksVersion: boolean) : Promise<Map<string, string>> {
     const tasksVersions: Map<string, string> = new Map<string, string>();
     await Promise.all(manifestPaths.map(async (extensionPath) => {
-        let manifest: any = await getManifest(extensionPath);
+        const manifest: any = await getManifest(extensionPath);
         const taskManifestPaths: string[] = getTaskManifestPaths(extensionPath, manifest);
 
         if (taskManifestPaths && taskManifestPaths.length) {
@@ -475,10 +479,8 @@ async function updateExtensionManifests(manifestPaths: string[], originalTaskId:
 }
 
 function getExtensionManifestPaths(): string[] {
-    let rootFolder: string;
-
     // Search for extension manifests given the rootFolder and patternManifest inputs
-    rootFolder = tl.getInput("rootFolder", false) || tl.getInput("System.DefaultWorkingDirectory");
+    const rootFolder = tl.getInput("rootFolder", false) || tl.getInput("System.DefaultWorkingDirectory");
     const manifestsPatterns = tl.getDelimitedInput("patternManifest", "\n", false) || ["vss-extension.json"];
 
     tl.debug(`Searching for extension manifests: ${manifestsPatterns.join(", ")}`);
@@ -486,7 +488,7 @@ function getExtensionManifestPaths(): string[] {
     return tl.findMatch(rootFolder, manifestsPatterns);
 }
 
-function getManifest(path: string): Promise<Object> {
+function getManifest(path: string): Promise<unknown> {
     return fse.readFile(path, "utf8").then((data: string) => {
         try {
             data = data.replace(/^\uFEFF/,
@@ -501,7 +503,7 @@ function getManifest(path: string): Promise<Object> {
     });
 }
 
-function getTaskManifestPaths(manifestPath: string, manifest: object): string[] {
+function getTaskManifestPaths(manifestPath: string, manifest: any): string[] {
     const tasks = getTaskPathContributions(manifest);
     const rootFolder = path.dirname(manifestPath);
 
@@ -517,7 +519,7 @@ function getTaskManifestPaths(manifestPath: string, manifest: object): string[] 
 
         if (tl.exist(rootManifest)) {
             tl.debug(`Found single-task manifest: ${rootManifest}`);
-            let rootManifests: string[] = [rootManifest];
+            const rootManifests: string[] = [rootManifest];
             const rootLocManifest: string = path.join(localizationRoot || taskRoot, "task.loc.json");
             if (tl.exist(rootLocManifest)) {
                 tl.debug(`Found localized single-task manifest: ${rootLocManifest}`);
@@ -534,7 +536,7 @@ function getTaskManifestPaths(manifestPath: string, manifest: object): string[] 
     }, []);
 }
 
-export function writeManifest(manifest: object, path: string): Promise<void> {
+export function writeManifest(manifest: any, path: string): Promise<void> {
     return fse.writeJSON(path, manifest);
 }
 

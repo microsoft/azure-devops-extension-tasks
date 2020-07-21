@@ -1,9 +1,7 @@
-///<reference path="../Common/Common.ts"/>
-
 import * as tl from "azure-pipelines-task-lib/task";
 import * as common from "../Common/Common";
 
-const accounts = tl.getDelimitedInput("accounts", ",", true).map((value, index) => { return value.trim(); });
+const accounts = tl.getDelimitedInput("accounts", ",", true).map((value) => { return value.trim(); });
 
 void accounts.forEach(async (account) => await common.runTfx(tfx => {
     try {

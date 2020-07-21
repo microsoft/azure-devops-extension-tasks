@@ -12,6 +12,6 @@ declare module 'uuidv5' {
         createUUIDv5: createUUIDv5;
         spaces: space;
     }
-    var exp: createUUIDv5;
+    const exp: createUUIDv5;
     export = exp;
 }

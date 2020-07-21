@@ -13,12 +13,8 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "azure-pipelines-task-lib": "^2.8.0",
+    "azure-pipelines-task-lib": "^2.9.6",
     "core-js": "^2.6.3",
     "path": "~0.12.7"
-  },
-  "devDependencies": {
-    "@types/node": "10.12.19",
-    "@types/q": "~1.5.1"
   }
 }

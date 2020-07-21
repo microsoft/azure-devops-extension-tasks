@@ -1,5 +1,3 @@
-///<reference path="../Common/Common.ts"/>
-
 import * as tl from "azure-pipelines-task-lib/task";
 import * as common from "../Common/Common";
 
@@ -11,7 +9,7 @@ void common.runTfx(async tfx => {
 
     // Installation targets
     const accounts = tl.getDelimitedInput("accounts", ",", true);
-    tfx.arg(["--share-with"].concat(accounts).map((value, index) => { return value.trim(); }));
+    tfx.arg(["--share-with"].concat(accounts).map((value) => { return value.trim(); }));
 
     try{
         const code = await tfx.exec();

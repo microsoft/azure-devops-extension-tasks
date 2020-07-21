@@ -1,18 +1,17 @@
 import * as tl from "azure-pipelines-task-lib";
-import tr = require("azure-pipelines-task-lib/toolrunner");
 import * as util from "./Utils";
 
 let publisher = "";
 
 try {
-    let connectedService = tl.getInput("ConnectedServiceName", true);
-    let token = tl.getEndpointAuthorizationParameter(connectedService, "password", true);
+    const connectedService = tl.getInput("ConnectedServiceName", true);
+    const token = tl.getEndpointAuthorizationParameter(connectedService, "password", true);
 
-    let vsixFile = tl.getPathInput("vsixFile", true, true);
-    let manifestFile = tl.getPathInput("manifestFile", true, true);
-    let publisherId = tl.getInput("publisherId", true);
+    const vsixFile = tl.getPathInput("vsixFile", true, true);
+    const manifestFile = tl.getPathInput("manifestFile", true, true);
+    const publisherId = tl.getInput("publisherId", true);
     publisher = publisherId;
-    let ignoreWarnings = tl.getInput("ignoreWarnings", false);
+    const ignoreWarnings = tl.getInput("ignoreWarnings", false);
 
     console.info(`Logging in as '${publisherId}'`);
     util.login(publisherId, token);

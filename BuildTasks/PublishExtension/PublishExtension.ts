@@ -1,5 +1,3 @@
-///<reference path="../Common/Common.ts"/>
-
 import "core-js";
 import * as tl from "azure-pipelines-task-lib/task";
 import * as common from "../Common/Common";
@@ -26,7 +24,7 @@ void common.runTfx(async tfx => {
             await common.checkUpdateTasksManifests();
         } else {
             // Set vsix file argument
-            let vsixFilePattern = tl.getPathInput("vsixFile", true);
+            const vsixFilePattern = tl.getPathInput("vsixFile", true);
             let matchingVsixFile: string[];
             if (vsixFilePattern.indexOf("*") >= 0 || vsixFilePattern.indexOf("?") >= 0) {
                 tl.debug("Pattern found in vsixFile parameter");

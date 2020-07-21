@@ -25,8 +25,8 @@ export function getVsixPublisherExe(): string {
  }
 
 export function login(publisher: string, token: string) {
-    let vsixPublisherExe = getVsixPublisherExe();
-    let vsixPublisher = tl.tool(vsixPublisherExe);
+    const vsixPublisherExe = getVsixPublisherExe();
+    const vsixPublisher = tl.tool(vsixPublisherExe);
 
     vsixPublisher.arg("login");
     vsixPublisher.arg(["-personalAccessToken", token]);
@@ -44,8 +44,8 @@ export function login(publisher: string, token: string) {
 export function logout(publisher: string) {
     if (loggedIn)
     {
-        let vsixPublisherExe = getVsixPublisherExe();
-        let vsixPublisher = tl.tool(vsixPublisherExe);
+        const vsixPublisherExe = getVsixPublisherExe();
+        const vsixPublisher = tl.tool(vsixPublisherExe);
 
         vsixPublisher.arg("logout");
         vsixPublisher.arg(["-publisherName", publisher]);
@@ -61,8 +61,8 @@ export function logout(publisher: string) {
 }
 
 export function publish(vsixPath: string, manifestPath: string, warningsToIgnore: string) {
-    let vsixPublisherExe = getVsixPublisherExe();
-    let vsixPublisher = tl.tool(vsixPublisherExe);
+    const vsixPublisherExe = getVsixPublisherExe();
+    const vsixPublisher = tl.tool(vsixPublisherExe);
 
     vsixPublisher.arg("publish");
     vsixPublisher.arg(["-payload", vsixPath]);

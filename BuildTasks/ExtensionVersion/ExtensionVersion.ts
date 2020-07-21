@@ -1,5 +1,3 @@
-///<reference path="../Common/Common.ts"/>
-
 import * as tl from "azure-pipelines-task-lib/task";
 import * as tr from "azure-pipelines-task-lib/toolrunner";
 import * as common from "../Common/Common";
@@ -30,7 +28,7 @@ if (extensionVersionOverrideVariable) {
     }
 }
 
-export async function run() {
+async function run() {
     try {
         await common.runTfx(async tfx => {
             try {
