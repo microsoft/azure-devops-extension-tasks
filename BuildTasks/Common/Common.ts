@@ -418,8 +418,9 @@ export async function updateManifests(manifestPaths: string[]): Promise<void> {
         tl.debug(`Found manifests: ${manifestPaths.join(", ")}`);
 
         const tasksVersions = await updateTaskManifests(manifestPaths, updateTasksId, updateTasksVersion);
-        for(const [originalTaskVersion, newTaskVersion] of tasksVersions) {
-            await updateExtensionManifests(manifestPaths, originalTaskVersion, newTaskVersion);
+        
+        if (tasksVersions.size){
+            await updateExtensionManifests(manifestPaths, tasksVersions);
         }
     }
 }
@@ -444,7 +445,8 @@ async function updateTaskManifests(manifestPaths: string[], updateTasksId: boole
                     const originalTaskId = taskManifest.id || null;
                     taskManifest = updateTaskId(taskManifest, publisherId, extensionId);
                     const newTaskId = taskManifest.id;
-                    if(originalTaskId) {
+
+                    if(originalTaskId && originalTaskId !== newTaskId) {
                         tasksVersions[originalTaskId] = newTaskId;
                     }
                 }
