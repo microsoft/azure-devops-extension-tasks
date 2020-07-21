@@ -417,16 +417,14 @@ export async function updateManifests(manifestPaths: string[]): Promise<void> {
 
         tl.debug(`Found manifests: ${manifestPaths.join(", ")}`);
 
-        const tasksVersions = await updateTaskManifests(manifestPaths, updateTasksId, updateTasksVersion);
-        
-        if (tasksVersions.size){
-            await updateExtensionManifests(manifestPaths, tasksVersions);
-        }
+        const tasksIds = await updateTaskManifests(manifestPaths, updateTasksId, updateTasksVersion);
+        await updateExtensionManifests(manifestPaths, tasksIds);
     }
 }
 
-async function updateTaskManifests(manifestPaths: string[], updateTasksId: boolean, updateTasksVersion: boolean) : Promise<Map<string, string>> {
-    const tasksVersions: Map<string, string> = new Map<string, string>();
+async function updateTaskManifests(manifestPaths: string[], updateTasksId: boolean, updateTasksVersion: boolean) : Promise<[string, string][]> {
+    const tasksIds: [string, string][] = [];
+
     await Promise.all(manifestPaths.map(async (extensionPath) => {
         const manifest: any = await getManifest(extensionPath);
         const taskManifestPaths: string[] = getTaskManifestPaths(extensionPath, manifest);
@@ -442,12 +440,12 @@ async function updateTaskManifests(manifestPaths: string[], updateTasksId: boole
                     const extensionTag = tl.getInput("extensionTag", false) || "";
                     const extensionId = `${(tl.getInput("extensionId", false) || manifest.id)}${extensionTag}`;
 
-                    const originalTaskId = taskManifest.id || null;
+                    const originalTaskId: string = taskManifest.id || null;
                     taskManifest = updateTaskId(taskManifest, publisherId, extensionId);
-                    const newTaskId = taskManifest.id;
+                    const newTaskId: string = taskManifest.id;
 
-                    if(originalTaskId && originalTaskId !== newTaskId) {
-                        tasksVersions[originalTaskId] = newTaskId;
+                    if(originalTaskId && (originalTaskId !== newTaskId)) {
+                        tasksIds.push([originalTaskId, newTaskId])
                     }
                 }
 
@@ -469,14 +467,20 @@ async function updateTaskManifests(manifestPaths: string[], updateTasksId: boole
         }
     }));
 
-    return tasksVersions;
+    return tasksIds;
 }
 
-async function updateExtensionManifests(manifestPaths: string[], originalTaskId: string, newTaskId: string): Promise<void> {
+async function updateExtensionManifests(manifestPaths: string[], updatedTaskIds: [string, string][]): Promise<void> {
     await Promise.all(manifestPaths.map(async (path) => { 
-        const originalManifest = await getManifest(path);
-        const newManifest = updateExtensionManifestTaskIds(originalManifest, originalTaskId, newTaskId);
-        await writeManifest(newManifest, path);
+        tl.debug(`Patching: ${path}.`);
+        let originalManifest = await getManifest(path);
+
+        updatedTaskIds.map((tasksVersion) => {
+            tl.debug(`Updating: ${tasksVersion[0]} => ${tasksVersion[1]}.`)
+            originalManifest = updateExtensionManifestTaskIds(originalManifest, tasksVersion[0], tasksVersion[1]);
+        });
+
+        await writeManifest(originalManifest, path);
     }));
 }
 
