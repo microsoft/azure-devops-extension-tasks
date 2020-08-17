@@ -1,0 +1,57 @@
+trigger:
+- main
+
+pool:
+  vmImage: 'windows-latest'
+  demands: npm
+
+steps:
+- task: NodeTool@0
+  inputs:
+    versionSpec: '10.x'
+  displayName: 'Install Node.js'
+
+- script: |
+    npm run initdev
+    npm run build
+  displayName: 'npm install and build'
+
+- powershell: |
+   $vswhereLatest = "https://github.com/Microsoft/vswhere/releases/latest/download/vswhere.exe"
+   $vswherePath = "$(Build.SourcesDirectory)\BuildTasks\PublishVSExtension\tools\vswhere.exe"
+   remove-item $vswherePath
+   invoke-webrequest $vswhereLatest -OutFile $vswherePath
+   test-path $vswherePath -PathType Leaf
+  displayName: 'Grab the latest version of vswehere.exe'
+
+- task: Npm@1
+  displayName: 'Build the extension'
+  inputs:
+    command: custom
+    verbose: false
+    customCommand: 'run build'
+
+- task: TfxInstaller@3
+  displayName: 'Use Node CLI for Azure DevOps'
+
+- task: PackageAzureDevOpsExtension@3
+  displayName: 'Package Extension: $(Build.SourcesDirectory)'
+  name: 'packageStep'
+  inputs:
+    rootFolder: '$(Build.SourcesDirectory)'
+    outputPath: 'azure-devops-extension-task.vsix'
+    publisherId: 'alm-rangers'
+    extensionId: 'vsts-developer-tools-build-tasks'
+    extensionTag: ALPHA
+    extensionName: 'Azure DevOps Extension Tasks'
+    extensionVersion: '$(Build.BuildNumber)'
+    updateTasksVersion: true
+    updateTasksVersionType: patch
+    extensionVisibility: private
+    extensionPricing: free
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: drop'
+  inputs:
+    PathtoPublish: '$(packageStep.Extension.OutputPath)'
+  condition: succeededOrFailed()
