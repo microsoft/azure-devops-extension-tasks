@@ -33,6 +33,14 @@ steps:
     verbose: false
     customCommand: 'run build'
 
+- task: SnykSecurityScan@0
+  inputs:
+    testType: 'app'
+    monitorOnBuild: false
+    failOnIssues: true
+    projectName: 'azure-devops-extension-task'
+    additionalArguments: '--all-projects --detection-depth=6'
+
 - task: TfxInstaller@3
   displayName: 'Use Node CLI for Azure DevOps'
 
@@ -41,7 +49,7 @@ steps:
   name: 'packageStep'
   inputs:
     rootFolder: '$(Build.SourcesDirectory)'
-    outputPath: 'azure-devops-extension-task.vsix'
+    outputPath: 'vsix'
     publisherId: 'alm-rangers'
     extensionId: 'vsts-developer-tools-build-tasks'
     extensionTag: ALPHA
@@ -51,6 +59,7 @@ steps:
     updateTasksVersionType: patch
     extensionVisibility: private
     extensionPricing: free
+
 
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact: drop'
