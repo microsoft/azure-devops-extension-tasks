@@ -1,3 +1,5 @@
+name: '3.1$(rev:.r)'
+
 trigger:
 - main
 
