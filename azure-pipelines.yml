@@ -137,7 +137,7 @@ stages:
             name: 'publishProd'
             inputs:
               connectTo: 'VsTeam'
-              connectedServiceName: 'Jesse Houwing'
+              connectedServiceName: 'msdevlabs'
               fileType: 'vsix'
               vsixFile: '$(Pipeline.Workspace)/vsix/vsts-developer-tools-build-tasks.vsix'
               publisherId: 'msdevlabs'
