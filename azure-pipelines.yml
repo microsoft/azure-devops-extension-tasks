@@ -81,90 +81,98 @@ stages:
   displayName: 'Publish privately'
   dependsOn: 'Build'
   jobs:
-    - job: 
-      steps:
-      - task: DownloadPipelineArtifact@2
-        inputs:
-           artifactName: 'build'
-           buildType: current
-           targetPath: $(Build.ArtifactStagingDirectory)
+    - deployment: 
+      environment: Publisher JesseHouwing (privately)
+      strategy: 
+        runOnce:
+         deploy:
+          steps:
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              artifactName: 'build'
+              buildType: current
+              targetPath: $(Build.ArtifactStagingDirectory)
 
-      - task: TfxInstaller@3
-        displayName: 'Use Node CLI for Azure DevOps'
-        inputs:
-           version: '0.8.x'
-           checkLatest: true
+          - task: TfxInstaller@3
+            displayName: 'Use Node CLI for Azure DevOps'
+            inputs:
+              version: '0.8.x'
+              checkLatest: true
 
-      - task: PublishAzureDevOpsExtension@3
-        name: 'publishDev'
-        inputs:
-          connectTo: 'VsTeam'
-          connectedServiceName: 'Jesse Houwing'
-          fileType: 'vsix'
-          vsixFile: '$(Build.ArtifactStagingDirectory)\**\vsts-developer-tools-build-tasks.vsix'
-          publisherId: 'jessehouwing'
-          extensionId: 'vsts-developer-tools-build-tasks'
-          extensionTag: '-dev'
-          updateTasksVersion: false
-          extensionVisibility: 'privatepreview'
-          shareWith: 'jessehouwing-dev'
+          - task: PublishAzureDevOpsExtension@3
+            name: 'publishDev'
+            inputs:
+              connectTo: 'VsTeam'
+              connectedServiceName: 'Jesse Houwing'
+              fileType: 'vsix'
+              vsixFile: '$(Build.ArtifactStagingDirectory)\**\vsts-developer-tools-build-tasks.vsix'
+              publisherId: 'jessehouwing'
+              extensionId: 'vsts-developer-tools-build-tasks'
+              extensionTag: '-dev'
+              updateTasksVersion: false
+              extensionVisibility: 'privatepreview'
+              shareWith: 'jessehouwing-dev'
 
-      - task: PublishPipelineArtifact@1
-        displayName: 'Publish vsix'
-        inputs:
-          publishLocation: pipeline
-          targetPath: '$(publishDev.Extension.OutputPath)'
-          artifact: 'dev'
-        condition: succeededOrFailed()
+          - task: PublishPipelineArtifact@1
+            displayName: 'Publish vsix'
+            inputs:
+              publishLocation: pipeline
+              targetPath: '$(publishDev.Extension.OutputPath)'
+              artifact: 'dev'
+            condition: succeededOrFailed()
 
 - stage: PublishProd
   displayName: 'Publish publicly to MsDevLabs'
   dependsOn: 'PublishDev'
   jobs:
-    - job: 
-      steps:
-      - task: DownloadPipelineArtifact@2
-        inputs:
-           artifactName: 'build'
-           buildType: current
-           targetPath: $(Build.ArtifactStagingDirectory)
+    - deployment: 
+      environment: Publisher MsDevLabs (publicly)
+      strategy: 
+        runOnce:
+         deploy:
+          steps:
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              artifactName: 'build'
+              buildType: current
+              targetPath: $(Build.ArtifactStagingDirectory)
 
-      - task: TfxInstaller@3
-        displayName: 'Use Node CLI for Azure DevOps'
-        inputs:
-           version: '0.8.x'
-           checkLatest: true
+          - task: TfxInstaller@3
+            displayName: 'Use Node CLI for Azure DevOps'
+            inputs:
+              version: '0.8.x'
+              checkLatest: true
 
-      - task: PublishAzureDevOpsExtension@3
-        name: 'publishProd'
-        inputs:
-          connectTo: 'VsTeam'
-          connectedServiceName: 'Jesse Houwing'
-          fileType: 'vsix'
-          vsixFile: '$(Build.ArtifactStagingDirectory)\**\vsts-developer-tools-build-tasks.vsix'
-          publisherId: 'msdevlabs'
-          extensionId: 'vsts-developer-tools-build-tasks'
-          updateTasksVersion: false
-          extensionVisibility: 'public'
+          - task: PublishAzureDevOpsExtension@3
+            name: 'publishProd'
+            inputs:
+              connectTo: 'VsTeam'
+              connectedServiceName: 'Jesse Houwing'
+              fileType: 'vsix'
+              vsixFile: '$(Build.ArtifactStagingDirectory)\**\vsts-developer-tools-build-tasks.vsix'
+              publisherId: 'msdevlabs'
+              extensionId: 'vsts-developer-tools-build-tasks'
+              updateTasksVersion: false
+              extensionVisibility: 'public'
 
-      - task: PublishPipelineArtifact@1
-        displayName: 'Publish vsix'
-        inputs:
-          publishLocation: pipeline
-          targetPath: '$(publishProd.Extension.OutputPath)'
-          artifact: 'dev'
-        condition: succeededOrFailed()
+          - task: PublishPipelineArtifact@1
+            displayName: 'Publish vsix'
+            inputs:
+              publishLocation: pipeline
+              targetPath: '$(publishProd.Extension.OutputPath)'
+              artifact: 'dev'
+            condition: succeededOrFailed()
 
-      - task: GitHubRelease@1
-        inputs:
-          gitHubConnection: 'GitHub - jessehouwing'
-          repositoryName: '$(Build.Repository.Name)'
-          action: 'create'
-          target: '$(Build.SourceVersion)'
-          tagSource: 'gitTag'
-          tagPattern: '$(Build.BuildNumber)'
-          title: 'v$(Build.BuildNumber)'
-          releaseNotesSource: 'inline'
-          assets: '$(Build.ArtifactStagingDirectory)\**\vsts-developer-tools-build-tasks.vsix'
-          changeLogCompareToRelease: 'lastFullRelease'
-          changeLogType: 'commitBased'
+          - task: GitHubRelease@1
+            inputs:
+              gitHubConnection: 'GitHub - jessehouwing'
+              repositoryName: '$(Build.Repository.Name)'
+              action: 'create'
+              target: '$(Build.SourceVersion)'
+              tagSource: 'gitTag'
+              tagPattern: '$(Build.BuildNumber)'
+              title: 'v$(Build.BuildNumber)'
+              releaseNotesSource: 'inline'
+              assets: '$(Build.ArtifactStagingDirectory)\**\vsts-developer-tools-build-tasks.vsix'
+              changeLogCompareToRelease: 'lastFullRelease'
+              changeLogType: 'commitBased'
