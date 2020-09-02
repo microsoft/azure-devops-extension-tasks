@@ -59,7 +59,7 @@ stages:
       name: 'packageStep'
       inputs:
         rootFolder: '$(Build.SourcesDirectory)'
-        outputPath: 'vsix'
+        outputPath: '$(Build.ArtifactStagingDirectory)\vsts-developer-tools-build-tasks.vsix'
         publisherId: 'jessehouwing'
         extensionId: 'vsts-developer-tools-build-tasks'
         extensionTag: '-build'
@@ -127,6 +127,11 @@ stages:
          deploy:
           steps:
 
+          - script: |
+              cd $(Build.ArtifactStagingDirectory)
+              dir /s /b
+
+    
           - task: TfxInstaller@3
             displayName: 'Use Node CLI for Azure DevOps'
             inputs:
@@ -139,7 +144,7 @@ stages:
               connectTo: 'VsTeam'
               connectedServiceName: 'Jesse Houwing'
               fileType: 'vsix'
-              vsixFile: '$(Build.ArtifactStagingDirectory)\**\vsts-developer-tools-build-tasks.vsix'
+              vsixFile: '$(Build.ArtifactStagingDirectory)\build\vsts-developer-tools-build-tasks.vsix'
               publisherId: 'msdevlabs'
               extensionId: 'vsts-developer-tools-build-tasks'
               updateTasksVersion: false
@@ -163,6 +168,6 @@ stages:
               tagPattern: '$(Build.BuildNumber)'
               title: 'v$(Build.BuildNumber)'
               releaseNotesSource: 'inline'
-              assets: '$(Build.ArtifactStagingDirectory)\**\vsts-developer-tools-build-tasks.vsix'
+              assets: '$(Build.ArtifactStagingDirectory)\build\vsts-developer-tools-build-tasks.vsix'
               changeLogCompareToRelease: 'lastFullRelease'
               changeLogType: 'commitBased'
