@@ -74,7 +74,7 @@ stages:
       inputs:
         publishLocation: pipeline
         targetPath: '$(packageStep.Extension.OutputPath)'
-        artifact: 'build'
+        artifact: 'vsix'
       condition: succeededOrFailed()
 
 - stage: PublishDev
@@ -89,7 +89,7 @@ stages:
           steps:
 
           - script: |
-              cd $(Build.ArtifactStagingDirectory)
+              cd $(Pipeline.Workspace)
               dir /s /b
           - task: TfxInstaller@3
             displayName: 'Use Node CLI for Azure DevOps'
@@ -103,7 +103,7 @@ stages:
               connectTo: 'VsTeam'
               connectedServiceName: 'Jesse Houwing'
               fileType: 'vsix'
-              vsixFile: '$(Build.ArtifactStagingDirectory)\**\vsts-developer-tools-build-tasks.vsix'
+              vsixFile: '$(Pipeline.Workspace)/vsix/vsts-developer-tools-build-tasks.vsix'
               publisherId: 'jessehouwing'
               extensionId: 'vsts-developer-tools-build-tasks'
               extensionTag: '-dev'
@@ -142,7 +142,7 @@ stages:
               connectTo: 'VsTeam'
               connectedServiceName: 'Jesse Houwing'
               fileType: 'vsix'
-              vsixFile: '$(Build.ArtifactStagingDirectory)\build\vsts-developer-tools-build-tasks.vsix'
+              vsixFile: '$(Pipeline.Workspace)/vsix/vsts-developer-tools-build-tasks.vsix'
               publisherId: 'msdevlabs'
               extensionId: 'vsts-developer-tools-build-tasks'
               updateTasksVersion: false
