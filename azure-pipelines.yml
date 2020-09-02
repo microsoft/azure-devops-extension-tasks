@@ -166,6 +166,6 @@ stages:
               tagPattern: '$(Build.BuildNumber)'
               title: 'v$(Build.BuildNumber)'
               releaseNotesSource: 'inline'
-              assets: '$(Pipeline.Workspace)/vsix/vsts-developer-tools-build-tasks*.vsix'
+              assets: '$(publishProd.Extension.OutputPath)*'
               changeLogCompareToRelease: 'lastFullRelease'
               changeLogType: 'commitBased'
