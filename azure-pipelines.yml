@@ -140,7 +140,7 @@ stages:
               connectedServiceName: 'msdevlabs'
               fileType: 'vsix'
               vsixFile: '$(Pipeline.Workspace)/vsix/vsts-developer-tools-build-tasks.vsix'
-              publisherId: 'msdevlabs'
+              publisherId: 'ms-devlabs'
               extensionId: 'vsts-developer-tools-build-tasks'
               updateTasksVersion: false
               extensionVisibility: 'public'
