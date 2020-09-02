@@ -88,9 +88,6 @@ stages:
          deploy:
           steps:
 
-          - script: |
-              cd $(Pipeline.Workspace)
-              dir /s /b
           - task: TfxInstaller@3
             displayName: 'Use Node CLI for Azure DevOps'
             inputs:
