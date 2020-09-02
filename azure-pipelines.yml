@@ -87,11 +87,6 @@ stages:
         runOnce:
          deploy:
           steps:
-          - task: DownloadPipelineArtifact@2
-            inputs:
-              artifactName: 'build'
-              buildType: current
-              targetPath: $(Build.ArtifactStagingDirectory)
 
           - task: TfxInstaller@3
             displayName: 'Use Node CLI for Azure DevOps'
@@ -131,11 +126,6 @@ stages:
         runOnce:
          deploy:
           steps:
-          - task: DownloadPipelineArtifact@2
-            inputs:
-              artifactName: 'build'
-              buildType: current
-              targetPath: $(Build.ArtifactStagingDirectory)
 
           - task: TfxInstaller@3
             displayName: 'Use Node CLI for Azure DevOps'
