@@ -88,6 +88,9 @@ stages:
          deploy:
           steps:
 
+          - script: |
+              cd $(Build.ArtifactStagingDirectory)
+              dir /s /b
           - task: TfxInstaller@3
             displayName: 'Use Node CLI for Azure DevOps'
             inputs:
@@ -127,11 +130,6 @@ stages:
          deploy:
           steps:
 
-          - script: |
-              cd $(Build.ArtifactStagingDirectory)
-              dir /s /b
-
-    
           - task: TfxInstaller@3
             displayName: 'Use Node CLI for Azure DevOps'
             inputs:
