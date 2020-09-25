@@ -159,7 +159,7 @@ stages:
             inputs:
               publishLocation: pipeline
               targetPath: '$(publishProd.Extension.OutputPath)'
-              artifact: 'dev'
+              artifact: 'prod'
             condition: succeededOrFailed()
 
           - task: GitHubRelease@1
