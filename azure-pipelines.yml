@@ -21,8 +21,7 @@ stages:
 
     - script: |
         npm run initdev
-        npm run build
-      displayName: 'npm install and build'
+      displayName: 'Install Node dependencies'
 
     - powershell: |
         $vswhereLatest = "https://github.com/Microsoft/vswhere/releases/latest/download/vswhere.exe"
