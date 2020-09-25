@@ -3,6 +3,9 @@ name: '3.1$(rev:.r)'
 trigger:
 - main
 
+pr:
+- main
+
 pool:
   vmImage: 'windows-latest'
   demands: npm
@@ -78,7 +81,7 @@ stages:
 
 - stage: PublishDev
   displayName: 'Publish privately'
-  condition: 'ne(variables["Build.Reason"]), "PullRequest")'
+  condition: ne(variables['Build.Reason']), "PullRequest")
   dependsOn: 'Build'
   jobs:
     - deployment: 
