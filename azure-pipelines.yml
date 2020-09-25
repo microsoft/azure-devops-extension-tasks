@@ -107,6 +107,7 @@ stages:
               updateTasksVersion: false
               extensionVisibility: 'privatepreview'
               shareWith: 'jessehouwing-dev'
+              noWaitValidation: true
 
           - task: PublishPipelineArtifact@1
             displayName: 'Publish vsix'
@@ -144,6 +145,14 @@ stages:
               extensionId: 'vsts-developer-tools-build-tasks'
               updateTasksVersion: false
               extensionVisibility: 'public'
+              noWaitValidation:  true
+          
+          - task: IsAzureDevOpsExtensionValid@3
+            inputs:
+              connectTo: 'VsTeam'
+              connectedServiceName: 'msdevlabs'
+              method: 'vsix'
+              vsixFile: '$(publishProd.Extension.OutputPath)'
 
           - task: PublishPipelineArtifact@1
             displayName: 'Publish vsix'
