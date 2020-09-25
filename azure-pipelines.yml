@@ -81,7 +81,7 @@ stages:
 
 - stage: PublishDev
   displayName: 'Publish privately'
-  condition: ne(variables['Build.Reason']), "PullRequest")
+  condition: ne(variables['Build.Reason'], 'PullRequest')
   dependsOn: 'Build'
   jobs:
     - deployment: 
