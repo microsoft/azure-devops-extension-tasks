@@ -4,7 +4,7 @@
   "publisher": "ms-devlabs",
   "name": "Azure DevOps Extension Tasks",
   "version": "3.1.0",
-  "description": "Azure Pipelines tasks for packaging and publishing Azure Devops and Visual Studio (coming soon) extensions to the Visual Studio Marketplace.",
+  "description": "Azure Pipelines tasks for packaging and publishing Azure Devops and Visual Studio extensions to the Visual Studio Marketplace.",
   "tags": [
     "Extension",
     "Marketplace",
