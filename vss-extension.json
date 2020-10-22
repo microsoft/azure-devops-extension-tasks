@@ -57,13 +57,13 @@
   },
   "badges": [
     {
-      "href": "https://almrangers.visualstudio.com/ALM/_build?definitionId=127",
-      "uri": "https://almrangers.visualstudio.com/ALM/_apis/build/status/Extensions/Azure%20DevOps%20Extension%20Tasks",
+      "href": "https://dev.azure.com/jessehouwing/azure-devops-extensions/_build/latest?definitionId=77&branchName=main",
+      "uri": "https://dev.azure.com/jessehouwing/azure-devops-extensions/_apis/build/status/azure-devops-extension-tasks/microsoft.azure-devops-extension-tasks?branchName=main&stageName=Build",
       "description": "Build"
     },
     {
-      "href": "https://almrangers.visualstudio.com/ALM/_releaseDefinition?definitionId=25",
-      "uri": "https://almrangers.vsrm.visualstudio.com/_apis/public/Release/badge/7f3cfb9a-d1cb-4e66-9d36-1af87b906fe9/25/70",
+      "href": "https://dev.azure.com/jessehouwing/azure-devops-extensions/_build/latest?definitionId=77&branchName=main",
+      "uri": "https://dev.azure.com/jessehouwing/azure-devops-extensions/_apis/build/status/azure-devops-extension-tasks/microsoft.azure-devops-extension-tasks?branchName=main&stageName=Publish%20publicly%20to%20MsDevLabs",
       "description": "Release"
     }
   ],
