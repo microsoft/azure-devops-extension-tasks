@@ -5,7 +5,7 @@ import * as path from 'path';
 import * as os from 'os';
 import * as fs from 'fs';
 
-const debug = taskLib.getVariable("debug") || false;
+const debug = taskLib.getVariable("system.debug") || false;
 
 async function run() 
 {
@@ -50,19 +50,19 @@ async function getTfx(versionSpec: string, checkLatest: boolean) {
         }
     }
 
-    if (os.platform() !== "win32")
+    if (!taskLib.exist(path.join(toolPath, "/tfx")))
     {
         toolPath = path.join(toolPath, "/node_modules/.bin/");
     }
     
-    taskLib.setVariable("__tfxpath", toolPath, false);
+    taskLib.setTaskVariable("__tfxpath", toolPath, false);
     toolLib.prependPath(toolPath);
 }
 
 function queryLatestMatch(versionSpec: string): string {
     const npmRunner = new tr.ToolRunner("npm");
     npmRunner.arg(["show", "tfx-cli", "versions", "--json"]);
-    const result = npmRunner.execSync({ failOnStdErr: false, silent: true, ignoreReturnCode: false} as tr.IExecOptions);
+    const result = npmRunner.execSync({ failOnStdErr: false, silent: !debug, ignoreReturnCode: false} as tr.IExecOptions);
     if (result.code === 0)
     {
         const versions: string[] = JSON.parse(result.stdout.trim());
