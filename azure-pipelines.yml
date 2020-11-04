@@ -2,6 +2,7 @@ name: '3.1$(rev:.r)'
 
 trigger:
 - main
+- feature/*
 
 pr:
 - main
@@ -81,7 +82,7 @@ stages:
 
 - stage: PublishDev
   displayName: 'Publish privately'
-  condition: ne(variables['Build.Reason'], 'PullRequest')
+  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
   dependsOn: 'Build'
   jobs:
     - deployment: 
@@ -112,6 +113,13 @@ stages:
               shareWith: 'jessehouwing-dev'
               noWaitValidation: true
 
+          - task: IsAzureDevOpsExtensionValid@3
+            inputs:
+              connectTo: 'VsTeam'
+              connectedServiceName: 'Jesse Houwing'
+              method: 'vsix'
+              vsixFile: '$(publishDev.Extension.OutputPath)'
+
           - task: PublishPipelineArtifact@1
             displayName: 'Publish vsix'
             inputs:
@@ -122,6 +130,7 @@ stages:
 
 - stage: PublishProd
   displayName: 'Publish publicly to MsDevLabs'
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
   dependsOn: 'PublishDev'
   jobs:
     - deployment: 
