@@ -193,7 +193,7 @@ export async function runTfx(cmd: (tfx: ToolRunner) => void) : Promise<boolean> 
         }
     };
 
-    const tfxInstallerPath = tl.getTaskVariable("__tfxpath");
+    const tfxInstallerPath = tl.getVariable("__tfxpath");
     if (tfxInstallerPath)
     {
         tfxPath = tl.which(path.join(tfxInstallerPath, "/tfx"));
