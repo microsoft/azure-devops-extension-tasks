@@ -50,9 +50,12 @@ async function getTfx(versionSpec: string, checkLatest: boolean) {
         }
     }
 
-    if (!taskLib.exist(path.join(toolPath, "/tfx")))
+    if (os.platform() !== "win32")
     {
-        toolPath = path.join(toolPath, "/node_modules/.bin/");
+        const probePaths = [toolPath, path.join(toolPath, "/bin"), path.join(toolPath, "/node_modules/.bin/")];
+        toolPath = probePaths.find((probePath) => {
+            return taskLib.exist(path.join(probePath, "/tfx"));
+        });
     }
     
     taskLib.setTaskVariable("__tfxpath", toolPath, false);
