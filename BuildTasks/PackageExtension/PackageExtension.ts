@@ -20,7 +20,11 @@ async function run() {
                 await common.checkUpdateTasksManifests();
                 const outputStream = new common.TfxJsonOutputStream(console.log);
 
-                const code = await tfx.exec(<any>{ outStream: outputStream, failOnStdErr: true });
+                const code = await tfx.exec(<any>{ outStream: outputStream, failOnStdErr: false });
+                if (code !== 0)
+                {
+                    throw `tfx exited with return code: ${code}`
+                }
                 const json = JSON.parse(outputStream.jsonString);
 
                 if (outputVariable) {
