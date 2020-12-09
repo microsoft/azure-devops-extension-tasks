@@ -268,7 +268,7 @@
               {
                 "id": "apitoken",
                 "name": "Personal Access Token",
-                "description": "Personal Access Token (TFS 2017+ and Azure DevOps Server 2019).",
+                "description": "Personal Access Token (TFS 2017+ and Azure DevOps Server 2019 and 2020).",
                 "inputMode": "passwordbox",
                 "isConfidential": true,
                 "validation": {
