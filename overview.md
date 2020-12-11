@@ -2,11 +2,11 @@ This extension provides build and release tasks for packaging and publishing Azu
 
 ## How to use
 
-After installing the extension, you can add one (or more) of the tasks to a new or existing [build definition](https://www.visualstudio.com/en-us/docs/build/define/create) or [release definition](https://www.visualstudio.com/en-us/docs/release/author-release-definition/more-release-definition)
+After installing the extension, you can add one (or more) of the tasks to [your pipeline](https://docs.microsoft.com/en-us/azure/devops/pipelines/?WT.mc_id=DOP-MVP-5001511&view=azure-devops). You can find an [example YAML pipeline in the form of the pipeline which peblished this extension](https://github.com/microsoft/azure-devops-extension-tasks/blob/main/azure-pipelines.yml).
 
 ![add-task](add-task.png)
 
-If you plan to publish to the Marketplace, you will need to [create a personal access token](https://www.visualstudio.com/docs/setup-admin/team-services/use-personal-access-tokens-to-authenticate).
+If you plan to publish to the Marketplace, you will need to [create a personal access token](https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?WT.mc_id=DOP-MVP-5001511&view=azure-devops&tabs=preview-page).
 
 ## Available tasks
 
