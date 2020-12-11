@@ -2,7 +2,7 @@ This extension provides build and release tasks for packaging and publishing Azu
 
 ## How to use
 
-After installing the extension, you can add one (or more) of the tasks to [your pipeline](https://docs.microsoft.com/en-us/azure/devops/pipelines/?WT.mc_id=DOP-MVP-5001511&view=azure-devops). You can find an [example YAML pipeline in the form of the pipeline which peblished this extension](https://github.com/microsoft/azure-devops-extension-tasks/blob/main/azure-pipelines.yml).
+After installing the extension, you can add one (or more) of the tasks to [your pipeline](https://docs.microsoft.com/en-us/azure/devops/pipelines/?WT.mc_id=DOP-MVP-5001511&view=azure-devops). You can find an [example YAML pipeline in the form of the pipeline which publishes this extension](https://github.com/microsoft/azure-devops-extension-tasks/blob/main/azure-pipelines.yml).
 
 ![add-task](add-task.png)
 
