@@ -517,8 +517,8 @@ function getTaskManifestPaths(manifestPath: string, manifest: any): string[] {
         tl.debug(`Found task: ${task}`);
         const taskRoot: string = path.join(rootFolder, task);
         const rootManifest: string = path.join(taskRoot, "task.json");
-
-        let localizationRoot = tl.getInput("localizationRoot", false);
+        
+        let localizationRoot = tl.filePathSupplied("localizationRoot") ? tl.getPathInput("localizationRoot", false) : taskRoot;
         if (localizationRoot) {
             localizationRoot = path.resolve(localizationRoot);
         }
@@ -526,7 +526,7 @@ function getTaskManifestPaths(manifestPath: string, manifest: any): string[] {
         if (tl.exist(rootManifest)) {
             tl.debug(`Found single-task manifest: ${rootManifest}`);
             const rootManifests: string[] = [rootManifest];
-            const rootLocManifest: string = path.join(localizationRoot || taskRoot, "task.loc.json");
+            const rootLocManifest: string = path.join(localizationRoot, "task.loc.json");
             if (tl.exist(rootLocManifest)) {
                 tl.debug(`Found localized single-task manifest: ${rootLocManifest}`);
                 rootManifests.push(rootLocManifest);
@@ -534,7 +534,7 @@ function getTaskManifestPaths(manifestPath: string, manifest: any): string[] {
             return (result).concat(rootManifests);
         } else {
             const versionManifests = tl.findMatch(taskRoot, "*/task.json");
-            const locVersionManifests = tl.findMatch(localizationRoot || taskRoot, "*/task.loc.json");
+            const locVersionManifests = tl.findMatch(localizationRoot, "*/task.loc.json");
             tl.debug(`Found multi-task manifests: ${versionManifests.join(", ")}`);
             tl.debug(`Found multi-task localized manifests: ${locVersionManifests.join(", ")}`);
             return (result).concat(versionManifests).concat(locVersionManifests);
