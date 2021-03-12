@@ -14,7 +14,7 @@
     "temp": "^0.8.3",
     "uuidv5": "^1.0.0",
     "x2js": "^3.1.1",
-    "xmldom": "^0.1.27"
+    "xmldom": "^0.5.0"
   },
   "devDependencies": {
     "@types/node": "^14.0.24"
