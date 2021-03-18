@@ -13,7 +13,7 @@
     "fs-extra": "^5.0.0",
     "temp": "^0.8.3",
     "uuidv5": "^1.0.0",
-    "x2js": "^3.4.0",
+    "x2js": "^3.4.1",
     "xmldom": "^0.5.0"
   },
   "devDependencies": {

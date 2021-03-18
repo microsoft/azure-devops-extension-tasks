@@ -5,8 +5,4 @@ ignore:
   'npm:shelljs:20140723':
     - azure-pipelines-task-lib > shelljs:
         reason: No patch available. Code currently not exposed through extension.
-  SNYK-JS-XMLDOM-1084960:
-    - x2js > xmldom:
-        reason: No fix available at the moment.
-        expires: '2021-04-15T10:34:22.850Z'
 patch: {}
