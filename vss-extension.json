@@ -87,6 +87,9 @@
       "path": "BuildTasks/PublishExtension"
     },
     {
+      "path": "BuildTasks/UnpublishExtension"
+    },
+    {
       "path": "BuildTasks/PublishVSExtension"
     },
     {
@@ -123,6 +126,16 @@
       ],
       "properties": {
         "name": "BuildTasks/PublishExtension"
+      }
+    },
+    {
+      "id": "unpublish-extension-build-task",
+      "type": "ms.vss-distributed-task.task",
+      "targets": [
+        "ms.vss-distributed-task.tasks"
+      ],
+      "properties": {
+        "name": "BuildTasks/UnpublishExtension"
       }
     },
     {
