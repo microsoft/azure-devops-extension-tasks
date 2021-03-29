@@ -6,7 +6,7 @@ async function run() {
         try {
             tfx.arg(["extension", "unpublish", "--no-color"]);
 
-            common.setTfxMarketplaceArguments(tfx, false);
+            common.setTfxMarketplaceArguments(tfx);
             common.validateAndSetTfxManifestArguments(tfx);
             
             const result = tfx.execSync(<any>{ silent: false, failOnStdErr: false });
