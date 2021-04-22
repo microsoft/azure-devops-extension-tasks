@@ -1,9 +1,5 @@
 # Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
 version: v1.19.0
 # ignores vulnerabilities until expiry date; change duration by modifying expiry date
-ignore:
-  SNYK-JS-UNDERSCORE-1080984:
-    - azure-pipelines-tool-lib > typed-rest-client > underscore:
-        reason: No patch available
-        expires: '2021-04-28T19:03:07.408Z'
+ignore: {}
 patch: {}
