@@ -6,7 +6,7 @@ ignore:
     - azure-pipelines-task-lib > shelljs > rechoir > resolve > path-parse:
         reason: No update available as of yet.
         expires: '2021-06-05T17:42:01.715Z'
-      azure-pipelines-tool-lib > azure-pipelines-task-lib > shelljs > rechoir > resolve > path-parse:
+    - azure-pipelines-tool-lib > azure-pipelines-task-lib > shelljs > rechoir > resolve > path-parse:
         reason: None given
         expires: '2021-06-05T17:45:51.228Z'
 patch: {}
