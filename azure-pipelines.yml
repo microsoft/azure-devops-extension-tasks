@@ -33,7 +33,7 @@ stages:
         remove-item $vswherePath
         invoke-webrequest $vswhereLatest -OutFile $vswherePath
         test-path $vswherePath -PathType Leaf
-      displayName: 'Grab the latest version of vswehere.exe'
+      displayName: 'Grab the latest version of vswhere.exe'
 
     - task: Npm@1
       displayName: 'Build the extension'
