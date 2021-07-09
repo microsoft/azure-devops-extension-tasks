@@ -47,7 +47,6 @@ stages:
         testType: 'app'
         monitorOnBuild: false
         failOnIssues: true
-        projectName: 'azure-devops-extension-task'
         additionalArguments: '--all-projects --detection-depth=6'
         serviceConnectionEndpoint: 'snyk-jessehouwing'
 
