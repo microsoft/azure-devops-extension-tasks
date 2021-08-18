@@ -475,9 +475,9 @@ async function updateExtensionManifests(manifestPaths: string[], updatedTaskIds:
         tl.debug(`Patching: ${path}.`);
         let originalManifest = await getManifest(path);
 
-        updatedTaskIds.map((tasksVersion) => {
-            tl.debug(`Updating: ${tasksVersion[0]} => ${tasksVersion[1]}.`)
-            originalManifest = updateExtensionManifestTaskIds(originalManifest, tasksVersion[0], tasksVersion[1]);
+        updatedTaskIds.map(([originalTaskId, newTaskId]) => {
+            tl.debug(`Updating: ${originalTaskId} => ${newTaskId}.`)
+            originalManifest = updateExtensionManifestTaskIds(originalManifest, originalTaskId, newTaskId);
         });
 
         await writeManifest(originalManifest, path);
