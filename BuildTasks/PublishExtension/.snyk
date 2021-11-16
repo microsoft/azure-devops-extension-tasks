@@ -8,8 +8,8 @@ ignore:
   SNYK-JS-XMLDOM-1534562:
     - xmldom:
         reason: None given
-        expires: '2021-10-29T17:55:18.420Z'
+        expires: '2021-12-16T15:01:03.783Z'
     - x2js > xmldom:
         reason: None given
-        expires: '2021-10-29T17:55:18.420Z'
+        expires: '2021-12-16T15:01:03.783Z'
 patch: {}
