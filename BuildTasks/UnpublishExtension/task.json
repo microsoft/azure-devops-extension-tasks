@@ -137,6 +137,10 @@
     "Node": {
       "target": "UnpublishExtension/UnpublishExtension.js",
       "argumentFormat": ""
+    },
+    "Node10": {
+      "target": "UnpublishExtension/UnpublishExtension.js",
+      "argumentFormat": ""
     }
   }
 }

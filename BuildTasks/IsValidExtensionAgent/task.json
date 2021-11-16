@@ -141,6 +141,10 @@
     "Node": {
       "target": "IsValidExtensionAgent/IsValidExtension.js",
       "argumentFormat": ""
+    },
+    "Node10": {
+      "target": "IsValidExtensionAgent/IsValidExtension.js",
+      "argumentFormat": ""
     }
   }
 }

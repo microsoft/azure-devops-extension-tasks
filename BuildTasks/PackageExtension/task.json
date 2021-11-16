@@ -229,6 +229,10 @@
     "Node": {
       "target": "PackageExtension/PackageExtension.js",
       "argumentFormat": ""
+    },
+    "Node10": {
+      "target": "PackageExtension/PackageExtension.js",
+      "argumentFormat": ""
     }
   }
 }

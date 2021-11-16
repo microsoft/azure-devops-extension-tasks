@@ -169,6 +169,10 @@
     "Node": {
       "target": "ExtensionVersion/ExtensionVersion.js",
       "argumentFormat": ""
+    },
+    "Node10": {
+      "target": "ExtensionVersion/ExtensionVersion.js",
+      "argumentFormat": ""
     }
   }
 }

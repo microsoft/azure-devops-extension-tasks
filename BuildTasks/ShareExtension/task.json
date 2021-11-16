@@ -142,6 +142,10 @@
     "Node": {
       "target": "ShareExtension/ShareExtension.js",
       "argumentFormat": ""
+    },
+    "Node10": {
+      "target": "ShareExtension/ShareExtension.js",
+      "argumentFormat": ""
     }
   }
 }

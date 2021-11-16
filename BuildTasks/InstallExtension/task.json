@@ -151,6 +151,10 @@
     "Node": {
       "target": "InstallExtension/InstallExtension.js",
       "argumentFormat": ""
+    },
+    "Node10": {
+      "target": "InstallExtension/InstallExtension.js",
+      "argumentFormat": ""
     }
   }
 }

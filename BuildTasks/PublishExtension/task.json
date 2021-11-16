@@ -296,6 +296,10 @@
     "Node": {
       "target": "PublishExtension/PublishExtension.js",
       "argumentFormat": ""
+    },
+    "Node10": {
+      "target": "PublishExtension/PublishExtension.js",
+      "argumentFormat": ""
     }
   }
 }
