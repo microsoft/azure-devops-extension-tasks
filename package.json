@@ -43,7 +43,7 @@
     "eslint-config-airbnb-typescript": "^9.0.0",
     "eslint-plugin-import": "^2.22.0",
     "glob-exec": "^0.1.1",
-    "tfx-cli": "^0.9.3",
+    "tfx-cli": "^0.10.0",
     "tslint": "^5.20.1",
     "typescript": "^3.9.7"
   }
