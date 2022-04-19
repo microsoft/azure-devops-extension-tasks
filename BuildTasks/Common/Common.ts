@@ -10,7 +10,7 @@ import * as tmp from "tmp";
 
 function writeBuildTempFile(taskName: string, data: any): string {
     const tempDir = tl.getVariable("Agent.TempDirectory");
-    const tempFile = tmp.tmpNameSync({ prefix: taskName, postfix: ".tmp", dir: tempDir });
+    const tempFile = tmp.tmpNameSync({ prefix: taskName, postfix: ".tmp", tmpdir: tempDir });
 
     tl.debug(`Generating Build temp file: ${tempFile}`);
     tl.writeFile(tempFile, data);

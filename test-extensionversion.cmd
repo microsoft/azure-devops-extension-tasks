@@ -16,6 +16,13 @@ set NO_UPDATE_NOTIFIER=true
 
 cmd /c "npm run build:tasks"
 
+pushd BuildTasks\TfxInstaller\TfxInstaller
+node TfxInstaller.js
+popd
+
+set __TFXPATH=c:\temp\agent\tools\tfx\0.7.11\x64
+
+
 pushd BuildTasks\ExtensionVersion\ExtensionVersion
 node ExtensionVersion.js
 popd
