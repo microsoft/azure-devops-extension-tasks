@@ -13,7 +13,7 @@ function writeBuildTempFile(taskName: string, data: any): string {
     const tempFile = tmp.tmpNameSync({ prefix: taskName, postfix: ".tmp", tmpdir: tempDir });
 
     tl.debug(`Generating Build temp file: ${tempFile}`);
-    tl.writeFile(tempFile, data);
+    tl.writeFile(tempFile, data, { mode: 0o600, encoding: "utf8"} );
 
     return tempFile;
 }
