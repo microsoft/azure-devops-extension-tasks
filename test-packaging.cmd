@@ -1,5 +1,5 @@
 set INPUT_VERSION=v0.7.x
-if %INPUT_PUBLISHERID% == meA (set INPUT_PUBLISHERID=meB) else (set INPUT_PUBLISHERID=meA)
+set INPUT_PUBLISHERID=meA
 
 set AGENT_WORKFOLDER=c:\temp\agent\work
 set AGENT_TOOLSDIRECTORY=c:\temp\agent\tools

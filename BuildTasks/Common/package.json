@@ -9,6 +9,10 @@
   "dependencies": {
     "azure-pipelines-task-lib": "^3.1.10",
     "fs-extra": "^5.0.0",
+    "tmp": "^0.2.1",
     "uuidv5": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/tmp": "^0.2.3"
   }
 }

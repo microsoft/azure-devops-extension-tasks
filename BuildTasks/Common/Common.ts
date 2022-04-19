@@ -1,21 +1,16 @@
-import * as os from "os";
 import * as path from "path";
 import * as stream from "stream";
 import * as fs from "fs";
 import * as tl from "azure-pipelines-task-lib/task";
 import * as trl from "azure-pipelines-task-lib/toolrunner";
 import * as fse from "fs-extra";
-
 import ToolRunner = trl.ToolRunner;
 import * as uuidv5 from "uuidv5";
+import * as tmp from "tmp";
 
 function writeBuildTempFile(taskName: string, data: any): string {
-    let tempFile: string;
-    do {
-        // Let's add a random suffix
-        const randomSuffix = Math.random().toFixed(6);
-        tempFile = path.join(os.tmpdir(), `${taskName}-${randomSuffix}.tmp`);
-    } while (tl.exist(tempFile));
+    const tempDir = tl.getVariable("Agent.TempDirectory");
+    const tempFile = tmp.tmpNameSync({ prefix: taskName, postfix: ".tmp", dir: tempDir });
 
     tl.debug(`Generating Build temp file: ${tempFile}`);
     tl.writeFile(tempFile, data);
