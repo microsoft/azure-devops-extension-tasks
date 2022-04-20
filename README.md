@@ -6,7 +6,7 @@ This extension provides build and release tasks for packaging and publishing Azu
 
 ## To use
 
-[Learn more](https://marketplace.visualstudio.com/items?itemName=ms-devlabs.vsts-developer-tools-build-tasks) about this extension about and install the extension into your Azure DevOps Organisation via the Visual Studio Marketplace.
+[Learn more](https://marketplace.visualstudio.com/items?itemName=ms-devlabs.vsts-developer-tools-build-tasks) about this extension and install the extension into your Azure DevOps Organisation via the Visual Studio Marketplace.
 
 ## Available tasks
 
