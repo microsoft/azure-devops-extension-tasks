@@ -10,11 +10,12 @@ function setVersion(version: string) {
         tl.command("build.updatebuildnumber", null, version);
     }
 
+    const setOutputFlag = tl.getBoolInput("setOutputFlag", false) || false;
     const outputVariable = tl.getInput("outputVariable", false);
     if (outputVariable) {
-        tl.setVariable(outputVariable, version);
+        tl.setVariable(outputVariable, version, false, setOutputFlag);
     }
-    tl.setVariable("Extension.Version", version);
+    tl.setVariable("Extension.Version", version, false, setOutputFlag);
 }
 
 if (extensionVersionOverrideVariable) {

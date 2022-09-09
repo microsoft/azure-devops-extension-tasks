@@ -8,7 +8,7 @@
   "category": "Utility",
   "version": {
     "Major": 3,
-    "Minor": 1,
+    "Minor": 2,
     "Patch": 0
   },
   "visibility": [
@@ -121,6 +121,15 @@
       "required": false,
       "helpMarkDown": "The variable name to assign the version to. Specify only the name, e.g.: `Extension.Version`, not `$(Extension.Version)`.",
       "groupName": "backcompat"
+    },
+    {
+      "name": "setOutputFlag",
+      "type": "boolean",
+      "label": "Set Output flag on Output Variable",
+      "defaultValue": false,
+      "required": false,
+      "helpMarkDown": "When this is set to true the task will set the Output flag on the variable, allowing you to reference the variable across stages and jobs. See: https://docs.microsoft.com/en-us/azure/devops/pipelines/process/set-variables-scripts?view=azure-devops&tabs=bash#set-an-output-variable-for-use-in-future-jobs.",
+      "groupName": "advanced"
     },
     {
       "name": "setBuildNumber",
