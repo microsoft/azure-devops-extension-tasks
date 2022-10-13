@@ -1,10 +1,7 @@
 # Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
-version: v1.22.1
+version: v1.25.0
 # ignores vulnerabilities until expiry date; change duration by modifying expiry date
 ignore:
-  'npm:shelljs:20140723':
-    - azure-pipelines-task-lib > shelljs:
-        reason: No patch available. Code currently not exposed through extension.
   SNYK-JS-XMLDOM-1534562:
     - xmldom:
         reason: None given
@@ -12,4 +9,13 @@ ignore:
     - x2js > xmldom:
         reason: None given
         expires: '2021-12-16T15:01:03.783Z'
+    - '*':
+        reason: None Given
+        expires: 2022-11-12T12:46:16.699Z
+        created: 2022-10-13T12:46:16.704Z
+  SNYK-JS-XMLDOM-3042242:
+    - '*':
+        reason: None Given
+        expires: 2022-11-12T12:46:39.870Z
+        created: 2022-10-13T12:46:39.875Z
 patch: {}
