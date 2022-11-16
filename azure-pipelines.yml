@@ -8,8 +8,7 @@ pr:
 - main
 
 pool:
-  vmImage: 'windows-latest'
-  demands: npm
+  vmImage: 'windows-2022'
 
 stages:
 - stage: 'Build'
