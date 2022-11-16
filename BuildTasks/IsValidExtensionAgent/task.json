@@ -19,9 +19,6 @@
     "npm" 
   ],
   "minimumAgentVersion": "2.206.1",
-  "runsOn": [
-    "Agent"
-  ],
   "groups": [
     {
       "name": "extension",
