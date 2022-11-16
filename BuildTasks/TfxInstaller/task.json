@@ -7,8 +7,8 @@
   "helpMarkDown": "",
   "category": "Tool",
   "version": {
-    "Major": 3,
-    "Minor": 1,
+    "Major": 4,
+    "Minor": 0,
     "Patch": 0
   },
   "visibility": [
@@ -43,11 +43,7 @@
     }
   ],
   "execution": {
-    "Node10": {
-      "target": "TfxInstaller/TfxInstaller.js",
-      "argumentFormat": ""
-    },
-    "Node": {
+    "Node16": {
       "target": "TfxInstaller/TfxInstaller.js",
       "argumentFormat": ""
     }

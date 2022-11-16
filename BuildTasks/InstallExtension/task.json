@@ -7,8 +7,8 @@
   "helpMarkDown": "",
   "category": "Deploy",
   "version": {
-    "Major": 3,
-    "Minor": 1,
+    "Major": 4,
+    "Minor": 0,
     "Patch": 0
   },
   "visibility": [
@@ -18,7 +18,7 @@
   "demands": [
     "npm"
   ],
-  "minimumAgentVersion": "1.83.0",
+  "minimumAgentVersion": "2.206.1",
   "groups": [
     {
       "name": "extension",
@@ -148,11 +148,7 @@
     }
   ],
   "execution": {
-    "Node": {
-      "target": "InstallExtension/InstallExtension.js",
-      "argumentFormat": ""
-    },
-    "Node10": {
+    "Node16": {
       "target": "InstallExtension/InstallExtension.js",
       "argumentFormat": ""
     }
