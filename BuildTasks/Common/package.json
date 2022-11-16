@@ -7,8 +7,8 @@
   },
   "license": "MIT",
   "dependencies": {
-    "azure-pipelines-task-lib": "^3.3.1",
-    "fs-extra": "^5.0.0",
+    "azure-pipelines-task-lib": "^4.0.1-preview",
+    "fs-extra": "^10.1.0",
     "tmp": "^0.2.1",
     "uuidv5": "^1.0.0"
   },

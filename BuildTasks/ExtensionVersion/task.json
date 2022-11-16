@@ -18,7 +18,7 @@
   "demands": [
     "npm"
   ],
-  "minimumAgentVersion": "1.83.0",
+  "minimumAgentVersion": "2.206.1",
   "groups": [
     {
       "name": "extension",
@@ -157,11 +157,7 @@
     }
   ],
   "execution": {
-    "Node": {
-      "target": "ExtensionVersion/ExtensionVersion.js",
-      "argumentFormat": ""
-    },
-    "Node10": {
+    "Node16": {
       "target": "ExtensionVersion/ExtensionVersion.js",
       "argumentFormat": ""
     }

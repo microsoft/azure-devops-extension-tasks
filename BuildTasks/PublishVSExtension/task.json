@@ -8,8 +8,8 @@
   "preview": true,
   "category": "Deploy",
   "version": {
-    "Major": 3,
-    "Minor": 1,
+    "Major": 4,
+    "Minor": 0,
     "Patch": 0
   },
   "visibility": [
@@ -19,7 +19,7 @@
   "demands": [
     "visualstudio"
   ],
-  "minimumAgentVersion": "1.83.0",
+  "minimumAgentVersion": "2.206.1",
   "groups": [],
   "instanceNameFormat": "Publish Visual Studio Extension",
   "inputs": [
@@ -64,14 +64,7 @@
     }
   ],
   "execution": {
-    "Node10": {
-      "target": "PublishVSExtension.js",
-      "argumentFormat": "",
-      "platforms": [
-        "windows"
-      ]
-    },
-    "Node": {
+    "Node16": {
       "target": "PublishVSExtension.js",
       "argumentFormat": "",
       "platforms": [
