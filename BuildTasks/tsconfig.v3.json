@@ -1,0 +1,15 @@
+{
+  "compileOnSave": true,
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es6",
+    "sourceMap": true,
+    "strict": false,
+    "strictNullChecks": false,
+    "removeComments": true
+  },
+  "files": [
+    "./Common/v3/uuidv5.d.ts",
+    "./Common/v3/Common.ts"
+  ]
+}

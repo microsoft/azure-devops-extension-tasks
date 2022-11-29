@@ -1,0 +1,15 @@
+{
+  "name": "vsts-developer-tools.shareextension",
+  "description": "Share Extension Task",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Microsoft/azure-devops-extension-tasks.git"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "azure-pipelines-task-lib": "^3.4.0",
+    "fs-extra": "^5.0.0",
+    "tmp": "^0.2.1",
+    "uuidv5": "^1.0.0"
+  }
+}

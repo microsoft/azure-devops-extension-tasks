@@ -1,0 +1,82 @@
+{
+  "id": "17654839-813a-4e5f-a724-223a68ec647c",
+  "name": "PublishVisualStudioExtension",
+  "friendlyName": "Publish Visual Studio Extension",
+  "description": "Publish Visual Studio extension to the Visual Studio Marketplace",
+  "author": "Microsoft Corporation",
+  "helpMarkDown": "[More Information](https://marketplace.visualstudio.com/items?itemName=ms-devlabs.vsts-developer-tools-build-tasks)",
+  "preview": true,
+  "category": "Deploy",
+  "version": {
+    "Major": 3,
+    "Minor": 5,
+    "Patch": 0
+  },
+  "visibility": [
+    "Build",
+    "Release"
+  ],
+  "demands": [
+    "visualstudio"
+  ],
+  "minimumAgentVersion": "1.83.0",
+  "groups": [],
+  "instanceNameFormat": "Publish Visual Studio Extension",
+  "inputs": [
+    {
+      "name": "connectedServiceName",
+      "type": "connectedService:VstsMarketplacePublishing",
+      "label": "Visual Studio Marketplace connection",
+      "required": true,
+      "helpMarkDown": "Service endpoint connection to install the extension."
+    },
+    {
+      "name": "vsixFile",
+      "type": "filePath",
+      "label": "VSIX file",
+      "defaultValue": "",
+      "required": true,
+      "helpMarkDown": "VSIX file to publish."
+    },
+    {
+      "name": "manifestFile",
+      "type": "filePath",
+      "label": "Manifest file",
+      "defaultValue": "",
+      "required": true,
+      "helpMarkDown": "Path for the manifest file. [more](https://docs.microsoft.com/en-us/visualstudio/extensibility/walkthrough-publishing-a-visual-studio-extension-via-command-line?view=vs-2017#publishmanifest-file)"
+    },
+    {
+      "name": "publisherId",
+      "type": "string",
+      "label": "Publisher ID",
+      "defaultValue": "",
+      "required": true,
+      "helpMarkDown": "Extension publisher ID."
+    },
+    {
+      "name": "ignoreWarnings",
+      "type": "string",
+      "label": "Warnings to ignore",
+      "defaultValue": "",
+      "helpMarkDown": "List of warnings to ignore when publishing an extension. These warnings are shown as command line messages when publishing an extension. (for example, \"VSIXValidatorWarning01, VSIXValidatorWarning02\")",
+      "required": false
+    }
+  ],
+  "execution": {
+    "Node10": {
+      "target": "PublishVSExtension.js",
+      "argumentFormat": "",
+      "platforms": [
+        "windows"
+      ]
+    },
+    "Node": {
+      "target": "PublishVSExtension.js",
+      "argumentFormat": "",
+      "platforms": [
+        "windows"
+      ]
+    }
+  }
+}

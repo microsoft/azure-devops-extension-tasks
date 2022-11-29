@@ -1,0 +1,7 @@
+{
+    "extends": "../../tsconfig.v4.json",
+    "compilerOptions": {
+        "outDir": "./Common", 
+        "sourceRoot": "./"
+    }
+  }
