@@ -1,0 +1,11 @@
+{
+    "extends": "../../tsconfig.v3.json",
+    "compilerOptions": {
+        "outDir": "./", 
+        "sourceRoot": "./"
+    },
+    "files": [
+        "vsixeditor.ts",
+        "PublishExtension.ts"
+    ]
+  }
