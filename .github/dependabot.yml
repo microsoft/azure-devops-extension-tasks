@@ -13,79 +13,179 @@ updates:
     directory: "/BuildTasks/v3/Common" # Location of package manifests
     schedule:
       interval: "weekly"
+    ignore:
+    - dependency-name: "azure-pipelines-task-lib"
+      update-types: ["version-update:semver-major"]
+    - dependency-name: "@types/node"
+      update-types: ["version-update:semver-major"]
   - package-ecosystem: "npm" # See documentation for possible values
     directory: "/BuildTasks/v3/ExtensionVersion" # Location of package manifests
     schedule:
       interval: "weekly"
+    ignore:
+    - dependency-name: "azure-pipelines-task-lib"
+      update-types: ["version-update:semver-major"]
+    - dependency-name: "@types/node"
+      update-types: ["version-update:semver-major"]
   - package-ecosystem: "npm" # See documentation for possible values
     directory: "/BuildTasks/v3/InstallExtension" # Location of package manifests
     schedule:
       interval: "weekly"
+    ignore:
+    - dependency-name: "azure-pipelines-task-lib"
+      update-types: ["version-update:semver-major"]
+    - dependency-name: "@types/node"
+      update-types: ["version-update:semver-major"]
   - package-ecosystem: "npm" # See documentation for possible values
     directory: "/BuildTasks/v3/IsValidExtensionAgent" # Location of package manifests
     schedule:
       interval: "weekly"
+    ignore:
+    - dependency-name: "azure-pipelines-task-lib"
+      update-types: ["version-update:semver-major"]
+    - dependency-name: "@types/node"
+      update-types: ["version-update:semver-major"]
   - package-ecosystem: "npm" # See documentation for possible values
     directory: "/BuildTasks/v3/PackageExtension" # Location of package manifests
     schedule:
       interval: "weekly"
+    ignore:
+    - dependency-name: "azure-pipelines-task-lib"
+      update-types: ["version-update:semver-major"]
+    - dependency-name: "@types/node"
+      update-types: ["version-update:semver-major"]
   - package-ecosystem: "npm" # See documentation for possible values
     directory: "/BuildTasks/v3/PublishExtension" # Location of package manifests
     schedule:
       interval: "weekly"
+    ignore:
+    - dependency-name: "azure-pipelines-task-lib"
+      update-types: ["version-update:semver-major"]
+    - dependency-name: "@types/node"
+      update-types: ["version-update:semver-major"]
   - package-ecosystem: "npm" # See documentation for possible values
     directory: "/BuildTasks/v3/PublishVSExtension" # Location of package manifests
     schedule:
       interval: "weekly"
+    ignore:
+    - dependency-name: "azure-pipelines-task-lib"
+      update-types: ["version-update:semver-major"]
+    - dependency-name: "@types/node"
+      update-types: ["version-update:semver-major"]
   - package-ecosystem: "npm" # See documentation for possible values
     directory: "/BuildTasks/v3/ShareExtension" # Location of package manifests
     schedule:
       interval: "weekly"
+    ignore:
+    - dependency-name: "azure-pipelines-task-lib"
+      update-types: ["version-update:semver-major"]
+    - dependency-name: "@types/node"
+      update-types: ["version-update:semver-major"]
   - package-ecosystem: "npm" # See documentation for possible values
     directory: "/BuildTasks/v3/TfxInstaller" # Location of package manifests
     schedule:
       interval: "weekly"
+    ignore:
+    - dependency-name: "azure-pipelines-task-lib"
+      update-types: ["version-update:semver-major"]
+    - dependency-name: "@types/node"
+      update-types: ["version-update:semver-major"]
   - package-ecosystem: "npm" # See documentation for possible values
     directory: "/BuildTasks/v3/UnpublishExtension" # Location of package manifests
     schedule:
       interval: "weekly"
+    ignore:
+    - dependency-name: "azure-pipelines-task-lib"
+      update-types: ["version-update:semver-major"]
+    - dependency-name: "@types/node"
+      update-types: ["version-update:semver-major"]
   - package-ecosystem: "npm" # See documentation for possible values
     directory: "/BuildTasks/v4/Common" # Location of package manifests
     schedule:
       interval: "weekly"
+    ignore:
+    - dependency-name: "azure-pipelines-task-lib"
+      update-types: ["version-update:semver-major"]
+    - dependency-name: "@types/node"
+      update-types: ["version-update:semver-major"]
   - package-ecosystem: "npm" # See documentation for possible values
     directory: "/BuildTasks/v4/ExtensionVersion" # Location of package manifests
     schedule:
       interval: "weekly"
+    ignore:
+    - dependency-name: "azure-pipelines-task-lib"
+      update-types: ["version-update:semver-major"]
+    - dependency-name: "@types/node"
+      update-types: ["version-update:semver-major"]
   - package-ecosystem: "npm" # See documentation for possible values
     directory: "/BuildTasks/v4/InstallExtension" # Location of package manifests
     schedule:
       interval: "weekly"
+    ignore:
+    - dependency-name: "azure-pipelines-task-lib"
+      update-types: ["version-update:semver-major"]
+    - dependency-name: "@types/node"
+      update-types: ["version-update:semver-major"]
   - package-ecosystem: "npm" # See documentation for possible values
     directory: "/BuildTasks/v4/IsValidExtensionAgent" # Location of package manifests
     schedule:
       interval: "weekly"
+    ignore:
+    - dependency-name: "azure-pipelines-task-lib"
+      update-types: ["version-update:semver-major"]
+    - dependency-name: "@types/node"
+      update-types: ["version-update:semver-major"]
   - package-ecosystem: "npm" # See documentation for possible values
     directory: "/BuildTasks/v4/PackageExtension" # Location of package manifests
     schedule:
       interval: "weekly"
+    ignore:
+    - dependency-name: "azure-pipelines-task-lib"
+      update-types: ["version-update:semver-major"]
+    - dependency-name: "@types/node"
+      update-types: ["version-update:semver-major"]
   - package-ecosystem: "npm" # See documentation for possible values
     directory: "/BuildTasks/v4/PublishExtension" # Location of package manifests
     schedule:
       interval: "weekly"
+    ignore:
+    - dependency-name: "azure-pipelines-task-lib"
+      update-types: ["version-update:semver-major"]
+    - dependency-name: "@types/node"
+      update-types: ["version-update:semver-major"]
   - package-ecosystem: "npm" # See documentation for possible values
     directory: "/BuildTasks/v4/PublishVSExtension" # Location of package manifests
     schedule:
       interval: "weekly"
+    ignore:
+    - dependency-name: "azure-pipelines-task-lib"
+      update-types: ["version-update:semver-major"]
+    - dependency-name: "@types/node"
+      update-types: ["version-update:semver-major"]
   - package-ecosystem: "npm" # See documentation for possible values
     directory: "/BuildTasks/v4/ShareExtension" # Location of package manifests
     schedule:
       interval: "weekly"
+    ignore:
+    - dependency-name: "azure-pipelines-task-lib"
+      update-types: ["version-update:semver-major"]
+    - dependency-name: "@types/node"
+      update-types: ["version-update:semver-major"]
   - package-ecosystem: "npm" # See documentation for possible values
     directory: "/BuildTasks/v4/TfxInstaller" # Location of package manifests
     schedule:
       interval: "weekly"
+    ignore:
+    - dependency-name: "azure-pipelines-task-lib"
+      update-types: ["version-update:semver-major"]
+    - dependency-name: "@types/node"
+      update-types: ["version-update:semver-major"]
   - package-ecosystem: "npm" # See documentation for possible values
     directory: "/BuildTasks/v4/UnpublishExtension" # Location of package manifests
     schedule:
       interval: "weekly"
+    ignore:
+    - dependency-name: "azure-pipelines-task-lib"
+      update-types: ["version-update:semver-major"]
+    - dependency-name: "@types/node"
+      update-types: ["version-update:semver-major"]
