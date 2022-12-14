@@ -57,13 +57,13 @@ stages:
         additionalArguments: '--all-projects --detection-depth=6'
         serviceConnectionEndpoint: 'snyk-jessehouwing'
 
-    - task: TfxInstaller@3
+    - task: TfxInstaller@4
       displayName: 'Use Node CLI for Azure DevOps'
       inputs:
         version: '0.x'
         checkLatest: true
 
-    - task: PackageAzureDevOpsExtension@3
+    - task: PackageAzureDevOpsExtension@4
       displayName: 'Package Extension: $(Build.SourcesDirectory)'
       name: 'packageStep'
       inputs:
@@ -102,13 +102,13 @@ stages:
               versionSpec: '16.x'
             displayName: 'Install Node.js'
 
-          - task: TfxInstaller@3
+          - task: TfxInstaller@4
             displayName: 'Use Node CLI for Azure DevOps'
             inputs:
               version: '0.x'
               checkLatest: true
 
-          - task: PublishAzureDevOpsExtension@3
+          - task: PublishAzureDevOpsExtension@4
             name: 'publishDev'
             inputs:
               connectTo: 'VsTeam'
@@ -123,7 +123,7 @@ stages:
               shareWith: 'jessehouwing-dev'
               noWaitValidation: true
 
-          - task: IsAzureDevOpsExtensionValid@3
+          - task: IsAzureDevOpsExtensionValid@4
             inputs:
               connectTo: 'VsTeam'
               connectedServiceName: 'Jesse Houwing'
@@ -154,13 +154,13 @@ stages:
               versionSpec: '16.x'
             displayName: 'Install Node.js'
             
-          - task: TfxInstaller@3
+          - task: TfxInstaller@4
             displayName: 'Use Node CLI for Azure DevOps'
             inputs:
               version: '0.x'
               checkLatest: true
 
-          - task: PublishAzureDevOpsExtension@3
+          - task: PublishAzureDevOpsExtension@4
             name: 'publishProd'
             inputs:
               connectTo: 'VsTeam'
@@ -173,7 +173,7 @@ stages:
               extensionVisibility: 'public'
               noWaitValidation:  true
           
-          - task: IsAzureDevOpsExtensionValid@3
+          - task: IsAzureDevOpsExtensionValid@4
             inputs:
               connectTo: 'VsTeam'
               connectedServiceName: 'msdevlabs'
