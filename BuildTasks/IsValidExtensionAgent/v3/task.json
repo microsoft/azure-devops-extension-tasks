@@ -139,11 +139,11 @@
   ],
   "execution": {
     "Node": {
-      "target": "IsValidExtensionAgent/IsValidExtension.js",
+      "target": "IsValidExtensionAgent/v3/IsValidExtension.js",
       "argumentFormat": ""
     },
     "Node10": {
-      "target": "IsValidExtensionAgent/IsValidExtension.js",
+      "target": "IsValidExtensionAgent/v3/IsValidExtension.js",
       "argumentFormat": ""
     }
   }

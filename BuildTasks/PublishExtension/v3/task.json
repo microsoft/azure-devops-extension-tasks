@@ -294,11 +294,11 @@
   ],
   "execution": {
     "Node": {
-      "target": "PublishExtension/PublishExtension.js",
+      "target": "PublishExtension/v3/PublishExtension.js",
       "argumentFormat": ""
     },
     "Node10": {
-      "target": "PublishExtension/PublishExtension.js",
+      "target": "PublishExtension/v3/PublishExtension.js",
       "argumentFormat": ""
     }
   }

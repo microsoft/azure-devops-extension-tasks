@@ -135,11 +135,11 @@
   ],
   "execution": {
     "Node": {
-      "target": "UnpublishExtension/UnpublishExtension.js",
+      "target": "UnpublishExtension/v3/UnpublishExtension.js",
       "argumentFormat": ""
     },
     "Node10": {
-      "target": "UnpublishExtension/UnpublishExtension.js",
+      "target": "UnpublishExtension/v3/UnpublishExtension.js",
       "argumentFormat": ""
     }
   }

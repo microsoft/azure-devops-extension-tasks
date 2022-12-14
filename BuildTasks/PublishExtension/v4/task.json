@@ -294,7 +294,7 @@
   ],
   "execution": {
     "Node16": {
-      "target": "PublishExtension/PublishExtension.js",
+      "target": "PublishExtension/v4/PublishExtension.js",
       "argumentFormat": ""
     }
   }

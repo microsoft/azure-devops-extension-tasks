@@ -135,7 +135,7 @@
   ],
   "execution": {
     "Node16": {
-      "target": "UnpublishExtension/UnpublishExtension.js",
+      "target": "UnpublishExtension/v4/UnpublishExtension.js",
       "argumentFormat": ""
     }
   }

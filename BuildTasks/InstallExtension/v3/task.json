@@ -149,11 +149,11 @@
   ],
   "execution": {
     "Node": {
-      "target": "InstallExtension/InstallExtension.js",
+      "target": "InstallExtension/v3/InstallExtension.js",
       "argumentFormat": ""
     },
     "Node10": {
-      "target": "InstallExtension/InstallExtension.js",
+      "target": "InstallExtension/v3/InstallExtension.js",
       "argumentFormat": ""
     }
   }

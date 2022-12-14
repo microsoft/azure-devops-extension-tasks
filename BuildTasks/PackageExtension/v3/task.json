@@ -227,11 +227,11 @@
   ],
   "execution": {
     "Node": {
-      "target": "PackageExtension/PackageExtension.js",
+      "target": "PackageExtension/v3/PackageExtension.js",
       "argumentFormat": ""
     },
     "Node10": {
-      "target": "PackageExtension/PackageExtension.js",
+      "target": "PackageExtension/v3/PackageExtension.js",
       "argumentFormat": ""
     }
   }
