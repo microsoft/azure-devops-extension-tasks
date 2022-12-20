@@ -1,5 +1,6 @@
 {
-  "name": "vsts-developer-tools.common",
+  "name": "vsts-developer-tools.commonv3",
+  "version": "3.5.0",
   "description": "common",
   "repository": {
     "type": "git",

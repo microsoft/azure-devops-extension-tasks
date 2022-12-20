@@ -1,5 +1,6 @@
 {
-  "name": "vsts-developer-tools.extensionversion",
+  "name": "vsts-developer-tools.extensionversionv3",
+  "version": "3.5.0",
   "description": "Query Extension Version Task",
   "repository": {
     "type": "git",

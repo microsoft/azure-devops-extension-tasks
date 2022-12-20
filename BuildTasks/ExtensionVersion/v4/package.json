@@ -1,6 +1,7 @@
 {
-  "name": "vsts-developer-tools.extensionversion",
+  "name": "vsts-developer-tools.extensionversionv4",
   "description": "Query Extension Version Task",
+  "version": "4.0.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/Microsoft/azure-devops-extension-tasks.git"

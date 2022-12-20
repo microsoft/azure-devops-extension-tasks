@@ -1,5 +1,6 @@
 {
-  "name": "vsts-developer-tools.installextension",
+  "name": "vsts-developer-tools.installextensionv4",
+  "version": "4.0.0",
   "description": "Install Extension Task",
   "repository": {
     "type": "git",

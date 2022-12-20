@@ -1,5 +1,6 @@
 {
-  "name": "vsts-developer-tools.unpublishextension",
+  "name": "vsts-developer-tools.unpublishextensionv3",
+  "version": "3.5.0",
   "description": "Unpublish Extension Task",
   "repository": {
     "type": "git",
