@@ -111,52 +111,93 @@ export class VSIXEditor {
         tl.debug("Editing started");
     }
 
-    private extractArchive(input: string, output: string): void {
-        if (tl.osType() === "Windows_NT") {
+    private extractArchive(vsix: string, tmpPath: string): void {
+        const cwd = tl.cwd();
+
+        if (tl.getPlatform() === tl.Platform.Windows) {
             const sevenZip = require("7zip-bin-win");
             const zip = new tr.ToolRunner(sevenZip.path7za);
-            zip.arg("x");
-            zip.arg(input);          // file to extract
-            zip.arg(`-o${output}`);  // redirect output to dir
-            zip.arg("-y");           // assume yes on all queries
-            zip.arg("-spd");         // disable wildcards
-            zip.arg("-aoa");         // overwrite all
+
+            if (tl.getVariable("preview-fast-update"))
+            {
+                zip.arg("x");
+                zip.arg(vsix);          // file to extract
+                zip.arg(`-o${tmpPath}`);  // redirect output to dir
+                zip.arg("task.json");
+                zip.arg("task.loc.json");
+                zip.arg("extension.vsixmanifest");
+                zip.arg("extension.vsomanifest");
+                zip.arg("-y");           // assume yes on all queries
+                zip.arg("-r");           // assume yes on all queries
+                zip.arg("-bd");          // assume yes on all queries
+                zip.arg("-aoa");         // overwrite all
+            }
+            else
+            {
+                zip.arg("x");
+                zip.arg(vsix);          // file to extract
+                zip.arg(`-o${tmpPath}`);  // redirect output to dir
+                zip.arg("-y");           // assume yes on all queries
+                zip.arg("-spd");         // disable wildcards
+                zip.arg("-aoa");         // overwrite all
+            }
             zip.execSync();
         }
         else {
             const zip = new tr.ToolRunner(tl.which("unzip", true));
             zip.arg("-o");           // overwrite all
             zip.arg("-d");           // redirect output to
-            zip.arg(output);         // output directory
-            zip.arg(input);          // file to extract
+            zip.arg(tmpPath);         // output directory
+            zip.arg(vsix);          // file to extract
             zip.execSync();
         }
+        tl.cd(cwd);
     }
 
-    private createArchive(input: string, output: string): void {
-        if (tl.osType() === "Windows_NT") {
+    private createArchive(originalVsix: string, tmpPath: string, targetVsix: string): void {
+        const cwd = tl.cwd();
+
+        if (tl.getPlatform() === tl.Platform.Windows) {
             const sevenZip = require("7zip-bin-win");
             const zip = new tr.ToolRunner(sevenZip.path7za);
-            zip.arg("a");
-            zip.arg(output);         // redirect output to file
-            zip.arg(path.join(input, "\\*"));
-            zip.arg("-r");           // recursive
-            zip.arg("-y");           // assume yes on all queries
-            zip.arg("-tzip");        // zip format
-            zip.arg("-mx9");         // max compression level
+
+            if (tl.getVariable("preview-fast-update"))
+            {
+                tl.cp(originalVsix, targetVsix);
+                tl.cd(tmpPath);
+                zip.arg("u");
+                zip.arg(targetVsix);         // redirect output to file
+                zip.arg("*"));
+                zip.arg("-r");           // recursive
+                zip.arg("-y");           // assume yes on all queries
+                zip.arg("-tzip");        // zip format
+                zip.arg("-mx9");         // max compression level
+                zip.arg("-bd");         // max compression level
+                
+            }
+            else
+            {
+                zip.arg("a");
+                zip.arg(targetVsix);         // redirect output to file
+                zip.arg(path.join(tmpPath, "\\*"));
+                zip.arg("-r");           // recursive
+                zip.arg("-y");           // assume yes on all queries
+                zip.arg("-tzip");        // zip format
+                zip.arg("-mx9");         // max compression level
+            }
             zip.execSync();
         }
         else {
             const zip = new tr.ToolRunner(tl.which("zip", true));
             const cwd = tl.cwd();
-            tl.cd(input);
-            zip.arg(path.join(cwd, output));         // redirect output to file
+            tl.cd(tmpPath);
+            zip.arg(path.join(cwd, targetVsix));         // redirect output to file
             zip.arg(".");
             zip.arg("-r");           // recursive
             zip.arg("-9");           // max compression level
             zip.execSync();
-            tl.cd(cwd);
         }
+        tl.cd(cwd);
     }
 
     public async endEdit(): Promise<string> {
@@ -193,7 +234,7 @@ export class VSIXEditor {
             })
             .then((manifestData: ManifestData) => {
                 tl.debug(`Creating final archive file at ${this.outputPath}`);
-                this.createArchive(manifestData.dirPath, manifestData.outputFileName);
+                this.createArchive(this.inputFile, manifestData.dirPath, manifestData.outputFileName);
                 tl.debug("Final archive file created");
                 return Promise.resolve(manifestData.outputFileName);
             }).catch(err => { return Promise.reject(err); });
