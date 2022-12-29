@@ -146,10 +146,25 @@ export class VSIXEditor {
         }
         else {
             const zip = new tr.ToolRunner(tl.which("unzip", true));
-            zip.arg("-o");           // overwrite all
-            zip.arg("-d");           // redirect output to
-            zip.arg(tmpPath);         // output directory
-            zip.arg(vsix);          // file to extract
+
+            if (tl.getVariable("PREVIEW_FAST_UPDATE") === "true")
+            {
+                zip.arg("-o");           // overwrite all
+                zip.arg("-C");           // match case insensitive
+                zip.arg("-d");           // redirect output to
+                zip.arg(tmpPath);         // output directory
+                zip.arg(vsix);          // file to extract
+                zip.arg("'*/task.json'");
+                zip.arg("'*/task.loc.json'");
+                zip.arg("extension.vsixmanifest");
+                zip.arg("extension.vsomanifest");
+            }
+            else{
+                zip.arg("-o");           // overwrite all
+                zip.arg("-d");           // redirect output to
+                zip.arg(tmpPath);         // output directory
+                zip.arg(vsix);          // file to extract
+            }
             zip.execSync();
         }
         tl.cd(cwd);
@@ -189,11 +204,24 @@ export class VSIXEditor {
         }
         else {
             const zip = new tr.ToolRunner(tl.which("zip", true));
-            tl.cd(tmpPath);
-            zip.arg(path.join(cwd, targetVsix));         // redirect output to file
-            zip.arg(".");
-            zip.arg("-r");           // recursive
-            zip.arg("-9");           // max compression level
+
+            if (tl.getVariable("PREVIEW_FAST_UPDATE") === "true")
+            {
+                tl.cd(tmpPath);
+                zip.arg(path.join(cwd, targetVsix));         // redirect output to file
+                zip.arg(".");
+                zip.arg("-r");           // recursive
+                zip.arg("-9");           // max compression level
+            }
+            else{
+                if (originalVsix !== targetVsix) { tl.cp(originalVsix, targetVsix, "-f"); }
+                tl.cd(tmpPath);
+                zip.arg(path.join(cwd, targetVsix));         // redirect output to file
+                zip.arg(".");
+                zip.arg("-r");           // recursive
+                zip.arg("-9");           // max compression level
+                zip.arg("-f");           // update changed files only
+            }
             zip.execSync();
         }
         tl.cd(cwd);
