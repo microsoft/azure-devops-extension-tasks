@@ -188,7 +188,6 @@ export class VSIXEditor {
                 zip.arg("-tzip");        // zip format
                 zip.arg("-mx9");         // max compression level
                 zip.arg("-bd");         // disable progress indicator
-                
             }
             else
             {
@@ -207,20 +206,25 @@ export class VSIXEditor {
 
             if (tl.getVariable("PREVIEW_FAST_UPDATE") === "true")
             {
-                tl.cd(tmpPath);
-                zip.arg(path.join(cwd, targetVsix));         // redirect output to file
-                zip.arg(".");
-                zip.arg("-r");           // recursive
-                zip.arg("-9");           // max compression level
-            }
-            else{
-                if (originalVsix !== targetVsix) { tl.cp(originalVsix, targetVsix, "-f"); }
+                if (originalVsix !== targetVsix) { 
+                    tl.debug("Original vsix not matching targetVsix. Copying.");
+                    tl.debug(originalVsix);
+                    tl.debug(targetVsix);
+                    tl.cp(originalVsix, targetVsix, "-f"); 
+                }
                 tl.cd(tmpPath);
                 zip.arg(path.join(cwd, targetVsix));         // redirect output to file
                 zip.arg(".");
                 zip.arg("-r");           // recursive
                 zip.arg("-9");           // max compression level
                 zip.arg("-f");           // update changed files only
+            }
+            else{
+                tl.cd(tmpPath);
+                zip.arg(path.join(cwd, targetVsix));         // redirect output to file
+                zip.arg(".");
+                zip.arg("-r");           // recursive
+                zip.arg("-9");           // max compression level
             }
             zip.execSync();
         }
