@@ -154,8 +154,8 @@ export class VSIXEditor {
                 zip.arg("-d");           // redirect output to
                 zip.arg(tmpPath);         // output directory
                 zip.arg(vsix);          // file to extract
-                zip.arg("'*/task.json'");
-                zip.arg("'*/task.loc.json'");
+                zip.arg("*/task.json");
+                zip.arg("*/task.loc.json");
                 zip.arg("extension.vsixmanifest");
                 zip.arg("extension.vsomanifest");
             }
