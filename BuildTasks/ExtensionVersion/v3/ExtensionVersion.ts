@@ -9,26 +9,18 @@ function setVersion(version: string) {
     if (tl.getBoolInput("setBuildNumber", false)) {
         tl.command("build.updatebuildnumber", null, version);
     }
-
-    const setOutputFlag = tl.getBoolInput("setOutputFlag", false) || false;
+    
     const outputVariable = tl.getInput("outputVariable", false);
     if (outputVariable) {
-        tl.warning("Using of deprecated 'outputVariable' parameter. Remove this parameter and use 'setOutputFlag: true' and 'name: {{Stepname}}' on this step and reference '{{StepName.Extension.Version}}' in a future step instead.");
+        const setOutputFlag = tl.getBoolInput("setOutputFlag", false) || false;
+        tl.warning("Using of deprecated 'outputVariable' parameter. Remove this parameter and 'name: {{Stepname}}' on this step and reference '{{StepName.Extension.Version}}' in a future step instead.");
         tl.setVariable(outputVariable, version, false, setOutputFlag);
     }
     
     if (outputVariable !== "Extension.Version")
     {
-        if (setOutputFlag)
-        {
-            console.log("Setting output variable '{{StepName}}.Extension.Version'.");
-        }
-        else
-        {
-            tl.warning("Using deprecated variable convernsion. Use 'setOutputFlag: true' and 'name: {{Stepname}}' on this step and reference '{{StepName.Extension.Version}}' in a future step instead.")
-            console.log("Setting variable 'Extension.Version'.");
-        }
-        tl.setVariable("Extension.Version", version, false, setOutputFlag);
+        console.log("Setting output variable '{{StepName}}.Extension.Version'.");
+        tl.setVariable("Extension.Version", version, false, true);
     }
 }
 
