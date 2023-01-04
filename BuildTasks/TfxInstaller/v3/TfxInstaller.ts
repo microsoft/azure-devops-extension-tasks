@@ -90,7 +90,7 @@ async function acquireTfx(version: string): Promise<string> {
 
         taskLib.mkdirP(path.join(extPath));
         const npmRunner = new tr.ToolRunner("npm");
-        npmRunner.arg(["install", "tfx-cli@" + version, "-g", "--prefix", extPath]);
+        npmRunner.arg(["install", "tfx-cli@" + version, "-g", "--prefix", extPath, '--no-fund']);
 
         const result = npmRunner.execSync({ failOnStdErr: false, silent: !debug, ignoreReturnCode: false} as tr.IExecOptions);
         if (result.code === 0)
