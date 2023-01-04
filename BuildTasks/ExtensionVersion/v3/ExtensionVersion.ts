@@ -23,6 +23,7 @@ function setVersion(version: string) {
     }
     
     console.log("Setting output variable '{{StepName}}.Extension.Version'.");
+    tl.setVariable("Extension.Version", version, false, false);
     tl.setVariable("Extension.Version", version, false, true);
 }
 

@@ -168,12 +168,6 @@
         "groupName": "advanced"
     }
   ],
-  "outputVariables": [
-    {
-        "name": "Extension.Version",
-        "description": "Is set with the calculated version number."
-    }
-  ],
   "execution": {
     "Node": {
       "target": "ExtensionVersion/v3/ExtensionVersion.js",
