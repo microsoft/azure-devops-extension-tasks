@@ -13,15 +13,17 @@ function setVersion(version: string) {
     const outputVariable = tl.getInput("outputVariable", false);
     if (outputVariable) {
         const setOutputFlag = tl.getBoolInput("setOutputFlag", false) || false;
-        tl.warning("Using of deprecated 'outputVariable' parameter. Remove this parameter and 'name: {{Stepname}}' on this step and reference '{{StepName.Extension.Version}}' in a future step instead.");
+        tl.warning("Using of deprecated 'outputVariable' parameter. Remove this parameter and 'name: {{Stepname}}' on this step and reference '{{StepName}}.Extension.Version' in a future step instead.");
         tl.setVariable(outputVariable, version, false, setOutputFlag);
+
+        if (outputVariable === "Extension.Version")
+        {
+            tl.warning("The default variable name 'Extension.Variable' is always promoted to an output variable.");
+        }
     }
     
-    if (outputVariable !== "Extension.Version")
-    {
-        console.log("Setting output variable '{{StepName}}.Extension.Version'.");
-        tl.setVariable("Extension.Version", version, false, true);
-    }
+    console.log("Setting output variable '{{StepName}}.Extension.Version'.");
+    tl.setVariable("Extension.Version", version, false, true);
 }
 
 if (extensionVersionOverrideVariable) {
