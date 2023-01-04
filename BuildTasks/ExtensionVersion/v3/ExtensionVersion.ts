@@ -10,7 +10,14 @@ function setVersion(version: string) {
         tl.command("build.updatebuildnumber", null, version);
     }
 
+    const setOutputFlag = tl.getBoolInput("setOutputFlag", false) || false;
+    const outputVariable = tl.getInput("outputVariable", false);
+    if (outputVariable) {
+        tl.warning("Use of deprecated 'outputVariable' parameter. Use the default output variable `{{StepName}}.Extension.Version` instead.")
+        tl.setVariable(outputVariable, version, false, setOutputFlag);
+    }
     tl.setVariable("Extension.Version", version, false, true);
+    tl.setVariable("Extension.Version", version, false, false);
 }
 
 if (extensionVersionOverrideVariable) {
