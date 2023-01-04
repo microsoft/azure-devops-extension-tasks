@@ -10,6 +10,9 @@ function setVersion(version: string) {
         tl.command("build.updatebuildnumber", null, version);
     }
 
+    console.log("Setting local variable 'Extension.Version'.");
+    tl.setVariable("Extension.Version", version, false, false);
+    console.log("Setting output variable '{{StepName}}.Extension.Version'.");
     tl.setVariable("Extension.Version", version, false, true);
 }
 
