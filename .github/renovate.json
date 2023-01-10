@@ -22,6 +22,10 @@
       "matchPaths": ["BuildTasks/*/v3/**/package.json"],
       "updateTypes": ["major"],
       "enabled": false
+    },
+    {
+      "matchDatasources": ["azure-pipelines-tasks"],
+      "extractVersion": "^(?<version>\\d+)"
     }
   ]
 }
