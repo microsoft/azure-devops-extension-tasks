@@ -1,7 +1,7 @@
 blank_issues_enabled: true
 contact_links:
   - name: "🛍️ Problem with the marketplace?"
-    url: mailto:vsmarketplace@microsoft.com
+    url: https://learn.microsoft.com/en-us/azure/devops/marketplace/install-extension?view=azure-devops&tabs=browser#frequently-asked-questions-faqs
     about: In case you need support for the Azure DevOps Marketplace. 
   - name: "🧑‍💻 Problem with tfx"
     url: https://github.com/microsoft/tfs-cli/issues
