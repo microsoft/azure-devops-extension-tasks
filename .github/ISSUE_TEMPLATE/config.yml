@@ -6,6 +6,6 @@ contact_links:
   - name: "🧑‍💻 Problem with tfx"
     url: https://github.com/microsoft/tfs-cli/issues
     about: For reporting issues with `tfx`.
-  - name: "🧑‍💻 Problem with Azure DevOps"
+  - name: "♾️ Problem with Azure DevOps"
     url: https://developercommunity.visualstudio.com/AzureDevOps
     about: For reporting issues with `Azure DevOps`.
