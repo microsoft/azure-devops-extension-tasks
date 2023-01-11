@@ -1,0 +1,11 @@
+blank_issues_enabled: true
+contact_links:
+  - name: "🛍️ Problem with the marketplace?"
+    url: mailto:vsmarketplace@microsoft.com
+    about: In case you need support for the Azure DevOps Marketplace. 
+  - name: "🧑‍💻 Problem with tfx"
+    url: https://github.com/microsoft/tfs-cli/issues
+    about: For reporting issues with `tfx`.
+  - name: "🧑‍💻 Problem with Azure DevOps"
+    url: https://developercommunity.visualstudio.com/AzureDevOps
+    about: For reporting issues with `Azure DevOps`.
