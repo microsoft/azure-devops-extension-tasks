@@ -118,7 +118,7 @@ export class VSIXEditor {
             const sevenZip = require("7zip-bin-win");
             const zip = new tr.ToolRunner(sevenZip.path7za);
 
-            if (tl.getVariable("PREVIEW_FAST_UPDATE") === "true")
+            if (tl.getVariable("PREVIEW_FAST_UPDATE") === "false")
             {
                 zip.arg("x");
                 zip.arg(vsix);          // file to extract
@@ -147,7 +147,7 @@ export class VSIXEditor {
         else {
             const zip = new tr.ToolRunner(tl.which("unzip", true));
 
-            if (tl.getVariable("PREVIEW_FAST_UPDATE") === "true")
+            if (tl.getVariable("PREVIEW_FAST_UPDATE") === "false")
             {
                 zip.arg("-o");           // overwrite all
                 zip.arg("-C");           // match case insensitive
@@ -177,7 +177,7 @@ export class VSIXEditor {
             const sevenZip = require("7zip-bin-win");
             const zip = new tr.ToolRunner(sevenZip.path7za);
 
-            if (tl.getVariable("PREVIEW_FAST_UPDATE") === "true")
+            if (tl.getVariable("PREVIEW_FAST_UPDATE") === "false")
             {
                 if (originalVsix !== targetVsix) { tl.cp(originalVsix, targetVsix, "-f"); }
                 zip.arg("u");
@@ -204,7 +204,7 @@ export class VSIXEditor {
         else {
             const zip = new tr.ToolRunner(tl.which("zip", true));
 
-            if (tl.getVariable("PREVIEW_FAST_UPDATE") === "true")
+            if (tl.getVariable("PREVIEW_FAST_UPDATE") === "false")
             {
                 if (originalVsix !== targetVsix) { 
                     tl.debug("Original vsix not matching targetVsix. Copying.");
