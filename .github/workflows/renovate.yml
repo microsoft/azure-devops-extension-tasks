@@ -1,0 +1,38 @@
+name: Renovate
+
+on:
+  schedule: 
+  - cron: "0 0 * * *"
+  push:
+  workflow_dispatch:
+  
+jobs:
+  renovate:
+    runs-on: windows-latest
+    
+    permissions:
+      contents: write
+      pull-requests: write
+      checks: write
+    
+    steps:
+      - name: Cache
+        uses: actions/cache@v3.2.4
+        with:
+          path: "./.renovateCache"
+          key: ${{ github.repository }}
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v3.6.0
+        with:
+          node-version: "18.x"
+          
+      - run: |
+          git config --global user.email 'bot@renovateapp.com'
+          git config --global user.name 'Renovate Bot'
+          npx renovate --platform=github --include-forks=true $env:REPOSITORY
+        name: Runs renovate against this repository.
+        env:
+          RENOVATE_TOKEN: ${{ secrets.RENOVATE_TOKEN }}
+          REPOSITORY:  ${{ github.repository }}
+          RENOVATE_CACHE_DIR: "./.renovateCache"
