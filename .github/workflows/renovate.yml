@@ -9,6 +9,8 @@ on:
   workflow_dispatch:
   issue_comment:
     types: [created, deleted, edited]
+  issues:
+    types: [edited]
   
 jobs:
   renovate:
