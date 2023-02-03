@@ -16,15 +16,23 @@ jobs:
       checks: write
     
     steps:
+      - name: Cache
+        uses: actions/cache@v3.2.4
+        with:
+          path: "./.renovateCache"
+          key: ${{ github.repository }}
+
       - name: Setup Node.js environment
         uses: actions/setup-node@v3.6.0
         with:
           node-version: "18.x"
+          
       - run: |
           git config --global user.email 'bot@renovateapp.com'
           git config --global user.name 'Renovate Bot'
-          npx renovate --autodiscover --platform=github --repositories="$env:REPOSITORY"
+          npx renovate --autodiscover --platform=github
         name: Runs renovate against this repository.
         env:
           RENOVATE_TOKEN: ${{ secrets.RENOVATE_TOKEN }}
-          REPOSITORY: ${{ github.repository }}
+          RENOVATE_REPOSITORIES: ${{ github.repository }}
+          RENOVATE_CACHE_DIR: "./.renovateCache"
