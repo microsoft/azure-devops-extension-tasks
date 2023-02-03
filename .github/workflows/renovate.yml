@@ -30,7 +30,7 @@ jobs:
       - run: |
           git config --global user.email 'bot@renovateapp.com'
           git config --global user.name 'Renovate Bot'
-          npx renovate --platform=github $env:REPOSITORY
+          npx renovate --platform=github --include-forks $env:REPOSITORY
         name: Runs renovate against this repository.
         env:
           RENOVATE_TOKEN: ${{ secrets.RENOVATE_TOKEN }}
