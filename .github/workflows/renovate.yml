@@ -1,0 +1,25 @@
+name: Renovate
+
+on:
+  schedule: 
+  - cron: "0 0 * * *"
+  push:
+  
+jobs:
+  renovate:
+    runs-on: windows-latest
+    
+    permissions:
+      contents: write
+      pull-requests: write
+      checks: write
+    
+    steps:
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v3.6.0
+        with:
+          node-version: "18.x"
+      - run: |
+          npx renovate
+        env:
+          RENOVATE_TOKEN: ${{ secrets.RENOVATE_TOKEN }}
