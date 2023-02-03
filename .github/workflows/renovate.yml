@@ -11,7 +11,16 @@ on:
     types: [edited, created]
   issues:
     types: [edited]
-  
+
+env:
+  POWERSHELL_CLI_TELEMETRY_OPTOUT: "1"
+  POWERSHELL_TELEMETRY_OPTOUT: "1"
+  POWERSHELL_UPDATECHECK: "Off"
+  POWERSHELL_UPDATECHECK_OPTOUT: "1"
+  DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+  DOTNET_TELEMETRY_OPTOUT: "1"
+  COMPlus_EnableDiagnostics: "0"
+
 jobs:
   renovate:
     runs-on: windows-latest
