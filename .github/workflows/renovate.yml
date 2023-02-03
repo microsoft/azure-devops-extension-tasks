@@ -30,9 +30,9 @@ jobs:
       - run: |
           git config --global user.email 'bot@renovateapp.com'
           git config --global user.name 'Renovate Bot'
-          npx renovate --autodiscover --platform=github
+          npx renovate --platform=github $env:REPOSITORY
         name: Runs renovate against this repository.
         env:
           RENOVATE_TOKEN: ${{ secrets.RENOVATE_TOKEN }}
-          RENOVATE_REPOSITORIES: ${{ github.repository }}
+          REPOSITORY:  ${{ github.repository }}
           RENOVATE_CACHE_DIR: "./.renovateCache"
