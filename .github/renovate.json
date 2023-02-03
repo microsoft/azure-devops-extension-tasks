@@ -20,7 +20,7 @@
         "@types/fs-extra",
         "fs-extra"
       ],
-      "matchPaths": ["BuildTasks/*/v3/**/package.json", "package.json"],
+      "matchPaths": ["./BuildTasks/*/v3/**/package.json", "./package.json"],
       "updateTypes": ["major"],
       "enabled": false
     },
