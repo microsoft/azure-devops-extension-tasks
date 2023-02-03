@@ -118,53 +118,32 @@ export class VSIXEditor {
             const sevenZip = require("7zip-bin-win");
             const zip = new tr.ToolRunner(sevenZip.path7za);
 
-            if (tl.getVariable("PREVIEW_FAST_UPDATE") === "false")
-            {
-                zip.arg("x");
-                zip.arg(vsix);          // file to extract
-                zip.arg(`-o${tmpPath}`);  // redirect output to dir
-                zip.arg("task.json");
-                zip.arg("task.loc.json");
-                zip.arg("extension.vsixmanifest");
-                zip.arg("extension.vsomanifest");
-                zip.arg("-y");           // assume yes on all queries
-                zip.arg("-r");           // recurse
-                zip.arg("-bd");          // disable progress indicator
-                zip.arg("-aoa");         // overwrite all
-                zip.arg("-spd");         // disable wildcards
-            }
-            else
-            {
-                zip.arg("x");
-                zip.arg(vsix);          // file to extract
-                zip.arg(`-o${tmpPath}`);  // redirect output to dir
-                zip.arg("-y");           // assume yes on all queries
-                zip.arg("-spd");         // disable wildcards
-                zip.arg("-aoa");         // overwrite all
-            }
+            zip.arg("x");
+            zip.arg(vsix);          // file to extract
+            zip.arg(`-o${tmpPath}`);  // redirect output to dir
+            zip.arg("task.json");
+            zip.arg("task.loc.json");
+            zip.arg("extension.vsixmanifest");
+            zip.arg("extension.vsomanifest");
+            zip.arg("-y");           // assume yes on all queries
+            zip.arg("-r");           // recurse
+            zip.arg("-bd");          // disable progress indicator
+            zip.arg("-aoa");         // overwrite all
+            zip.arg("-spd");         // disable wildcards
             zip.execSync();
         }
         else {
             const zip = new tr.ToolRunner(tl.which("unzip", true));
 
-            if (tl.getVariable("PREVIEW_FAST_UPDATE") === "false")
-            {
-                zip.arg("-o");           // overwrite all
-                zip.arg("-C");           // match case insensitive
-                zip.arg("-d");           // redirect output to
-                zip.arg(tmpPath);         // output directory
-                zip.arg(vsix);          // file to extract
-                zip.arg("*/task.json");
-                zip.arg("*/task.loc.json");
-                zip.arg("extension.vsixmanifest");
-                zip.arg("extension.vsomanifest");
-            }
-            else{
-                zip.arg("-o");           // overwrite all
-                zip.arg("-d");           // redirect output to
-                zip.arg(tmpPath);         // output directory
-                zip.arg(vsix);          // file to extract
-            }
+            zip.arg("-o");           // overwrite all
+            zip.arg("-C");           // match case insensitive
+            zip.arg("-d");           // redirect output to
+            zip.arg(tmpPath);         // output directory
+            zip.arg(vsix);          // file to extract
+            zip.arg("*/task.json");
+            zip.arg("*/task.loc.json");
+            zip.arg("extension.vsixmanifest");
+            zip.arg("extension.vsomanifest");
             zip.execSync();
         }
         tl.cd(cwd);
@@ -172,60 +151,32 @@ export class VSIXEditor {
 
     private createArchive(originalVsix: string, tmpPath: string, targetVsix: string): void {
         const cwd = tl.cwd();
+        
+        if (originalVsix !== targetVsix) { tl.cp(originalVsix, targetVsix, "-f"); }
 
         if (tl.getPlatform() === tl.Platform.Windows) {
             const sevenZip = require("7zip-bin-win");
             const zip = new tr.ToolRunner(sevenZip.path7za);
 
-            if (tl.getVariable("PREVIEW_FAST_UPDATE") === "false")
-            {
-                if (originalVsix !== targetVsix) { tl.cp(originalVsix, targetVsix, "-f"); }
-                zip.arg("u");
-                zip.arg(targetVsix);         // redirect output to file
-                zip.arg(path.join(tmpPath, "\\*"));
-                zip.arg("-r");           // recursive
-                zip.arg("-y");           // assume yes on all queries
-                zip.arg("-tzip");        // zip format
-                zip.arg("-mx9");         // max compression level
-                zip.arg("-bd");         // disable progress indicator
-            }
-            else
-            {
-                zip.arg("a");
-                zip.arg(targetVsix);         // redirect output to file
-                zip.arg(path.join(tmpPath, "\\*"));
-                zip.arg("-r");           // recursive
-                zip.arg("-y");           // assume yes on all queries
-                zip.arg("-tzip");        // zip format
-                zip.arg("-mx9");         // max compression level
-            }
+            zip.arg("u");
+            zip.arg(targetVsix);         // redirect output to file
+            zip.arg(path.join(tmpPath, "\\*"));
+            zip.arg("-r");           // recursive
+            zip.arg("-y");           // assume yes on all queries
+            zip.arg("-tzip");        // zip format
+            zip.arg("-mx9");         // max compression level
+            zip.arg("-bd");         // disable progress indicator
             zip.execSync();
         }
         else {
             const zip = new tr.ToolRunner(tl.which("zip", true));
 
-            if (tl.getVariable("PREVIEW_FAST_UPDATE") === "false")
-            {
-                if (originalVsix !== targetVsix) { 
-                    tl.debug("Original vsix not matching targetVsix. Copying.");
-                    tl.debug(originalVsix);
-                    tl.debug(targetVsix);
-                    tl.cp(originalVsix, targetVsix, "-f"); 
-                }
-                tl.cd(tmpPath);
-                zip.arg(path.join(cwd, targetVsix));         // redirect output to file
-                zip.arg(".");
-                zip.arg("-r");           // recursive
-                zip.arg("-9");           // max compression level
-                zip.arg("-f");           // update changed files only
-            }
-            else{
-                tl.cd(tmpPath);
-                zip.arg(path.join(cwd, targetVsix));         // redirect output to file
-                zip.arg(".");
-                zip.arg("-r");           // recursive
-                zip.arg("-9");           // max compression level
-            }
+            tl.cd(tmpPath);
+            zip.arg(path.join(cwd, targetVsix));         // redirect output to file
+            zip.arg(".");
+            zip.arg("-r");           // recursive
+            zip.arg("-9");           // max compression level
+            zip.arg("-f");           // update changed files only
             zip.execSync();
         }
         tl.cd(cwd);
