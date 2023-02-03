@@ -8,7 +8,7 @@ on:
       main
   workflow_dispatch:
   issue_comment:
-    types: [created, deleted, edited]
+    types: [edited, created]
   issues:
     types: [edited]
   
@@ -19,31 +19,40 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      issues: write
       checks: write
     
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-        
-      - name: Cache
-        uses: actions/cache@v3.2.4
-        with:
-          path: "./.renovateCache"
-          key: ${{ github.repository }}
 
-      - name: Setup Node.js environment
-        uses: actions/setup-node@v3.6.0
-        with:
-          node-version: "18.x"
-          cache: 'npm'
-          
-      - run: |
-          git config --global user.email 'bot@renovateapp.com'
-          git config --global user.name 'Renovate Bot'
-          npm install renovate -g
-          renovate --platform=github --include-forks=true $env:REPOSITORY
-        name: Runs renovate against this repository.
-        env:
-          RENOVATE_TOKEN: ${{ secrets.RENOVATE_TOKEN }}
-          REPOSITORY:  ${{ github.repository }}
-          RENOVATE_CACHE_DIR: "./.renovateCache"
+    - name: Get npm cache directory
+      id: npm-cache-dir
+      shell: pwsh
+      run: echo "dir=$(npm config get cache)" >> ${env:GITHUB_OUTPUT}
+
+    - uses: actions/cache@v3
+      id: npm-cache # use this to check for `cache-hit` ==> if: steps.npm-cache.outputs.cache-hit != 'true'
+      with:
+        path: ${{ steps.npm-cache-dir.outputs.dir }}
+        key: renovate-node-cache-${{ runner.os }}-${{ github.repository }}
+
+    - uses: actions/cache@v3.2.4
+      with:
+        path: "./.renovateCache"
+        key: renovate-cache-${{ runner.os }}-${{ github.repository }}
+
+    - name: Setup Node.js environment
+      uses: actions/setup-node@v3.6.0
+      with:
+        node-version: "18.x"
+        cache: 'npm'
+
+    - name: Runs renovate against this repository. 
+      run: |
+        git config --global user.email 'bot@renovateapp.com'
+        git config --global user.name 'Renovate Bot'
+        npm install renovate -g
+        renovate --platform=github --include-forks=true $env:REPOSITORY
+      env:
+        RENOVATE_TOKEN: ${{ secrets.RENOVATE_TOKEN }}
+        REPOSITORY:  ${{ github.repository }}
+        RENOVATE_CACHE_DIR: "./.renovateCache"
