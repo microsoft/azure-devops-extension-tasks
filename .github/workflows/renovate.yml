@@ -43,7 +43,7 @@ jobs:
       shell: pwsh
       run: |
         "dir=$(npm config get cache --global)" >> ${env:GITHUB_OUTPUT}
-        "npm show renovate version >> renovate-lock.txt"
+        npm show renovate version >> renovate-lock.txt
 
     - uses: actions/cache@v3
       with:
