@@ -43,11 +43,12 @@ jobs:
       shell: pwsh
       run: |
         "dir=$(npm config get cache --global)" >> ${env:GITHUB_OUTPUT}
+        "npm show renovate version >> renovate-lock.txt"
 
     - uses: actions/cache@v3
       with:
         path: ${{ steps.npm-cache-dir.outputs.dir }}
-        key: renovate-node-cache-${{ runner.os }}-${{ github.repository }}
+        key: ${{ runner.os }}-${{ hashFiles('renovate-lock.txt') }}
 
     - uses: actions/cache@v3
       with:
@@ -58,8 +59,8 @@ jobs:
       run: |
         git config --global user.email 'bot@renovateapp.com'
         git config --global user.name 'Renovate Bot'
-        npm install renovate -g
-        renovate --platform=github --include-forks=true $env:REPOSITORY
+        npm install renovate
+        npm exec -- renovate --platform=github --include-forks=true $env:REPOSITORY
       env:
         RENOVATE_TOKEN: ${{ secrets.RENOVATE_TOKEN }}
         REPOSITORY:  ${{ github.repository }}
