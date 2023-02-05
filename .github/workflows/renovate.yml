@@ -43,17 +43,21 @@ jobs:
       shell: pwsh
       run: |
         "dir=$(npm config get cache --global)" >> ${env:GITHUB_OUTPUT}
+        $cultureInfo = [System.Globalization.CultureInfo]::InvariantCulture
+        $date = get-date
+        $weeknumber = $cultureInfo.Calendar.GetWeekOfYear($date,$cultureInfo.DateTimeFormat.CalendarWeekRule,$cultureInfo.DateTimeFormat.FirstDayOfWeek)
+        "$weeknumber-$($date.Year)" >> renovate-cache-lock.txt
         npm show renovate version >> renovate-lock.txt
 
     - uses: actions/cache@v3
       with:
         path: ${{ steps.npm-cache-dir.outputs.dir }}
-        key: ${{ runner.os }}-${{ hashFiles('renovate-lock.txt') }}
+        key: npm-cache-${{ hashFiles('renovate-lock.txt') }}
 
     - uses: actions/cache@v3
       with:
         path: "./.renovateCache"
-        key: renovate-cache-${{ runner.os }}-${{ github.repository }}
+        key: renovate-cache-${{ hashFiles('renovate-cache-lock.txt') }}
 
     - name: Runs renovate against this repository. 
       run: |
