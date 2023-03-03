@@ -2,14 +2,9 @@
 version: v1.25.0
 # ignores vulnerabilities until expiry date; change duration by modifying expiry date
 ignore:
-  SNYK-JS-QS-3153490:
-    - '*':
-        reason: None Given
-        expires: 2023-01-05T14:16:55.035Z
-        created: 2022-12-06T14:16:55.040Z
   SNYK-JS-MOCKERY-3043117:
     - '*':
         reason: None Given
-        expires: 2023-04-02T12:27:10.956Z
-        created: 2023-03-03T12:27:10.963Z
+        expires: 2023-04-02T12:26:55.809Z
+        created: 2023-03-03T12:26:55.812Z
 patch: {}

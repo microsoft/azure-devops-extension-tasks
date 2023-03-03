@@ -1,6 +1,6 @@
 (Get-ChildItem buildtasks\*\v*) | ForEach-Object{ 
     write-host $_
     Push-Location $_
-    npm audit
+    snyk ignore --id=SNYK-JS-MOCKERY-3043117
     Pop-Location
 }
