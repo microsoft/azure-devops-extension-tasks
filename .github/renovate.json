@@ -4,6 +4,9 @@
   "azure-pipelines": {"enabled": true},
   "packageRules": [
     {
+      "rangeStrategy": "replace"
+    },
+    {
       "matchPackageNames": ["azure-pipelines-task-lib", "azure-pipelines-tool-lib", "@types/node"],
       "matchUpdateTypes": ["major"],
       "enabled": false
