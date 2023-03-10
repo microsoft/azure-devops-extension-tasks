@@ -1,27 +1,17 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:base"
-  ],
-  "azure-pipelines": {
-    "enabled": true
-  },
+  "extends": ["config:base"],
+  "azure-pipelines": {"enabled": true},
   "packageRules": [
     {
-      "packageNames": [
-        "azure-pipelines-task-lib",
-        "@types/node"
-      ],
-      "updateTypes": ["major"],
+      "matchPackageNames": ["azure-pipelines-task-lib", "azure-pipelines-tool-lib", "@types/node"],
+      "matchUpdateTypes": ["major"],
       "enabled": false
     },
     {
-      "packageNames": [
-        "@types/fs-extra",
-        "fs-extra"
-      ],
+      "matchPackageNames": ["@types/fs-extra", "fs-extra"],
       "matchPaths": ["BuildTasks/*/v3/**/package.json", "+(package.json)"],
-      "updateTypes": ["major"],
+      "matchUpdateTypes": ["major"],
       "enabled": false
     },
     {
