@@ -4,7 +4,7 @@
   "azure-pipelines": {"enabled": true},
   "packageRules": [
     {
-      "rangeStrategy": "replace",
+      "rangeStrategy": "widen",
        "matchDatasources": ["npm"]
     },
     {
