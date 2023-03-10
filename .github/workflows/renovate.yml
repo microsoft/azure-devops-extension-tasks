@@ -69,3 +69,4 @@ jobs:
         RENOVATE_TOKEN: ${{ secrets.RENOVATE_TOKEN }}
         REPOSITORY:  ${{ github.repository }}
         RENOVATE_CACHE_DIR: "./.renovateCache"
+        LOG_LEVEL: "debug"
