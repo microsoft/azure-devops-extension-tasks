@@ -63,7 +63,7 @@ jobs:
       run: |
         git config --global user.email 'bot@renovateapp.com'
         git config --global user.name 'Renovate Bot'
-        npm install renovate@^34
+        npm install renovate
         npm exec -- renovate --platform=github --include-forks=true --enabled-managers="npm,azure-pipelines,github-actions" $env:REPOSITORY
       env:
         RENOVATE_TOKEN: ${{ secrets.RENOVATE_TOKEN }}
