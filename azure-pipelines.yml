@@ -57,7 +57,7 @@ stages:
         failOnIssues: true
         additionalArguments: '--all-projects --detection-depth=6'
 
-    - task: TfxInstaller@3
+    - task: TfxInstaller@4
       displayName: 'Use Node CLI for Azure DevOps'
       inputs:
         version: '0.x'
