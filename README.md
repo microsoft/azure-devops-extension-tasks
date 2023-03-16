@@ -6,7 +6,7 @@ This extension provides build and release tasks for packaging and publishing Azu
 
 ## To use
 
-[Learn more](https://marketplace.visualstudio.com/items?itemName=ms-devlabs.vsts-developer-tools-build-tasks) about this extension and install the extension into your Azure DevOps Organisation via the Visual Studio Marketplace.
+[Learn more](https://marketplace.visualstudio.com/items?itemName=ms-devlabs.vsts-developer-tools-build-tasks) about this extension and install the extension into your Azure DevOps Organization via the Visual Studio Marketplace.
 
 ## Available tasks
 
@@ -15,8 +15,8 @@ Azure DevOps
 * **Package**: package an Azure DevOps extension into an extension package (.VSIX) file
 * **Publish**: (optionally) package and publish an extension (either privately or publicly) to the Visual Studio Marketplace
 * **Unpublish**: unpublish an extension from the Visual Studio Marketplace
-* **Share**: share an extension with an Azure DevOps organisation
-* **Install**: install an extension to an Azure DevOps organisation
+* **Share**: share an extension with an Azure DevOps organization
+* **Install**: install an extension to an Azure DevOps organization
 * **Query version**: query an extension's version (to make it easy to increment on your next package or publish)
 * **Wait for validation**: waits for the Visual Studio Marketplace validation to come through.
 
@@ -28,12 +28,12 @@ Visual Studio
 
  When creating a personal access token for use by your pipeline, make sure the token has at least the following scopes for the task(s) you are using:
 
-* **Publish**: `All accessible organisations`, `Marketplace (publish)`
-* **Unpublish**: `All accessible organisations`, `Marketplace (manage)`
-* **Share**: `All accessible organisations`, `Marketplace (publish)`
-* **Install**: `All accessible organisations` or a specific Organisation, `Extensions (read and manage)`, `Marketplace (acquire)`
-* **Query Version**: `All accessible organisations`, `Marketplace (read)`
-* **Is Valid**: `All accessible organisations`, `Marketplace (read)`
+* **Publish**: `All accessible organizations`, `Marketplace (publish)`
+* **Unpublish**: `All accessible organizations`, `Marketplace (manage)`
+* **Share**: `All accessible organizations`, `Marketplace (publish)`
+* **Install**: `All accessible organizations` or a specific Organization, `Extensions (read and manage)`, `Marketplace (acquire)`
+* **Query Version**: `All accessible organizations`, `Marketplace (read)`
+* **Is Valid**: `All accessible organizations`, `Marketplace (read)`
 
 ![Permissions](permissions.png)
 
