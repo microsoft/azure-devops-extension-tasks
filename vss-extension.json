@@ -221,7 +221,7 @@
           "displayName": "Marketplace URL",
           "value": "https://marketplace.visualstudio.com"
         },
-        "helpMarkDown": "Required permissions: <ul><li><b>Publish</b>: All accessible organisations, Marketplace (Publish)</li><li><b>Share</b>: All accessible organisations, Marketplace Publish</li><li><b>Install</b>: All accessible organisations or a specific organisation, Extensions (read and manage), Marketplace (acquire)</li><li><b>Query Version</b>: All accessible organisations, Marketplace (read)</li><li><b>Is Valid Extension</b>: All accessible organisations, Marketplace (read)</li></ul><br/><a href='https://www.visualstudio.com/docs/setup-admin/team-services/use-personal-access-tokens-to-authenticate'>More information</a>.",
+        "helpMarkDown": "Required permissions: <ul><li><b>Publish</b>: All accessible organizations, Marketplace (Publish)</li><li><b>Share</b>: All accessible organizations, Marketplace Publish</li><li><b>Install</b>: All accessible organizations or a specific organization, Extensions (read and manage), Marketplace (acquire)</li><li><b>Query Version</b>: All accessible organizations, Marketplace (read)</li><li><b>Is Valid Extension</b>: All accessible organizations, Marketplace (read)</li></ul><br/><a href='https://www.visualstudio.com/docs/setup-admin/team-services/use-personal-access-tokens-to-authenticate'>More information</a>.",
         "authenticationSchemes": [
           {
             "type": "ms.vss-endpoint.endpoint-auth-scheme-basic",
@@ -246,7 +246,7 @@
               {
                 "id": "password",
                 "name": "Personal access token",
-                "description": "Azure DevOps personal access token. Required permissions: <ul><li><b>Publish</b>: All accessible organisations, Marketplace (Publish)</li><li><b>Share</b>: All accessible organisations, Marketplace Publish</li><li><b>Install</b>: All accessible organisations or a specific organisation, Extensions (read and manage), Marketplace (acquire)</li><li><b>Query Version</b>: All accessible organisations, Marketplace (read)</li><li><b>Is Valid Extension</b>: All accessible organisations, Marketplace (read)</li></ul><br/><a href='https://www.visualstudio.com/docs/setup-admin/team-services/use-personal-access-tokens-to-authenticate'>More information</a>.",
+                "description": "Azure DevOps personal access token. Required permissions: <ul><li><b>Publish</b>: All accessible organizations, Marketplace (Publish)</li><li><b>Share</b>: All accessible organizations, Marketplace Publish</li><li><b>Install</b>: All accessible organizations or a specific organization, Extensions (read and manage), Marketplace (acquire)</li><li><b>Query Version</b>: All accessible organizations, Marketplace (read)</li><li><b>Is Valid Extension</b>: All accessible organizations, Marketplace (read)</li></ul><br/><a href='https://www.visualstudio.com/docs/setup-admin/team-services/use-personal-access-tokens-to-authenticate'>More information</a>.",
                 "inputMode": "passwordbox",
                 "isConfidential": true,
                 "validation": {
