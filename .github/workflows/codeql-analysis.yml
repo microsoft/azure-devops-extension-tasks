@@ -9,9 +9,10 @@ on:
     - cron: '17 15 * * 2'
 
 permissions:
+  actions: read
   contents: read
+  pull-requests: read
   security-events: write
-  checks: write
   
 jobs:
   analyze:
