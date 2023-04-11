@@ -28,16 +28,18 @@ stages:
 
     - powershell: |
         $vswhereLatest = "https://github.com/Microsoft/vswhere/releases/latest/download/vswhere.exe"
-        $vswherePath = "$(Build.SourcesDirectory)\BuildTasks\PublishVSExtension\v3\tools\vswhere.exe"
-        remove-item $vswherePath
+        $vswherePath = ".\BuildTasks\PublishVSExtension\v3\tools\vswhere.exe"
+        remove-item $vswherePath -ErrorAction SilentlyContinue
+        mkdir ".\BuildTasks\PublishVSExtension\v3\tools\" -force
         invoke-webrequest $vswhereLatest -OutFile $vswherePath
         test-path $vswherePath -PathType Leaf
       displayName: 'Grab the latest version of vswhere.exe for v3'
 
     - powershell: |
         $vswhereLatest = "https://github.com/Microsoft/vswhere/releases/latest/download/vswhere.exe"
-        $vswherePath = "$(Build.SourcesDirectory)\BuildTasks\PublishVSExtension\v4\tools\vswhere.exe"
-        remove-item $vswherePath
+        $vswherePath = ".\BuildTasks\PublishVSExtension\v4\tools\vswhere.exe"
+        remove-item $vswherePath -ErrorAction SilentlyContinue
+        mkdir ".\BuildTasks\PublishVSExtension\v4\tools\" -force
         invoke-webrequest $vswhereLatest -OutFile $vswherePath
         test-path $vswherePath -PathType Leaf
       displayName: 'Grab the latest version of vswhere.exe for v4'
