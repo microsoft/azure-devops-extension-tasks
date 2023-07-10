@@ -37,7 +37,7 @@
     "@types/xmldom": "^0.1.31",
     "@typescript-eslint/eslint-plugin": "^5.61.0",
     "@typescript-eslint/eslint-plugin-tslint": "^5.61.0",
-    "@typescript-eslint/parser": "^5.61.0",
+    "@typescript-eslint/parser": "^5.62.0",
     "eslint": "^8.44.0",
     "eslint-config-airbnb-typescript": "^17.0.0",
     "eslint-plugin-import": "^2.27.5",
