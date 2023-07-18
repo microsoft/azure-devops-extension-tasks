@@ -24,6 +24,9 @@ env:
 jobs:
   renovate:
     runs-on: windows-latest
+    concurrency:
+      group: ${{ github.ref }}
+      cancel-in-progress: true
     
     permissions:
       contents: write
