@@ -193,3 +193,103 @@ updates:
       update-types: ["version-update:semver-major"]
     - dependency-name: "@types/node"
       update-types: ["version-update:semver-major"]
+
+  - package-ecosystem: npm
+    directory: /BuildTasks/Common/v3
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /BuildTasks/Common/v4
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /BuildTasks/ExtensionVersion/v3
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /BuildTasks/ExtensionVersion/v4
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /BuildTasks/InstallExtension/v3
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /BuildTasks/InstallExtension/v4
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /BuildTasks/IsValidExtensionAgent/v3
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /BuildTasks/IsValidExtensionAgent/v4
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /BuildTasks/PackageExtension/v3
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /BuildTasks/PackageExtension/v4
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /BuildTasks/PublishExtension/v3
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /BuildTasks/PublishExtension/v4
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /BuildTasks/PublishVSExtension/v3
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /BuildTasks/PublishVSExtension/v4
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /BuildTasks/ShareExtension/v3
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /BuildTasks/ShareExtension/v4
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /BuildTasks/TfxInstaller/v3
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /BuildTasks/TfxInstaller/v4
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /BuildTasks/UnpublishExtension/v3
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /BuildTasks/UnpublishExtension/v4
+    schedule:
+      interval: daily
