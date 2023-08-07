@@ -1,6 +1,6 @@
 {
   "name": "vsts-developer-tools.publishextensionv4",
-  "version": "4.0.0",
+  "version": "4.3.0",
   "description": "Publish Extension Task",
   "repository": {
     "type": "git",

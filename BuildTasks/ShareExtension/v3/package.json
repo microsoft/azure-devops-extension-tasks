@@ -1,7 +1,7 @@
 {
   "name": "vsts-developer-tools.shareextensionv3",
   "description": "Share Extension Task",
-  "version": "3.5.0",
+  "version": "3.6.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/Microsoft/azure-devops-extension-tasks.git"

@@ -1,6 +1,6 @@
 {
   "name": "vsts-developer-tools.tfxinstallerv4",
-  "version": "4.0.0",
+  "version": "4.3.0",
   "description": "Node CLI for Azure DevOps Installer Task",
   "repository": {
     "type": "git",

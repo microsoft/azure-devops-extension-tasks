@@ -1,6 +1,6 @@
 {
   "name": "publishvsextension",
-  "version": "3.5.0",
+  "version": "3.6.0",
   "description": "Publish Visual Studio Extension Task",
   "repository": {
     "type": "git",
