@@ -37,7 +37,7 @@ jobs:
     steps:
     
     - name: Setup Node.js environment
-      uses: actions/setup-node@v3.7.0
+      uses: actions/setup-node@v3.8.0
       with:
         node-version: "18.x"
         
