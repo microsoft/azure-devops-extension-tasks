@@ -72,7 +72,7 @@ stages:
       inputs:
         rootFolder: '$(Build.SourcesDirectory)'
         outputPath: '$(Build.ArtifactStagingDirectory)\vsts-developer-tools-build-tasks.vsix'
-        publisherId: 'jessehouwing'
+        publisherId: 'ms-devlabs'
         extensionId: 'vsts-developer-tools-build-tasks'
         extensionTag: '-build'
         extensionName: 'Azure DevOps Extension Tasks'
@@ -147,7 +147,7 @@ stages:
   dependsOn: 'PublishDev'
   jobs:
     - deployment: 
-      environment: Publisher MsDevLabs (publicly)
+      environment: public-vsts-developer-tools-build-tasks
       strategy: 
         runOnce:
          deploy:
