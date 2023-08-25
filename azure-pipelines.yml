@@ -95,7 +95,7 @@ stages:
   dependsOn: 'Build'
   jobs:
     - deployment: 
-      environment: Publisher JesseHouwing (privately)
+      environment: dev
       strategy: 
         runOnce:
          deploy:
@@ -115,10 +115,10 @@ stages:
             name: 'publishDev'
             inputs:
               connectTo: 'VsTeam'
-              connectedServiceName: 'Jesse Houwing'
+              connectedServiceName: 'marketplaceServiceConnection'
               fileType: 'vsix'
               vsixFile: '$(Pipeline.Workspace)/vsix/vsts-developer-tools-build-tasks.vsix'
-              publisherId: 'jessehouwing'
+              publisherId: 'ms-devlabs'
               extensionId: 'vsts-developer-tools-build-tasks'
               extensionTag: '-dev'
               updateTasksVersion: false
@@ -129,7 +129,7 @@ stages:
           - task: IsAzureDevOpsExtensionValid@4
             inputs:
               connectTo: 'VsTeam'
-              connectedServiceName: 'Jesse Houwing'
+              connectedServiceName: 'marketplaceServiceConnection'
               method: 'vsix'
               vsixFile: '$(publishDev.Extension.OutputPath)'
 
@@ -167,7 +167,7 @@ stages:
             name: 'publishProd'
             inputs:
               connectTo: 'VsTeam'
-              connectedServiceName: 'msdevlabs'
+              connectedServiceName: 'marketplaceServiceConnection'
               fileType: 'vsix'
               vsixFile: '$(Pipeline.Workspace)/vsix/vsts-developer-tools-build-tasks.vsix'
               publisherId: 'ms-devlabs'
@@ -179,7 +179,7 @@ stages:
           - task: IsAzureDevOpsExtensionValid@4
             inputs:
               connectTo: 'VsTeam'
-              connectedServiceName: 'msdevlabs'
+              connectedServiceName: 'marketplaceServiceConnection'
               method: 'vsix'
               vsixFile: '$(publishProd.Extension.OutputPath)'
 
