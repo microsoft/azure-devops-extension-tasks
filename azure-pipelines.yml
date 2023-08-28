@@ -184,7 +184,7 @@ stages:
 
           - task: GitHubRelease@1
             inputs:
-              gitHubConnection: 'GitHub - jessehouwing'
+              gitHubConnection: 'Sage'
               repositoryName: '$(Build.Repository.Name)'
               action: 'create'
               target: '$(Build.SourceVersion)'
