@@ -51,15 +51,6 @@ stages:
         verbose: false
         customCommand: 'run build'
 
-    - task: SnykSecurityScan@1
-      inputs:
-        serviceConnectionEndpoint: 'snyk-jessehouwing'
-        testType: 'app'
-        monitorWhen: 'never'
-        failOnIssues: true
-        additionalArguments: '--all-projects --detection-depth=6'
-      condition: false
-
     - task: TfxInstaller@4
       displayName: 'Use Node CLI for Azure DevOps'
       inputs:
