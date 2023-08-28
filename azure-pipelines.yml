@@ -184,7 +184,7 @@ stages:
 
           - task: GitHubRelease@1
             inputs:
-              gitHubConnection: 'Sage'
+              gitHubConnection: 'microsoft/azure-devops-extension-tasks'
               repositoryName: '$(Build.Repository.Name)'
               action: 'create'
               target: '$(Build.SourceVersion)'
