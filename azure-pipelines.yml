@@ -113,7 +113,7 @@ stages:
               extensionId: 'vsts-developer-tools-build-tasks'
               extensionTag: '-dev'
               updateTasksVersion: false
-              extensionVisibility: 'privatepreview'
+              extensionVisibility: 'private'
               shareWith: 'jessehouwing-dev'
               noWaitValidation: true
 
