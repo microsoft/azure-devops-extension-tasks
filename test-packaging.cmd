@@ -25,7 +25,7 @@ set INPUT_UPDATETASKSID=true
 set INPUT_UPDATETASKSVERSION=true
 set INPUT_UPDATETASKSVERSIONTYPE=minor
 set INPUT_PATTERNMANIFEST=vss-extension*.json
-pushd BuildTasks\PackageExtension\PackageExtension
+pushd BuildTasks\PackageExtension\v4\PackageExtension\v4
 rem c:\TfsData\jessehouwing\externals.2.111.1\node\bin\node.exe PackageExtension.js
 rem c:\TfsData\jessehouwing\externals.2.136.1\node\bin\node.exe PackageExtension.js
 node PackageExtension.js

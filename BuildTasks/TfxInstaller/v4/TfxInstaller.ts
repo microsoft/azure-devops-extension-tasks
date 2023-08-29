@@ -16,7 +16,7 @@ async function run()
         const checkLatest = taskLib.getBoolInput("checkLatest", false) || false;
         
         await getTfx(version, checkLatest);
-        await taskLib.tool("tfx").arg(["version", "--no-color"]).exec();
+        await taskLib.tool("tfx").arg(["version", "--no-color"]).execAsync();
     }
     catch (error) {
         taskLib.setResult(taskLib.TaskResult.Failed, error.message);
