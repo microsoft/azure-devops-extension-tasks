@@ -57,14 +57,19 @@
   },
   "badges": [
     {
-      "href": "https://dev.azure.com/jessehouwing/azure-devops-extensions/_build/latest?definitionId=77&branchName=main",
-      "uri": "https://dev.azure.com/jessehouwing/azure-devops-extensions/_apis/build/status/azure-devops-extension-tasks/microsoft.azure-devops-extension-tasks?branchName=main&stageName=Build",
+      "href": "https://dev.azure.com/vsalmchamps/Sage/_build/latest?definitionId=18&branchName=main",
+      "uri": "https://dev.azure.com/vsalmchamps/Sage/_apis/build/status%2Fazure-devops-extension-tasks?branchName=main&stageName=Build",
       "description": "Build"
     },
     {
-      "href": "https://dev.azure.com/jessehouwing/azure-devops-extensions/_build/latest?definitionId=77&branchName=main",
-      "uri": "https://dev.azure.com/jessehouwing/azure-devops-extensions/_apis/build/status/azure-devops-extension-tasks/microsoft.azure-devops-extension-tasks?branchName=main&stageName=Publish%20publicly%20to%20MsDevLabs",
+      "href": "https://dev.azure.com/vsalmchamps/Sage/_build/latest?definitionId=18&branchName=main",
+      "uri": "https://dev.azure.com/vsalmchamps/Sage/_apis/build/status%2Fazure-devops-extension-tasks?branchName=main&stageName=Publish%20publicly%20to%20MsDevLabs",
       "description": "Release"
+    },
+    {
+      "href": "https://github.com/sponsors/jessehouwing",
+      "uri": "https://img.shields.io/github/sponsors/jessehouwing",
+      "description": "GitHub Sponsors"
     }
   ],
   "files": [

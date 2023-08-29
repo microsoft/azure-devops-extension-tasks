@@ -1,6 +1,6 @@
 # Azure DevOps Extension Tasks
-Build: [![Build Status](https://dev.azure.com/jessehouwing/azure-devops-extensions/_apis/build/status/azure-devops-extension-tasks/microsoft.azure-devops-extension-tasks?branchName=main&stageName=Build)](https://dev.azure.com/jessehouwing/azure-devops-extensions/_build/latest?definitionId=77&branchName=main) 
-Release: [![Build Status](https://dev.azure.com/jessehouwing/azure-devops-extensions/_apis/build/status/azure-devops-extension-tasks/microsoft.azure-devops-extension-tasks?branchName=main&stageName=Publish%20publicly%20to%20MsDevLabs)](https://dev.azure.com/jessehouwing/azure-devops-extensions/_build/latest?definitionId=77&branchName=main)
+Build: [![Build Status](https://dev.azure.com/vsalmchamps/Sage/_apis/build/status%2Fazure-devops-extension-tasks?branchName=main&stageName=Build)](https://dev.azure.com/vsalmchamps/Sage/_build/latest?definitionId=18&branchName=main)
+Release: [![Build Status](https://dev.azure.com/vsalmchamps/Sage/_apis/build/status%2Fazure-devops-extension-tasks?branchName=main&stageName=Publish%20publicly%20to%20MsDevLabs)](https://dev.azure.com/vsalmchamps/Sage/_build/latest?definitionId=18&branchName=main)
 
 This extension provides build and release tasks for packaging and publishing Azure Devops Extensions to the [Visual Studio Marketplace](https://marketplace.visualstudio.com). There are also tasks to share and install your extension to your Azure Devops organization or Team Foundation Server.
 
