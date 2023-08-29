@@ -41,7 +41,7 @@ async function run() {
                 const outputStream = new common.TfxJsonOutputStream(console.log);
                 const errorStream = new common.TfxJsonOutputStream(tl.error);
             
-                const code: number = await tfx.exec(<any>{ outStream: outputStream, errorStream: errorStream, failOnStdErr: false, ignoreReturnCode: false } as tr.IExecOptions);
+                const code: number = await tfx.execAsync(<any>{ outStream: outputStream, errorStream: errorStream, failOnStdErr: false, ignoreReturnCode: false } as tr.IExecOptions);
                 if (code !== 0)
                 {
                     throw `tfx exited with return code: ${code}`

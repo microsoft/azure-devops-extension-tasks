@@ -12,7 +12,7 @@ void common.runTfx(async tfx => {
     tfx.arg(["--share-with"].concat(accounts).map((value) => { return value.trim(); }));
 
     try{
-        const code = await tfx.exec();
+        const code = await tfx.execAsync();
         tl.setResult(tl.TaskResult.Succeeded, `tfx exited with return code: ${code}`);
     } catch (err)
     {
