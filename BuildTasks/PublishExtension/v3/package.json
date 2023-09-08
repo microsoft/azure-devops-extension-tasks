@@ -11,7 +11,7 @@
     "@xmldom/xmldom": "^0.8.10",
     "7zip-bin-win": "^2.2.0",
     "azure-pipelines-task-lib": "^3.4.0",
-    "core-js": "^3.32.1",
+    "core-js": "^3.32.2",
     "fs-extra": "^5.0.0",
     "temp": "^0.9.4",
     "tmp": "^0.2.1",
