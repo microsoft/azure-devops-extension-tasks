@@ -1,8 +1,11 @@
 name: '4.3$(rev:.r)'
 
 trigger:
-- main
-- feature/*
+  batch: true
+  branches:
+    include:
+    - main
+    - feature/*
 
 pr:
 - main
