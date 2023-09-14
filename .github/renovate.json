@@ -5,6 +5,10 @@
   "github-actions": {"enabled": false},
   "packageRules": [
     {
+      "datasources": ["github-releases", "github-tags", "github-release-attachments"],
+      "enabled": false
+    },
+    {
       "rangeStrategy": "bump",
        "matchDatasources": ["npm"]
     },
