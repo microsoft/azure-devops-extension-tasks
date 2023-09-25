@@ -4,9 +4,10 @@
     "module": "commonjs",
     "target": "es6",
     "sourceMap": true,
-    "strict": false,
+    "strict": true,
     "strictNullChecks": false,
-    "removeComments": true
+    "removeComments": true,
+    "forceConsistentCasingInFileNames": true
   },
   "files": [
     "./Common/v3/uuidv5.d.ts",
