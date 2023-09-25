@@ -79,11 +79,11 @@ async function run() {
                 setVersion(version);
                 tl.setResult(tl.TaskResult.Succeeded, `tfx exited with return code: ${code}`);
             }
-            catch (err){
+            catch (err: any){
                 tl.setResult(tl.TaskResult.Failed, err);
             }
         });
-    } catch (err) {
+    } catch (err: any) {
         tl.setResult(tl.TaskResult.Failed, `Extension Version task failed: ${err}`);
     }
 }

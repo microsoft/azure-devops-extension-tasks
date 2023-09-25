@@ -1,6 +1,6 @@
-(Get-ChildItem buildtasks\*\v4) | ForEach-Object{ 
+(Get-ChildItem buildtasks\*\v*) | ForEach-Object{ 
     write-host $_
     Push-Location $_
-    & npm install azure-pipelines-task-lib@4 --save
+    & npm audit fix
     Pop-Location
 }

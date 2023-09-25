@@ -10,7 +10,7 @@
     "forceConsistentCasingInFileNames": true
   },
   "files": [
-    "./Common/v4/uuidv5.d.ts",
     "./Common/v4/Common.ts"
-  ]
+  ],
+  "include": ["./Common/v4/uuidv5.d.ts"]
 }

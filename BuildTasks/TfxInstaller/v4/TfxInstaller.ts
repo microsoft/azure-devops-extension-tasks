@@ -18,7 +18,7 @@ async function run()
         await getTfx(version, checkLatest);
         await taskLib.tool("tfx").arg(["version", "--no-color"]).execAsync();
     }
-    catch (error) {
+    catch (error: any) {
         taskLib.setResult(taskLib.TaskResult.Failed, error.message);
     }
 }

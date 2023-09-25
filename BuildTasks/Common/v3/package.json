@@ -15,5 +15,6 @@
   },
   "devDependencies": {
     "@types/tmp": "^0.2.4"
-  }
+  },
+  "types": "./uuidv5.d.ts"
 }
