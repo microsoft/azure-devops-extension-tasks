@@ -32,7 +32,7 @@
     "@types/core-js": "^2.5.6",
     "@types/fs-extra": "^5.1.0",
     "@types/q": "^1.5.6",
-    "@types/node": "^16.18.55",
+    "@types/node": "^16.18.57",
     "@types/promise-retry": "^1.1.4",
     "@types/temp": "^0.9.2",
     "@types/xmldom": "^0.1.32",
