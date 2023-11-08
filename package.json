@@ -33,7 +33,7 @@
     "@types/fs-extra": "^5.1.0",
     "@types/q": "^1.5.7",
     "@types/node": "^16.18.61",
-    "@types/promise-retry": "^1.1.5",
+    "@types/promise-retry": "^1.1.6",
     "@types/temp": "^0.9.3",
     "@types/xmldom": "^0.1.33",
     "@typescript-eslint/eslint-plugin": "^6.9.1",
