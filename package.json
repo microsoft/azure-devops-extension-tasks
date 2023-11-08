@@ -29,7 +29,7 @@
   "author": "Microsoft Corporation",
   "license": "MIT",
   "devDependencies": {
-    "@types/core-js": "^2.5.7",
+    "@types/core-js": "^2.5.8",
     "@types/fs-extra": "^5.1.0",
     "@types/q": "^1.5.7",
     "@types/node": "^16.18.61",
