@@ -36,7 +36,7 @@
     "@types/promise-retry": "^1.1.5",
     "@types/temp": "^0.9.3",
     "@types/xmldom": "^0.1.33",
-    "@typescript-eslint/eslint-plugin": "^6.10.0",
+    "@typescript-eslint/eslint-plugin": "^6.11.0",
     "@typescript-eslint/eslint-plugin-tslint": "^6.10.0",
     "@typescript-eslint/parser": "^6.10.0",
     "eslint": "^8.53.0",
