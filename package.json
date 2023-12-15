@@ -41,7 +41,7 @@
     "@typescript-eslint/parser": "^6.14.0",
     "eslint": "^8.55.0",
     "eslint-config-airbnb-typescript": "^17.1.0",
-    "eslint-plugin-import": "^2.29.0",
+    "eslint-plugin-import": "^2.29.1",
     "glob-exec": "^0.1.1",
     "tfx-cli": "^0.16.0",
     "tslint": "^6.1.3",
