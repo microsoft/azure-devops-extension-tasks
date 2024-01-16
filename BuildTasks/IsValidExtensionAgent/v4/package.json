@@ -8,7 +8,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "azure-pipelines-task-lib": "^4.7.0",
+    "azure-pipelines-task-lib": "^4.8.0",
     "fs-extra": "^11.2.0",
     "promise-retry": "^2.0.1",
     "tmp": "^0.2.1",
