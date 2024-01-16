@@ -10,7 +10,7 @@
   "dependencies": {
     "@xmldom/xmldom": "^0.8.10",
     "7zip-bin-win": "^2.2.0",
-    "azure-pipelines-task-lib": "^4.7.0",
+    "azure-pipelines-task-lib": "^4.8.0",
     "core-js": "^3.35.0",
     "fs-extra": "^11.2.0",
     "temp": "^0.9.4",
