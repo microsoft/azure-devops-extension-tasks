@@ -14,7 +14,7 @@
   "license": "MIT",
   "dependencies": {
     "azure-pipelines-task-lib": "^4.9.1",
-    "core-js": "^3.35.1",
+    "core-js": "^3.36.0",
     "path": "~0.12.7",
     "tmp": "^0.2.1"
   }
