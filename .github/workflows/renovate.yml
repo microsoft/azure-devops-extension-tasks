@@ -7,11 +7,7 @@ on:
     branches:
       main
   workflow_dispatch:
-  issue_comment:
-    types: [edited, created]
-  issues:
-    types: [edited]
-
+  
 env:
   POWERSHELL_CLI_TELEMETRY_OPTOUT: "1"
   POWERSHELL_TELEMETRY_OPTOUT: "1"
