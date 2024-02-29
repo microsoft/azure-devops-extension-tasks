@@ -16,6 +16,6 @@
     "azure-pipelines-task-lib": "^3.4.0",
     "core-js": "^3.36.0",
     "path": "~0.12.7",
-    "tmp": "^0.2.2"
+    "tmp": "^0.2.3"
   }
 }
