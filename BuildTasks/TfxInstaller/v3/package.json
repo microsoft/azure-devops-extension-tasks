@@ -10,6 +10,6 @@
   "dependencies": {
     "azure-pipelines-task-lib": "^3.4.0",
     "azure-pipelines-tool-lib": "^1.3.2",
-    "tmp": "^0.2.2"
+    "tmp": "^0.2.3"
   }
 }
