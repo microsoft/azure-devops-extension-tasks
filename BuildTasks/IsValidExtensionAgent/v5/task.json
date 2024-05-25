@@ -1,8 +1,8 @@
 {
-  "id": "231decda-22cb-4e83-b2f4-31fc86a0de1f",
-  "name": "IsAzureDevOpsExtensionValidServer",
+  "id": "b86cdd2a-0579-4d40-b28f-18197ffaf520",
+  "name": "IsAzureDevOpsExtensionValid",
   "friendlyName": "Is valid Extension",
-  "description": "Check Marketplace validation status.",
+  "description": "Check Visual Studio Marketplace validation status.",
   "author": "Microsoft Corporation",
   "helpMarkDown": "",
   "category": "Deploy",
@@ -15,14 +15,19 @@
     "Build",
     "Release"
   ],
-  "runsOn": [
-    "Server",
-    "ServerGate"
+  "demands": [
+    "npm"
   ],
+  "minimumAgentVersion": "2.206.1",
   "groups": [
     {
       "name": "extension",
       "displayName": "Extension",
+      "isExpanded": true
+    },
+    {
+      "name": "retry",
+      "displayName": "Retry",
       "isExpanded": true
     }
   ],
@@ -33,19 +38,28 @@
       "type": "radio",
       "label": "Connect to",
       "required": true,
-      "defaultValue": "VsTeam",
-      "helpMarkDown": "Connect to Visual Studio Marketplace.",
+      "defaultValue": "AzureRM",
+      "helpMarkDown": "Connect to Visual Studio Marketplace or a local Azure DevOps Server.",
       "options": {
-        "VsTeam": "Visual Studio Marketplace"
+        "VsTeam": "Visual Studio Marketplace (personal access token)",
+        "AzureRM": "Visual Studio Marketplace (workload identity federation)"
       }
     },
     {
       "name": "connectedServiceName",
       "type": "connectedService:VstsMarketplacePublishing",
-      "label": "Visual Studio Marketplace",
+      "label": "Visual Studio Marketplace (personal access token)",
       "required": true,
       "helpMarkDown": "Service endpoint connection to install the extension.",
       "visibleRule": "connectTo=VsTeam"
+    },
+    {
+      "name": "connectedServiceNameAzureRM",
+      "type": "connectedService:AzureRM",
+      "label": "Visual Studio Marketplace (workload identity federation)",
+      "required": true,
+      "helpMarkDown": "Service endpoint connection to install the extension.",
+      "visibleRule": "connectTo=AzureRM"
     },
     {
       "name": "method",
@@ -55,7 +69,8 @@
       "defaultValue": "id",
       "helpMarkDown": "Validate using either an existing VSIX or using the Publisher, Extension ID and version.",
       "options": {
-        "id": "Publisher + Extension ID"
+        "id": "Publisher + Extension ID",
+        "vsix": "VSIX"
       },
       "groupName": "extension"
     },
@@ -93,24 +108,45 @@
       "name": "extensionVersion",
       "type": "string",
       "label": "Extension Version",
-      "defaultValue": "latest",
-      "helpMarkDown": "Extension version (enter 'latest' or leave the value empty to check the last submitted version).",
+      "defaultValue": "",
+      "helpMarkDown": "Extension version (leave the value empty to check the last submitted version).",
       "required": false,
       "groupName": "extension",
       "visibleRule": "method = id"
+    },
+    {
+      "name": "vsixFile",
+      "type": "filePath",
+      "label": "VSIX file",
+      "defaultValue": "",
+      "required": true,
+      "helpMarkDown": "VSIX file of the extension to be installed. Supports wildcards.",
+      "visibleRule": "method = vsix",
+      "groupName": "extension"
+    },
+    {
+      "name": "maxRetries",
+      "type": "string",
+      "label": "Maximum number of retries",
+      "defaultValue": "10",
+      "required": false,
+      "helpMarkDown": "Maximum number of retries.",
+      "groupName": "retry"
+    },
+    {
+      "name": "minTimeout",
+      "type": "string",
+      "label": "Time between retries",
+      "defaultValue": "1",
+      "required": false,
+      "helpMarkDown": "Time between retries (minutes).",
+      "groupName": "retry"
     }
   ],
   "execution": {
-    "HttpRequest": {
-      "Execute": {
-        "EndpointId": "$(connectedServiceName)",
-        "EndpointUrl": "$(endpoint.url)_apis/gallery/publishers/$(publisherId)/extensions/$(extensionId)$(extensionTag)?flags=1",
-        "Method": "GET",
-        "Body": "",
-        "Headers": "{\"Content-Type\":\"application/json\"}",
-        "WaitForCompletion": "false",
-        "Expression": "or(eq(count(jsonpath('$.versions[?(@.version==''$(extensionVersion)'' && @.flags==''validated'')]')), 1), and(in('$(extensionVersion)', 'latest', ''), eq(jsonpath('$.versions[0].flags')[0], 'validated')))"
-      }
+    "Node16": {
+      "target": "IsValidExtensionAgent/v5/IsValidExtension.js",
+      "argumentFormat": ""
     }
   }
 }
