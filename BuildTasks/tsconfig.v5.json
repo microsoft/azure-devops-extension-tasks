@@ -1,0 +1,18 @@
+{
+  "compileOnSave": true,
+  "compilerOptions": {
+    "module": "Node16",
+    "target": "ES2022",
+    "sourceMap": true,
+    "strict": true,
+    "strictNullChecks": false,
+    "removeComments": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "files": [
+    "./Common/v5/Common.ts"
+  ],
+  "include": [
+    "./Common/v5/uuidv5.d.ts"
+  ]
+}

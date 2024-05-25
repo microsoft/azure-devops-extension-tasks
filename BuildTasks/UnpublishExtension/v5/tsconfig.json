@@ -1,0 +1,10 @@
+{
+    "extends": "../../tsconfig.v5.json",
+    "compilerOptions": {
+        "outDir": "./",
+        "sourceRoot": "./"
+    },
+    "files": [
+        "UnpublishExtension.ts"
+    ]
+}
