@@ -6,6 +6,7 @@
     "type": "git",
     "url": "https://github.com/Microsoft/azure-devops-extension-tasks.git"
   },
+  "type": "module",
   "license": "MIT",
   "dependencies": {
     "azure-pipelines-task-lib": "^4.12.0",
