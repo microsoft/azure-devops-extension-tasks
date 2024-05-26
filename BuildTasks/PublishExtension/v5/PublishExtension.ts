@@ -1,6 +1,6 @@
 import tl from "azure-pipelines-task-lib/task.js";
 import * as common from "../../Common/v5/Common.js";
-import * as vsixeditor from "./vsixeditor.js";
+import VsixEditor from "./vsixeditor.js";
 
 await common.runTfx(async tfx => {
     let cleanupTfxArgs: () => void;
@@ -70,7 +70,7 @@ await common.runTfx(async tfx => {
                 || updateTasksId) {
 
                 tl.debug("Start editing of VSIX");
-                const ve = new vsixeditor.VSIXEditor(vsixFile, vsixOutput);
+                const ve = new VsixEditor(vsixFile, vsixOutput);
                 ve.startEdit();
 
                 if (publisher) { ve.editPublisher(publisher); }

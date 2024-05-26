@@ -1,5 +1,5 @@
 import tl from "azure-pipelines-task-lib";
-import { getFederatedToken } from "azure-pipelines-tasks-artifacts-common/webapi.js";
+import { AzureRMEndpoint } from "azure-pipelines-tasks-azure-arm-rest/azure-arm-endpoint.js";
 import * as util from "./Utils.js";
 
 let publisher = "";
@@ -11,7 +11,9 @@ try {
         const connectedService = tl.getInput("connectedServiceName", true);
         token = tl.getEndpointAuthorizationParameter(connectedService, "password", true);
     } else {
-        token = await getFederatedToken("connectedServiceNameAzureRM");
+        const connectedService = tl.getInput("connectedServiceNameAzureRM", true);
+        const endpoint = await new AzureRMEndpoint(connectedService).getEndpoint();
+        token = await endpoint.applicationTokenCredentials.getFederatedToken();
     }
 
     const vsixFile = tl.getPathInput("vsixFile", true, true);
