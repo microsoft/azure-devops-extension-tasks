@@ -1,5 +1,5 @@
 {
-  "name": "publishvsextension",
+  "name": "vsts-developer-tools.publishvsextensionv5",
   "version": "5.0.0",
   "description": "Publish Visual Studio Extension Task",
   "repository": {
