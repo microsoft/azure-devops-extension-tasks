@@ -96,7 +96,7 @@
         "ms.vss-distributed-task.tasks"
       ],
       "properties": {
-        "name": "vsts-developer-tools.packageextensionv5"
+        "name": "node_modules/vsts-developer-tools.packageextensionv5"
       }
     },
     {
@@ -106,7 +106,7 @@
         "ms.vss-distributed-task.tasks"
       ],
       "properties": {
-        "name": "vsts-developer-tools.publishextensionv5"
+        "name": "node_modules/vsts-developer-tools.publishextensionv5"
       }
     },
     {
@@ -116,7 +116,7 @@
         "ms.vss-distributed-task.tasks"
       ],
       "properties": {
-        "name": "vsts-developer-tools.unpublishextensionv5"
+        "name": "node_modules/vsts-developer-tools.unpublishextensionv5"
       }
     },
     {
@@ -126,7 +126,7 @@
         "ms.vss-distributed-task.tasks"
       ],
       "properties": {
-        "name": "vsts-developer-tools.publishvsextensionv5"
+        "name": "node_modules/vsts-developer-tools.publishvsextensionv5"
       }
     },
     {
@@ -136,7 +136,7 @@
         "ms.vss-distributed-task.tasks"
       ],
       "properties": {
-        "name": "vsts-developer-tools.installextensionv5"
+        "name": "node_modules/vsts-developer-tools.installextensionv5"
       }
     },
     {
@@ -156,7 +156,7 @@
         "ms.vss-distributed-task.tasks"
       ],
       "properties": {
-        "name": "vsts-developer-tools.isvalidextensionagentv5"
+        "name": "node_modules/vsts-developer-tools.isvalidextensionagentv5"
       }
     },
     {
@@ -166,7 +166,7 @@
         "ms.vss-distributed-task.tasks"
       ],
       "properties": {
-        "name": "vsts-developer-tools.extensionversionv5"
+        "name": "node_modules/vsts-developer-tools.extensionversionv5"
       }
     },
     {
@@ -176,7 +176,7 @@
         "ms.vss-distributed-task.tasks"
       ],
       "properties": {
-        "name": "vsts-developer-tools.shareextensionv5"
+        "name": "node_modules/vsts-developer-tools.shareextensionv5"
       }
     },
     {
@@ -186,7 +186,7 @@
         "ms.vss-distributed-task.tasks"
       ],
       "properties": {
-        "name": "vsts-developer-tools.tfxinstallerv5"
+        "name": "node_modules/vsts-developer-tools.tfxinstallerv5"
       }
     },
     {
