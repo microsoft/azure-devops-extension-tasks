@@ -145,7 +145,7 @@
   ],
   "execution": {
     "Node16": {
-      "target": "IsValidExtensionAgent/v5/IsValidExtension.js",
+      "target": "IsValidExtension.js",
       "argumentFormat": ""
     }
   }

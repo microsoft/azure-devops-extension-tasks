@@ -227,7 +227,7 @@
   ],
   "execution": {
     "Node16": {
-      "target": "PackageExtension/v5/PackageExtension.js",
+      "target": "PackageExtension.js",
       "argumentFormat": ""
     }
   }

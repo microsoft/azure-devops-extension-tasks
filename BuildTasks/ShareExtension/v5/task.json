@@ -149,7 +149,7 @@
   ],
   "execution": {
     "Node16": {
-      "target": "ShareExtension/v5/ShareExtension.js",
+      "target": "ShareExtension.js",
       "argumentFormat": ""
     }
   }

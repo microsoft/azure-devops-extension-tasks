@@ -303,7 +303,7 @@
   ],
   "execution": {
     "Node16": {
-      "target": "PublishExtension/v5/PublishExtension.js",
+      "target": "PublishExtension.js",
       "argumentFormat": ""
     }
   }
