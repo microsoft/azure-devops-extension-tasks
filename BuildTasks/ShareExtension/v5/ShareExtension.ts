@@ -1,5 +1,5 @@
 import * as tl from "azure-pipelines-task-lib";
-import * as common from "vsts-developer-tools.commonv5/Common.js";
+import * as common from "../../Common/v5/Common.js";
 
 await common.runTfx(async tfx => {
     tfx.arg(["extension", "share", "--no-color"]);

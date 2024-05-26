@@ -1,6 +1,6 @@
 import * as tl from "azure-pipelines-task-lib";
 import * as tr from "azure-pipelines-task-lib/toolrunner.js";
-import * as common from "vsts-developer-tools.commonv5/Common.js";
+import * as common from "../../Common/v5/Common.js";
 
 const extensionVersionOverrideVariable = tl.getInput("extensionVersionOverride", false);
 let usingOverride = false;
