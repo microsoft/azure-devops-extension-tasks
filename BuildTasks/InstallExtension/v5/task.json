@@ -158,7 +158,7 @@
   ],
   "execution": {
     "Node16": {
-      "target": "InstallExtension/v5/InstallExtension.js",
+      "target": "InstallExtension.js",
       "argumentFormat": ""
     }
   }
