@@ -74,36 +74,6 @@
   ],
   "files": [
     {
-      "path": "BuildTasks/ExtensionVersion"
-    },
-    {
-      "path": "BuildTasks/InstallExtension"
-    },
-    {
-      "path": "BuildTasks/IsValidExtension"
-    },
-    {
-      "path": "BuildTasks/IsValidExtensionAgent"
-    },
-    {
-      "path": "BuildTasks/PackageExtension"
-    },
-    {
-      "path": "BuildTasks/PublishExtension"
-    },
-    {
-      "path": "BuildTasks/UnpublishExtension"
-    },
-    {
-      "path": "BuildTasks/PublishVSExtension"
-    },
-    {
-      "path": "BuildTasks/ShareExtension"
-    },
-    {
-      "path": "BuildTasks/TfxInstaller"
-    },
-    {
       "path": "node_modules"
     },
     {
