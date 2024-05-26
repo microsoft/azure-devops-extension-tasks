@@ -3,7 +3,7 @@ import stream from "node:stream";
 import fs from "node:fs/promises";
 import tl from "azure-pipelines-task-lib";
 import { ToolRunner } from "azure-pipelines-task-lib/toolrunner.js";
-import { getFederatedToken } from "azure-pipelines-tasks-artifacts-common/webapi.js";
+import { AzureRMEndpoint } from "azure-pipelines-tasks-azure-arm-rest/azure-arm-endpoint.js";
 import fse from "fs-extra";
 import uuidv5 from "uuidv5";
 import tmp from "tmp";
@@ -260,7 +260,9 @@ export async function setTfxMarketplaceArguments(tfx: ToolRunner, setServiceUrl 
         tfx.arg(["--auth-type", "pat"]);
         tfx.arg(["--token", galleryEndpoint.password]);
     } else if (connectTo === "AzureRM") {
-        const token = await getFederatedToken("connectedServiceNameAzureRM");
+        const serviceName = tl.getInput("connectedServiceNameAzureRM", true);
+        const endpoint = await new AzureRMEndpoint(serviceName).getEndpoint();
+        const token = await endpoint.applicationTokenCredentials.getFederatedToken();
         tfx.argIf(setServiceUrl, ["--service-url", "https://marketplace.visualstudio.com"]);
         tfx.arg(["--auth-type", "pat"]);
         tfx.arg(["--token", token]);

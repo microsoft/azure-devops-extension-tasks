@@ -98,7 +98,7 @@ class GalleryFlagsEditor {
     }
 }
 
-export class VSIXEditor {
+export default class VSIXEditor {
     private edit = false;
     private versionNumber: string = null;
     private id: string = null;
