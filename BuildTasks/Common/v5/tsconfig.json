@@ -1,7 +1,11 @@
 {
     "extends": "../../tsconfig.v5.json",
     "compilerOptions": {
-        "outDir": "./Common",
+        "outDir": "./",
         "sourceRoot": "./"
-    }
+    },
+    "files": [
+        "Common.ts",
+        "uuidv5.d.ts"
+    ]
 }
