@@ -55,6 +55,7 @@
     "BuildTasks/PackageExtension/v5",
     "BuildTasks/PublishExtension/v5",
     "BuildTasks/PublishVSExtension/v5",
+    "BuildTasks/ShareExtension/v5",
     "BuildTasks/TfxInstaller/v5",
     "BuildTasks/UnpublishExtension/v5"
   ]
