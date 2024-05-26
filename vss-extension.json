@@ -77,6 +77,9 @@
       "path": "node_modules"
     },
     {
+      "path": "BuildTasks/IsValidExtension"
+    },
+    {
       "path": "add-task.png",
       "addressable": true
     },
@@ -93,7 +96,7 @@
         "ms.vss-distributed-task.tasks"
       ],
       "properties": {
-        "name": "BuildTasks/PackageExtension"
+        "name": "vsts-developer-tools.packageextensionv5"
       }
     },
     {
@@ -103,7 +106,7 @@
         "ms.vss-distributed-task.tasks"
       ],
       "properties": {
-        "name": "BuildTasks/PublishExtension"
+        "name": "vsts-developer-tools.publishextensionv5"
       }
     },
     {
@@ -113,7 +116,7 @@
         "ms.vss-distributed-task.tasks"
       ],
       "properties": {
-        "name": "BuildTasks/UnpublishExtension"
+        "name": "vsts-developer-tools.unpublishextensionv5"
       }
     },
     {
@@ -123,7 +126,7 @@
         "ms.vss-distributed-task.tasks"
       ],
       "properties": {
-        "name": "BuildTasks/PublishVSExtension"
+        "name": "vsts-developer-tools.publishvsextensionv5"
       }
     },
     {
@@ -133,7 +136,7 @@
         "ms.vss-distributed-task.tasks"
       ],
       "properties": {
-        "name": "BuildTasks/InstallExtension"
+        "name": "vsts-developer-tools.installextensionv5"
       }
     },
     {
@@ -153,7 +156,7 @@
         "ms.vss-distributed-task.tasks"
       ],
       "properties": {
-        "name": "BuildTasks/IsValidExtensionAgent"
+        "name": "vsts-developer-tools.isvalidextensionagentv5"
       }
     },
     {
@@ -163,7 +166,7 @@
         "ms.vss-distributed-task.tasks"
       ],
       "properties": {
-        "name": "BuildTasks/ExtensionVersion"
+        "name": "vsts-developer-tools.extensionversionv5"
       }
     },
     {
@@ -173,7 +176,7 @@
         "ms.vss-distributed-task.tasks"
       ],
       "properties": {
-        "name": "BuildTasks/ShareExtension"
+        "name": "vsts-developer-tools.shareextensionv5"
       }
     },
     {
@@ -183,7 +186,7 @@
         "ms.vss-distributed-task.tasks"
       ],
       "properties": {
-        "name": "BuildTasks/TfxInstaller"
+        "name": "vsts-developer-tools.tfxinstallerv5"
       }
     },
     {
