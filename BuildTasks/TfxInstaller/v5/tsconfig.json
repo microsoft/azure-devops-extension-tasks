@@ -1,7 +1,7 @@
 {
     "extends": "../../tsconfig.v5.json",
     "compilerOptions": {
-        "outDir": "./TfxInstaller",
+        "outDir": "./",
         "sourceRoot": "./"
     },
     "files": [
