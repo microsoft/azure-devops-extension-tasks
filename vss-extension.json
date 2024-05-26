@@ -104,6 +104,9 @@
       "path": "BuildTasks/TfxInstaller"
     },
     {
+      "path": "node_modules"
+    },
+    {
       "path": "add-task.png",
       "addressable": true
     },
