@@ -1,13 +1,12 @@
-import * as path from "path";
-import * as stream from "stream";
-import * as fs from "fs";
-import * as tl from "azure-pipelines-task-lib";
-import * as trl from "azure-pipelines-task-lib/toolrunner.js";
+import path from "node:path";
+import stream from "node:stream";
+import fs from "node:fs/promises";
+import tl from "azure-pipelines-task-lib";
+import { ToolRunner } from "azure-pipelines-task-lib/toolrunner.js";
 import { getFederatedToken } from "azure-pipelines-tasks-artifacts-common/webapi.js";
-import * as fse from "fs-extra";
-import ToolRunner = trl.ToolRunner;
+import fse from "fs-extra";
 import uuidv5 from "uuidv5";
-import * as tmp from "tmp";
+import tmp from "tmp";
 
 function writeBuildTempFile(taskName: string, data: any): string {
     const tempDir = tl.getVariable("Agent.TempDirectory");
@@ -19,10 +18,10 @@ function writeBuildTempFile(taskName: string, data: any): string {
     return tempFile;
 }
 
-function deleteBuildTempFile(tempFile: string) {
+async function deleteBuildTempFile(tempFile: string) {
     if (tempFile && tl.exist(tempFile)) {
         tl.debug(`Deleting temp file: ${tempFile}`);
-        fs.unlinkSync(tempFile);
+        await fs.unlink(tempFile);
     }
 }
 
@@ -30,9 +29,9 @@ function deleteBuildTempFile(tempFile: string) {
  * Set manifest related arguments for "tfx extension" command, such as
  * the  --root or the --manifest-globs switches.
  * @param  {ToolRunner} tfx
- * @returns {() => void} Cleaner function that the caller should use to cleanup temporary files created to be used as arguments
+ * @returns {() => Promise<void>} Cleaner function that the caller should await to cleanup temporary files created to be used as arguments
  */
-export function validateAndSetTfxManifestArguments(tfx: ToolRunner): (() => void) {
+export function validateAndSetTfxManifestArguments(tfx: ToolRunner): (() => Promise<void>) {
     const rootFolder = tl.getInput("rootFolder", false);
     tfx.argIf(rootFolder, ["--root", rootFolder]);
 
@@ -161,7 +160,7 @@ export function validateAndSetTfxManifestArguments(tfx: ToolRunner): (() => void
         tfx.line(args);
     }
 
-    return () => deleteBuildTempFile(overrideFilePath);
+    return async () => await deleteBuildTempFile(overrideFilePath);
 }
 
 /**
@@ -196,7 +195,7 @@ export async function runTfx(cmd: (tfx: ToolRunner) => void): Promise<boolean> {
 
     if (tfxPath) {
         tl.debug(`using: ${tfxPath}`);
-        tfx = new trl.ToolRunner(tfxPath);
+        tfx = new ToolRunner(tfxPath);
         await tryRunCmd(tfx);
         return;
     }
@@ -491,19 +490,17 @@ function getExtensionManifestPaths(): string[] {
     return tl.findMatch(rootFolder, manifestsPatterns);
 }
 
-function getManifest(path: string): Promise<unknown> {
-    return fse.readFile(path, "utf8").then((data: string) => {
-        try {
-            data = data.replace(/^\uFEFF/,
-                () => {
-                    tl.warning(`Removing Unicode BOM from manifest file: ${path}.`);
-                    return "";
-                });
-            return JSON.parse(data);
-        } catch (jsonError) {
-            throw new Error(`Error parsing task manifest: ${path} - ${jsonError}`);
-        }
-    });
+async function getManifest(path: string): Promise<unknown> {
+    const data = (await fs.readFile(path, "utf8")).replace(/^\uFEFF/,
+        () => {
+            tl.warning(`Removing Unicode BOM from manifest file: ${path}.`);
+            return "";
+        });
+    try {
+        return JSON.parse(data);
+    } catch (jsonError) {
+        throw new Error(`Error parsing task manifest: ${path} - ${jsonError}`);
+    }
 }
 
 function getTaskManifestPaths(manifestPath: string, manifest: any): string[] {

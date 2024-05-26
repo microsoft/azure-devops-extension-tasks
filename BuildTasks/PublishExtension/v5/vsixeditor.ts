@@ -1,10 +1,8 @@
-import "core-js";
-import * as temp from "temp";
-import * as fs from "fs";
-import * as fse from "fs-extra";
-import * as path from "path";
-import * as tl from "azure-pipelines-task-lib";
-import * as tr from "azure-pipelines-task-lib/toolrunner.js";
+import temp from "temp";
+import fs from "node:fs/promises";
+import path from "node:path";
+import tl from "azure-pipelines-task-lib";
+import tr from "azure-pipelines-task-lib/toolrunner.js";
 import * as common from "../../Common/v5/Common.js";
 
 interface VsixManifest {
@@ -31,24 +29,24 @@ class ManifestData {
         public name: string,
         public dirPath: string) { }
 
-    public createOutputFilePath(outputPath: string): string {
+    public async createOutputFilePath(outputPath: string): Promise<string> {
         const fileName = `${this.publisher}.${this.id}-${this.version}.gen.vsix`;
 
-        const updateFileName = (fileName: string, iteration: number) => {
+        const updateFileName = async (fileName: string, iteration: number) => {
             if (iteration > 0) {
                 const gen = iteration.toString().padStart(2, "0");
                 fileName = `${this.publisher}.${this.id}-${this.version}.gen${gen}.vsix`;
             }
-            fs.exists(path.join(outputPath, fileName), result => {
-                if (result) {
-                    updateFileName(fileName, ++iteration);
-                } else {
-                    tl.debug("Generated filename: " + fileName);
-                }
-            });
+
+            try {
+                await fs.access(path.join(outputPath, fileName));
+                await updateFileName(fileName, ++iteration);
+            } catch {
+                tl.debug("Generated filename: " + fileName);
+            }
         };
 
-        updateFileName(fileName, 0);
+        await updateFileName(fileName, 0);
 
         return fileName;
     }
@@ -213,7 +211,7 @@ export class VSIXEditor {
 
         tl.debug("Editing VSIX manifest");
         const manifestData = await this.editVsixManifest(dirPath);
-        manifestData.outputFileName = manifestData.createOutputFilePath(this.outputPath);
+        manifestData.outputFileName = await manifestData.createOutputFilePath(this.outputPath);
 
         tl.debug(`Creating final archive file at ${this.outputPath}`);
         await this.createArchive(this.inputFile, manifestData.dirPath, manifestData.outputFileName);
@@ -228,7 +226,7 @@ export class VSIXEditor {
 
         const vsixManifestPath = path.join(dirPath, "extension.vsixmanifest");
 
-        let vsixManifestData = await fse.readFile(vsixManifestPath, "utf8");
+        let vsixManifestData = await fs.readFile(vsixManifestPath, "utf8");
 
         const vsixmanifest = x2js.xml2js<VsixManifest>(vsixManifestData);
         const identity = vsixmanifest.PackageManifest.Metadata.Identity;
@@ -286,7 +284,7 @@ export class VSIXEditor {
             vsixmanifest.PackageManifest.Metadata.DisplayName,
             dirPath);
 
-        await fse.writeFile(vsixManifestPath, vsixManifestData, { encoding: "utf8" });
+        await fs.writeFile(vsixManifestPath, vsixManifestData, { encoding: "utf8" });
         return manifestData;
     }
 

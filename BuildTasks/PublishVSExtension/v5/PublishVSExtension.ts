@@ -1,4 +1,4 @@
-import * as tl from "azure-pipelines-task-lib";
+import tl from "azure-pipelines-task-lib";
 import { getFederatedToken } from "azure-pipelines-tasks-artifacts-common/webapi.js";
 import * as util from "./Utils.js";
 
