@@ -1,6 +1,6 @@
-import * as tl from "azure-pipelines-task-lib";
-import * as tr from "azure-pipelines-task-lib/toolrunner.js";
-import * as path from "path";
+import tl from "azure-pipelines-task-lib";
+import tr from "azure-pipelines-task-lib/toolrunner.js";
+import path from "node:path";
 
 let cacheVsixPublisherExe = "";
 let loggedIn = false;

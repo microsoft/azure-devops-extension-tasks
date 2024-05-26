@@ -1,4 +1,4 @@
-import * as tl from "azure-pipelines-task-lib/task.js";
+import tl from "azure-pipelines-task-lib/task.js";
 import * as common from "../../Common/v5/Common.js";
 
 try {

@@ -1,11 +1,11 @@
-import * as tr from 'azure-pipelines-task-lib/toolrunner.js';
+import tr from 'azure-pipelines-task-lib/toolrunner.js';
 
-import * as taskLib from 'azure-pipelines-task-lib/task.js';
-import * as toolLib from 'azure-pipelines-tool-lib/tool.js';
+import taskLib from 'azure-pipelines-task-lib/task.js';
+import toolLib from 'azure-pipelines-tool-lib/tool.js';
 
-import * as path from 'path';
-import * as os from 'os';
-import * as fs from 'fs';
+import path from 'node:path';
+import os from 'node:os';
+import fs from 'node:fs';
 
 const debug = taskLib.getVariable("system.debug") || false;
 

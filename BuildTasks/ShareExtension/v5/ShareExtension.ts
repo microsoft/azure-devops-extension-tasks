@@ -1,4 +1,4 @@
-import * as tl from "azure-pipelines-task-lib";
+import tl from "azure-pipelines-task-lib";
 import * as common from "../../Common/v5/Common.js";
 
 await common.runTfx(async tfx => {
