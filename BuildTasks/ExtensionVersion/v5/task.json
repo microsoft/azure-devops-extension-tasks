@@ -161,7 +161,7 @@
   ],
   "execution": {
     "Node16": {
-      "target": "ExtensionVersion.js",
+      "target": "ExtensionVersion/v5/ExtensionVersion.js",
       "argumentFormat": ""
     }
   }

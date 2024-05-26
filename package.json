@@ -46,17 +46,5 @@
     "tfx-cli": "^0.17.0",
     "tslint": "^6.1.3",
     "typescript": "^4.9.5"
-  },
-  "workspaces": [
-    "BuildTasks/Common/v5",
-    "BuildTasks/ExtensionVersion/v5",
-    "BuildTasks/InstallExtension/v5",
-    "BuildTasks/IsValidExtensionAgent/v5",
-    "BuildTasks/PackageExtension/v5",
-    "BuildTasks/PublishExtension/v5",
-    "BuildTasks/PublishVSExtension/v5",
-    "BuildTasks/ShareExtension/v5",
-    "BuildTasks/TfxInstaller/v5",
-    "BuildTasks/UnpublishExtension/v5"
-  ]
+  }
 }
