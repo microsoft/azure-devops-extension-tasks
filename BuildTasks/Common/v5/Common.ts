@@ -259,6 +259,7 @@ export async function setTfxMarketplaceArguments(tfx: ToolRunner, setServiceUrl 
         tfx.argIf(setServiceUrl, ["--service-url", galleryEndpoint.url]);
         tfx.arg(["--auth-type", "pat"]);
         tfx.arg(["--token", galleryEndpoint.password]);
+        tl.setSecret(galleryEndpoint.password);
     } else if (connectTo === "AzureRM") {
         const serviceName = tl.getInput("connectedServiceNameAzureRM", true);
         const endpoint = await new AzureRMEndpoint(serviceName).getEndpoint();
@@ -266,6 +267,7 @@ export async function setTfxMarketplaceArguments(tfx: ToolRunner, setServiceUrl 
         tfx.argIf(setServiceUrl, ["--service-url", "https://marketplace.visualstudio.com"]);
         tfx.arg(["--auth-type", "pat"]);
         tfx.arg(["--token", token]);
+        tl.setSecret(token);
     } else {
         const galleryEndpoint = getMarketplaceEndpointDetails("connectedServiceNameTFS");
         tfx.argIf(setServiceUrl, ["--service-url", galleryEndpoint.url]);
@@ -274,10 +276,12 @@ export async function setTfxMarketplaceArguments(tfx: ToolRunner, setServiceUrl 
             tfx.arg(["--auth-type", "basic"]);
             tfx.arg(["--username", galleryEndpoint.username]);
             tfx.arg(["--password", galleryEndpoint.password]);
+            tl.setSecret(galleryEndpoint.password);
         }
         else {
             tfx.arg(["--auth-type", "pat"]);
             tfx.arg(["--token", galleryEndpoint.apitoken]);
+            tl.setSecret(galleryEndpoint.apitoken);
         }
     }
 }

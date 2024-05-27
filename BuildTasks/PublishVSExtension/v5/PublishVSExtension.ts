@@ -15,6 +15,7 @@ try {
         const endpoint = await new AzureRMEndpoint(connectedService).getEndpoint();
         token = await endpoint.applicationTokenCredentials.getFederatedToken();
     }
+    tl.setSecret(token);
 
     const vsixFile = tl.getPathInput("vsixFile", true, true);
     const manifestFile = tl.getPathInput("manifestFile", true, true);
