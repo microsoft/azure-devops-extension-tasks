@@ -263,7 +263,11 @@ export async function setTfxMarketplaceArguments(tfx: ToolRunner, setServiceUrl 
     } else if (connectTo === "AzureRM") {
         const serviceName = tl.getInput("connectedServiceNameAzureRM", true);
         const endpoint = await new AzureRMEndpoint(serviceName).getEndpoint();
-        const token = await endpoint.applicationTokenCredentials.getFederatedToken();
+
+        // Overriding the "Active Directory" ID seems to be the only public way to change which scopes the token has access to.
+        // https://github.com/microsoft/azure-pipelines-tasks-common-packages/blob/74b799d41d0b78bae6b9ecf9987cf7008093d457/common-npm-packages/azure-arm-rest/azure-arm-common.ts#L480
+        endpoint.applicationTokenCredentials.activeDirectoryResourceId = "499b84ac-1321-427f-aa17-267ca6975798";
+        const token = await endpoint.applicationTokenCredentials.getToken();
         tfx.argIf(setServiceUrl, ["--service-url", "https://marketplace.visualstudio.com"]);
         tfx.arg(["--auth-type", "pat"]);
         tfx.arg(["--token", token]);
