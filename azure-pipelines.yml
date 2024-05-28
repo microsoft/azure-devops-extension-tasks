@@ -70,7 +70,7 @@ stages:
         del BuildTasks\*\v*\tsconfig.json
         del BuildTasks\*\v*\.snyk
         del BuildTasks\*\v*\*.md
-      displayName: 'Publish the extension'
+      displayName: 'Delete unneeded files'
 
     - task: TfxInstaller@4
       displayName: 'Use Node CLI for Azure DevOps'
