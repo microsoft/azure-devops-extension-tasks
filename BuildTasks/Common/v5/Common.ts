@@ -256,10 +256,10 @@ export async function setTfxMarketplaceArguments(tfx: ToolRunner, setServiceUrl 
 
     if (connectTo === "VsTeam") {
         const galleryEndpoint = getMarketplaceEndpointDetails("connectedServiceName");
+        tl.setSecret(galleryEndpoint.password);
         tfx.argIf(setServiceUrl, ["--service-url", galleryEndpoint.url]);
         tfx.arg(["--auth-type", "pat"]);
         tfx.arg(["--token", galleryEndpoint.password]);
-        tl.setSecret(galleryEndpoint.password);
     } else if (connectTo === "AzureRM") {
         const serviceName = tl.getInput("connectedServiceNameAzureRM", true);
         const endpoint = await new AzureRMEndpoint(serviceName).getEndpoint();
