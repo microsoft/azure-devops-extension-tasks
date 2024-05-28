@@ -150,7 +150,7 @@
         "ms.vss-distributed-task.tasks"
       ],
       "properties": {
-        "name": "BuildTasks/PublishVsExtension"
+        "name": "BuildTasks/PublishVSExtension"
       }
     },
     {
