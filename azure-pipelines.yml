@@ -17,7 +17,7 @@ stages:
 - stage: 'Build'
   displayName: 'Build'
   jobs:
-  - job: 
+  - job:
     displayName: 'Build on Windows'
     steps:
     - task: NodeTool@0
@@ -46,6 +46,15 @@ stages:
         invoke-webrequest $vswhereLatest -OutFile $vswherePath
         test-path $vswherePath -PathType Leaf
       displayName: 'Grab the latest version of vswhere.exe for v4'
+
+    - powershell: |
+        $vswhereLatest = "https://github.com/Microsoft/vswhere/releases/latest/download/vswhere.exe"
+        $vswherePath = ".\BuildTasks\PublishVSExtension\v5\tools\vswhere.exe"
+        remove-item $vswherePath -ErrorAction SilentlyContinue
+        mkdir ".\BuildTasks\PublishVSExtension\v5\tools\" -force
+        invoke-webrequest $vswhereLatest -OutFile $vswherePath
+        test-path $vswherePath -PathType Leaf
+      displayName: 'Grab the latest version of vswhere.exe for v5'
 
     - task: Npm@1
       displayName: 'Build the extension'
@@ -88,11 +97,11 @@ stages:
   condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
   dependsOn: 'Build'
   jobs:
-    - deployment: 
-      environment: dev
-      strategy: 
-        runOnce:
-         deploy:
+  - deployment:
+    environment: dev
+    strategy:
+      runOnce:
+        deploy:
           steps:
           - task: NodeTool@0
             inputs:
@@ -140,17 +149,17 @@ stages:
   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
   dependsOn: 'PublishDev'
   jobs:
-    - deployment: 
-      environment: public-vsts-developer-tools-build-tasks
-      strategy: 
-        runOnce:
-         deploy:
+  - deployment:
+    environment: public-vsts-developer-tools-build-tasks
+    strategy:
+      runOnce:
+        deploy:
           steps:
           - task: NodeTool@0
             inputs:
               versionSpec: '16.x'
             displayName: 'Install Node.js'
-            
+
           - task: TfxInstaller@4
             displayName: 'Use Node CLI for Azure DevOps'
             inputs:
@@ -168,8 +177,8 @@ stages:
               extensionId: 'vsts-developer-tools-build-tasks'
               updateTasksVersion: false
               extensionVisibility: 'public'
-              noWaitValidation:  true
-          
+              noWaitValidation: true
+
           - task: IsAzureDevOpsExtensionValid@4
             inputs:
               connectTo: 'VsTeam'
