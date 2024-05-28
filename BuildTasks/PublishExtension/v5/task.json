@@ -306,5 +306,6 @@
       "target": "PublishExtension/v5/PublishExtension.js",
       "argumentFormat": ""
     }
-  }
+  },
+  "preview": true
 }

@@ -164,5 +164,6 @@
       "target": "ExtensionVersion/v5/ExtensionVersion.js",
       "argumentFormat": ""
     }
-  }
+  },
+  "preview": true
 }

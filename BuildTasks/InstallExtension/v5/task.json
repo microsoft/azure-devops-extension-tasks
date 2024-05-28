@@ -161,5 +161,6 @@
       "target": "InstallExtension/v5/InstallExtension.js",
       "argumentFormat": ""
     }
-  }
+  },
+  "preview": true
 }

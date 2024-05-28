@@ -152,5 +152,6 @@
       "target": "ShareExtension/v5/ShareExtension.js",
       "argumentFormat": ""
     }
-  }
+  },
+  "preview": true
 }

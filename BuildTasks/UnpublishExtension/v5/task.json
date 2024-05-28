@@ -147,5 +147,6 @@
       "target": "UnpublishExtension/v5/UnpublishExtension.js",
       "argumentFormat": ""
     }
-  }
+  },
+  "preview": true
 }

@@ -18,7 +18,7 @@
   "demands": [
     "npm"
   ],
-  "preview": false,
+  "preview": true,
   "satisfies": [
     "tfx-cli"
   ],

@@ -148,5 +148,6 @@
       "target": "IsValisExtensionAgent/v5/IsValidExtension.js",
       "argumentFormat": ""
     }
-  }
+  },
+  "preview": true
 }

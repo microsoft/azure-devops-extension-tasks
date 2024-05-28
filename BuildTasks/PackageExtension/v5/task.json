@@ -230,5 +230,6 @@
       "target": "PackageExtension/v5/PackageExtension.js",
       "argumentFormat": ""
     }
-  }
+  },
+  "preview": true
 }
