@@ -343,15 +343,6 @@ function getTaskPathContributions(manifest: any): string[] {
         .map((c: any) => c.properties["name"]);
 }
 
-function getContributions(manifest: any): string[] {
-    // Check for all contributions
-    if (!manifest.contributions) {
-        return [];
-    }
-
-    return manifest.contributions;
-}
-
 function updateTaskId(manifest: any, publisherId: string, extensionId: string): unknown {
     tl.debug(`Task manifest ${manifest.name} id before: ${manifest.id}`);
 
