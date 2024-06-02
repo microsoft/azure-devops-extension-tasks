@@ -7,6 +7,7 @@ import { AzureRMEndpoint } from "azure-pipelines-tasks-azure-arm-rest/azure-arm-
 import fse from "fs-extra";
 import uuidv5 from "uuidv5";
 import tmp from "tmp";
+import { forEach } from "core-js/core/array";
 
 function writeBuildTempFile(taskName: string, data: any): string {
     const tempDir = tl.getVariable("Agent.TempDirectory");
@@ -342,6 +343,15 @@ function getTaskPathContributions(manifest: any): string[] {
         .map((c: any) => c.properties["name"]);
 }
 
+function getContributions(manifest: any): string[] {
+    // Check for all contributions
+    if (!manifest.contributions) {
+        return [];
+    }
+
+    return manifest.contributions;
+}
+
 function updateTaskId(manifest: any, publisherId: string, extensionId: string): unknown {
     tl.debug(`Task manifest ${manifest.name} id before: ${manifest.id}`);
 
@@ -374,6 +384,35 @@ function updateExtensionManifestTaskIds(manifest: any, originalTaskId: string, n
             } else {
                 tl.debug(`No supportTasks entry found in manifest contribution`);
             }
+        });
+
+    return manifest;
+}
+
+function updateExtensionManifestsFeatureConstrains(manifest: any): unknown {
+    if (!manifest.contributions) {
+        tl.debug(`No contributions found`);
+        return manifest;
+    }
+
+    const extensionTag = tl.getInput("extensionTag", false) || "";
+    const extensionId = `${(tl.getInput("extensionId", false) || manifest.id)}${extensionTag}`;
+
+    manifest.contributions
+        .filter((c: any) => c.constraints && c.constraints.length > 0)
+        .forEach((c: any) => {
+            c.constraints.forEach((constraint: any) => {
+                if (constraint.properties?.featureId) {
+                    tl.debug(`Extension manifest featureId before: ${constraint.properties.featureId}`);
+                    
+                    const parts = constraint.properties.featureId.split(".");
+                    parts[1] = extensionId;
+                    const newFeatureId = parts.join(".");
+                    constraint.properties.featureId = newFeatureId;
+
+                    tl.debug(`Extension manifest featureId after: ${newFeatureId}`);
+                }
+            });
         });
 
     return manifest;
@@ -415,6 +454,8 @@ function updateTaskVersion(manifest: any, extensionVersionString: string, extens
 export async function updateManifests(manifestPaths: string[]): Promise<void> {
     const updateTasksVersion = tl.getBoolInput("updateTasksVersion", false);
     const updateTasksId = tl.getBoolInput("updateTasksId", false);
+    const extensionTag = tl.getInput("extensionTag", false);
+    const updateFeatureConstraints = tl.getBoolInput("updateFeatureConstraints", false);
 
     if (updateTasksVersion || updateTasksId) {
         if (!(manifestPaths && manifestPaths.length)) {
@@ -424,7 +465,17 @@ export async function updateManifests(manifestPaths: string[]): Promise<void> {
         tl.debug(`Found manifests: ${manifestPaths.join(", ")}`);
 
         const tasksIds = await updateTaskManifests(manifestPaths, updateTasksId, updateTasksVersion);
-        await updateExtensionManifests(manifestPaths, tasksIds);
+        await updateExtensionManifestsTaskIds(manifestPaths, tasksIds);
+    }
+
+    if (extensionTag && updateFeatureConstraints) {
+        if (!(manifestPaths && manifestPaths.length)) {
+            manifestPaths = getExtensionManifestPaths();
+        }
+
+        tl.debug(`Found manifests: ${manifestPaths.join(", ")}`);
+
+        await updateExtensionManifestsFeatureConstrains(manifestPaths);
     }
 }
 
@@ -476,7 +527,7 @@ async function updateTaskManifests(manifestPaths: string[], updateTasksId: boole
     return tasksIds;
 }
 
-async function updateExtensionManifests(manifestPaths: string[], updatedTaskIds: [string, string][]): Promise<void> {
+async function updateExtensionManifestsTaskIds(manifestPaths: string[], updatedTaskIds: [string, string][]): Promise<void> {
     await Promise.all(manifestPaths.map(async (path) => {
         tl.debug(`Patching: ${path}.`);
         let originalManifest = await getManifest(path);
