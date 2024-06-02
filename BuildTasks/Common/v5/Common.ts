@@ -353,7 +353,7 @@ function updateTaskId(manifest: any, publisherId: string, extensionId: string): 
     return manifest;
 }
 
-function updateExtensionManifestTaskIds(manifest: any, originalTaskId: string, newTaskId: string): unknown {
+function updateExtensionManifests(manifest: any, originalTaskId: string, newTaskId: string): unknown {
     if (!manifest.contributions) {
         tl.debug(`No contributions found`);
         return manifest;
@@ -525,7 +525,7 @@ async function updateExtensionManifestsTaskIds(manifestPaths: string[], updatedT
 
         updatedTaskIds.map(([originalTaskId, newTaskId]) => {
             tl.debug(`Updating: ${originalTaskId} => ${newTaskId}.`)
-            originalManifest = updateExtensionManifestTaskIds(originalManifest, originalTaskId, newTaskId);
+            originalManifest = updateExtensionManifests(originalManifest, originalTaskId, newTaskId);
         });
 
         await writeManifest(originalManifest, path);
