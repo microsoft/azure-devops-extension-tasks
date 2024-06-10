@@ -1,4 +1,4 @@
-name: '4.3$(rev:.r)'
+name: '5.0$(rev:.r)'
 
 trigger:
   batch: true
@@ -31,30 +31,20 @@ stages:
 
     - powershell: |
         $vswhereLatest = "https://github.com/Microsoft/vswhere/releases/latest/download/vswhere.exe"
-        $vswherePath = ".\BuildTasks\PublishVSExtension\v3\tools\vswhere.exe"
-        remove-item $vswherePath -ErrorAction SilentlyContinue
-        mkdir ".\BuildTasks\PublishVSExtension\v3\tools\" -force
-        invoke-webrequest $vswhereLatest -OutFile $vswherePath
-        test-path $vswherePath -PathType Leaf
-      displayName: 'Grab the latest version of vswhere.exe for v3'
 
-    - powershell: |
-        $vswhereLatest = "https://github.com/Microsoft/vswhere/releases/latest/download/vswhere.exe"
-        $vswherePath = ".\BuildTasks\PublishVSExtension\v4\tools\vswhere.exe"
-        remove-item $vswherePath -ErrorAction SilentlyContinue
-        mkdir ".\BuildTasks\PublishVSExtension\v4\tools\" -force
-        invoke-webrequest $vswhereLatest -OutFile $vswherePath
-        test-path $vswherePath -PathType Leaf
-      displayName: 'Grab the latest version of vswhere.exe for v4'
+        $targets = @(
+          ".\BuildTasks\PublishVSExtension\v3\tools\"
+          ".\BuildTasks\PublishVSExtension\v4\tools\"
+          ".\BuildTasks\PublishVSExtension\v5\tools\"
+        )
 
-    - powershell: |
-        $vswhereLatest = "https://github.com/Microsoft/vswhere/releases/latest/download/vswhere.exe"
-        $vswherePath = ".\BuildTasks\PublishVSExtension\v5\tools\vswhere.exe"
-        remove-item $vswherePath -ErrorAction SilentlyContinue
-        mkdir ".\BuildTasks\PublishVSExtension\v5\tools\" -force
-        invoke-webrequest $vswhereLatest -OutFile $vswherePath
-        test-path $vswherePath -PathType Leaf
-      displayName: 'Grab the latest version of vswhere.exe for v5'
+        invoke-webrequest $vswhereLatest -OutFile $env:temp\vswhere.exe
+        
+        $targets | %{
+          mkdir $_ -force | out-null
+          copy $env:temp\vswhere.exe $_ -force
+        }
+      displayName: 'Grab the latest version of vswhere.exe'
 
     - task: Npm@1
       displayName: 'Build the extension'
@@ -80,10 +70,10 @@ stages:
 
     - task: PackageAzureDevOpsExtension@4
       displayName: 'Package Extension: $(Build.SourcesDirectory)'
-      name: 'packageStep'
+      name: 'packagebuild'
       inputs:
         rootFolder: '$(Build.SourcesDirectory)'
-        outputPath: '$(Build.ArtifactStagingDirectory)\vsts-developer-tools-build-tasks.vsix'
+        outputPath: '$(Build.ArtifactStagingDirectory)\vsts-developer-tools-build-tasks-build.vsix'
         publisherId: 'ms-devlabs'
         extensionId: 'vsts-developer-tools-build-tasks'
         extensionTag: '-build'
@@ -93,12 +83,30 @@ stages:
         updateTasksVersionType: patch
         extensionVisibility: private
 
-    - task: PublishPipelineArtifact@1
-      displayName: 'Publish vsix'
+    - task: PackageAzureDevOpsExtension@4
+      name: 'packageprivate'
+      displayName: 'Package the private extension'
       inputs:
-        publishLocation: pipeline
-        targetPath: '$(packageStep.Extension.OutputPath)'
-        artifact: 'vsix'
+        rootFolder: '$(Build.SourcesDirectory)'
+        outputPath: '$(Build.ArtifactStagingDirectory)\vsts-developer-tools-build-tasks-private.vsix'
+        publisherId: 'ms-devlabs'
+        extensionId: 'vsts-developer-tools-build-tasks'
+        extensionTag: '-dev'
+        extensionVisibility: 'private'
+
+    - task: PackageAzureDevOpsExtension@4
+      displayName: 'Package the public extension'
+      name: 'packagepublic'
+      inputs:
+        rootFolder: '$(Build.SourcesDirectory)'
+        outputPath: '$(Build.ArtifactStagingDirectory)\vsts-developer-tools-build-tasks-public.vsix'
+        publisherId: 'ms-devlabs'
+        extensionId: 'vsts-developer-tools-build-tasks'
+        extensionVisibility: 'public'
+
+    - publish: $(Build.ArtifactStagingDirectory)
+      artifact: vsix
+      displayName: 'Publish vsix as pipeline artifact'
       condition: succeededOrFailed()
 
 - stage: PublishDev
@@ -112,6 +120,10 @@ stages:
       runOnce:
         deploy:
           steps:
+          - download: current
+            artifact: vsix
+            patterns: "**/*-private.vsix"
+
           - task: NodeTool@0
             inputs:
               versionSpec: '16.x'
@@ -125,33 +137,21 @@ stages:
 
           - task: PublishAzureDevOpsExtension@4
             name: 'publishDev'
+            displayName: 'Publish the private extension to ms-devlabs'
             inputs:
               connectTo: 'VsTeam'
               connectedServiceName: 'marketplaceServiceConnection'
               fileType: 'vsix'
-              vsixFile: '$(Pipeline.Workspace)/vsix/vsts-developer-tools-build-tasks.vsix'
-              publisherId: 'ms-devlabs'
-              extensionId: 'vsts-developer-tools-build-tasks'
-              extensionTag: '-dev'
-              updateTasksVersion: false
-              extensionVisibility: 'private'
-              shareWith: 'jessehouwing-dev'
+              vsixFile: '$(Pipeline.Workspace)/vsix/vsts-developer-tools-build-tasks-private.vsix'
               noWaitValidation: true
 
           - task: IsAzureDevOpsExtensionValid@4
+            displayName: 'Validate the private extension on the marketplace'
             inputs:
               connectTo: 'VsTeam'
               connectedServiceName: 'marketplaceServiceConnection'
               method: 'vsix'
               vsixFile: '$(publishDev.Extension.OutputPath)'
-
-          - task: PublishPipelineArtifact@1
-            displayName: 'Publish vsix'
-            inputs:
-              publishLocation: pipeline
-              targetPath: '$(publishDev.Extension.OutputPath)'
-              artifact: 'dev'
-            condition: succeededOrFailed()
 
 - stage: PublishProd
   displayName: 'Publish publicly to MsDevLabs'
@@ -164,6 +164,10 @@ stages:
       runOnce:
         deploy:
           steps:
+          - download: current
+            artifact: vsix
+            patterns: "**/*-public.vsix"
+
           - task: NodeTool@0
             inputs:
               versionSpec: '16.x'
@@ -177,33 +181,24 @@ stages:
 
           - task: PublishAzureDevOpsExtension@4
             name: 'publishProd'
+            displayName: 'Publish the public extension to ms-devlabs'
             inputs:
               connectTo: 'VsTeam'
               connectedServiceName: 'marketplaceServiceConnection'
               fileType: 'vsix'
-              vsixFile: '$(Pipeline.Workspace)/vsix/vsts-developer-tools-build-tasks.vsix'
-              publisherId: 'ms-devlabs'
-              extensionId: 'vsts-developer-tools-build-tasks'
-              updateTasksVersion: false
-              extensionVisibility: 'public'
+              vsixFile: '$(Pipeline.Workspace)/vsix/vsts-developer-tools-build-tasks-public.vsix'
               noWaitValidation: true
 
           - task: IsAzureDevOpsExtensionValid@4
+            displayName: 'Validate the private extension on the marketplace'
             inputs:
               connectTo: 'VsTeam'
               connectedServiceName: 'marketplaceServiceConnection'
               method: 'vsix'
               vsixFile: '$(publishProd.Extension.OutputPath)'
 
-          - task: PublishPipelineArtifact@1
-            displayName: 'Publish vsix'
-            inputs:
-              publishLocation: pipeline
-              targetPath: '$(publishProd.Extension.OutputPath)'
-              artifact: 'prod'
-            condition: succeededOrFailed()
-
           - task: GitHubRelease@1
+            displayName: 'Publish the public extension to GitHub'
             inputs:
               gitHubConnection: 'microsoft/azure-devops-extension-tasks'
               repositoryName: '$(Build.Repository.Name)'
