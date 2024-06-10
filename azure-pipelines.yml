@@ -88,7 +88,7 @@ stages:
       displayName: 'Package the private extension'
       inputs:
         fileType: 'vsix'
-        vsixFile: '$(Build.ArtifactStagingDirectory)\vsts-developer-tools-build-tasks.vsix'
+        vsixFile: '$(packagebuild.Extension.OutputPath)'
         outputPath: '$(Build.ArtifactStagingDirectory)\vsts-developer-tools-build-tasks-private.vsix'
         publisherId: 'ms-devlabs'
         extensionId: 'vsts-developer-tools-build-tasks'
@@ -101,7 +101,7 @@ stages:
       name: 'packageprod'
       inputs:
         fileType: 'vsix'
-        vsixFile: '$(Build.ArtifactStagingDirectory)\vsts-developer-tools-build-tasks.vsix'
+        vsixFile: '$(packagebuild.Extension.OutputPath)'
         outputPath: '$(Build.ArtifactStagingDirectory)\vsts-developer-tools-build-tasks-public.vsix'
         publisherId: 'ms-devlabs'
         extensionId: 'vsts-developer-tools-build-tasks'
