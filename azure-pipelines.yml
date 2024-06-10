@@ -98,7 +98,7 @@ stages:
 
     - task: PackageAzureDevOpsExtension@4
       displayName: 'Package the public extension'
-      name: 'packageprod'
+      name: 'packagepublic'
       inputs:
         fileType: 'vsix'
         vsixFile: '$(packagebuild.Extension.OutputPath)'
