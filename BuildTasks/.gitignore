@@ -4,3 +4,4 @@
 */*.js
 */*.js.map
 */node_modules/
+vswhere.exe
