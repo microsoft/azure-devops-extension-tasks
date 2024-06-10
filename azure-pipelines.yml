@@ -105,9 +105,9 @@ stages:
         extensionVisibility: 'public'
 
     - publish: |
-        $(packagebuild.Extension.OutputPath)
-        $(packageprivate.Extension.OutputPath)
-        $(packagepublic.Extension.OutputPath)
+        $(Build.ArtifactStagingDirectory)\vsts-developer-tools-build-tasks-build.vsix
+        $(Build.ArtifactStagingDirectory)\vsts-developer-tools-build-tasks-private.vsix
+        $(Build.ArtifactStagingDirectory)\vsts-developer-tools-build-tasks-public.vsix
       artifact: vsix
       displayName: 'Publish vsix as pipeline artifact'
       condition: succeededOrFailed()
