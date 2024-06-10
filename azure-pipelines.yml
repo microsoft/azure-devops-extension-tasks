@@ -83,7 +83,7 @@ stages:
         updateTasksVersionType: patch
         extensionVisibility: private
 
-    - task: PublishAzureDevOpsExtension@4
+    - task: PackageAzureDevOpsExtension@4
       name: 'packageprivate'
       displayName: 'Package the private extension'
       inputs:
@@ -96,7 +96,7 @@ stages:
         updateTasksVersion: false
         extensionVisibility: 'private'
 
-    - task: PublishAzureDevOpsExtension@4
+    - task: PackageAzureDevOpsExtension@4
       displayName: 'Package the public extension'
       name: 'packageprod'
       inputs:
