@@ -13,6 +13,10 @@ pr:
 pool:
   vmImage: 'windows-2022'
 
+variables:
+  - name: 'marketplaceServiceConnection'
+    value: '84645cfd-95a8-4fcc-bb6a-d8e35e3d699d'
+
 stages:
 - stage: 'Build'
   displayName: 'Build'
