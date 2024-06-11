@@ -14,8 +14,8 @@ pool:
   vmImage: 'windows-2022'
 
 variables:
-  - name: 'marketplaceServiceConnection'
-    value: '84645cfd-95a8-4fcc-bb6a-d8e35e3d699d'
+- name: 'marketplaceServiceConnection'
+  value: '84645cfd-95a8-4fcc-bb6a-d8e35e3d699d'
 
 stages:
 - stage: 'Build'
@@ -37,13 +37,12 @@ stages:
         $vswhereLatest = "https://github.com/Microsoft/vswhere/releases/latest/download/vswhere.exe"
 
         $targets = @(
-          ".\BuildTasks\PublishVSExtension\v3\tools\"
-          ".\BuildTasks\PublishVSExtension\v4\tools\"
+          ".\BuildTasks\PublishVSExtension\v4\tools\",
           ".\BuildTasks\PublishVSExtension\v5\tools\"
         )
 
         invoke-webrequest $vswhereLatest -OutFile $env:temp\vswhere.exe
-        
+
         $targets | %{
           mkdir $_ -force | out-null
           copy $env:temp\vswhere.exe $_ -force
@@ -56,7 +55,7 @@ stages:
         command: custom
         verbose: false
         customCommand: 'run build'
-        
+
     - task: Npm@1
       displayName: 'Prepare the extension'
       inputs:
@@ -138,7 +137,7 @@ stages:
           - download: current
             artifact: vsix
             patterns: "**/*-private.vsix"
-          
+
           - task: AzureCLI@2
             inputs:
               azureSubscription: 'SecurePublishMarketplaceServiceConnection'
