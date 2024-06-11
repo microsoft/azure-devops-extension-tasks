@@ -58,7 +58,6 @@ stages:
 
     - task: Npm@1
       displayName: 'Prepare the extension'
-      condition: false
       inputs:
         command: custom
         verbose: false
