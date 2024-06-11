@@ -56,6 +56,13 @@ stages:
         command: custom
         verbose: false
         customCommand: 'run build'
+        
+    - task: Npm@1
+      displayName: 'Prepare the extension'
+      inputs:
+        command: custom
+        verbose: false
+        customCommand: 'run package'
 
     - pwsh: |
         del BuildTasks\*\v*\package-lock.json
@@ -94,7 +101,9 @@ stages:
         rootFolder: '$(Build.SourcesDirectory)'
         outputPath: '$(Build.ArtifactStagingDirectory)\vsts-developer-tools-build-tasks-private.vsix'
         publisherId: 'ms-devlabs'
+        extensionName: 'Azure DevOps Extension Tasks'
         extensionId: 'vsts-developer-tools-build-tasks'
+        extensionVersion: '$(Build.BuildNumber)'
         extensionTag: '-dev'
         extensionVisibility: 'private'
 
@@ -105,7 +114,9 @@ stages:
         rootFolder: '$(Build.SourcesDirectory)'
         outputPath: '$(Build.ArtifactStagingDirectory)\vsts-developer-tools-build-tasks-public.vsix'
         publisherId: 'ms-devlabs'
+        extensionName: 'Azure DevOps Extension Tasks'
         extensionId: 'vsts-developer-tools-build-tasks'
+        extensionVersion: '$(Build.BuildNumber)'
         extensionVisibility: 'public'
 
     - publish: $(Build.ArtifactStagingDirectory)
