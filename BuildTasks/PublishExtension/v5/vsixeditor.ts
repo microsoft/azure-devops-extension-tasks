@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 import temp from "temp";
 import fs from "node:fs/promises";
 import path from "node:path";
@@ -125,7 +126,7 @@ export default class VSIXEditor {
         const cwd = tl.cwd();
 
         if (tl.getPlatform() === tl.Platform.Windows) {
-            const sevenZip = (await import("7zip-bin")).default;
+            const sevenZip = await require("7zip-bin-win");
             const zip = new tr.ToolRunner(sevenZip.path7za);
 
             zip.arg("x");
@@ -165,7 +166,7 @@ export default class VSIXEditor {
         if (originalVsix !== targetVsix) { tl.cp(originalVsix, targetVsix, "-f"); }
 
         if (tl.getPlatform() === tl.Platform.Windows) {
-            const sevenZip = await import("7zip-bin");
+            const sevenZip = await require("7zip-bin-win");
             const zip = new tr.ToolRunner(sevenZip.path7za);
 
             zip.arg("u");
