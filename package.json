@@ -23,7 +23,7 @@
     "build": "npm run build:tasks",
     "build:clean": "npm run clean && npm run initdev && npm run build",
     "build:tasks": "npm run compile:tasks",
-    "package": "npm run build:clean && npm run package:tasks",
+    "package": "glob-exec --parallel --foreach \"BuildTasks/*/*/tsconfig.json\" -- \"cd {{file.dir}} && npm dedupe && npm prune --omit=dev\"",
     "clean": "git clean -fdX"
   },
   "author": "Microsoft Corporation",
