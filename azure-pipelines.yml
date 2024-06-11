@@ -67,7 +67,6 @@ stages:
     - pwsh: |
         del BuildTasks\*\v*\package-lock.json
         del BuildTasks\*\v*\*.ts
-        del BuildTasks\*\v*\package.json
         del BuildTasks\*\v*\tsconfig.json
         del BuildTasks\*\v*\.snyk
         del BuildTasks\*\v*\*.md
