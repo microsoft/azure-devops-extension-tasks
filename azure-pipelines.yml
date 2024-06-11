@@ -123,6 +123,17 @@ stages:
           - download: current
             artifact: vsix
             patterns: "**/*-private.vsix"
+          
+          - task: AzureCLI@2
+            inputs:
+              azureSubscription: 'SecurePublishMarketplaceServiceConnection'
+              scriptType: 'pscore'
+              scriptLocation: 'inlineScript'
+              useGlobalConfig: true
+              inlineScript: |
+                $accessToken = az account get-access-token --resource 499b84ac-1321-427f-aa17-267ca6975798 --query "accessToken" --output tsv
+                write-host "##vso[task.setsecret]$accessToken"
+                write-host "##vso[task.setendpoint id=$env:MARKETPLACESERVICECONNECTION;field=authParameter;key=password]$accessToken"
 
           - task: NodeTool@0
             inputs:
@@ -167,6 +178,17 @@ stages:
           - download: current
             artifact: vsix
             patterns: "**/*-public.vsix"
+
+          - task: AzureCLI@2
+            inputs:
+              azureSubscription: 'SecurePublishMarketplaceServiceConnection'
+              scriptType: 'pscore'
+              scriptLocation: 'inlineScript'
+              useGlobalConfig: true
+              inlineScript: |
+                $accessToken = az account get-access-token --resource 499b84ac-1321-427f-aa17-267ca6975798 --query "accessToken" --output tsv
+                write-host "##vso[task.setsecret]$accessToken"
+                write-host "##vso[task.setendpoint id=$env:MARKETPLACESERVICECONNECTION;field=authParameter;key=password]$accessToken"
 
           - task: NodeTool@0
             inputs:
