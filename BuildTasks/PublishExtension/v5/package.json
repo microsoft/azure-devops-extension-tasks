@@ -9,7 +9,7 @@
   "type": "module",
   "license": "MIT",
   "dependencies": {
-    "7zip-bin-win": "^2.2.0",
+    "7zip-bin": "^5.2.0",
     "azure-pipelines-task-lib": "^4.13.0",
     "azure-pipelines-tasks-azure-arm-rest": "^3.239.0",
     "fs-extra": "^11.2.0",
