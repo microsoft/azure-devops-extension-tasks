@@ -13,6 +13,10 @@ pr:
 pool:
   vmImage: 'windows-2022'
 
+variables:
+- name: 'marketplaceServiceConnection'
+  value: '84645cfd-95a8-4fcc-bb6a-d8e35e3d699d'
+
 stages:
 - stage: 'Build'
   displayName: 'Build'
@@ -33,13 +37,12 @@ stages:
         $vswhereLatest = "https://github.com/Microsoft/vswhere/releases/latest/download/vswhere.exe"
 
         $targets = @(
-          ".\BuildTasks\PublishVSExtension\v3\tools\"
-          ".\BuildTasks\PublishVSExtension\v4\tools\"
+          ".\BuildTasks\PublishVSExtension\v4\tools\",
           ".\BuildTasks\PublishVSExtension\v5\tools\"
         )
 
         invoke-webrequest $vswhereLatest -OutFile $env:temp\vswhere.exe
-        
+
         $targets | %{
           mkdir $_ -force | out-null
           copy $env:temp\vswhere.exe $_ -force
@@ -53,22 +56,30 @@ stages:
         verbose: false
         customCommand: 'run build'
 
+    - task: Npm@1
+      displayName: 'Prepare the extension'
+      inputs:
+        command: custom
+        verbose: false
+        customCommand: 'run package'
+
     - pwsh: |
+        del BuildTasks\PublishExtension\v5\node_modules\7zip-bin\linux -recurse
+        del BuildTasks\PublishExtension\v5\node_modules\7zip-bin\mac -recurse
         del BuildTasks\*\v*\package-lock.json
         del BuildTasks\*\v*\*.ts
-        del BuildTasks\*\v*\package.json
         del BuildTasks\*\v*\tsconfig.json
         del BuildTasks\*\v*\.snyk
         del BuildTasks\*\v*\*.md
       displayName: 'Delete unneeded files'
 
-    - task: TfxInstaller@4
+    - task: TfxInstaller@5
       displayName: 'Use Node CLI for Azure DevOps'
       inputs:
         version: '0.x'
         checkLatest: true
 
-    - task: PackageAzureDevOpsExtension@4
+    - task: PackageAzureDevOpsExtension@5
       displayName: 'Package Extension: $(Build.SourcesDirectory)'
       name: 'packagebuild'
       inputs:
@@ -83,25 +94,29 @@ stages:
         updateTasksVersionType: patch
         extensionVisibility: private
 
-    - task: PackageAzureDevOpsExtension@4
+    - task: PackageAzureDevOpsExtension@5
       name: 'packageprivate'
       displayName: 'Package the private extension'
       inputs:
         rootFolder: '$(Build.SourcesDirectory)'
         outputPath: '$(Build.ArtifactStagingDirectory)\vsts-developer-tools-build-tasks-private.vsix'
         publisherId: 'ms-devlabs'
+        extensionName: 'Azure DevOps Extension Tasks'
         extensionId: 'vsts-developer-tools-build-tasks'
+        extensionVersion: '$(Build.BuildNumber)'
         extensionTag: '-dev'
         extensionVisibility: 'private'
 
-    - task: PackageAzureDevOpsExtension@4
+    - task: PackageAzureDevOpsExtension@5
       displayName: 'Package the public extension'
       name: 'packagepublic'
       inputs:
         rootFolder: '$(Build.SourcesDirectory)'
         outputPath: '$(Build.ArtifactStagingDirectory)\vsts-developer-tools-build-tasks-public.vsix'
         publisherId: 'ms-devlabs'
+        extensionName: 'Azure DevOps Extension Tasks'
         extensionId: 'vsts-developer-tools-build-tasks'
+        extensionVersion: '$(Build.BuildNumber)'
         extensionVisibility: 'public'
 
     - publish: $(Build.ArtifactStagingDirectory)
@@ -129,27 +144,27 @@ stages:
               versionSpec: '16.x'
             displayName: 'Install Node.js'
 
-          - task: TfxInstaller@4
+          - task: TfxInstaller@5
             displayName: 'Use Node CLI for Azure DevOps'
             inputs:
               version: '0.x'
               checkLatest: true
 
-          - task: PublishAzureDevOpsExtension@4
+          - task: PublishAzureDevOpsExtension@5
             name: 'publishDev'
             displayName: 'Publish the private extension to ms-devlabs'
             inputs:
-              connectTo: 'VsTeam'
-              connectedServiceName: 'marketplaceServiceConnection'
+              connectTo: 'AzureRM'
+              connectedServiceNameAzureRM: 'SecurePublishMarketplaceServiceConnection'
               fileType: 'vsix'
               vsixFile: '$(Pipeline.Workspace)/vsix/vsts-developer-tools-build-tasks-private.vsix'
               noWaitValidation: true
 
-          - task: IsAzureDevOpsExtensionValid@4
+          - task: IsAzureDevOpsExtensionValid@5
             displayName: 'Validate the private extension on the marketplace'
             inputs:
-              connectTo: 'VsTeam'
-              connectedServiceName: 'marketplaceServiceConnection'
+              connectTo: 'AzureRM'
+              connectedServiceNameAzureRM: 'SecurePublishMarketplaceServiceConnection'
               method: 'vsix'
               vsixFile: '$(publishDev.Extension.OutputPath)'
 
@@ -173,27 +188,27 @@ stages:
               versionSpec: '16.x'
             displayName: 'Install Node.js'
 
-          - task: TfxInstaller@4
+          - task: TfxInstaller@5
             displayName: 'Use Node CLI for Azure DevOps'
             inputs:
               version: '0.x'
               checkLatest: true
 
-          - task: PublishAzureDevOpsExtension@4
+          - task: PublishAzureDevOpsExtension@5
             name: 'publishProd'
             displayName: 'Publish the public extension to ms-devlabs'
             inputs:
-              connectTo: 'VsTeam'
-              connectedServiceName: 'marketplaceServiceConnection'
+              connectTo: 'AzureRM'
+              connectedServiceNameAzureRM: 'SecurePublishMarketplaceServiceConnection'
               fileType: 'vsix'
               vsixFile: '$(Pipeline.Workspace)/vsix/vsts-developer-tools-build-tasks-public.vsix'
               noWaitValidation: true
 
-          - task: IsAzureDevOpsExtensionValid@4
+          - task: IsAzureDevOpsExtensionValid@5
             displayName: 'Validate the private extension on the marketplace'
             inputs:
-              connectTo: 'VsTeam'
-              connectedServiceName: 'marketplaceServiceConnection'
+              connectTo: 'AzureRM'
+              connectedServiceNameAzureRM: 'SecurePublishMarketplaceServiceConnection'
               method: 'vsix'
               vsixFile: '$(publishProd.Extension.OutputPath)'
 
