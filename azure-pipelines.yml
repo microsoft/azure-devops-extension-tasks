@@ -73,13 +73,13 @@ stages:
         del BuildTasks\*\v*\*.md
       displayName: 'Delete unneeded files'
 
-    - task: TfxInstaller@4
+    - task: TfxInstaller@5
       displayName: 'Use Node CLI for Azure DevOps'
       inputs:
         version: '0.x'
         checkLatest: true
 
-    - task: PackageAzureDevOpsExtension@4
+    - task: PackageAzureDevOpsExtension@5
       displayName: 'Package Extension: $(Build.SourcesDirectory)'
       name: 'packagebuild'
       inputs:
@@ -94,7 +94,7 @@ stages:
         updateTasksVersionType: patch
         extensionVisibility: private
 
-    - task: PackageAzureDevOpsExtension@4
+    - task: PackageAzureDevOpsExtension@5
       name: 'packageprivate'
       displayName: 'Package the private extension'
       inputs:
@@ -107,7 +107,7 @@ stages:
         extensionTag: '-dev'
         extensionVisibility: 'private'
 
-    - task: PackageAzureDevOpsExtension@4
+    - task: PackageAzureDevOpsExtension@5
       displayName: 'Package the public extension'
       name: 'packagepublic'
       inputs:
@@ -139,43 +139,32 @@ stages:
             artifact: vsix
             patterns: "**/*-private.vsix"
 
-          - task: AzureCLI@2
-            inputs:
-              azureSubscription: 'SecurePublishMarketplaceServiceConnection'
-              scriptType: 'pscore'
-              scriptLocation: 'inlineScript'
-              useGlobalConfig: true
-              inlineScript: |
-                $accessToken = az account get-access-token --resource 499b84ac-1321-427f-aa17-267ca6975798 --query "accessToken" --output tsv
-                write-host "##vso[task.setsecret]$accessToken"
-                write-host "##vso[task.setendpoint id=$env:MARKETPLACESERVICECONNECTION;field=authParameter;key=password]$accessToken"
-
           - task: NodeTool@0
             inputs:
               versionSpec: '16.x'
             displayName: 'Install Node.js'
 
-          - task: TfxInstaller@4
+          - task: TfxInstaller@5
             displayName: 'Use Node CLI for Azure DevOps'
             inputs:
               version: '0.x'
               checkLatest: true
 
-          - task: PublishAzureDevOpsExtension@4
+          - task: PublishAzureDevOpsExtension@5
             name: 'publishDev'
             displayName: 'Publish the private extension to ms-devlabs'
             inputs:
-              connectTo: 'VsTeam'
-              connectedServiceName: 'marketplaceServiceConnection'
+              connectTo: 'AzureRM'
+              connectedServiceNameAzureRM: 'SecurePublishMarketplaceServiceConnection'
               fileType: 'vsix'
               vsixFile: '$(Pipeline.Workspace)/vsix/vsts-developer-tools-build-tasks-private.vsix'
               noWaitValidation: true
 
-          - task: IsAzureDevOpsExtensionValid@4
+          - task: IsAzureDevOpsExtensionValid@5
             displayName: 'Validate the private extension on the marketplace'
             inputs:
-              connectTo: 'VsTeam'
-              connectedServiceName: 'marketplaceServiceConnection'
+              connectTo: 'AzureRM'
+              connectedServiceNameAzureRM: 'SecurePublishMarketplaceServiceConnection'
               method: 'vsix'
               vsixFile: '$(publishDev.Extension.OutputPath)'
 
@@ -194,43 +183,32 @@ stages:
             artifact: vsix
             patterns: "**/*-public.vsix"
 
-          - task: AzureCLI@2
-            inputs:
-              azureSubscription: 'SecurePublishMarketplaceServiceConnection'
-              scriptType: 'pscore'
-              scriptLocation: 'inlineScript'
-              useGlobalConfig: true
-              inlineScript: |
-                $accessToken = az account get-access-token --resource 499b84ac-1321-427f-aa17-267ca6975798 --query "accessToken" --output tsv
-                write-host "##vso[task.setsecret]$accessToken"
-                write-host "##vso[task.setendpoint id=$env:MARKETPLACESERVICECONNECTION;field=authParameter;key=password]$accessToken"
-
           - task: NodeTool@0
             inputs:
               versionSpec: '16.x'
             displayName: 'Install Node.js'
 
-          - task: TfxInstaller@4
+          - task: TfxInstaller@5
             displayName: 'Use Node CLI for Azure DevOps'
             inputs:
               version: '0.x'
               checkLatest: true
 
-          - task: PublishAzureDevOpsExtension@4
+          - task: PublishAzureDevOpsExtension@5
             name: 'publishProd'
             displayName: 'Publish the public extension to ms-devlabs'
             inputs:
-              connectTo: 'VsTeam'
-              connectedServiceName: 'marketplaceServiceConnection'
+              connectTo: 'AzureRM'
+              connectedServiceNameAzureRM: 'SecurePublishMarketplaceServiceConnection'
               fileType: 'vsix'
               vsixFile: '$(Pipeline.Workspace)/vsix/vsts-developer-tools-build-tasks-public.vsix'
               noWaitValidation: true
 
-          - task: IsAzureDevOpsExtensionValid@4
+          - task: IsAzureDevOpsExtensionValid@5
             displayName: 'Validate the private extension on the marketplace'
             inputs:
-              connectTo: 'VsTeam'
-              connectedServiceName: 'marketplaceServiceConnection'
+              connectTo: 'AzureRM'
+              connectedServiceNameAzureRM: 'SecurePublishMarketplaceServiceConnection'
               method: 'vsix'
               vsixFile: '$(publishProd.Extension.OutputPath)'
 
