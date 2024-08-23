@@ -71,6 +71,11 @@ stages:
         del BuildTasks\*\v*\tsconfig.json
         del BuildTasks\*\v*\.snyk
         del BuildTasks\*\v*\*.md
+        del -include *.map -recurse BuildTasks\*\v*\node_modules
+        del -include *.ts -recurse BuildTasks\*\v*\node_modules
+        del -include .github -recurse BuildTasks\*\v*\node_modules -force
+        del -include package-lock.json -recurse BuildTasks\*\v*\node_modules
+        del -include tsconfig.json -recurse BuildTasks\*\v*\node_modules
       displayName: 'Delete unneeded files'
 
     - task: TfxInstaller@5
