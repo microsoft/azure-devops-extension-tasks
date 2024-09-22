@@ -8,7 +8,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@xmldom/xmldom": "^0.9.2",
+    "@xmldom/xmldom": "^0.9.3",
     "7zip-bin-win": "^2.2.0",
     "azure-pipelines-task-lib": "^4.17.2",
     "core-js": "^3.38.1",
