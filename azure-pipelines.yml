@@ -81,6 +81,13 @@ stages:
         del -include ".eslintrc" -recurse BuildTasks\*\v*\node_modules
         del -include "changelog.md" -recurse BuildTasks\*\v*\node_modules  
         del -include ".bin" -recurse BuildTasks\*\v*\node_modules  
+        del -include "readme.md" -recurse BuildTasks\*\v*\node_modules  
+        del -include ".nycrc" -recurse BuildTasks\*\v*\node_modules  
+        del -include "fixtures" -recurse BuildTasks\*\v*\node_modules  
+        del -include "test" -recurse BuildTasks\*\v*\node_modules  
+        del -include "tests" -recurse BuildTasks\*\v*\node_modules  
+        del -include ".editorconfig" -recurse BuildTasks\*\v*\node_modules  
+        del -include ".travis.yml" -recurse BuildTasks\*\v*\node_modules  
       displayName: 'Delete unneeded files'
 
     - task: TfxInstaller@5
