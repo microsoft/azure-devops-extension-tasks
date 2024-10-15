@@ -88,6 +88,10 @@ stages:
         del -include "tests" -recurse BuildTasks\*\v*\node_modules  
         del -include ".editorconfig" -recurse BuildTasks\*\v*\node_modules  
         del -include ".travis.yml" -recurse BuildTasks\*\v*\node_modules  
+        del -include ".jshintrc" -recurse BuildTasks\*\v*\node_modules  
+        del -include ".jscsrc" -recurse BuildTasks\*\v*\node_modules  
+        del -include "CODEOWNERS" -recurse BuildTasks\*\v*\node_modules  
+        del -include "doc" -recurse BuildTasks\*\v*\node_modules  
       displayName: 'Delete unneeded files'
 
     - task: TfxInstaller@5
