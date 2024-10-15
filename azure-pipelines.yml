@@ -77,6 +77,11 @@ stages:
         del -include .package-lock.json -recurse BuildTasks\*\v*\node_modules
         del -include package-lock.json -recurse BuildTasks\*\v*\node_modules
         del -include tsconfig.json -recurse BuildTasks\*\v*\node_modules
+        del -include "@types" -recurse BuildTasks\*\v*\node_modules
+        del -include ".eslintrc" -recurse BuildTasks\*\v*\node_modules
+        del -include "changelog.md" -recurse BuildTasks\*\v*\node_modules  
+        del -include "changelog.md" -recurse BuildTasks\*\v*\node_modules  
+        del -include ".bin" -recurse BuildTasks\*\v*\node_modules  
       displayName: 'Delete unneeded files'
 
     - task: TfxInstaller@5
