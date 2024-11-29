@@ -59,6 +59,7 @@ await common.runTfx(async tfx => {
             const extensionVersion = common.getExtensionVersion();
             const updateTasksId = tl.getBoolInput("updateTasksId", false);
             const updateTasksVersion = tl.getBoolInput("updateTasksVersion", false);
+            const updateFeatureConstraints = tl.getBoolInput("updateFeatureConstraints", false);
 
             if (publisher
                 || extensionId
@@ -67,7 +68,8 @@ await common.runTfx(async tfx => {
                 || (extensionPricing && extensionPricing !== "default")
                 || (extensionVisibility && extensionVisibility !== "default")
                 || extensionVersion
-                || updateTasksId) {
+                || updateTasksId
+                || updateFeatureConstraints) {
 
                 tl.debug("Start editing of VSIX");
                 const ve = new VsixEditor(vsixFile, vsixOutput);
@@ -77,6 +79,7 @@ await common.runTfx(async tfx => {
                 if (extensionId) { ve.editId(extensionId); }
                 if (extensionTag) { ve.editIdTag(extensionTag); }
                 if (extensionName) { ve.editExtensionName(extensionName); }
+                if (updateFeatureConstraints) { ve.editUpdateFeatureConstraints(updateFeatureConstraints); }
                 if (extensionVisibility) { ve.editExtensionVisibility(extensionVisibility); }
                 if (extensionPricing) { ve.editExtensionPricing(extensionPricing); }
                 if (extensionVersion) {
