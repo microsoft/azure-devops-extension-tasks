@@ -5,7 +5,7 @@
   "description": "Publish Visual Studio extension to the Visual Studio Marketplace",
   "author": "Microsoft Corporation",
   "helpMarkDown": "[More Information](https://marketplace.visualstudio.com/items?itemName=ms-devlabs.vsts-developer-tools-build-tasks)",
-  "preview": true,
+  "preview": false,
   "category": "Deploy",
   "version": {
     "Major": 5,
