@@ -145,7 +145,7 @@ await common.runTfx(async tfx => {
         const json = JSON.parse(outputStream.jsonString);
 
         if (json && json.published) {
-            const publishedVsix = fileType === "manifest" ? json.packaged : vsixOutput;
+            const publishedVsix : string = fileType === "manifest" ? json.packaged : vsixOutput;
 
             if (outputVariable) {
                 tl.setVariable(outputVariable, publishedVsix);

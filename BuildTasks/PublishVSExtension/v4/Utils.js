@@ -1,6 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.publish = exports.logout = exports.login = exports.getVsixPublisherExe = void 0;
+exports.getVsixPublisherExe = getVsixPublisherExe;
+exports.login = login;
+exports.logout = logout;
+exports.publish = publish;
 const tl = require("azure-pipelines-task-lib");
 const path = require("path");
 let cacheVsixPublisherExe = "";
@@ -21,7 +24,6 @@ function getVsixPublisherExe() {
     }
     return cacheVsixPublisherExe;
 }
-exports.getVsixPublisherExe = getVsixPublisherExe;
 function login(publisher, token) {
     const vsixPublisherExe = getVsixPublisherExe();
     const vsixPublisher = tl.tool(vsixPublisherExe);
@@ -34,7 +36,6 @@ function login(publisher, token) {
     loggedIn = true;
     console.info(`Login successful.`);
 }
-exports.login = login;
 function logout(publisher) {
     if (loggedIn) {
         const vsixPublisherExe = getVsixPublisherExe();
@@ -49,7 +50,6 @@ function logout(publisher) {
     }
     console.info(`Logout successful.`);
 }
-exports.logout = logout;
 function publish(vsixPath, manifestPath, warningsToIgnore) {
     const vsixPublisherExe = getVsixPublisherExe();
     const vsixPublisher = tl.tool(vsixPublisherExe);
@@ -62,5 +62,4 @@ function publish(vsixPath, manifestPath, warningsToIgnore) {
     }
     console.info(`Published successfully.`);
 }
-exports.publish = publish;
 //# sourceMappingURL=Utils.js.map

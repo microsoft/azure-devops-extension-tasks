@@ -19,3 +19,5 @@ BuildTasks/*Extension*/common.ts
 *.env
 BuildTasks/*/v*/**/*.js
 BuildTasks/*/v*/**/*.js.map
+
+tsconfig.tsbuildinfo

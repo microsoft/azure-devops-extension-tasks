@@ -17,5 +17,8 @@
     "core-js": "^3.39.0",
     "path": "~0.12.7",
     "tmp": "^0.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.12"
   }
 }

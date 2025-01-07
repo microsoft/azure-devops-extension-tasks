@@ -1,6 +1,6 @@
 (Get-ChildItem buildtasks\*\v*) | ForEach-Object{ 
     write-host $_
     Push-Location $_
-    npm audit fix
+    npm install @types/node@^20 --save-dev
     Pop-Location
 }

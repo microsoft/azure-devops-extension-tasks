@@ -73,6 +73,7 @@ stages:
         del BuildTasks\*\v*\tsconfig.json
         del BuildTasks\*\v*\.snyk
         del BuildTasks\*\v*\*.md
+        del BuildTasks\*\v*\tsconfig.tsbuildinfo
         del -include *.map -recurse BuildTasks\*\v*\node_modules
         del -include *.ts -recurse BuildTasks\*\v*\node_modules
         del -include .github -recurse BuildTasks\*\v*\node_modules -force

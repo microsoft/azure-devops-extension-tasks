@@ -11,5 +11,8 @@
     "azure-pipelines-task-lib": "^4.17.3",
     "azure-pipelines-tool-lib": "^2.0.8",
     "tmp": "^0.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.12"
   }
 }
