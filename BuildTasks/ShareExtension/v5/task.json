@@ -148,6 +148,10 @@
     }
   ],
   "execution": {
+    "Node20_1": {
+      "target": "ShareExtension/v5/ShareExtension.js",
+      "argumentFormat": ""
+    },
     "Node16": {
       "target": "ShareExtension/v5/ShareExtension.js",
       "argumentFormat": ""

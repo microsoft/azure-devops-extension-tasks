@@ -64,6 +64,7 @@ stages:
         customCommand: 'run package'
 
     - pwsh: |
+        $erroractionpreference = "continue"
         del BuildTasks\PublishExtension\v5\node_modules\7zip-bin\linux -recurse
         del BuildTasks\PublishExtension\v5\node_modules\7zip-bin\mac -recurse
         del BuildTasks\*\v*\package-lock.json

@@ -226,6 +226,10 @@
     }
   ],
   "execution": {
+    "Node20_1": {
+      "target": "PackageExtension/v5/PackageExtension.js",
+      "argumentFormat": ""
+    },
     "Node16": {
       "target": "PackageExtension/v5/PackageExtension.js",
       "argumentFormat": ""

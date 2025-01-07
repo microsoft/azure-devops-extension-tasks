@@ -157,6 +157,10 @@
     }
   ],
   "execution": {
+    "Node20_1": {
+      "target": "InstallExtension/v5/InstallExtension.js",
+      "argumentFormat": ""
+    },
     "Node16": {
       "target": "InstallExtension/v5/InstallExtension.js",
       "argumentFormat": ""

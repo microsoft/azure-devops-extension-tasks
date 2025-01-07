@@ -44,8 +44,12 @@
     }
   ],
   "execution": {
+    "Node20_1": {
+      "target": "TfxInstaller/v5/TfxInstaller.js",
+      "argumentFormat": ""
+    },
     "Node16": {
-      "target": "TfxInstaller.js",
+      "target": "TfxInstaller/v5/TfxInstaller.js",
       "argumentFormat": ""
     }
   }

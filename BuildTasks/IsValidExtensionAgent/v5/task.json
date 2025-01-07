@@ -144,6 +144,10 @@
     }
   ],
   "execution": {
+    "Node20_1": {
+      "target": "IsValidExtensionAgent/v5/IsValidExtension.js",
+      "argumentFormat": ""
+    },
     "Node16": {
       "target": "IsValidExtensionAgent/v5/IsValidExtension.js",
       "argumentFormat": ""

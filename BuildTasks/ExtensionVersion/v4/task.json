@@ -151,6 +151,10 @@
     }
   ],
   "execution": {
+    "Node20_1": {
+      "target": "ExtensionVersion/v4/ExtensionVersion.js",
+      "argumentFormat": ""
+    },
     "Node16": {
       "target": "ExtensionVersion/v4/ExtensionVersion.js",
       "argumentFormat": ""

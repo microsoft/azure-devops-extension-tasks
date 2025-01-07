@@ -302,6 +302,10 @@
     }
   ],
   "execution": {
+    "Node20_1": {
+      "target": "PublishExtension/v5/PublishExtension.js",
+      "argumentFormat": ""
+    },
     "Node16": {
       "target": "PublishExtension/v5/PublishExtension.js",
       "argumentFormat": ""

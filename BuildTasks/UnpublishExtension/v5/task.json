@@ -143,6 +143,10 @@
     }
   ],
   "execution": {
+    "Node20_1": {
+      "target": "UnpublishExtension/v5/UnpublishExtension.js",
+      "argumentFormat": ""
+    },
     "Node16": {
       "target": "UnpublishExtension/v5/UnpublishExtension.js",
       "argumentFormat": ""

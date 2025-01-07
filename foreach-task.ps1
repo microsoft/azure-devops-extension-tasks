@@ -1,6 +1,6 @@
 (Get-ChildItem buildtasks\*\v*) | ForEach-Object{ 
     write-host $_
     Push-Location $_
-    rmdir .\node_modules -Recurse -Force
+    npm audit fix
     Pop-Location
 }
