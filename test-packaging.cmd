@@ -1,21 +1,26 @@
 set INPUT_VERSION=v0.7.x
 set INPUT_PUBLISHERID=meA
 
-set AGENT_WORKFOLDER=c:\temp\agent\work
-set AGENT_TOOLSDIRECTORY=c:\temp\agent\tools
-set AGENT_TEMPDIRECTORY=c:\temp\agent\temp
 set AGENT_VERSION=2.211.2
+set AGENT_WORKFOLDER=%temp%\agent\work
+set AGENT_TOOLSDIRECTORY=%temp%\agent\tools
+SET AGENT_TEMPDIRECTORY=%temp%\agent\tmp
+
+md %temp%\agent
+md %AGENT_WORKFOLDER%
+md %AGENT_TOOLSDIRECTORY%
+md %AGENT_TEMPDIRECTORY%
 
 set NODE_ENV=production
 set NO_UPDATE_NOTIFIER=true
 
 cmd /c "npm run build:tasks"
 
-pushd BuildTasks\TfxInstaller\TfxInstaller
+pushd BuildTasks\TfxInstaller\v4\TfxInstaller\v4
 node TfxInstaller.js
 popd
 
-set __TFXPATH=c:\temp\agent\tools\tfx\0.7.11\x64
+set __TFXPATH=C:\Users\JESSEH~1\AppData\Local\Temp\agent\tools\tfx\0.18.0\x64\
 set INPUT_EXTENSIONID=ext
 set INPUT_EXTENSIONVERSION=8.9.10
 

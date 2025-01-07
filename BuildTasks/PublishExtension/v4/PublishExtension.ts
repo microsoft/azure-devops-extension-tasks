@@ -162,7 +162,7 @@ void common.runTfx(async tfx => {
             tl.setResult(tl.TaskResult.Failed, `Publishing failed`);    
         }
     }catch (err) {
-        tl.setResult(tl.TaskResult.Failed, `tfx failed with error: ${err}`);
+        tl.setResult(tl.TaskResult.Failed, `tfx failed with error: ${err.toString()}`);
     } finally {
         if (cleanupTfxArgs) { cleanupTfxArgs(); }
     }

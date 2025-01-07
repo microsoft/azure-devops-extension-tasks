@@ -26,7 +26,7 @@ stages:
     steps:
     - task: NodeTool@0
       inputs:
-        versionSpec: '16.x'
+        versionSpec: '20.x'
       displayName: 'Install Node.js'
 
     - script: |
@@ -64,10 +64,12 @@ stages:
         customCommand: 'run package'
 
     - pwsh: |
+        $erroractionpreference = "continue"
         del BuildTasks\PublishExtension\v5\node_modules\7zip-bin\linux -recurse
         del BuildTasks\PublishExtension\v5\node_modules\7zip-bin\mac -recurse
         del BuildTasks\*\v*\package-lock.json
         del BuildTasks\*\v*\*.ts
+        del BuildTasks\*\v*\.taskkey
         del BuildTasks\*\v*\tsconfig.json
         del BuildTasks\*\v*\.snyk
         del BuildTasks\*\v*\*.md
@@ -162,7 +164,7 @@ stages:
 
           - task: NodeTool@0
             inputs:
-              versionSpec: '16.x'
+              versionSpec: '20.x'
             displayName: 'Install Node.js'
 
           - task: TfxInstaller@5
@@ -206,7 +208,7 @@ stages:
 
           - task: NodeTool@0
             inputs:
-              versionSpec: '16.x'
+              versionSpec: '20.x'
             displayName: 'Install Node.js'
 
           - task: TfxInstaller@5

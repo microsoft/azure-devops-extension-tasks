@@ -7,12 +7,14 @@
     "strict": true,
     "strictNullChecks": false,
     "removeComments": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true
   },
-  "files": [
-    "./Common/v5/Common.ts"
-  ],
   "include": [
+    "./Common/v5/Common.ts",
     "./Common/v5/uuidv5.d.ts"
+  ],
+  "exclude": [
+    "*/v5/**/*.js"
   ]
 }
