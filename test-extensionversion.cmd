@@ -6,23 +6,36 @@ set INPUT_UPDATETASKSID=true
 set INPUT_UPDATETASKSVERSION=true
 set INPUT_UPDATETASKSVERSIONTYPE=minor
 SET INPUT_CONNECTEDSERVICENAME=A
+SET INPUT_VERSION=0.x
 SET ENDPOINT_URL_A=https://marketplace.visualstudio.com
 SET ENDPOINT_AUTH_A={ "parameters": { "apitoken": "token", "username": "user", "password": "password" }, "Scheme": "basic" }
 
-set AGENT_WORKFOLDER=%temp%
+set AGENT_WORKFOLDER=%temp%\agent\work
+set AGENT_TOOLSDIRECTORY=%temp%\agent\tools
+SET AGENT_TEMPDIRECTORY=%temp%\agent\tmp
+
+md %temp%\agent
+md %AGENT_WORKFOLDER%
+md %AGENT_TOOLSDIRECTORY%
+md %AGENT_TEMPDIRECTORY%
 
 set NODE_ENV=production
 set NO_UPDATE_NOTIFIER=true
 
-cmd /c "npm run build:tasks"
+REM cmd /c "npm run build:tasks"
 
-pushd BuildTasks\TfxInstaller\TfxInstaller
+pushd BuildTasks\TfxInstaller\v4\TfxInstaller\v4
+node TfxInstaller.js
+popd
+pushd BuildTasks\TfxInstaller\v5\TfxInstaller\v5
 node TfxInstaller.js
 popd
 
-set __TFXPATH=c:\temp\agent\tools\tfx\0.7.11\x64
 
+pushd BuildTasks\ExtensionVersion\v4\ExtensionVersion\v4
+node ExtensionVersion.js
+popd
 
-pushd BuildTasks\ExtensionVersion\ExtensionVersion
+pushd BuildTasks\ExtensionVersion\v5\ExtensionVersion\v5
 node ExtensionVersion.js
 popd

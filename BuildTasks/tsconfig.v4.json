@@ -13,5 +13,8 @@
   "include": [
     "./Common/v4/Common.ts",
     "./Common/v4/uuidv5.d.ts"
+  ],
+  "exclude": [
+    "*/v4/**/*.js"
   ]
 }

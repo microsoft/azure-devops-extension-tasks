@@ -293,6 +293,7 @@ export class TfxJsonOutputStream extends stream.Writable {
         super();
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
     _write(chunk: any, enc: string, cb: (Function)) : void {
         const chunkStr: string = chunk.toString();
         if (chunkStr.startsWith("[command]"))
@@ -384,7 +385,9 @@ function updateTaskVersion(manifest: any, extensionVersionString: string, extens
         switch (extensionVersionType) {
             default:
             case "major": manifest.version.Major = `${extensionversion.major}`;
+            // eslint-disable-next-line no-fallthrough
             case "minor": manifest.version.Minor = `${extensionversion.minor}`;
+            // eslint-disable-next-line no-fallthrough
             case "patch": manifest.version.Patch = `${extensionversion.patch}`;
         }
     }

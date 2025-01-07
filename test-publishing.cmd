@@ -1,4 +1,3 @@
-SET AGENT_WORKFOLDER=%temp%
 SET SYSTEM_DEFAULTWORKINGDIRECTORY=C:\Users\JesseHouwing\source\azure-pipelines-variable-tasks\
 set INPUT_CWD=C:\Users\JesseHouwing\source\azure-pipelines-variable-tasks\
 set INPUT_ROOTFOLDER=C:\Users\JesseHouwing\source\azure-pipelines-variable-tasks\
@@ -16,11 +15,20 @@ SET ENDPOINT_AUTH_A={ "parameters": { "apitoken": "token", "username": "user", "
 set NODE_ENV=production
 set NO_UPDATE_NOTIFIER=true
 
+set AGENT_WORKFOLDER=%temp%\agent\work
+set AGENT_TOOLSDIRECTORY=%temp%\agent\tools
+SET AGENT_TEMPDIRECTORY=%temp%\agent\tmp
+
+md %temp%\agent
+md %AGENT_WORKFOLDER%
+md %AGENT_TOOLSDIRECTORY%
+md %AGENT_TEMPDIRECTORY%
+
 fnm use v16
 
 cmd /c "npm run build:tasks"
 
-set __TFXPATH=C:\Users\JesseHouwing\AppData\Local\fnm_multishells\5548_1672346643184
+set __TFXPATH=C:\Users\JESSEH~1\AppData\Local\Temp\agent\tools\tfx\0.18.0\x64\
 
 pushd BuildTasks\PublishExtension\v4\PublishExtension\v4
 SET PREVIEW_FAST_UPDATE=false

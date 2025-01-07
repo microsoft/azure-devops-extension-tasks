@@ -78,11 +78,11 @@ export function validateAndSetTfxManifestArguments(tfx: ToolRunner): (() => Prom
 
             if (!matchingVsixFile || matchingVsixFile.length === 0) {
                 tl.setResult(tl.TaskResult.Failed, `Found no vsix files matching: ${vsixFilePattern}.`);
-                throw "failed";
+                throw new Error("failed");
             }
             if (matchingVsixFile.length !== 1) {
                 tl.setResult(tl.TaskResult.Failed, `Found multiple vsix files matching: ${vsixFilePattern}.`);
-                throw "failed";
+                throw new Error("failed");
             }
             tfx.arg(["--vsix", matchingVsixFile[0]]);
             break;
@@ -305,7 +305,6 @@ export class TfxJsonOutputStream extends stream.Writable {
         super();
     }
 
-    // eslint-disable-next-line @typescript-eslint/ban-types
     _write(chunk: any, enc: string, cb: (Function)): void {
         const chunkStr: string = chunk.toString();
         if (chunkStr.startsWith("[command]")) {
