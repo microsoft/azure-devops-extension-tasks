@@ -68,6 +68,7 @@ stages:
         del BuildTasks\PublishExtension\v5\node_modules\7zip-bin\mac -recurse
         del BuildTasks\*\v*\package-lock.json
         del BuildTasks\*\v*\*.ts
+        del BuildTasks\*\v*\.taskkey
         del BuildTasks\*\v*\tsconfig.json
         del BuildTasks\*\v*\.snyk
         del BuildTasks\*\v*\*.md
