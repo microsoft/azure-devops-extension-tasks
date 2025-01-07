@@ -5,10 +5,10 @@ import * as tl from "azure-pipelines-task-lib/task";
 import * as trl from "azure-pipelines-task-lib/toolrunner";
 import * as fse from "fs-extra";
 import ToolRunner = trl.ToolRunner;
-import * as uuidv5 from "uuidv5";
+import uuidv5 from "uuidv5";
 import * as tmp from "tmp";
 
-function writeBuildTempFile(taskName: string, data: any): string {
+function writeBuildTempFile(taskName: string, data: string | Buffer): string {
     const tempDir = tl.getVariable("Agent.TempDirectory");
     const tempFile = tmp.tmpNameSync({ prefix: taskName, postfix: ".tmp", tmpdir: tempDir });
 
@@ -78,11 +78,11 @@ export function validateAndSetTfxManifestArguments(tfx: ToolRunner): (() => void
 
             if (!matchingVsixFile || matchingVsixFile.length === 0) {
                 tl.setResult(tl.TaskResult.Failed, `Found no vsix files matching: ${vsixFilePattern}.`);
-                throw "failed";
+                throw new Error("failed");
             }
             if (matchingVsixFile.length !== 1) {
                 tl.setResult(tl.TaskResult.Failed, `Found multiple vsix files matching: ${vsixFilePattern}.`);
-                throw "failed";
+                throw new Error("failed");
             }
             tfx.arg(["--vsix", matchingVsixFile[0]]);
             break;
@@ -293,7 +293,6 @@ export class TfxJsonOutputStream extends stream.Writable {
         super();
     }
 
-    // eslint-disable-next-line @typescript-eslint/ban-types
     _write(chunk: any, enc: string, cb: (Function)) : void {
         const chunkStr: string = chunk.toString();
         if (chunkStr.startsWith("[command]"))
@@ -385,9 +384,7 @@ function updateTaskVersion(manifest: any, extensionVersionString: string, extens
         switch (extensionVersionType) {
             default:
             case "major": manifest.version.Major = `${extensionversion.major}`;
-            // eslint-disable-next-line no-fallthrough
             case "minor": manifest.version.Minor = `${extensionversion.minor}`;
-            // eslint-disable-next-line no-fallthrough
             case "patch": manifest.version.Patch = `${extensionversion.patch}`;
         }
     }
@@ -544,3 +541,15 @@ export function writeManifest(manifest: any, path: string): Promise<void> {
 export function checkUpdateTasksManifests(manifestFile?: string): Promise<void> {
     return updateManifests(manifestFile ? [manifestFile] : []);
 }
+
+export default {
+    validateAndSetTfxManifestArguments,
+    runTfx,
+    getExtensionVersion,
+    getMarketplaceEndpointDetails,
+    setTfxMarketplaceArguments,
+    TfxJsonOutputStream,
+    updateManifests,
+    writeManifest,
+    checkUpdateTasksManifests
+};

@@ -1,13 +1,13 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 import "core-js";
-import temp = require("temp");
-import fs = require("fs");
-import fse = require("fs-extra"); 
-import path = require("path");
-import Q = require("q");
-import tl = require("azure-pipelines-task-lib/task");
-import tr = require("azure-pipelines-task-lib/toolrunner");
-import common = require("../../Common/v4/Common");
+import temp from "temp";
+import fs from "fs";
+import fse from "fs-extra";
+import path from "path";
+import Q from "q";
+import tl from "azure-pipelines-task-lib/task";
+import tr from "azure-pipelines-task-lib/toolrunner";
+import common from "../../Common/v4/Common";
+import x2jsLib from "x2js";
 
 class ManifestData {
     public outputFileName: string;
@@ -223,7 +223,6 @@ export class VSIXEditor {
     }
 
     private async editVsixManifest(dirPath: string): Promise<ManifestData> {
-        const x2jsLib = require("x2js");
         const x2js = new x2jsLib();
 
         const vsixManifestPath = path.join(dirPath, "extension.vsixmanifest");
@@ -231,7 +230,7 @@ export class VSIXEditor {
         try {
             let vsixManifestData = await fse.readFile(vsixManifestPath, "utf8");
 
-            const vsixmanifest = x2js.xml2js(vsixManifestData);
+            const vsixmanifest:any = x2js.xml2js(vsixManifestData);
             const identity = vsixmanifest.PackageManifest.Metadata.Identity;
 
             if (this.versionNumber) { identity._Version = this.versionNumber; }
@@ -290,8 +289,8 @@ export class VSIXEditor {
             await fse.writeFile(vsixManifestPath, vsixManifestData, { encoding: "utf8" });
             return Promise.resolve(manifestData);
         }
-        catch (err) {
-            return Promise.reject(err);
+        catch (err: any) {
+            return Promise.reject(new Error(err.message));
         }
     }
 

@@ -1,6 +1,7 @@
 import * as tl from "azure-pipelines-task-lib/task";
+import * as tlr from "azure-pipelines-task-lib/toolrunner";
 import * as common from "../../Common/v4/Common";
-import promiseRetry = require("promise-retry");
+import promiseRetry from "promise-retry";
 
 async function run() {
     await common.runTfx(async tfx => {
@@ -22,7 +23,7 @@ async function run() {
             await promiseRetry(options,
                 (retry, attempt) => {
                     tl.debug(`Attempt: ${attempt}`);
-                    const result = tfx.execSync({ silent: false, failOnStdErr: false } as any);
+                    const result = tfx.execSync({ silent: false, failOnStdErr: false } as tlr.IExecSyncOptions);
                     const json = JSON.parse(result.stdout);
                     switch (json.status) {
                         case "pending":
@@ -35,7 +36,7 @@ async function run() {
             });
             tl.setResult(tl.TaskResult.Succeeded, "Extension is valid.");
         } catch (err) {
-            tl.setResult(tl.TaskResult.Failed, `Extension validation failed: ${err}`);
+            tl.setResult(tl.TaskResult.Failed, `Extension validation failed: ${err.toString()});}`);
         }
     });
 }

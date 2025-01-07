@@ -553,3 +553,15 @@ export function writeManifest(manifest: any, path: string): Promise<void> {
 export function checkUpdateTasksManifests(manifestFile?: string): Promise<void> {
     return updateManifests(manifestFile ? [manifestFile] : []);
 }
+
+export default {
+    validateAndSetTfxManifestArguments,
+    runTfx,
+    getExtensionVersion,
+    getMarketplaceEndpointDetails,
+    setTfxMarketplaceArguments,
+    TfxJsonOutputStream,
+    updateManifests,
+    writeManifest,
+    checkUpdateTasksManifests
+};

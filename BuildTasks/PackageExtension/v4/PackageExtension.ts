@@ -23,7 +23,7 @@ async function run() {
                 const code = await tfx.execAsync(<any>{ outStream: outputStream, failOnStdErr: false });
                 if (code !== 0)
                 {
-                    throw `tfx exited with return code: ${code}`
+                    throw new Error(`tfx exited with return code: ${code}`);
                 }
                 const json = JSON.parse(outputStream.jsonString);
 

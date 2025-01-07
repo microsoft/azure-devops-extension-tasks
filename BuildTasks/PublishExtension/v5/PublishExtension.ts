@@ -140,7 +140,7 @@ await common.runTfx(async tfx => {
 
         const code = await tfx.execAsync({ outStream: outputStream, errorStream: errorStream, failOnStdErr: false } as any);
         if (code !== 0) {
-            throw `tfx exited with return code: ${code}`
+            throw new Error(`tfx exited with return code: ${code}`);
         }
         const json = JSON.parse(outputStream.jsonString);
 
