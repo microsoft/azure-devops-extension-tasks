@@ -36,7 +36,7 @@ async function run() {
             });
             tl.setResult(tl.TaskResult.Succeeded, "Extension is valid.");
         } catch (err) {
-            tl.setResult(tl.TaskResult.Failed, `Extension validation failed: ${err.toString()});}`);
+            tl.setResult(tl.TaskResult.Failed, `Extension validation failed: ${err.toString()}`);
         }
     });
 }
