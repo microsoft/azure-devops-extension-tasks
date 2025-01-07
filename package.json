@@ -50,6 +50,6 @@
     "typescript-eslint": "^8.15.0",
     "@typescript-eslint/eslint-plugin": "^8.15.0",
     "@typescript-eslint/parser": "^8.15.0",
-    "@ungap/structured-clone": "^1.2.0"
+    "@ungap/structured-clone": "^1.2.1"
   }
 }
