@@ -1,13 +1,13 @@
 import "core-js";
-import temp from "temp";
-import fs from "fs";
-import fse from "fs-extra";
-import path from "path";
-import Q from "q";
-import tl from "azure-pipelines-task-lib/task";
-import tr from "azure-pipelines-task-lib/toolrunner";
-import common from "../../Common/v4/Common";
-import x2jsLib from "x2js";
+import temp = require("temp");
+import fs = require("fs");
+import fse = require("fs-extra"); 
+import path = require("path");
+import Q = require("q");
+import tl = require("azure-pipelines-task-lib/task");
+import tr = require("azure-pipelines-task-lib/toolrunner");
+import common = require("../../Common/v4/Common");
+
 
 class ManifestData {
     public outputFileName: string;
@@ -27,13 +27,11 @@ class ManifestData {
                 const gen = iteration.toString().padStart(2, "0");
                 fileName = `${this.publisher}.${this.id}-${this.version}.gen${gen}.vsix`;
             }
-            fs.exists(path.join(outputPath, fileName), result => {
-                if (result) {
-                    updateFileName(fileName, ++iteration);
-                } else {
-                    tl.debug("Generated filename: " + fileName);
-                }
-            });
+            if (fs.existsSync(path.join(outputPath, fileName))) {
+                updateFileName(fileName, ++iteration);
+            } else {
+                tl.debug("Generated filename: " + fileName);
+            }
         };
 
         updateFileName(fileName, 0);
@@ -223,6 +221,7 @@ export class VSIXEditor {
     }
 
     private async editVsixManifest(dirPath: string): Promise<ManifestData> {
+        const x2jsLib = require("x2js");
         const x2js = new x2jsLib();
 
         const vsixManifestPath = path.join(dirPath, "extension.vsixmanifest");
