@@ -39,6 +39,7 @@ stages:
         $targets = @(
           ".\BuildTasks\PublishVSExtension\v4\tools\",
           ".\BuildTasks\PublishVSExtension\v5\tools\"
+          ".\BuildTasks\PublishVSExtension\v5\tools\PublishVSExtension\v5"
         )
 
         invoke-webrequest $vswhereLatest -OutFile $env:temp\vswhere.exe
