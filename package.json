@@ -49,7 +49,7 @@
     "glob-exec": "^0.1.1",
     "globals": "^15.14.0",
     "tfx-cli": "^0.18.0",
-    "typescript": "^5.7.2",
+    "typescript": "^5.7.3",
     "typescript-eslint": "^8.19.1"
   }
 }
