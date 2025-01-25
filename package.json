@@ -34,7 +34,7 @@
   "license": "MIT",
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
-    "@eslint/js": "^9.18.0",
+    "@eslint/js": "^9.19.0",
     "@types/core-js": "^2.5.8",
     "@types/fs-extra": "^5.1.0",
     "@types/node": "^20.17.12",
@@ -45,7 +45,7 @@
     "@typescript-eslint/eslint-plugin": "^8.20.0",
     "@typescript-eslint/parser": "^8.21.0",
     "@ungap/structured-clone": "^1.2.1",
-    "eslint": "^9.18.0",
+    "eslint": "^9.19.0",
     "glob-exec": "^0.1.1",
     "globals": "^15.14.0",
     "tfx-cli": "^0.18.0",
