@@ -160,10 +160,14 @@
     }
   ],
   "execution": {
+    "Node20_1": {
+      "target": "ExtensionVersion/v5/ExtensionVersion.js",
+      "argumentFormat": ""
+    },
     "Node16": {
       "target": "ExtensionVersion/v5/ExtensionVersion.js",
       "argumentFormat": ""
     }
   },
-  "preview": true
+  "preview": false
 }

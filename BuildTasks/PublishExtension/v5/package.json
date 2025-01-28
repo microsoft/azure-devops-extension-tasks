@@ -10,12 +10,15 @@
   "license": "MIT",
   "dependencies": {
     "7zip-bin": "^5.2.0",
-    "azure-pipelines-task-lib": "^4.13.0",
-    "azure-pipelines-tasks-azure-arm-rest": "^3.239.0",
-    "fs-extra": "^11.2.0",
+    "azure-pipelines-task-lib": "^4.17.3",
+    "azure-pipelines-tasks-azure-arm-rest": "^3.252.0",
+    "fs-extra": "^11.3.0",
     "temp": "^0.9.4",
     "tmp": "^0.2.3",
     "uuidv5": "^1.0.0",
     "x2js": "^3.4.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.16"
   }
 }

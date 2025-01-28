@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 import temp from "temp";
 import fs from "node:fs/promises";
 import path from "node:path";
@@ -117,7 +116,7 @@ export default class VSIXEditor {
         public outputPath: string) {
     }
 
-    public startEdit() {
+    public startEdit() : void {
         if (this.edit) { throw new Error("Edit is already started"); }
         this.edit = true;
         tl.debug("Editing started");
@@ -303,47 +302,47 @@ export default class VSIXEditor {
             || this.updateTasksId;
     }
 
-    public editVersion(version: string) {
+    public editVersion(version: string) : void {
         this.validateEditMode();
         this.versionNumber = version;
     }
 
-    public editExtensionName(name: string) {
+    public editExtensionName(name: string) : void {
         this.validateEditMode();
         this.extensionName = name;
     }
 
-    public editExtensionVisibility(visibility: string) {
+    public editExtensionVisibility(visibility: string) : void {
         this.validateEditMode();
         this.extensionVisibility = visibility;
     }
 
-    public editExtensionPricing(pricing: string) {
+    public editExtensionPricing(pricing: string) : void {
         this.validateEditMode();
         this.extensionPricing = pricing;
     }
 
-    public editId(id: string) {
+    public editId(id: string) : void {
         this.validateEditMode();
         this.id = id;
     }
 
-    public editIdTag(tag: string) {
+    public editIdTag(tag: string) : void {
         this.validateEditMode();
         this.idTag = tag;
     }
 
-    public editPublisher(publisher: string) {
+    public editPublisher(publisher: string) : void {
         this.validateEditMode();
         this.publisher = publisher;
     }
 
-    public editUpdateTasksVersion(updateTasksVersion: boolean) {
+    public editUpdateTasksVersion(updateTasksVersion: boolean) : void {
         this.validateEditMode();
         this.updateTasksVersion = updateTasksVersion;
     }
 
-    public editUpdateTasksId(updateTasksId: boolean) {
+    public editUpdateTasksId(updateTasksId: boolean) : void {
         this.validateEditMode();
         this.updateTasksId = updateTasksId;
     }
@@ -353,7 +352,7 @@ export default class VSIXEditor {
         this.updateFeatureConstraints = updateFeatureConstraints;
     }
 
-    private validateEditMode() {
+    private validateEditMode() : void {
         if (!this.edit) { throw new Error("Editing is not started"); }
     }
 }

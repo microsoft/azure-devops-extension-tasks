@@ -1,8 +1,6 @@
-(Get-ChildItem buildtasks\*\v5) | ForEach-Object{ 
+(Get-ChildItem buildtasks\*\v*) | ForEach-Object{ 
     write-host $_
     Push-Location $_
-    $task = gc -raw task.json | convertfrom-json -AsHashtable
-    $task.preview = $true
-    $task | convertto-json -depth 100 | set-content task.json
+    npm install @types/node@^20 --save-dev
     Pop-Location
 }

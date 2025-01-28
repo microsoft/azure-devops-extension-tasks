@@ -3,5 +3,9 @@
     "compilerOptions": {
         "outDir": "./Common", 
         "sourceRoot": "./"
-    }
+    },
+    "files": [
+        "Common.ts",
+        "uuidv5.d.ts"
+    ]
   }

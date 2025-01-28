@@ -44,7 +44,7 @@
   ],
   "execution": {
     "Node16": {
-      "target": "TfxInstaller/TfxInstaller.js",
+      "target": "TfxInstaller/v4/TfxInstaller.js",
       "argumentFormat": ""
     }
   }

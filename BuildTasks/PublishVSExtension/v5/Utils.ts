@@ -1,13 +1,14 @@
 import tl from "azure-pipelines-task-lib";
 import tr from "azure-pipelines-task-lib/toolrunner.js";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 let cacheVsixPublisherExe = "";
 let loggedIn = false;
 
 export function getVsixPublisherExe(): string {
     if (cacheVsixPublisherExe === "") {
-        const vswhereTool = tl.tool(path.join(__dirname, "tools", "vswhere.exe"));
+        const vswhereTool = tl.tool(path.join(path.dirname(fileURLToPath(import.meta.url)), "tools", "vswhere.exe"));
         vswhereTool.line("-version [15.0,) -latest -requires Microsoft.VisualStudio.Component.VSSDK -find VSSDK\\VisualStudioIntegration\\Tools\\Bin\\VsixPublisher.exe");
         const vswhereResult = vswhereTool.execSync({ silent: true } as tr.IExecSyncOptions);
         const vsixPublisherExe = vswhereResult.stdout.trim();

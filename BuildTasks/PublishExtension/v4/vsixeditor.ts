@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 import "core-js";
 import temp = require("temp");
 import fs = require("fs");
@@ -8,6 +7,7 @@ import Q = require("q");
 import tl = require("azure-pipelines-task-lib/task");
 import tr = require("azure-pipelines-task-lib/toolrunner");
 import common = require("../../Common/v4/Common");
+
 
 class ManifestData {
     public outputFileName: string;
@@ -27,13 +27,11 @@ class ManifestData {
                 const gen = iteration.toString().padStart(2, "0");
                 fileName = `${this.publisher}.${this.id}-${this.version}.gen${gen}.vsix`;
             }
-            fs.exists(path.join(outputPath, fileName), result => {
-                if (result) {
-                    updateFileName(fileName, ++iteration);
-                } else {
-                    tl.debug("Generated filename: " + fileName);
-                }
-            });
+            if (fs.existsSync(path.join(outputPath, fileName))) {
+                updateFileName(fileName, ++iteration);
+            } else {
+                tl.debug("Generated filename: " + fileName);
+            }
         };
 
         updateFileName(fileName, 0);
@@ -105,7 +103,7 @@ export class VSIXEditor {
         public outputPath: string) {
     }
 
-    public startEdit() {
+    public startEdit() : void {
         if (this.edit) { throw new Error("Edit is already started"); }
         this.edit = true;
         tl.debug("Editing started");
@@ -231,7 +229,7 @@ export class VSIXEditor {
         try {
             let vsixManifestData = await fse.readFile(vsixManifestPath, "utf8");
 
-            const vsixmanifest = x2js.xml2js(vsixManifestData);
+            const vsixmanifest:any = x2js.xml2js(vsixManifestData);
             const identity = vsixmanifest.PackageManifest.Metadata.Identity;
 
             if (this.versionNumber) { identity._Version = this.versionNumber; }
@@ -290,8 +288,8 @@ export class VSIXEditor {
             await fse.writeFile(vsixManifestPath, vsixManifestData, { encoding: "utf8" });
             return Promise.resolve(manifestData);
         }
-        catch (err) {
-            return Promise.reject(err);
+        catch (err: any) {
+            return Promise.reject(new Error(err.message));
         }
     }
 
@@ -306,52 +304,52 @@ export class VSIXEditor {
             || this.updateTasksId;
     }
 
-    public editVersion(version: string) {
+    public editVersion(version: string) : void {
         this.validateEditMode();
         this.versionNumber = version;
     }
 
-    public editExtensionName(name: string) {
+    public editExtensionName(name: string) : void {
         this.validateEditMode();
         this.extensionName = name;
     }
 
-    public editExtensionVisibility(visibility: string) {
+    public editExtensionVisibility(visibility: string) : void {
         this.validateEditMode();
         this.extensionVisibility = visibility;
     }
 
-    public editExtensionPricing(pricing: string) {
+    public editExtensionPricing(pricing: string) : void {
         this.validateEditMode();
         this.extensionPricing = pricing;
     }
 
-    public editId(id: string) {
+    public editId(id: string) : void {
         this.validateEditMode();
         this.id = id;
     }
 
-    public editIdTag(tag: string) {
+    public editIdTag(tag: string) : void {
         this.validateEditMode();
         this.idTag = tag;
     }
 
-    public editPublisher(publisher: string) {
+    public editPublisher(publisher: string) : void {
         this.validateEditMode();
         this.publisher = publisher;
     }
 
-    public editUpdateTasksVersion(updateTasksVersion: boolean) {
+    public editUpdateTasksVersion(updateTasksVersion: boolean) : void {
         this.validateEditMode();
         this.updateTasksVersion = updateTasksVersion;
     }
 
-    public editUpdateTasksId(updateTasksId: boolean) {
+    public editUpdateTasksId(updateTasksId: boolean) : void {
         this.validateEditMode();
         this.updateTasksId = updateTasksId;
     }
 
-    private validateEditMode() {
+    private validateEditMode() : void {
         if (!this.edit) { throw new Error("Editing is not started"); }
     }
 }

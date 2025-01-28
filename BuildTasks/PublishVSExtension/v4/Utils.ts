@@ -1,5 +1,5 @@
 import * as tl from "azure-pipelines-task-lib";
-import tr = require("azure-pipelines-task-lib/toolrunner");
+import * as tr from "azure-pipelines-task-lib/toolrunner";
 import * as path from "path";
 
 let cacheVsixPublisherExe = "";
