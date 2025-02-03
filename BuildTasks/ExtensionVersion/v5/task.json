@@ -124,7 +124,7 @@
     },
     {
       "name": "setBuildNumber",
-      "type": "checkbox",
+      "type": "boolean",
       "label": "Set Build Number",
       "defaultValue": false,
       "required": false,

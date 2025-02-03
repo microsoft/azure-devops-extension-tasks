@@ -21,7 +21,7 @@
   "minimumAgentVersion": "2.206.1",
   "groups": [
     {
-      "name": "extension",
+      "": "extension",
       "displayName": "Extension",
       "isExpanded": true
     },
@@ -115,7 +115,7 @@
     },
     {
       "name": "setBuildNumber",
-      "type": "checkbox",
+      "type": "boolean",
       "label": "Set Build Number",
       "defaultValue": false,
       "required": false,
