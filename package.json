@@ -37,7 +37,7 @@
     "@eslint/js": "^9.19.0",
     "@types/core-js": "^2.5.8",
     "@types/fs-extra": "^5.1.0",
-    "@types/node": "^20.17.16",
+    "@types/node": "^20.17.17",
     "@types/promise-retry": "^1.1.6",
     "@types/q": "^1.5.8",
     "@types/temp": "^0.9.4",
