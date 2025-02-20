@@ -3,7 +3,6 @@ import temp = require("temp");
 import fs = require("fs");
 import fse = require("fs-extra"); 
 import path = require("path");
-import Q = require("q");
 import tl = require("azure-pipelines-task-lib/task");
 import tr = require("azure-pipelines-task-lib/toolrunner");
 import common = require("../../Common/v4/Common");
@@ -197,7 +196,7 @@ export class VSIXEditor {
 
         tl.debug("Editing VSIX manifest");
         const manifestData = await this.editVsixManifest(dirPath);
-        manifestData.outputFileName = await manifestData.createOutputFilePath(this.outputPath);
+        manifestData.outputFileName = manifestData.createOutputFilePath(this.outputPath);
 
         tl.debug(`Creating final archive file at ${this.outputPath}`);
         await this.createArchive(this.inputFile, manifestData.dirPath, manifestData.outputFileName);
