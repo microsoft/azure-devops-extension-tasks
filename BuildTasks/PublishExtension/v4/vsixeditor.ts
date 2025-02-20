@@ -109,7 +109,7 @@ export class VSIXEditor {
         tl.debug("Editing started");
     }
 
-    private extractArchive(vsix: string, tmpPath: string): void {
+    private async extractArchive(vsix: string, tmpPath: string): Promise<void> {
         const cwd = tl.cwd();
 
         if (tl.getPlatform() === tl.Platform.Windows) {
@@ -128,9 +128,8 @@ export class VSIXEditor {
             zip.arg("-bd");          // disable progress indicator
             zip.arg("-aoa");         // overwrite all
             zip.arg("-spd");         // disable wildcards
-            zip.execSync();
-        }
-        else {
+            await zip.execAsync();
+        } else {
             const zip = new tr.ToolRunner(tl.which("unzip", true));
 
             zip.arg("-o");           // overwrite all
@@ -142,12 +141,12 @@ export class VSIXEditor {
             zip.arg("*/task.loc.json");
             zip.arg("extension.vsixmanifest");
             zip.arg("extension.vsomanifest");
-            zip.execSync();
+            await zip.execAsync();
         }
         tl.cd(cwd);
     }
 
-    private createArchive(originalVsix: string, tmpPath: string, targetVsix: string): void {
+    private async createArchive(originalVsix: string, tmpPath: string, targetVsix: string): Promise<void> {
         const cwd = tl.cwd();
         
         if (originalVsix !== targetVsix) { tl.cp(originalVsix, targetVsix, "-f"); }
@@ -164,9 +163,8 @@ export class VSIXEditor {
             zip.arg("-tzip");        // zip format
             zip.arg("-mx9");         // max compression level
             zip.arg("-bd");         // disable progress indicator
-            zip.execSync();
-        }
-        else {
+            await zip.execAsync();
+        } else {
             const zip = new tr.ToolRunner(tl.which("zip", true));
 
             tl.cd(tmpPath);
@@ -175,7 +173,7 @@ export class VSIXEditor {
             zip.arg("-r");           // recursive
             zip.arg("-9");           // max compression level
             zip.arg("-f");           // update changed files only
-            zip.execSync();
+            await zip.execAsync();
         }
         tl.cd(cwd);
     }
@@ -187,37 +185,38 @@ export class VSIXEditor {
 
         temp.track();
 
-        return new Promise<string>((resolve) => {
-                temp.mkdir("vsixeditor", (ex, dirPath) => { resolve(dirPath); });
-            })
-            .then((dirPath) => {
-                tl.debug("Extracting files to " + dirPath);
+        try {
+            const dirPath = await new Promise<string>((resolve, reject) => {
+                temp.mkdir("vsixeditor", (ex, dirPath) => {
+                    if (ex) {
+                        reject(ex);
+                    } else {
+                        resolve(dirPath);
+                    }
+                });
+            });
 
-                this.extractArchive(this.inputFile, dirPath);
-                return dirPath;
-            })
-            .then(async dirPath => {
-                if (this.versionNumber && this.updateTasksVersion || this.updateTasksId) {
-                    tl.debug("Look for build tasks manifest");
-                    const extensionManifest = path.join(dirPath, "extension.vsomanifest");
-                    await common.checkUpdateTasksManifests(extensionManifest);
-                }
-                return dirPath;
-            })
-            .then(dirPath => {
-                tl.debug("Editing VSIX manifest");
-                return this.editVsixManifest(dirPath).then((manifestData: ManifestData) => manifestData);
-            })
-            .then((manifestData: ManifestData) => {
-                manifestData.outputFileName = manifestData.createOutputFilePath(this.outputPath);
-                return manifestData;
-            })
-            .then((manifestData: ManifestData) => {
-                tl.debug(`Creating final archive file at ${this.outputPath}`);
-                this.createArchive(this.inputFile, manifestData.dirPath, manifestData.outputFileName);
-                tl.debug("Final archive file created");
-                return Promise.resolve(manifestData.outputFileName);
-            }).catch(err => { return Promise.reject(err); });
+            tl.debug("Extracting files to " + dirPath);
+            await this.extractArchive(this.inputFile, dirPath);
+
+            if (this.versionNumber && this.updateTasksVersion || this.updateTasksId) {
+                tl.debug("Look for build tasks manifest");
+                const extensionManifest = path.join(dirPath, "extension.vsomanifest");
+                await common.checkUpdateTasksManifests(extensionManifest);
+            }
+
+            tl.debug("Editing VSIX manifest");
+            const manifestData = await this.editVsixManifest(dirPath);
+            manifestData.outputFileName = manifestData.createOutputFilePath(this.outputPath);
+
+            tl.debug(`Creating final archive file at ${this.outputPath}`);
+            await this.createArchive(this.inputFile, manifestData.dirPath, manifestData.outputFileName);
+            tl.debug("Final archive file created");
+
+            return manifestData.outputFileName;
+        } catch (err) {
+            return Promise.reject(err);
+        }
     }
 
     private async editVsixManifest(dirPath: string): Promise<ManifestData> {
