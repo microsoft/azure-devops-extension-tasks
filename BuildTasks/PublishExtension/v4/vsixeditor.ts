@@ -181,42 +181,29 @@ export class VSIXEditor {
     public async endEdit(): Promise<string> {
         this.validateEditMode();
 
-        if (!this.hasEdits()) { return Q(this.inputFile); }
+        if (!this.hasEdits()) { return this.inputFile; }
 
         temp.track();
 
-        try {
-            const dirPath = await new Promise<string>((resolve, reject) => {
-                temp.mkdir("vsixeditor", (ex, dirPath) => {
-                    if (ex) {
-                        reject(ex);
-                    } else {
-                        resolve(dirPath);
-                    }
-                });
-            });
+        const dirPath = await temp.mkdir("vsixeditor");
+        tl.debug("Extracting files to " + dirPath);
 
-            tl.debug("Extracting files to " + dirPath);
-            await this.extractArchive(this.inputFile, dirPath);
-
-            if (this.versionNumber && this.updateTasksVersion || this.updateTasksId) {
-                tl.debug("Look for build tasks manifest");
-                const extensionManifest = path.join(dirPath, "extension.vsomanifest");
-                await common.checkUpdateTasksManifests(extensionManifest);
-            }
-
-            tl.debug("Editing VSIX manifest");
-            const manifestData = await this.editVsixManifest(dirPath);
-            manifestData.outputFileName = manifestData.createOutputFilePath(this.outputPath);
-
-            tl.debug(`Creating final archive file at ${this.outputPath}`);
-            await this.createArchive(this.inputFile, manifestData.dirPath, manifestData.outputFileName);
-            tl.debug("Final archive file created");
-
-            return manifestData.outputFileName;
-        } catch (err) {
-            return Promise.reject(err);
+        await this.extractArchive(this.inputFile, dirPath);
+        if (this.versionNumber && this.updateTasksVersion || this.updateTasksId) {
+            tl.debug("Look for build tasks manifest");
+            const extensionManifest = path.join(dirPath, "extension.vsomanifest");
+            await common.checkUpdateTasksManifests(extensionManifest);
         }
+
+        tl.debug("Editing VSIX manifest");
+        const manifestData = await this.editVsixManifest(dirPath);
+        manifestData.outputFileName = await manifestData.createOutputFilePath(this.outputPath);
+
+        tl.debug(`Creating final archive file at ${this.outputPath}`);
+        await this.createArchive(this.inputFile, manifestData.dirPath, manifestData.outputFileName);
+        tl.debug("Final archive file created");
+
+        return manifestData.outputFileName;
     }
 
     private async editVsixManifest(dirPath: string): Promise<ManifestData> {
