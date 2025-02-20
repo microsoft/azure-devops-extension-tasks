@@ -1,7 +1,7 @@
-SET SYSTEM_DEFAULTWORKINGDIRECTORY=C:\Users\JesseHouwing\source\azure-pipelines-variable-tasks\
-set INPUT_CWD=C:\Users\JesseHouwing\source\azure-pipelines-variable-tasks\
-set INPUT_ROOTFOLDER=C:\Users\JesseHouwing\source\azure-pipelines-variable-tasks\
-set INPUT_VSIXFILE=C:\Users\JesseHouwing\source\azure-pipelines-variable-tasks\jessehouwing.jessehouwing-vsts-variable-tasks-3.0.0.vsix
+SET SYSTEM_DEFAULTWORKINGDIRECTORY=E:\azure-devops-extension-tasks\
+set INPUT_CWD=E:\azure-devops-extension-tasks\
+set INPUT_ROOTFOLDER=E:\azure-devops-extension-tasks\
+set INPUT_VSIXFILE=E:\azure-devops-extension-tasks\ms-devlabs.vsts-developer-tools-build-tasks-5.0.0.vsix
 SET INPUT_CONNECTTO=VsTeam
 SET INPUT_FILETYPE=vsix
 SET INPUT_EXTENSIONVISIBILITY=default
