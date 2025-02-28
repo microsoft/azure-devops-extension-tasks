@@ -196,8 +196,7 @@ export async function runTfx(cmd: (tfx: ToolRunner) => void): Promise<boolean> {
     if (tfxPath) {
         tl.debug(`using: ${tfxPath}`);
         tfx = new ToolRunner(tfxPath);
-        await tryRunCmd(tfx);
-        return;
+        return await tryRunCmd(tfx);
     }
 
     tl.setResult(tl.TaskResult.Failed, "Could not find tfx. To resolve, add the 'Use Node CLI for Azure DevOps' task to your pipeline before this task.");
