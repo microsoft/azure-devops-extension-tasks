@@ -196,8 +196,7 @@ export async function runTfx(cmd: (tfx: ToolRunner) => void): Promise<boolean> {
     if (tfxPath) {
         tl.debug(`using: ${tfxPath}`);
         tfx = new ToolRunner(tfxPath);
-        await tryRunCmd(tfx);
-        return;
+        return await tryRunCmd(tfx);
     }
 
     tl.setResult(tl.TaskResult.Failed, "Could not find tfx. To resolve, add the 'Use Node CLI for Azure DevOps' task to your pipeline before this task.");
@@ -545,12 +544,12 @@ function getTaskManifestPaths(manifestPath: string, manifest: any): string[] {
     }, []);
 }
 
-export function writeManifest(manifest: any, path: string): Promise<void> {
-    return fse.writeJSON(path, manifest);
+export async function writeManifest(manifest: any, path: string): Promise<void> {
+    await fse.writeJSON(path, manifest);
 }
 
-export function checkUpdateTasksManifests(manifestFile?: string): Promise<void> {
-    return updateManifests(manifestFile ? [manifestFile] : []);
+export async function checkUpdateTasksManifests(manifestFile?: string): Promise<void> {
+    await updateManifests(manifestFile ? [manifestFile] : []);
 }
 
 export default {

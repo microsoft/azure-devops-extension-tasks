@@ -537,12 +537,12 @@ function getTaskManifestPaths(manifestPath: string, manifest: any): string[] {
     }, []);
 }
 
-export function writeManifest(manifest: any, path: string): Promise<void> {
-    return fse.writeJSON(path, manifest);
+export async function writeManifest(manifest: any, path: string): Promise<void> {
+    await fse.writeJSON(path, manifest);
 }
 
-export function checkUpdateTasksManifests(manifestFile?: string): Promise<void> {
-    return updateManifests(manifestFile ? [manifestFile] : []);
+export async function checkUpdateTasksManifests(manifestFile?: string): Promise<void> {
+    await updateManifests(manifestFile ? [manifestFile] : []);
 }
 
 export default {

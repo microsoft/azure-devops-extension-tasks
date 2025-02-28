@@ -1,11 +1,11 @@
-SET SYSTEM_DEFAULTWORKINGDIRECTORY=C:\Users\JesseHouwing\source\azure-pipelines-variable-tasks\
-set INPUT_CWD=C:\Users\JesseHouwing\source\azure-pipelines-variable-tasks\
-set INPUT_ROOTFOLDER=C:\Users\JesseHouwing\source\azure-pipelines-variable-tasks\
-set INPUT_VSIXFILE=C:\Users\JesseHouwing\source\azure-pipelines-variable-tasks\jessehouwing.jessehouwing-vsts-variable-tasks-3.0.0.vsix
+SET SYSTEM_DEFAULTWORKINGDIRECTORY=E:\azure-devops-extension-tasks\
+set INPUT_CWD=E:\azure-devops-extension-tasks\
+set INPUT_ROOTFOLDER=E:\azure-devops-extension-tasks\
+set INPUT_VSIXFILE=E:\azure-devops-extension-tasks\ms-devlabs.vsts-developer-tools-build-tasks-5.0.0.vsix
 SET INPUT_CONNECTTO=VsTeam
 SET INPUT_FILETYPE=vsix
 SET INPUT_EXTENSIONVISIBILITY=default
-SET INPUT_EXTENSIONVERSION=3.26.27
+SET INPUT_EXTENSIONVERSION=3.26.23
 SET INPUT_UPDATETASKSVERSION=true
 SET INPUT_UPDATETASKSVERSIONTYPE=minor
 SET INPUT_CONNECTEDSERVICENAME=A
@@ -24,16 +24,16 @@ md %AGENT_WORKFOLDER%
 md %AGENT_TOOLSDIRECTORY%
 md %AGENT_TEMPDIRECTORY%
 
-fnm use v16
+fnm use v20
 
 cmd /c "npm run build:tasks"
 
 set __TFXPATH=C:\Users\JESSEH~1\AppData\Local\Temp\agent\tools\tfx\0.18.0\x64\
 
-pushd BuildTasks\PublishExtension\v4\PublishExtension\v4
-SET PREVIEW_FAST_UPDATE=false
+pushd BuildTasks\PublishExtension\v4\PublishExtension\v5
 node PublishExtension.js
+popd
 
-SET PREVIEW_FAST_UPDATE=true
+pushd BuildTasks\PublishExtension\v4\PublishExtension\v4
 node PublishExtension.js
 popd

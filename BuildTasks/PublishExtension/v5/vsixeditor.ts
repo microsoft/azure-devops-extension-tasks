@@ -140,9 +140,8 @@ export default class VSIXEditor {
             zip.arg("-bd");          // disable progress indicator
             zip.arg("-aoa");         // overwrite all
             zip.arg("-spd");         // disable wildcards
-            zip.execSync();
-        }
-        else {
+            await zip.execAsync();
+        } else {
             const zip = new tr.ToolRunner(tl.which("unzip", true));
 
             zip.arg("-o");           // overwrite all
@@ -154,14 +153,14 @@ export default class VSIXEditor {
             zip.arg("*/task.loc.json");
             zip.arg("extension.vsixmanifest");
             zip.arg("extension.vsomanifest");
-            zip.execSync();
+            await zip.execAsync();
         }
         tl.cd(cwd);
     }
 
     private async createArchive(originalVsix: string, tmpPath: string, targetVsix: string): Promise<void> {
         const cwd = tl.cwd();
-
+        
         if (originalVsix !== targetVsix) { tl.cp(originalVsix, targetVsix, "-f"); }
 
         if (tl.getPlatform() === tl.Platform.Windows) {
@@ -176,9 +175,8 @@ export default class VSIXEditor {
             zip.arg("-tzip");        // zip format
             zip.arg("-mx9");         // max compression level
             zip.arg("-bd");         // disable progress indicator
-            zip.execSync();
-        }
-        else {
+            await zip.execAsync();
+        } else {
             const zip = new tr.ToolRunner(tl.which("zip", true));
 
             tl.cd(tmpPath);
@@ -187,7 +185,7 @@ export default class VSIXEditor {
             zip.arg("-r");           // recursive
             zip.arg("-9");           // max compression level
             zip.arg("-f");           // update changed files only
-            zip.execSync();
+            await zip.execAsync();
         }
         tl.cd(cwd);
     }
