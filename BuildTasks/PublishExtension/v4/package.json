@@ -8,10 +8,10 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@xmldom/xmldom": "^0.9.7",
+    "@xmldom/xmldom": "^0.9.8",
     "7zip-bin-win": "^2.2.0",
     "azure-pipelines-task-lib": "^4.17.3",
-    "core-js": "^3.40.0",
+    "core-js": "^3.41.0",
     "fs-extra": "^11.3.0",
     "temp": "^0.9.4",
     "tmp": "^0.2.3",
@@ -19,6 +19,6 @@
     "x2js": "^3.4.4"
   },
   "devDependencies": {
-    "@types/node": "^20.17.19"
+    "@types/node": "^20.17.23"
   }
 }
