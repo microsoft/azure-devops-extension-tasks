@@ -13,6 +13,14 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "weekly"
+    groups:
+      ESLint:
+        patterns:
+          - esbuild
+          - eslint
+          - "@typescript-eslint/*"
+          - "@eslint/*"
+          - typescript-eslint
   - package-ecosystem: "npm" # See documentation for possible values
     directory: "/BuildTasks/v3/Common" # Location of package manifests
     schedule:
