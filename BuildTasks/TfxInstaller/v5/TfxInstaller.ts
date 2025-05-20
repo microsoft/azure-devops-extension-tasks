@@ -12,15 +12,16 @@ const debug = taskLib.getVariable("system.debug") || false;
 try {
     const version = taskLib.getInput("version", true);
     const checkLatest = taskLib.getBoolInput("checkLatest", false) || false;
+    const registry = taskLib.getInput("registry", false);
 
-    await getTfx(version, checkLatest);
+    await getTfx(version, checkLatest, registry);
     await taskLib.tool("tfx").arg(["version", "--no-color"]).execAsync();
 }
 catch (error: any) {
     taskLib.setResult(taskLib.TaskResult.Failed, error.message);
 }
 
-async function getTfx(versionSpec: string, checkLatest: boolean) {
+async function getTfx(versionSpec: string, checkLatest: boolean, registry?: string) {
     if (toolLib.isExplicitVersion(versionSpec)) {
         checkLatest = false; // check latest doesn't make sense when explicit version
     }
@@ -36,7 +37,7 @@ async function getTfx(versionSpec: string, checkLatest: boolean) {
             version = versionSpec;
         }
         else {
-            version = queryLatestMatch(versionSpec);
+            version = queryLatestMatch(versionSpec, registry);
             if (!version) {
                 throw new Error(`Unable to find Tfx version '${versionSpec}'`);
             }
@@ -45,7 +46,7 @@ async function getTfx(versionSpec: string, checkLatest: boolean) {
         }
 
         if (!toolPath) {
-            toolPath = await acquireTfx(version);
+            toolPath = await acquireTfx(version, registry);
         }
     }
 
@@ -62,9 +63,13 @@ async function getTfx(versionSpec: string, checkLatest: boolean) {
     toolLib.prependPath(toolPath);
 }
 
-function queryLatestMatch(versionSpec: string): string {
+function queryLatestMatch(versionSpec: string, registry?: string): string {
     const npmRunner = new tr.ToolRunner("npm");
-    npmRunner.arg(["show", "tfx-cli", "versions", "--json"]);
+    const args = ["show", "tfx-cli", "versions", "--json"];
+    if (registry) {
+        args.push("--registry", registry);
+    }
+    npmRunner.arg(args);
     const result = npmRunner.execSync({ failOnStdErr: false, silent: !debug, ignoreReturnCode: false} as tr.IExecOptions);
     if (result.code === 0)
     {
@@ -75,7 +80,7 @@ function queryLatestMatch(versionSpec: string): string {
     return "";
 }
 
-async function acquireTfx(version: string): Promise<string> {
+async function acquireTfx(version: string, registry?: string): Promise<string> {
     try{
         version = toolLib.cleanVersion(version);
 
@@ -89,7 +94,11 @@ async function acquireTfx(version: string): Promise<string> {
 
         taskLib.mkdirP(path.join(extPath));
         const npmRunner = new tr.ToolRunner("npm");
-        npmRunner.arg(["install", "tfx-cli@" + version, "-g", "--prefix", extPath, '--no-fund']);
+        const args = ["install", "tfx-cli@" + version, "-g", "--prefix", extPath, '--no-fund'];
+        if (registry) {
+            args.push("--registry", registry);
+        }
+        npmRunner.arg(args);
 
         const result = npmRunner.execSync({ failOnStdErr: false, silent: !debug, ignoreReturnCode: false} as tr.IExecOptions);
         if (result.code === 0)

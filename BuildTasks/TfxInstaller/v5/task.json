@@ -41,6 +41,14 @@
       "defaultValue": "true",
       "required": false,
       "helpMarkDown": "Automatically download the latest version."
+    },
+    {
+      "name": "registry",
+      "type": "string",
+      "label": "Registry URL",
+      "defaultValue": "",
+      "required": false,
+      "helpMarkDown": "The npm registry URL to use. If empty, the default npm registry will be used."
     }
   ],
   "execution": {
