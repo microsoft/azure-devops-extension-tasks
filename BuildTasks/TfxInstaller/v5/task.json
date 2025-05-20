@@ -54,7 +54,8 @@
       "label": "Registry URL",
       "defaultValue": "",
       "required": false,
-      "helpMarkDown": "The npm registry URL to use. If empty, the default npm registry will be used."
+      "helpMarkDown": "The npm registry URL to use. If empty, the default npm registry will be used.",
+      "groupName": "advanced"
     },
     {
       "name": "verbose",

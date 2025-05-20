@@ -6,7 +6,11 @@ import toolLib from 'azure-pipelines-tool-lib/tool.js';
 import path from 'node:path';
 import os from 'node:os';
 import fs from 'node:fs';
+import { promisify } from 'node:util';
 import { parse, format, Url } from 'url';
+
+const writeFileAsync = promisify(fs.writeFile);
+const unlinkAsync = promisify(fs.unlink);
 
 const debug = taskLib.getVariable("system.debug") || false;
 
@@ -65,29 +69,38 @@ async function getTfx(versionSpec: string, checkLatest: boolean, registry?: stri
 }
 
 function queryLatestMatch(versionSpec: string, registry?: string): string {
-    const npmRunner = new tr.ToolRunner("npm");
-    const args = ["show", "tfx-cli", "versions", "--json"];
-    
-    // Add registry if specified
-    if (registry) {
-        args.push("--registry", registry);
+    let npmrcPath: string | null = null;
+    try {
+        // Since we can't await in sync functions, we'll use --registry directly
+        // and skip npmrc file creation for this function
+        const npmRunner = new tr.ToolRunner("npm");
+        const args = ["show", "tfx-cli", "versions", "--json"];
+        
+        // Add registry if specified
+        if (registry) {
+            args.push("--registry", registry);
+        }
+        
+        // Configure proxy settings if available
+        const execOptions = configureNpmOptions();
+        
+        npmRunner.arg(args);
+        const result = npmRunner.execSync({ ...execOptions, failOnStdErr: false, silent: !debug, ignoreReturnCode: false} as tr.IExecOptions);
+        if (result.code === 0)
+        {
+            const versions: string[] = JSON.parse(result.stdout.trim());
+            const version: string = toolLib.evaluateVersions(versions, versionSpec);
+            return version;
+        }
+        return "";
+    } catch (error) {
+        taskLib.debug(`Error in queryLatestMatch: ${error instanceof Error ? error.message : String(error)}`);
+        return "";
     }
-    
-    // Configure proxy settings if available
-    const execOptions = configureNpmOptions();
-    
-    npmRunner.arg(args);
-    const result = npmRunner.execSync({ ...execOptions, failOnStdErr: false, silent: !debug, ignoreReturnCode: false} as tr.IExecOptions);
-    if (result.code === 0)
-    {
-        const versions: string[] = JSON.parse(result.stdout.trim());
-        const version: string = toolLib.evaluateVersions(versions, versionSpec);
-        return version;
-    }
-    return "";
 }
 
 async function acquireTfx(version: string, registry?: string): Promise<string> {
+    let npmrcPath: string | null = null;
     try{
         version = toolLib.cleanVersion(version);
 
@@ -100,12 +113,21 @@ async function acquireTfx(version: string, registry?: string): Promise<string> {
         extPath = path.join(extPath, 'tfx'); // use as short a path as possible due to nested node_modules folders
 
         taskLib.mkdirP(path.join(extPath));
+        
+        // Create npmrc file when registry is specified
+        npmrcPath = await createNpmrcFile(registry);
+        
         const npmRunner = new tr.ToolRunner("npm");
         const args = ["install", "tfx-cli@" + version, "-g", "--prefix", extPath, '--no-fund'];
         
         // Add registry if specified
         if (registry) {
             args.push("--registry", registry);
+            
+            // Use the npmrc file if created
+            if (npmrcPath) {
+                args.push("--userconfig", npmrcPath);
+            }
         }
         
         // Configure proxy settings if available
@@ -126,6 +148,10 @@ async function acquireTfx(version: string, registry?: string): Promise<string> {
     catch (error) {
         taskLib.debug(`Error installing tfx: ${error instanceof Error ? error.message : String(error)}`);
         return Promise.reject(new Error("Failed to install tfx"));
+    }
+    finally {
+        // Clean up npmrc file if created
+        await cleanupNpmrcFile(npmrcPath);
     }
 }
 
@@ -246,4 +272,59 @@ function sanitizeUrl(url: string): string {
         parsed.auth = "***:***";
     }
     return format(parsed);
+}
+
+async function createNpmrcFile(registry?: string): Promise<string | null> {
+    if (!registry) {
+        return null;
+    }
+
+    try {
+        // Create a temporary npmrc file
+        const tempNpmrcPath = path.join(taskLib.getVariable('Agent.TempDirectory') || os.tmpdir(), `npmrc_${Date.now()}`);
+        
+        let npmrcContent = '';
+        
+        // Add registry URL
+        if (registry) {
+            const sanitizedRegistryUrl = registry.endsWith('/') ? registry : `${registry}/`;
+            npmrcContent += `registry=${sanitizedRegistryUrl}\n`;
+            
+            // Parse the registry URL to get the host
+            const registryUrl = parse(registry);
+            if (registryUrl.host) {
+                // Add always-auth setting for the registry
+                npmrcContent += `${registryUrl.host}:always-auth=true\n`;
+            }
+        }
+
+        // Configure proxy settings if needed
+        const proxy = getProxyFromEnvironment();
+        if (proxy) {
+            npmrcContent += `proxy=${proxy}\n`;
+            npmrcContent += `https-proxy=${proxy}\n`;
+        }
+
+        // Write the content to the temporary file
+        await writeFileAsync(tempNpmrcPath, npmrcContent);
+        taskLib.debug(`Created .npmrc file at ${tempNpmrcPath}`);
+
+        return tempNpmrcPath;
+    } catch (error) {
+        taskLib.warning(`Failed to create .npmrc file: ${error instanceof Error ? error.message : String(error)}`);
+        return null;
+    }
+}
+
+async function cleanupNpmrcFile(npmrcPath: string | null): Promise<void> {
+    if (!npmrcPath) {
+        return;
+    }
+
+    try {
+        await unlinkAsync(npmrcPath);
+        taskLib.debug(`Removed temporary .npmrc file: ${npmrcPath}`);
+    } catch (error) {
+        taskLib.warning(`Failed to clean up .npmrc file: ${error instanceof Error ? error.message : String(error)}`);
+    }
 }
