@@ -23,7 +23,13 @@
     "tfx-cli"
   ],
   "minimumAgentVersion": "2.115.0",
-  "groups": [],
+  "groups": [
+    {
+      "name": "advanced",
+      "displayName": "Advanced",
+      "isExpanded": false
+    }
+  ],
   "instanceNameFormat": "Use Node CLI for Azure DevOps (tfx-cli): $(version)",
   "inputs": [
     {
@@ -49,6 +55,15 @@
       "defaultValue": "",
       "required": false,
       "helpMarkDown": "The npm registry URL to use. If empty, the default npm registry will be used."
+    },
+    {
+      "name": "verbose",
+      "type": "boolean",
+      "label": "Verbose logging",
+      "defaultValue": "false",
+      "required": false,
+      "helpMarkDown": "Enable verbose logging for npm operations.",
+      "groupName": "advanced"
     }
   ],
   "execution": {
