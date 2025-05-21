@@ -93,7 +93,7 @@ function queryLatestMatch(versionSpec: string, registry?: string): string {
         }
         return "";
     } catch (error) {
-        taskLib.debug(`Error in queryLatestMatch: ${error instanceof Error ? error.message : String(error)}`);
+        taskLib.debug(`Error in queryLatestMatch: ${error instanceof Error ? error.message : String(error instanceof Object ? JSON.stringify(error) : error)}`);
         return "";
     }
 }
@@ -145,7 +145,7 @@ async function acquireTfx(version: string, registry?: string): Promise<string> {
         }
     }
     catch (error) {
-        taskLib.debug(`Error installing tfx: ${error instanceof Error ? error.message : String(error)}`);
+        taskLib.debug(`Error installing tfx: ${error instanceof Error ? error.message : String(error instanceof Object ? JSON.stringify(error) : error)}`);
         return Promise.reject(new Error("Failed to install tfx"));
     }
     finally {
@@ -185,7 +185,7 @@ function getProxyFromEnvironment(): string | undefined {
 function getProxyBypass(): string | undefined {
     // Check if there are any proxy bypass hosts
     const proxyBypassHosts: string[] = JSON.parse(taskLib.getVariable('Agent.ProxyBypassList') || '[]'); 
-    if (proxyBypassHosts == null || proxyBypassHosts.length == 0) {
+    if (proxyBypassHosts?.length === 0) {
         return undefined;
     }
 
@@ -199,7 +199,7 @@ function getProxyBypass(): string | undefined {
             if (registryUrl.hostname) {
                 bypassDomainSet.add(registryUrl.hostname);
             }
-        } catch (error) {
+        } catch {
             taskLib.debug(`Could not parse registry URL: ${registry}`);
         }
     }
@@ -210,7 +210,7 @@ function getProxyBypass(): string | undefined {
             // If it's a regex pattern, we can't easily determine domains, so we add it directly
             bypassDomainSet.add(bypassHost);
         } catch (error) {
-            taskLib.debug(`Error processing bypass host ${bypassHost}: ${error instanceof Error ? error.message : String(error)}`);
+            taskLib.debug(`Error processing bypass host ${bypassHost}: ${error instanceof Error ? error.message : String(error instanceof Object ? JSON.stringify(error) : error)}`);
         }
     });
 
@@ -310,7 +310,7 @@ async function createNpmrcFile(registry?: string): Promise<string | null> {
 
         return tempNpmrcPath;
     } catch (error) {
-        taskLib.warning(`Failed to create .npmrc file: ${error instanceof Error ? error.message : String(error)}`);
+        taskLib.warning(`Failed to create .npmrc file: ${error instanceof Error ? error.message : String(error instanceof Object ? JSON.stringify(error) : error)}`);
         return null;
     }
 }
@@ -324,6 +324,6 @@ async function cleanupNpmrcFile(npmrcPath: string | null): Promise<void> {
         await unlinkAsync(npmrcPath);
         taskLib.debug(`Removed temporary .npmrc file: ${npmrcPath}`);
     } catch (error) {
-        taskLib.warning(`Failed to clean up .npmrc file: ${error instanceof Error ? error.message : String(error)}`);
+        taskLib.warning(`Failed to clean up .npmrc file: ${error instanceof Error ? error.message : String(error instanceof Object ? JSON.stringify(error) : error)}`);
     }
 }

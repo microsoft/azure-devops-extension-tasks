@@ -52,5 +52,9 @@
     "tfx-cli": "^0.21.1",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.32.0"
+  },
+  "dependencies": {
+    "azure-pipelines-task-lib": "^5.2.0",
+    "azure-pipelines-tool-lib": "^2.0.8"
   }
 }
