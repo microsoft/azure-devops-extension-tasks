@@ -69,7 +69,6 @@ async function getTfx(versionSpec: string, checkLatest: boolean, registry?: stri
 }
 
 function queryLatestMatch(versionSpec: string, registry?: string): string {
-    let npmrcPath: string | null = null;
     try {
         // Since we can't await in sync functions, we'll use --registry directly
         // and skip npmrc file creation for this function
