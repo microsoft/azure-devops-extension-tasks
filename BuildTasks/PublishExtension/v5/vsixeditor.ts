@@ -109,6 +109,7 @@ export default class VSIXEditor {
     private extensionPricing: string = null;
     private updateTasksVersion = true;
     private updateTasksId = true;
+    private updateFeatureConstraints = false;
 
     constructor(
         public inputFile: string,
@@ -201,7 +202,9 @@ export default class VSIXEditor {
         tl.debug("Extracting files to " + dirPath);
 
         await this.extractArchive(this.inputFile, dirPath);
-        if (this.versionNumber && this.updateTasksVersion || this.updateTasksId) {
+
+        if (this.versionNumber && this.updateTasksVersion || this.updateTasksId ||
+            this.editIdTag && this.editUpdateFeatureConstraints) {
             tl.debug("Look for build tasks manifest");
             const extensionManifest = path.join(dirPath, "extension.vsomanifest");
             await common.checkUpdateTasksManifests(extensionManifest);
@@ -340,6 +343,11 @@ export default class VSIXEditor {
     public editUpdateTasksId(updateTasksId: boolean) : void {
         this.validateEditMode();
         this.updateTasksId = updateTasksId;
+    }
+
+    public editUpdateFeatureConstraints(updateFeatureConstraints: boolean) {
+        this.validateEditMode();
+        this.updateFeatureConstraints = updateFeatureConstraints;
     }
 
     private validateEditMode() : void {
