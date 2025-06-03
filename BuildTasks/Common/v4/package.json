@@ -11,7 +11,8 @@
     "azure-pipelines-task-lib": "^4.17.3",
     "fs-extra": "^11.3.0",
     "tmp": "^0.2.3",
-    "uuidv5": "^1.0.0"
+    "uuidv5": "^1.0.0",
+    "x2js": "^3.4.4"
   },
   "devDependencies": {
     "@types/node": "^20.17.27",

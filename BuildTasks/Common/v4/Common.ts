@@ -8,6 +8,20 @@ import ToolRunner = trl.ToolRunner;
 import uuidv5 from "uuidv5";
 import * as tmp from "tmp";
 
+interface VsixManifest {
+    PackageManifest: {
+        Metadata: {
+            Identity: {
+                _Id: string;
+                _Version: string;
+                _Publisher: string;
+            };
+            DisplayName: string;
+            GalleryFlags: string;
+        };
+    };
+}
+
 function writeBuildTempFile(taskName: string, data: string | Buffer): string {
     const tempDir = tl.getVariable("Agent.TempDirectory");
     const tempFile = tmp.tmpNameSync({ prefix: taskName, postfix: ".tmp", tmpdir: tempDir });
@@ -433,7 +447,21 @@ async function updateTaskManifests(manifestPaths: string[], updateTasksId: boole
                     tl.debug(`Updating Id...`);
                     const publisherId = tl.getInput("publisherId", false) || manifest.publisher;
                     const extensionTag = tl.getInput("extensionTag", false) || "";
-                    const extensionId = `${(tl.getInput("extensionId", false) || manifest.id)}${extensionTag}`;
+                    
+                    // Try to get extension ID from input, then from VSIX manifest, then from JSON manifest
+                    let baseExtensionId = tl.getInput("extensionId", false);
+                    if (!baseExtensionId) {
+                        const vsixExtensionId = await getVsixExtensionId(extensionPath);
+                        baseExtensionId = vsixExtensionId || manifest.id;
+                        if (vsixExtensionId) {
+                            tl.debug(`Using extension ID from VSIX manifest: ${vsixExtensionId}`);
+                        } else {
+                            tl.debug(`Using extension ID from JSON manifest: ${manifest.id}`);
+                        }
+                    } else {
+                        tl.debug(`Using extension ID from input: ${baseExtensionId}`);
+                    }
+                    const extensionId = `${baseExtensionId}${extensionTag}`;
 
                     const originalTaskId: string = taskManifest.id || null;
                     taskManifest = updateTaskId(taskManifest, publisherId, extensionId);
@@ -502,6 +530,34 @@ function getManifest(path: string): Promise<unknown> {
             throw new Error(`Error parsing task manifest: ${path} - ${jsonError}`);
         }
     });
+}
+
+async function getVsixExtensionId(manifestPath: string): Promise<string | undefined> {
+    try {
+        // Check if we're dealing with a VSIX directory
+        const manifestDir = path.dirname(manifestPath);
+        const vsixManifestPath = path.join(manifestDir, "extension.vsixmanifest");
+        
+        // Check if the VSIX manifest exists
+        try {
+            await fse.access(vsixManifestPath);
+        } catch {
+            // VSIX manifest doesn't exist, not a VSIX directory
+            return undefined;
+        }
+
+        // Read and parse the VSIX manifest
+        const x2jsLib = require("x2js");
+        const x2js = new x2jsLib();
+        
+        const vsixManifestData = await fse.readFile(vsixManifestPath, "utf8");
+        const vsixmanifest = x2js.xml2js(vsixManifestData) as VsixManifest;
+        
+        return vsixmanifest.PackageManifest.Metadata.Identity._Id;
+    } catch (error) {
+        tl.debug(`Failed to read VSIX extension ID: ${error}`);
+        return undefined;
+    }
 }
 
 function getTaskManifestPaths(manifestPath: string, manifest: any): string[] {
