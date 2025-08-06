@@ -1,6 +1,4 @@
 # Azure DevOps Extension Tasks
-Build: [![Build Status](https://dev.azure.com/solidify-ms-devlabs/DevLabs%20Extensions/_apis/build/status%2Fazure-devops-extension-tasks?branchName=main&stageName=Build&jobName=Build%20on%20Windows)](https://dev.azure.com/solidify-ms-devlabs/DevLabs%20Extensions/_build/latest?definitionId=5&branchName=main)
-Release: [![Build Status](https://dev.azure.com/solidify-ms-devlabs/DevLabs%20Extensions/_apis/build/status%2Fazure-devops-extension-tasks?branchName=main&stageName=Publish%20publicly%20to%20MsDevLabs)](https://dev.azure.com/solidify-ms-devlabs/DevLabs%20Extensions/_build/latest?definitionId=5&branchName=main)
 
 This extension provides build and release tasks for packaging and publishing Azure Devops Extensions to the [Visual Studio Marketplace](https://marketplace.visualstudio.com). There are also tasks to share and install your extension to your Azure Devops organization or Team Foundation Server.
 
