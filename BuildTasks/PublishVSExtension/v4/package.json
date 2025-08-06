@@ -16,7 +16,7 @@
     "azure-pipelines-task-lib": "^4.17.3",
     "core-js": "^3.41.0",
     "path": "~0.12.7",
-    "tmp": "^0.2.3"
+    "tmp": "^0.2.4"
   },
   "devDependencies": {
     "@types/node": "^20.17.27"
