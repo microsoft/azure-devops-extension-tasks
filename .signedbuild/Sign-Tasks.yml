@@ -87,36 +87,36 @@ stages:
         $erroractionpreference = "continue"
         del BuildTasks\PublishExtension\v5\node_modules\7zip-bin\linux -recurse
         del BuildTasks\PublishExtension\v5\node_modules\7zip-bin\mac -recurse
-        del BuildTasks\*\v*\package-lock.json
-        del BuildTasks\*\v*\*.ts
-        del BuildTasks\*\v*\.taskkey
-        del BuildTasks\*\v*\tsconfig.json
-        del BuildTasks\*\v*\.snyk
-        del BuildTasks\*\v*\*.md
-        del BuildTasks\*\v*\tsconfig.tsbuildinfo
-        del -include *.map -recurse BuildTasks\*\v*\node_modules
-        del -include *.ts -recurse BuildTasks\*\v*\node_modules
-        del -include .github -recurse BuildTasks\*\v*\node_modules -force
-        del -include .package-lock.json -recurse BuildTasks\*\v*\node_modules
-        del -include package-lock.json -recurse BuildTasks\*\v*\node_modules
-        del -include tsconfig.json -recurse BuildTasks\*\v*\node_modules
-        del -include "@types" -recurse BuildTasks\*\v*\node_modules
-        del -include ".eslintrc" -recurse BuildTasks\*\v*\node_modules
-        del -include "changelog.md" -recurse BuildTasks\*\v*\node_modules  
-        del -include "readme.md" -recurse BuildTasks\*\v*\node_modules  
-        del -include ".nycrc" -recurse BuildTasks\*\v*\node_modules  
-        del -include "fixtures" -recurse BuildTasks\*\v*\node_modules  
-        del -include "test" -recurse BuildTasks\*\v*\node_modules  
-        del -include "tests" -recurse BuildTasks\*\v*\node_modules  
-        del -include ".editorconfig" -recurse BuildTasks\*\v*\node_modules  
-        del -include ".travis.yml" -recurse BuildTasks\*\v*\node_modules  
-        del -include ".jshintrc" -recurse BuildTasks\*\v*\node_modules  
-        del -include ".jscsrc" -recurse BuildTasks\*\v*\node_modules  
-        del -include "CODEOWNERS" -recurse BuildTasks\*\v*\node_modules  
-        del -include "doc" -recurse BuildTasks\*\v*\node_modules  
-        del -include "CHANGELOG" -recurse BuildTasks\*\v*\node_modules  
-        del -include "Makefile" -recurse BuildTasks\*\v*\node_modules  
-        del -include "LICENSE-MIT" -recurse BuildTasks\*\v*\node_modules  
+        del -include @(
+            "package-lock.json",
+            "*.ts",
+            ".taskkey",
+            "tsconfig.json",
+            ".snyk",
+            "*.md",
+            "tsconfig.tsbuildinfo"
+        ) -recurse BuildTasks\*\v*
+
+        del -include @(
+            ".package-lock.json",
+            "*.map",
+            ".github",
+            "@types",
+            ".eslintrc",
+            ".nycrc",
+            "fixtures",
+            "test",
+            "tests",
+            ".editorconfig",
+            ".travis.yml",
+            ".jshintrc",
+            ".jscsrc",
+            "CODEOWNERS",
+            "doc",
+            "CHANGELOG",
+            "Makefile",
+            "LICENSE-MIT"
+        ) -recurse BuildTasks\*\v*\node_modules -force  
       displayName: 'Delete unneeded files'
       workingDirectory: '$(System.DefaultWorkingDirectory)/TaskExtensions'
 
