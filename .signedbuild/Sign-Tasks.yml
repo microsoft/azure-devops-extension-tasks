@@ -30,7 +30,7 @@ stages:
     - checkout: self
       clean: true
       fetchTags: false
-      
+
     - checkout: TaskExtensions
       clean: true
       fetchTags: false
@@ -66,7 +66,7 @@ stages:
             mkdir $_ -force | out-null
             copy $env:temp\vswhere.exe $_ -force
           }
-      
+
     - task: Npm@1
       displayName: 'Build the extension'
       inputs:
@@ -125,6 +125,7 @@ stages:
 
     - task: QueryAzureDevOpsExtensionVersion@5
       displayName: 'Query Azure DevOps Extension Version - dev'
+      name: QueryVersion
       inputs:
         connectTo: 'AzureRM'
         connectedServiceNameAzureRM: 'PublishSignedExtensions'
@@ -150,7 +151,7 @@ stages:
         ${{ if ne(parameters.ExtensionVersion, '') }}:
           extensionVersion: '${{parameters.ExtensionVersion}}'
         ${{ if eq(parameters.ExtensionVersion, '') }}:
-          extensionVersion: '$(Build.BuildNumber)'
+          extensionVersion: '$(QueryVersion.Extension.Version)'
         updateTasksVersion: ${{ parameters.UpdateTaskVersion }}
         updateTasksVersionType: patch
         extensionVisibility: private
@@ -167,22 +168,9 @@ stages:
         ${{ if ne(parameters.ExtensionVersion, '') }}:
           extensionVersion: '${{parameters.ExtensionVersion}}'
         ${{ if eq(parameters.ExtensionVersion, '') }}:
-          extensionVersion: '$(Build.BuildNumber)'
+          extensionVersion: '$(QueryVersion.Extension.Version)'
         extensionTag: '-dev'
         extensionVisibility: 'private'
-
-    - task: QueryAzureDevOpsExtensionVersion@5
-      displayName: 'Query Azure DevOps Extension Version - Public'
-      inputs:
-        connectTo: 'AzureRM'
-        connectedServiceNameAzureRM: 'PublishSignedExtensions'
-        publisherId: 'ms-devlabs'
-        extensionId: 'vsts-developer-tools-build-tasks'
-        versionAction: 'Patch'
-        extensionVersionOverride: '${{parameters.ExtensionVersion}}'
-        setBuildNumber: 'true'
-        cwd: '$(System.DefaultWorkingDirectory)/TaskExtensions'
-      continueOnError: true
 
     - task: PackageAzureDevOpsExtension@5
       displayName: 'Package Public Extension'
@@ -196,7 +184,7 @@ stages:
         ${{ if ne(parameters.ExtensionVersion, '') }}:
           extensionVersion: '${{parameters.ExtensionVersion}}'
         ${{ if eq(parameters.ExtensionVersion, '') }}:
-          extensionVersion: '$(Build.BuildNumber)'
+          extensionVersion: '$(QueryVersion.Extension.Version)'
         extensionVisibility: 'public'
         updateTasksVersion: ${{ parameters.UpdateTaskVersion }}
         updateTasksVersionType: patch
@@ -205,7 +193,7 @@ stages:
   displayName: 'Publish Privately'
   dependsOn: BuildPackageTaskExtension
   condition: succeeded()
-  jobs: 
+  jobs:
   - job: DeployDev
     displayName: 'Deploy to Dev'
     templateContext:
@@ -217,7 +205,7 @@ stages:
     steps:
     - download: current
       artifact: unsigned-vsix
-    
+
     - task: NodeTool@0
       inputs:
         versionSpec: '20.x'
@@ -234,30 +222,30 @@ stages:
         rootPath: $(Pipeline.Workspace)\unsigned-vsix
 
     - ${{ if eq(parameters.publishExtension, true) }}:
-        - task: 1ES.PublishAzureDevOpsExtension@1
-          displayName: 'Publish the private extension to ms-devlabs'
-          inputs:
-            connectedServiceNameAzureRM: 'PublishSignedExtensions'
-            fileType: 'vsix'
-            vsixFile: '$(System.ArtifactsDirectory)/signed-vsix/vsts-developer-tools-build-tasks-private.vsix'
-            targetPath: '$(System.ArtifactsDirectory)'
-            validateExtension: false
-            useV5: true
+      - task: 1ES.PublishAzureDevOpsExtension@1
+        displayName: 'Publish the private extension to ms-devlabs'
+        inputs:
+          connectedServiceNameAzureRM: 'PublishSignedExtensions'
+          fileType: 'vsix'
+          vsixFile: '$(System.ArtifactsDirectory)/signed-vsix/vsts-developer-tools-build-tasks-private.vsix'
+          targetPath: '$(System.ArtifactsDirectory)'
+          validateExtension: false
+          useV5: true
 
     - ${{ if eq(parameters.publishExtension, true) }}:
-        - task: IsAzureDevOpsExtensionValid@5
-          displayName: 'Validate the private extension on the marketplace'
-          inputs:
-            connectTo: 'AzureRM'
-            connectedServiceNameAzureRM: 'PublishSignedExtensions'
-            method: 'vsix'
-            vsixFile: '$(System.ArtifactsDirectory)/signed-vsix/vsts-developer-tools-build-tasks-private.vsix'
+      - task: IsAzureDevOpsExtensionValid@5
+        displayName: 'Validate the private extension on the marketplace'
+        inputs:
+          connectTo: 'AzureRM'
+          connectedServiceNameAzureRM: 'PublishSignedExtensions'
+          method: 'vsix'
+          vsixFile: '$(System.ArtifactsDirectory)/signed-vsix/vsts-developer-tools-build-tasks-private.vsix'
 
 - stage: PublishProd
   displayName: 'Publish publicly to MsDevLabs'
   dependsOn: PublishDev
   condition: succeeded()
-  jobs: 
+  jobs:
   - job: DeployProd
     displayName: 'Deploy to Prod'
     templateContext:
@@ -269,7 +257,7 @@ stages:
     steps:
     - download: current
       artifact: unsigned-vsix
-    
+
     - task: NodeTool@0
       inputs:
         versionSpec: '20.x'
@@ -286,39 +274,39 @@ stages:
         rootPath: $(Pipeline.Workspace)\unsigned-vsix
 
     - ${{ if eq(parameters.publishExtension, true) }}:
-        - task: 1ES.PublishAzureDevOpsExtension@1
-          displayName: 'Publish the public extension to ms-devlabs'
-          inputs:
-            connectTo: 'AzureRM'
-            connectedServiceNameAzureRM: 'PublishSignedExtensions'
-            fileType: 'vsix'
-            vsixFile: '$(System.ArtifactsDirectory)/signed-vsix/vsts-developer-tools-build-tasks-public.vsix'
-            targetPath: '$(System.ArtifactsDirectory)'
-            validateExtension: false
-            useV5: true
+      - task: 1ES.PublishAzureDevOpsExtension@1
+        displayName: 'Publish the public extension to ms-devlabs'
+        inputs:
+          connectTo: 'AzureRM'
+          connectedServiceNameAzureRM: 'PublishSignedExtensions'
+          fileType: 'vsix'
+          vsixFile: '$(System.ArtifactsDirectory)/signed-vsix/vsts-developer-tools-build-tasks-public.vsix'
+          targetPath: '$(System.ArtifactsDirectory)'
+          validateExtension: false
+          useV5: true
 
     - ${{ if eq(parameters.publishExtension, true) }}:
-        - task: IsAzureDevOpsExtensionValid@5
-          displayName: 'Validate the public extension on the marketplace'
-          inputs:
-            connectTo: 'AzureRM'
-            connectedServiceNameAzureRM: 'PublishSignedExtensions'
-            method: 'vsix'
-            vsixFile: '$(System.ArtifactsDirectory)/signed-vsix/vsts-developer-tools-build-tasks-public.vsix'
+      - task: IsAzureDevOpsExtensionValid@5
+        displayName: 'Validate the public extension on the marketplace'
+        inputs:
+          connectTo: 'AzureRM'
+          connectedServiceNameAzureRM: 'PublishSignedExtensions'
+          method: 'vsix'
+          vsixFile: '$(System.ArtifactsDirectory)/signed-vsix/vsts-developer-tools-build-tasks-public.vsix'
 
     - ${{ if eq(parameters.publishExtension, true) }}:
-        - task: GitHubRelease@1
-          displayName: 'Publish the public extension to GitHub'
-          inputs:
-            gitHubConnection: 'ADOExtensionAPIGHToken2'
-            repositoryName: '${{ parameters.RepositoryName }}'
-            action: 'create'
-            target: '$(Build.SourceVersion)'
-            tagSource: 'userSpecifiedTag'
-            tag: 'v$(Build.BuildNumber)'
-            title: 'v$(Build.BuildNumber)'
-            releaseNotesSource: 'inline'
-            assets: '$(publishProd.Extension.OutputPath)*'
-            changeLogCompareToRelease: 'lastFullRelease'
-            changeLogType: 'issueBased'
-            changeLogLabels: '[{ "state" : "closed" }]'
+      - task: GitHubRelease@1
+        displayName: 'Publish the public extension to GitHub'
+        inputs:
+          gitHubConnection: 'ADOExtensionAPIGHToken2'
+          repositoryName: '${{ parameters.RepositoryName }}'
+          action: 'create'
+          target: '$(Build.SourceVersion)'
+          tagSource: 'userSpecifiedTag'
+          tag: 'v$(Build.BuildNumber)'
+          title: 'v$(Build.BuildNumber)'
+          releaseNotesSource: 'inline'
+          assets: '$(publishProd.Extension.OutputPath)*'
+          changeLogCompareToRelease: 'lastFullRelease'
+          changeLogType: 'issueBased'
+          changeLogLabels: '[{ "state" : "closed" }]'
