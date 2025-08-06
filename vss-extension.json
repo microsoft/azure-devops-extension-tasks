@@ -94,6 +94,10 @@
       "path": "BuildTasks/TfxInstaller"
     },
     {
+      "path": "BuildTasks/TfxInstaller/v5/node_modules/.bin/tfx",
+      "contentType": "application/octet-stream"
+    },
+    {
       "path": "add-task.png",
       "addressable": true
     },
