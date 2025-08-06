@@ -127,12 +127,16 @@ export default class VSIXEditor {
         if (tl.getPlatform() === tl.Platform.Windows) {
             const sevenZip = await import ("7zip-bin");
             const zip = new tr.ToolRunner(sevenZip.path7za);
-
+            
             zip.arg("x");
             zip.arg(vsix);          // file to extract
             zip.arg(`-o${tmpPath}`);  // redirect output to dir
-            zip.arg("task.json");
-            zip.arg("task.loc.json");
+
+            if (this.updateTasksVersion || this.updateTasksId) {
+                zip.arg("task.json");
+                zip.arg("task.loc.json");
+            }
+            
             zip.arg("extension.vsixmanifest");
             zip.arg("extension.vsomanifest");
             zip.arg("-y");           // assume yes on all queries
@@ -149,11 +153,21 @@ export default class VSIXEditor {
             zip.arg("-d");           // redirect output to
             zip.arg(tmpPath);         // output directory
             zip.arg(vsix);          // file to extract
-            zip.arg("*/task.json");
-            zip.arg("*/task.loc.json");
+            
+            if (this.updateTasksVersion || this.updateTasksId) {
+                zip.arg("*/task.json");
+                zip.arg("*/task.loc.json");
+            }
+
             zip.arg("extension.vsixmanifest");
             zip.arg("extension.vsomanifest");
-            await zip.execAsync();
+            const result = await zip.execAsync({ ignoreReturnCode: true });
+            
+            // unzip returns exit code 11 when some files are not found, but extraction succeeds for existing files
+            // This is acceptable for optional files like task.json and task.loc.json
+            if (result !== 0 && result !== 11) {
+                throw new Error(`unzip extraction failed with exit code: ${result}`);
+            }
         }
         tl.cd(cwd);
     }
