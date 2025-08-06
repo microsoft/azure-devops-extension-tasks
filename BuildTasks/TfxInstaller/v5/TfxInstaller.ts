@@ -44,6 +44,7 @@ async function getTfx(versionSpec: string, checkLatest: boolean): Promise<void> 
 
         taskLib.setVariable("__tfxpath", builtInTfxPath, false);
         toolLib.prependPath(builtInTfxPath);
+        return;
     }
     
     if (toolLib.isExplicitVersion(versionSpec)) {
