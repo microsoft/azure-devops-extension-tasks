@@ -21,6 +21,10 @@ cmd /c "npm run build:tasks"
 
 pushd BuildTasks\TfxInstaller\v5\
 
+set INPUT_VERSION=0.21.1
+set INPUT_CHECKLATEST=true
+node TfxInstaller\v5\TfxInstaller.js
+
 set INPUT_VERSION=0.21.x
 set INPUT_CHECKLATEST=true
 node TfxInstaller\v5\TfxInstaller.js
