@@ -72,12 +72,7 @@ async function getTfx(versionSpec: string, checkLatest: boolean): Promise<void> 
         }
     }
 
-    if (os.platform() !== "win32")
-    {
-        // Depending on target platform npm behaves slightly different. This seems to differ between distros and npm versions too.
-        toolPath = findTfxExecutablePath(toolPath);
-    }
-
+    toolPath = findTfxExecutablePath(toolPath);
     taskLib.setVariable("__tfxpath", toolPath, false);
     toolLib.prependPath(toolPath);
 }
