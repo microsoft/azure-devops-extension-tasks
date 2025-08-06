@@ -115,10 +115,17 @@ stages:
             "doc",
             "CHANGELOG",
             "Makefile",
-            "LICENSE-MIT"
+            "LICENSE-MIT",
+            "LICENSE",
+            "license",
+            "AUTHORS"
         ) -recurse BuildTasks\*\v*\node_modules -force  
       displayName: 'Delete unneeded files'
       workingDirectory: '$(System.DefaultWorkingDirectory)/TaskExtensions'
+
+    - pwsh: |
+        ./fix-manifest-file.ps1
+      displayName: 'Fix the manifest file'
 
     - task: TfxInstaller@5
       displayName: 'Use Node CLI for Azure DevOps'
