@@ -45,6 +45,7 @@ async function getTfx(versionSpec: string, checkLatest: boolean): Promise<void> 
         const builtInTfxPath = findTfxExecutablePath(path.join(currentDir, "..", ".."));
 
         if (os.platform() !== "win32") {
+            
             fs.chmodSync(path.join(builtInTfxPath, "tfx"), 0o777);
         }
 

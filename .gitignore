@@ -21,3 +21,5 @@ BuildTasks/*/v*/**/*.js
 BuildTasks/*/v*/**/*.js.map
 
 tsconfig.tsbuildinfo
+/*.pfx
+vsixsigntool.exe
