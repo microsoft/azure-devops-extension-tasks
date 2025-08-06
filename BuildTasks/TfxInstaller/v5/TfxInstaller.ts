@@ -16,10 +16,16 @@ const debug = taskLib.getVariable("system.debug") || false;
  * @returns The path where tfx executable was found, or undefined if not found
  */
 function findTfxExecutablePath(basePath: string): string | undefined {
-    const probePaths = [basePath, path.join(basePath, "/bin"), path.join(basePath, "/node_modules/.bin/")];
-    return probePaths.find((probePath) => {
-        return taskLib.exist(path.join(probePath, "/tfx"));
+    const probePaths = [basePath, path.join(basePath, "/.bin"), path.join(basePath, "/bin"), path.join(basePath, "/node_modules/.bin/")];
+    const result = probePaths.find((probePath) => {
+        if (os.platform() === "win32") {
+            return taskLib.exist(path.join(probePath, "/tfx.cmd"));
+        }
+        else {
+            return taskLib.exist(path.join(probePath, "/tfx"));
+        }
     });
+    return result;
 }
 
 try {
@@ -45,6 +51,10 @@ async function getTfx(versionSpec: string, checkLatest: boolean): Promise<void> 
         taskLib.setVariable("__tfxpath", builtInTfxPath, false);
         toolLib.prependPath(builtInTfxPath);
         return;
+    }
+
+    if (versionSpec === "latest") {
+        versionSpec = "*";    
     }
     
     if (toolLib.isExplicitVersion(versionSpec)) {
