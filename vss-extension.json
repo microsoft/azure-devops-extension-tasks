@@ -104,6 +104,798 @@
     {
       "path": "permissions.png",
       "addressable": true
+    },
+    {
+      "path": "BuildTasks/ShareExtension/v5/node_modules/.bin/semver",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/TfxInstaller/v5/node_modules/msalv2/node_modules/uuid/dist/bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/ShareExtension/v5/node_modules/msalv2/node_modules/uuid/dist/bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/ShareExtension/v4/node_modules/.bin/shjs",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PublishVSExtension/v5/node_modules/.bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/InstallExtension/v5/node_modules/msalv1/node_modules/.bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/UnpublishExtension/v5/node_modules/shelljs/bin/shjs",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PackageExtension/v5/node_modules/msalv2/node_modules/.bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/ExtensionVersion/v5/node_modules/jsonwebtoken/node_modules/.bin/semver",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PublishVSExtension/v4/node_modules/.bin/semver",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/TfxInstaller/v5/node_modules/resolve/bin/resolve",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/ShareExtension/v5/node_modules/uuid/bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PublishExtension/v5/node_modules/.bin/semver",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/UnpublishExtension/v4/node_modules/.bin/resolve",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/TfxInstaller/v5/node_modules/.bin/node-which",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/IsValidExtensionAgent/v4/node_modules/.bin/shjs",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/InstallExtension/v5/node_modules/resolve/bin/resolve",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/TfxInstaller/v5/node_modules/.bin/mkdirp",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PublishExtension/v5/node_modules/shelljs/bin/shjs",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/ShareExtension/v4/node_modules/.bin/semver",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PublishExtension/v4/node_modules/resolve/bin/resolve",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/UnpublishExtension/v4/node_modules/shelljs/bin/shjs",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PublishExtension/v4/node_modules/shelljs/bin/shjs",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/UnpublishExtension/v5/node_modules/resolve/bin/resolve",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/ShareExtension/v5/node_modules/jsonwebtoken/node_modules/.bin/semver",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/InstallExtension/v5/node_modules/.bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/ShareExtension/v4/node_modules/resolve/bin/resolve",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PublishExtension/v5/node_modules/msalv1/node_modules/.bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/UnpublishExtension/v5/node_modules/.bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/TfxInstaller/v4/node_modules/uuid/bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/IsValidExtensionAgent/v5/node_modules/msalv2/node_modules/.bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/ShareExtension/v5/node_modules/.bin/shjs",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PackageExtension/v5/node_modules/msalv1/node_modules/uuid/dist/bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/ExtensionVersion/v4/node_modules/.bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/ShareExtension/v5/node_modules/msalv1/node_modules/uuid/dist/bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/InstallExtension/v4/node_modules/shelljs/bin/shjs",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/IsValidExtensionAgent/v5/node_modules/msalv1/node_modules/uuid/dist/bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/InstallExtension/v5/node_modules/.bin/semver",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PackageExtension/v4/node_modules/.bin/shjs",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/IsValidExtensionAgent/v5/node_modules/uuid/bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PublishExtension/v5/node_modules/msalv2/node_modules/.bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/TfxInstaller/v5/node_modules/uuid/bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PublishVSExtension/v5/node_modules/.bin/resolve",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PackageExtension/v5/node_modules/.bin/semver",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/TfxInstaller/v5/node_modules/.bin/is-docker",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PublishExtension/v5/node_modules/.bin/resolve",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/ExtensionVersion/v5/node_modules/msalv1/node_modules/uuid/dist/bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PublishVSExtension/v5/node_modules/shelljs/bin/shjs",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/ExtensionVersion/v5/node_modules/msalv2/node_modules/.bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/UnpublishExtension/v4/node_modules/.bin/shjs",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/InstallExtension/v4/node_modules/.bin/shjs",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/ShareExtension/v5/node_modules/.bin/resolve",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/IsValidExtensionAgent/v4/node_modules/resolve/bin/resolve",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/UnpublishExtension/v5/node_modules/msalv2/node_modules/.bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/IsValidExtensionAgent/v5/node_modules/msalv2/node_modules/uuid/dist/bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/InstallExtension/v4/node_modules/.bin/resolve",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/UnpublishExtension/v4/node_modules/semver/bin/semver",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PublishVSExtension/v5/node_modules/.bin/shjs",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PackageExtension/v5/node_modules/.bin/shjs",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PublishExtension/v4/node_modules/.bin/mkdirp",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PackageExtension/v4/node_modules/uuid/bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/ExtensionVersion/v5/node_modules/msalv2/node_modules/uuid/dist/bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PackageExtension/v4/node_modules/.bin/resolve",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PackageExtension/v5/node_modules/.bin/resolve",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/TfxInstaller/v4/node_modules/.bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/TfxInstaller/v4/node_modules/.bin/semver",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/TfxInstaller/v5/node_modules/clipboardy/fallbacks/linux/xsel",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/TfxInstaller/v5/node_modules/msalv2/node_modules/.bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/TfxInstaller/v5/node_modules/msalv1/node_modules/.bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/InstallExtension/v5/node_modules/.bin/shjs",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PublishVSExtension/v4/node_modules/semver/bin/semver",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PublishExtension/v5/node_modules/.bin/shjs",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/ShareExtension/v5/node_modules/msalv2/node_modules/.bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PublishVSExtension/v5/node_modules/semver/bin/semver",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/ExtensionVersion/v5/node_modules/msalv1/node_modules/.bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/TfxInstaller/v4/node_modules/.bin/shjs",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/InstallExtension/v5/node_modules/semver/bin/semver",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/IsValidExtensionAgent/v4/node_modules/semver/bin/semver",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/ShareExtension/v5/node_modules/semver/bin/semver",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/IsValidExtensionAgent/v4/node_modules/.bin/resolve",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/UnpublishExtension/v5/node_modules/uuid/bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/TfxInstaller/v4/node_modules/shelljs/bin/shjs",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/UnpublishExtension/v5/node_modules/jsonwebtoken/node_modules/.bin/semver",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/UnpublishExtension/v5/node_modules/msalv1/node_modules/uuid/dist/bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/ExtensionVersion/v5/node_modules/semver/bin/semver",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/ExtensionVersion/v5/node_modules/.bin/semver",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/IsValidExtensionAgent/v5/node_modules/.bin/shjs",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PublishExtension/v4/node_modules/.bin/rimraf",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/TfxInstaller/v5/node_modules/.bin/shjs",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/UnpublishExtension/v5/node_modules/.bin/semver",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/ShareExtension/v4/node_modules/semver/bin/semver",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/TfxInstaller/v5/node_modules/shelljs/bin/shjs",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/UnpublishExtension/v4/node_modules/.bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/ShareExtension/v5/node_modules/resolve/bin/resolve",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/UnpublishExtension/v4/node_modules/.bin/semver",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/UnpublishExtension/v5/node_modules/.bin/shjs",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PublishVSExtension/v4/node_modules/resolve/bin/resolve",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/ExtensionVersion/v5/node_modules/shelljs/bin/shjs",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/IsValidExtensionAgent/v5/node_modules/msalv1/node_modules/.bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/ShareExtension/v5/node_modules/shelljs/bin/shjs",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PackageExtension/v5/node_modules/semver/bin/semver",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PublishVSExtension/v5/node_modules/msalv1/node_modules/uuid/dist/bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/IsValidExtensionAgent/v5/node_modules/.bin/semver",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/ShareExtension/v4/node_modules/.bin/resolve",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PackageExtension/v5/node_modules/shelljs/bin/shjs",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/InstallExtension/v4/node_modules/uuid/bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/TfxInstaller/v5/node_modules/.bin/is-inside-container",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PublishExtension/v5/node_modules/msalv2/node_modules/uuid/dist/bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/InstallExtension/v5/node_modules/uuid/bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PublishExtension/v4/node_modules/semver/bin/semver",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/IsValidExtensionAgent/v5/node_modules/resolve/bin/resolve",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PublishVSExtension/v4/node_modules/.bin/shjs",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PublishExtension/v5/node_modules/.bin/rimraf",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/IsValidExtensionAgent/v4/node_modules/.bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PublishVSExtension/v5/node_modules/.bin/semver",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/ExtensionVersion/v4/node_modules/shelljs/bin/shjs",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PublishVSExtension/v5/node_modules/msalv2/node_modules/.bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/ExtensionVersion/v4/node_modules/semver/bin/semver",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/IsValidExtensionAgent/v5/node_modules/jsonwebtoken/node_modules/.bin/semver",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PackageExtension/v4/node_modules/resolve/bin/resolve",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/ExtensionVersion/v5/node_modules/resolve/bin/resolve",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/ExtensionVersion/v4/node_modules/uuid/bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PackageExtension/v4/node_modules/.bin/semver",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PublishExtension/v4/node_modules/.bin/shjs",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PackageExtension/v5/node_modules/msalv2/node_modules/uuid/dist/bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/ExtensionVersion/v5/node_modules/uuid/bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/ShareExtension/v4/node_modules/uuid/bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/UnpublishExtension/v4/node_modules/uuid/bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PublishVSExtension/v5/node_modules/msalv2/node_modules/uuid/dist/bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/InstallExtension/v5/node_modules/msalv2/node_modules/.bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PublishVSExtension/v5/node_modules/jsonwebtoken/node_modules/.bin/semver",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/IsValidExtensionAgent/v5/node_modules/shelljs/bin/shjs",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/IsValidExtensionAgent/v4/node_modules/uuid/bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/IsValidExtensionAgent/v5/node_modules/.bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/ExtensionVersion/v5/node_modules/.bin/resolve",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PackageExtension/v5/node_modules/resolve/bin/resolve",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PublishExtension/v5/node_modules/semver/bin/semver",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PublishVSExtension/v5/node_modules/resolve/bin/resolve",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/InstallExtension/v5/node_modules/msalv1/node_modules/uuid/dist/bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PackageExtension/v5/node_modules/msalv1/node_modules/.bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PublishExtension/v5/node_modules/jsonwebtoken/node_modules/.bin/semver",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/UnpublishExtension/v5/node_modules/.bin/resolve",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PublishVSExtension/v4/node_modules/.bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/InstallExtension/v4/node_modules/.bin/semver",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/ShareExtension/v4/node_modules/.bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/ExtensionVersion/v4/node_modules/.bin/shjs",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/IsValidExtensionAgent/v5/node_modules/.bin/resolve",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PublishExtension/v4/node_modules/.bin/resolve",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/IsValidExtensionAgent/v4/node_modules/shelljs/bin/shjs",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PublishVSExtension/v4/node_modules/uuid/bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/ExtensionVersion/v4/node_modules/resolve/bin/resolve",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PublishExtension/v5/node_modules/msalv1/node_modules/uuid/dist/bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/UnpublishExtension/v4/node_modules/resolve/bin/resolve",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/UnpublishExtension/v5/node_modules/msalv1/node_modules/.bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PublishVSExtension/v5/node_modules/uuid/bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/ExtensionVersion/v4/node_modules/.bin/resolve",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/InstallExtension/v5/node_modules/shelljs/bin/shjs",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/ShareExtension/v4/node_modules/shelljs/bin/shjs",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PublishVSExtension/v4/node_modules/.bin/resolve",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PackageExtension/v4/node_modules/.bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/TfxInstaller/v5/node_modules/msalv1/node_modules/uuid/dist/bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/TfxInstaller/v4/node_modules/semver/bin/semver",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PackageExtension/v5/node_modules/.bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PackageExtension/v4/node_modules/semver/bin/semver",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/IsValidExtensionAgent/v5/node_modules/semver/bin/semver",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/TfxInstaller/v5/node_modules/.bin/dateformat",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/ShareExtension/v5/node_modules/.bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/InstallExtension/v5/node_modules/.bin/resolve",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/UnpublishExtension/v5/node_modules/semver/bin/semver",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PackageExtension/v5/node_modules/uuid/bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/ExtensionVersion/v5/node_modules/.bin/shjs",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/ExtensionVersion/v4/node_modules/.bin/semver",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/TfxInstaller/v5/node_modules/which/bin/node-which",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/TfxInstaller/v5/node_modules/.bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PublishExtension/v5/node_modules/uuid/bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PackageExtension/v4/node_modules/shelljs/bin/shjs",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/InstallExtension/v4/node_modules/semver/bin/semver",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/InstallExtension/v4/node_modules/resolve/bin/resolve",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PublishVSExtension/v5/node_modules/msalv1/node_modules/.bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/TfxInstaller/v5/node_modules/semver/bin/semver",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/InstallExtension/v5/node_modules/jsonwebtoken/node_modules/.bin/semver",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PublishExtension/v4/node_modules/uuid/bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/TfxInstaller/v5/node_modules/.bin/resolve",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/IsValidExtensionAgent/v4/node_modules/.bin/semver",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/ShareExtension/v5/node_modules/msalv1/node_modules/.bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PublishExtension/v4/node_modules/.bin/semver",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PublishExtension/v4/node_modules/.bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PublishVSExtension/v4/node_modules/shelljs/bin/shjs",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/TfxInstaller/v5/node_modules/.bin/semver",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PublishExtension/v5/node_modules/resolve/bin/resolve",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/ExtensionVersion/v5/node_modules/.bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/TfxInstaller/v5/node_modules/jsonwebtoken/node_modules/.bin/semver",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/UnpublishExtension/v5/node_modules/msalv2/node_modules/uuid/dist/bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/InstallExtension/v5/node_modules/msalv2/node_modules/uuid/dist/bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PublishExtension/v5/node_modules/.bin/mkdirp",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/InstallExtension/v4/node_modules/.bin/uuid",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PackageExtension/v5/node_modules/jsonwebtoken/node_modules/.bin/semver",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "BuildTasks/PublishExtension/v5/node_modules/.bin/uuid",
+      "contentType": "application/octet-stream"
     }
   ],
   "contributions": [
