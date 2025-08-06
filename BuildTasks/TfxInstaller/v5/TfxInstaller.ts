@@ -6,6 +6,7 @@ import toolLib from 'azure-pipelines-tool-lib/tool.js';
 import path from 'node:path';
 import os from 'node:os';
 import fs from 'node:fs';
+import { fileURLToPath } from 'node:url';
 
 const debug = taskLib.getVariable("system.debug") || false;
 
@@ -34,7 +35,8 @@ catch (error: any) {
 
 async function getTfx(versionSpec: string, checkLatest: boolean): Promise<void> {
     if (versionSpec === "builtin") {
-        const builtInTfxPath = findTfxExecutablePath(__dirname);
+        const currentDir = path.dirname(fileURLToPath(import.meta.url));
+        const builtInTfxPath = findTfxExecutablePath(path.join(currentDir, "..", ".."));
 
         if (os.platform() !== "win32") {
             fs.chmodSync(path.join(builtInTfxPath, "tfx"), 0o777);
