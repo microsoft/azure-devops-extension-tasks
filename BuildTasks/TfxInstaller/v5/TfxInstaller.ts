@@ -9,6 +9,18 @@ import fs from 'node:fs';
 
 const debug = taskLib.getVariable("system.debug") || false;
 
+/**
+ * Finds the tfx executable by probing common paths where it might be located
+ * @param basePath The base path to start probing from
+ * @returns The path where tfx executable was found, or undefined if not found
+ */
+function findTfxExecutablePath(basePath: string): string | undefined {
+    const probePaths = [basePath, path.join(basePath, "/bin"), path.join(basePath, "/node_modules/.bin/")];
+    return probePaths.find((probePath) => {
+        return taskLib.exist(path.join(probePath, "/tfx"));
+    });
+}
+
 try {
     const version = taskLib.getInput("version", true);
     const checkLatest = taskLib.getBoolInput("checkLatest", false) || false;
@@ -20,7 +32,18 @@ catch (error: any) {
     taskLib.setResult(taskLib.TaskResult.Failed, error.message);
 }
 
-async function getTfx(versionSpec: string, checkLatest: boolean) {
+async function getTfx(versionSpec: string, checkLatest: boolean): Promise<void> {
+    if (versionSpec === "builtin") {
+        const builtInTfxPath = findTfxExecutablePath(__dirname);
+
+        if (os.platform() !== "win32") {
+            fs.chmodSync(path.join(builtInTfxPath, "tfx"), 0o777);
+        }
+
+        taskLib.setVariable("__tfxpath", builtInTfxPath, false);
+        toolLib.prependPath(builtInTfxPath);
+    }
+    
     if (toolLib.isExplicitVersion(versionSpec)) {
         checkLatest = false; // check latest doesn't make sense when explicit version
     }
@@ -52,10 +75,7 @@ async function getTfx(versionSpec: string, checkLatest: boolean) {
     if (os.platform() !== "win32")
     {
         // Depending on target platform npm behaves slightly different. This seems to differ between distros and npm versions too.
-        const probePaths = [toolPath, path.join(toolPath, "/bin"), path.join(toolPath, "/node_modules/.bin/")];
-        toolPath = probePaths.find((probePath) => {
-            return taskLib.exist(path.join(probePath, "/tfx"));
-        });
+        toolPath = findTfxExecutablePath(toolPath);
     }
 
     taskLib.setVariable("__tfxpath", toolPath, false);
