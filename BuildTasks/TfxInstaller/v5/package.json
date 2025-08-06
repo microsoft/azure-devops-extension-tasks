@@ -13,7 +13,7 @@
     "azure-pipelines-tasks-azure-arm-rest": "^3.252.1",
     "azure-pipelines-tool-lib": "^2.0.8",
     "fs-extra": "^11.3.0",
-    "tfx-cli": "^0.21.1",
+    "tfx-cli": "^0.21.2",
     "tmp": "^0.2.3",
     "uuidv5": "^1.0.0"
   },
