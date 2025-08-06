@@ -84,7 +84,6 @@ stages:
         del -include "@types" -recurse BuildTasks\*\v*\node_modules
         del -include ".eslintrc" -recurse BuildTasks\*\v*\node_modules
         del -include "changelog.md" -recurse BuildTasks\*\v*\node_modules  
-        del -include ".bin" -recurse BuildTasks\*\v*\node_modules  
         del -include "readme.md" -recurse BuildTasks\*\v*\node_modules  
         del -include ".nycrc" -recurse BuildTasks\*\v*\node_modules  
         del -include "fixtures" -recurse BuildTasks\*\v*\node_modules  

@@ -6,8 +6,27 @@ import toolLib from 'azure-pipelines-tool-lib/tool.js';
 import path from 'node:path';
 import os from 'node:os';
 import fs from 'node:fs';
+import { fileURLToPath } from 'node:url';
 
 const debug = taskLib.getVariable("system.debug") || false;
+
+/**
+ * Finds the tfx executable by probing common paths where it might be located
+ * @param basePath The base path to start probing from
+ * @returns The path where tfx executable was found, or undefined if not found
+ */
+function findTfxExecutablePath(basePath: string): string | undefined {
+    const probePaths = [basePath, path.join(basePath, "/.bin"), path.join(basePath, "/bin"), path.join(basePath, "/node_modules/.bin/")];
+    const result = probePaths.find((probePath) => {
+        if (os.platform() === "win32") {
+            return taskLib.exist(path.join(probePath, "/tfx.cmd"));
+        }
+        else {
+            return taskLib.exist(path.join(probePath, "/tfx"));
+        }
+    });
+    return result;
+}
 
 try {
     const version = taskLib.getInput("version", true);
@@ -20,7 +39,24 @@ catch (error: any) {
     taskLib.setResult(taskLib.TaskResult.Failed, error.message);
 }
 
-async function getTfx(versionSpec: string, checkLatest: boolean) {
+async function getTfx(versionSpec: string, checkLatest: boolean): Promise<void> {
+    if (versionSpec === "builtin") {
+        const currentDir = path.dirname(fileURLToPath(import.meta.url));
+        const builtInTfxPath = findTfxExecutablePath(path.join(currentDir, "..", ".."));
+
+        if (os.platform() !== "win32") {
+            fs.chmodSync(path.join(builtInTfxPath, "tfx"), 0o777);
+        }
+
+        taskLib.setVariable("__tfxpath", builtInTfxPath, false);
+        toolLib.prependPath(builtInTfxPath);
+        return;
+    }
+
+    if (versionSpec === "latest") {
+        versionSpec = "*";    
+    }
+    
     if (toolLib.isExplicitVersion(versionSpec)) {
         checkLatest = false; // check latest doesn't make sense when explicit version
     }
@@ -49,15 +85,7 @@ async function getTfx(versionSpec: string, checkLatest: boolean) {
         }
     }
 
-    if (os.platform() !== "win32")
-    {
-        // Depending on target platform npm behaves slightly different. This seems to differ between distros and npm versions too.
-        const probePaths = [toolPath, path.join(toolPath, "/bin"), path.join(toolPath, "/node_modules/.bin/")];
-        toolPath = probePaths.find((probePath) => {
-            return taskLib.exist(path.join(probePath, "/tfx"));
-        });
-    }
-
+    toolPath = findTfxExecutablePath(toolPath);
     taskLib.setVariable("__tfxpath", toolPath, false);
     toolLib.prependPath(toolPath);
 }

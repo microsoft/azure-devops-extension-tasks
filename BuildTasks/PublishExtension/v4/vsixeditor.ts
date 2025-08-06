@@ -140,7 +140,14 @@ export class VSIXEditor {
             zip.arg("*/task.loc.json");
             zip.arg("extension.vsixmanifest");
             zip.arg("extension.vsomanifest");
-            await zip.execAsync();
+            
+            const result = await zip.execAsync({ ignoreReturnCode: true });
+            
+            // unzip returns exit code 11 when some files are not found, but extraction succeeds for existing files
+            // This is acceptable for optional files like task.json and task.loc.json
+            if (result !== 0 && result !== 11) {
+                throw new Error(`unzip extraction failed with exit code: ${result}`);
+            }
         }
         tl.cd(cwd);
     }
