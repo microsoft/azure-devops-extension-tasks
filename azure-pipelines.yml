@@ -150,7 +150,7 @@ stages:
 
 - stage: PublishDev
   displayName: 'Publish privately'
-  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+  condition: false # and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
   dependsOn: 'Build'
   jobs:
   - deployment:
@@ -194,7 +194,7 @@ stages:
 
 - stage: PublishProd
   displayName: 'Publish publicly to MsDevLabs'
-  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  condition: false # and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
   dependsOn: 'PublishDev'
   jobs:
   - deployment:
