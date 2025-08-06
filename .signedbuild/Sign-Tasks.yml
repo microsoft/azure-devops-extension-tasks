@@ -114,6 +114,9 @@ stages:
         del -include ".jscsrc" -recurse BuildTasks\*\v*\node_modules  
         del -include "CODEOWNERS" -recurse BuildTasks\*\v*\node_modules  
         del -include "doc" -recurse BuildTasks\*\v*\node_modules  
+        del -include "CHANGELOG" -recurse BuildTasks\*\v*\node_modules  
+        del -include "Makefile" -recurse BuildTasks\*\v*\node_modules  
+        del -include "LICENSE-MIT" -recurse BuildTasks\*\v*\node_modules  
       displayName: 'Delete unneeded files'
       workingDirectory: '$(System.DefaultWorkingDirectory)/TaskExtensions'
 
