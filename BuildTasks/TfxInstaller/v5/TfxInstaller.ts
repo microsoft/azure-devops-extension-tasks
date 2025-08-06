@@ -16,13 +16,13 @@ const debug = taskLib.getVariable("system.debug") || false;
  * @returns The path where tfx executable was found, or undefined if not found
  */
 function findTfxExecutablePath(basePath: string): string | undefined {
-    const probePaths = [basePath, path.join(basePath, "/.bin"), path.join(basePath, "/bin"), path.join(basePath, "/node_modules/.bin/")];
+    const probePaths = [basePath, path.join(basePath, ".bin"), path.join(basePath, "bin"), path.join(basePath, "node_modules", ".bin")];
     const result = probePaths.find((probePath) => {
         if (os.platform() === "win32") {
-            return taskLib.exist(path.join(probePath, "/tfx.cmd"));
+            return taskLib.exist(path.join(probePath, "tfx.cmd"));
         }
         else {
-            return taskLib.exist(path.join(probePath, "/tfx"));
+            return taskLib.exist(path.join(probePath, "tfx"));
         }
     });
     return result;
