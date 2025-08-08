@@ -29,7 +29,7 @@ function findTfxExecutablePath(basePath: string): string | undefined {
 }
 
 try {
-    const version = taskLib.getInput("version", true);
+    const version = taskLib.getInput("version", false) || "builtin";
     const checkLatest = taskLib.getBoolInput("checkLatest", false) || false;
 
     await getTfx(version, checkLatest);
