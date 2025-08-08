@@ -107,9 +107,6 @@ stages:
       displayName: 'Fix the manifest file'
     - task: TfxInstaller@5
       displayName: 'Use Node CLI for Azure DevOps'
-      inputs:
-        version: '0.x'
-        checkLatest: true
 
     - task: PackageAzureDevOpsExtension@5
       displayName: 'Package Extension: $(Build.SourcesDirectory)'
@@ -178,9 +175,6 @@ stages:
 
           - task: TfxInstaller@5
             displayName: 'Use Node CLI for Azure DevOps'
-            inputs:
-              version: '0.x'
-              checkLatest: true
 
           - task: PublishAzureDevOpsExtension@5
             name: 'publishDev'
@@ -222,9 +216,6 @@ stages:
 
           - task: TfxInstaller@5
             displayName: 'Use Node CLI for Azure DevOps'
-            inputs:
-              version: '0.x'
-              checkLatest: true
 
           - task: PublishAzureDevOpsExtension@5
             name: 'publishProd'
