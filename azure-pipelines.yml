@@ -99,7 +99,7 @@ stages:
             "LICENSE-MIT",
             "LICENSE",
             "license",
-            "AUTHORS",
+            "AUTHORS"
         ) -recurse BuildTasks\*\v*\node_modules -force  
 
         del -include @(
