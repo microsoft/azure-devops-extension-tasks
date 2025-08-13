@@ -99,8 +99,12 @@ stages:
             "LICENSE-MIT",
             "LICENSE",
             "license",
-            "AUTHORS"
+            "AUTHORS",
         ) -recurse BuildTasks\*\v*\node_modules -force  
+
+        del -include @(
+            "*.pem"
+        ) -recurse BuildTasks\*\v*\node_modules\azure-pipelines-tasks-azure-arm-rest\openssl\PEM\ -force  
       displayName: 'Delete unneeded files'
     - pwsh: |
         ./fix-manifest-file.ps1
