@@ -19,6 +19,6 @@
     "tmp": "^0.2.4"
   },
   "devDependencies": {
-    "@types/node": "^20.17.27"
+    "@types/node": "^20.19.15"
   }
 }
