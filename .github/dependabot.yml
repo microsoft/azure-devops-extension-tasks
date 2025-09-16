@@ -6,11 +6,11 @@
 version: 2
 updates:
   - package-ecosystem: "github-actions"
-    directory: "/" # Location of package manifests
+    directory: "/"
     schedule:
       interval: "weekly"
-  - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/" # Location of package manifests
+  - package-ecosystem: "npm" 
+    directory: "/"
     schedule:
       interval: "weekly"
     groups:
@@ -21,8 +21,8 @@ updates:
           - "@typescript-eslint/*"
           - "@eslint/*"
           - typescript-eslint
-  - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/BuildTasks/v3/Common" # Location of package manifests
+  - package-ecosystem: "npm" 
+    directory: "/BuildTasks/v3/Common"
     schedule:
       interval: "weekly"
     ignore:
@@ -30,8 +30,8 @@ updates:
       update-types: ["version-update:semver-major"]
     - dependency-name: "@types/node"
       update-types: ["version-update:semver-major"]
-  - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/BuildTasks/v3/ExtensionVersion" # Location of package manifests
+  - package-ecosystem: "npm" 
+    directory: "/BuildTasks/v3/ExtensionVersion"
     schedule:
       interval: "weekly"
     ignore:
@@ -39,8 +39,8 @@ updates:
       update-types: ["version-update:semver-major"]
     - dependency-name: "@types/node"
       update-types: ["version-update:semver-major"]
-  - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/BuildTasks/v3/InstallExtension" # Location of package manifests
+  - package-ecosystem: "npm" 
+    directory: "/BuildTasks/v3/InstallExtension"
     schedule:
       interval: "weekly"
     ignore:
@@ -48,8 +48,8 @@ updates:
       update-types: ["version-update:semver-major"]
     - dependency-name: "@types/node"
       update-types: ["version-update:semver-major"]
-  - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/BuildTasks/v3/IsValidExtensionAgent" # Location of package manifests
+  - package-ecosystem: "npm" 
+    directory: "/BuildTasks/v3/IsValidExtensionAgent"
     schedule:
       interval: "weekly"
     ignore:
@@ -57,8 +57,8 @@ updates:
       update-types: ["version-update:semver-major"]
     - dependency-name: "@types/node"
       update-types: ["version-update:semver-major"]
-  - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/BuildTasks/v3/PackageExtension" # Location of package manifests
+  - package-ecosystem: "npm" 
+    directory: "/BuildTasks/v3/PackageExtension"
     schedule:
       interval: "weekly"
     ignore:
@@ -66,8 +66,8 @@ updates:
       update-types: ["version-update:semver-major"]
     - dependency-name: "@types/node"
       update-types: ["version-update:semver-major"]
-  - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/BuildTasks/v3/PublishExtension" # Location of package manifests
+  - package-ecosystem: "npm" 
+    directory: "/BuildTasks/v3/PublishExtension"
     schedule:
       interval: "weekly"
     ignore:
@@ -75,8 +75,8 @@ updates:
       update-types: ["version-update:semver-major"]
     - dependency-name: "@types/node"
       update-types: ["version-update:semver-major"]
-  - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/BuildTasks/v3/PublishVSExtension" # Location of package manifests
+  - package-ecosystem: "npm" 
+    directory: "/BuildTasks/v3/PublishVSExtension"
     schedule:
       interval: "weekly"
     ignore:
@@ -84,8 +84,8 @@ updates:
       update-types: ["version-update:semver-major"]
     - dependency-name: "@types/node"
       update-types: ["version-update:semver-major"]
-  - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/BuildTasks/v3/ShareExtension" # Location of package manifests
+  - package-ecosystem: "npm" 
+    directory: "/BuildTasks/v3/ShareExtension"
     schedule:
       interval: "weekly"
     ignore:
@@ -93,8 +93,8 @@ updates:
       update-types: ["version-update:semver-major"]
     - dependency-name: "@types/node"
       update-types: ["version-update:semver-major"]
-  - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/BuildTasks/v3/TfxInstaller" # Location of package manifests
+  - package-ecosystem: "npm" 
+    directory: "/BuildTasks/v3/TfxInstaller"
     schedule:
       interval: "weekly"
     ignore:
@@ -102,8 +102,8 @@ updates:
       update-types: ["version-update:semver-major"]
     - dependency-name: "@types/node"
       update-types: ["version-update:semver-major"]
-  - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/BuildTasks/v3/UnpublishExtension" # Location of package manifests
+  - package-ecosystem: "npm" 
+    directory: "/BuildTasks/v3/UnpublishExtension"
     schedule:
       interval: "weekly"
     ignore:
@@ -111,8 +111,8 @@ updates:
       update-types: ["version-update:semver-major"]
     - dependency-name: "@types/node"
       update-types: ["version-update:semver-major"]
-  - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/BuildTasks/v4/Common" # Location of package manifests
+  - package-ecosystem: "npm" 
+    directory: "/BuildTasks/v4/Common"
     schedule:
       interval: "weekly"
     ignore:
@@ -120,8 +120,8 @@ updates:
       update-types: ["version-update:semver-major"]
     - dependency-name: "@types/node"
       update-types: ["version-update:semver-major"]
-  - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/BuildTasks/v4/ExtensionVersion" # Location of package manifests
+  - package-ecosystem: "npm" 
+    directory: "/BuildTasks/v4/ExtensionVersion"
     schedule:
       interval: "weekly"
     ignore:
@@ -129,8 +129,8 @@ updates:
       update-types: ["version-update:semver-major"]
     - dependency-name: "@types/node"
       update-types: ["version-update:semver-major"]
-  - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/BuildTasks/v4/InstallExtension" # Location of package manifests
+  - package-ecosystem: "npm" 
+    directory: "/BuildTasks/v4/InstallExtension"
     schedule:
       interval: "weekly"
     ignore:
@@ -138,8 +138,8 @@ updates:
       update-types: ["version-update:semver-major"]
     - dependency-name: "@types/node"
       update-types: ["version-update:semver-major"]
-  - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/BuildTasks/v4/IsValidExtensionAgent" # Location of package manifests
+  - package-ecosystem: "npm" 
+    directory: "/BuildTasks/v4/IsValidExtensionAgent"
     schedule:
       interval: "weekly"
     ignore:
@@ -147,8 +147,8 @@ updates:
       update-types: ["version-update:semver-major"]
     - dependency-name: "@types/node"
       update-types: ["version-update:semver-major"]
-  - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/BuildTasks/v4/PackageExtension" # Location of package manifests
+  - package-ecosystem: "npm" 
+    directory: "/BuildTasks/v4/PackageExtension"
     schedule:
       interval: "weekly"
     ignore:
@@ -156,8 +156,8 @@ updates:
       update-types: ["version-update:semver-major"]
     - dependency-name: "@types/node"
       update-types: ["version-update:semver-major"]
-  - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/BuildTasks/v4/PublishExtension" # Location of package manifests
+  - package-ecosystem: "npm" 
+    directory: "/BuildTasks/v4/PublishExtension"
     schedule:
       interval: "weekly"
     ignore:
@@ -165,8 +165,8 @@ updates:
       update-types: ["version-update:semver-major"]
     - dependency-name: "@types/node"
       update-types: ["version-update:semver-major"]
-  - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/BuildTasks/v4/PublishVSExtension" # Location of package manifests
+  - package-ecosystem: "npm" 
+    directory: "/BuildTasks/v4/PublishVSExtension"
     schedule:
       interval: "weekly"
     ignore:
@@ -174,8 +174,8 @@ updates:
       update-types: ["version-update:semver-major"]
     - dependency-name: "@types/node"
       update-types: ["version-update:semver-major"]
-  - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/BuildTasks/v4/ShareExtension" # Location of package manifests
+  - package-ecosystem: "npm" 
+    directory: "/BuildTasks/v4/ShareExtension"
     schedule:
       interval: "weekly"
     ignore:
@@ -183,8 +183,8 @@ updates:
       update-types: ["version-update:semver-major"]
     - dependency-name: "@types/node"
       update-types: ["version-update:semver-major"]
-  - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/BuildTasks/v4/TfxInstaller" # Location of package manifests
+  - package-ecosystem: "npm" 
+    directory: "/BuildTasks/v4/TfxInstaller"
     schedule:
       interval: "weekly"
     ignore:
@@ -192,8 +192,98 @@ updates:
       update-types: ["version-update:semver-major"]
     - dependency-name: "@types/node"
       update-types: ["version-update:semver-major"]
-  - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/BuildTasks/v4/UnpublishExtension" # Location of package manifests
+  - package-ecosystem: "npm" 
+    directory: "/BuildTasks/v4/UnpublishExtension"
+    schedule:
+      interval: "weekly"
+    ignore:
+    - dependency-name: "azure-pipelines-task-lib"
+      update-types: ["version-update:semver-major"]
+    - dependency-name: "@types/node"
+      update-types: ["version-update:semver-major"]
+  - package-ecosystem: "npm" 
+    directory: "/BuildTasks/v5/Common"
+    schedule:
+      interval: "weekly"
+    ignore:
+    - dependency-name: "azure-pipelines-task-lib"
+      update-types: ["version-update:semver-major"]
+    - dependency-name: "@types/node"
+      update-types: ["version-update:semver-major"]
+  - package-ecosystem: "npm" 
+    directory: "/BuildTasks/v5/ExtensionVersion"
+    schedule:
+      interval: "weekly"
+    ignore:
+    - dependency-name: "azure-pipelines-task-lib"
+      update-types: ["version-update:semver-major"]
+    - dependency-name: "@types/node"
+      update-types: ["version-update:semver-major"]
+  - package-ecosystem: "npm" 
+    directory: "/BuildTasks/v5/InstallExtension"
+    schedule:
+      interval: "weekly"
+    ignore:
+    - dependency-name: "azure-pipelines-task-lib"
+      update-types: ["version-update:semver-major"]
+    - dependency-name: "@types/node"
+      update-types: ["version-update:semver-major"]
+  - package-ecosystem: "npm" 
+    directory: "/BuildTasks/v5/IsValidExtensionAgent"
+    schedule:
+      interval: "weekly"
+    ignore:
+    - dependency-name: "azure-pipelines-task-lib"
+      update-types: ["version-update:semver-major"]
+    - dependency-name: "@types/node"
+      update-types: ["version-update:semver-major"]
+  - package-ecosystem: "npm" 
+    directory: "/BuildTasks/v5/PackageExtension"
+    schedule:
+      interval: "weekly"
+    ignore:
+    - dependency-name: "azure-pipelines-task-lib"
+      update-types: ["version-update:semver-major"]
+    - dependency-name: "@types/node"
+      update-types: ["version-update:semver-major"]
+  - package-ecosystem: "npm" 
+    directory: "/BuildTasks/v5/PublishExtension"
+    schedule:
+      interval: "weekly"
+    ignore:
+    - dependency-name: "azure-pipelines-task-lib"
+      update-types: ["version-update:semver-major"]
+    - dependency-name: "@types/node"
+      update-types: ["version-update:semver-major"]
+  - package-ecosystem: "npm" 
+    directory: "/BuildTasks/v5/PublishVSExtension"
+    schedule:
+      interval: "weekly"
+    ignore:
+    - dependency-name: "azure-pipelines-task-lib"
+      update-types: ["version-update:semver-major"]
+    - dependency-name: "@types/node"
+      update-types: ["version-update:semver-major"]
+  - package-ecosystem: "npm" 
+    directory: "/BuildTasks/v5/ShareExtension"
+    schedule:
+      interval: "weekly"
+    ignore:
+    - dependency-name: "azure-pipelines-task-lib"
+      update-types: ["version-update:semver-major"]
+    - dependency-name: "@types/node"
+      update-types: ["version-update:semver-major"]
+  - package-ecosystem: "npm" 
+    directory: "/BuildTasks/v5/TfxInstaller"
+    schedule:
+      interval: "weekly"
+    ignore:
+    - dependency-name: "azure-pipelines-task-lib"
+      update-types: ["version-update:semver-major"]
+    - dependency-name: "@types/node"
+      update-types: ["version-update:semver-major"]
+  - package-ecosystem: "npm" 
+    directory: "/BuildTasks/v5/UnpublishExtension"
     schedule:
       interval: "weekly"
     ignore:
