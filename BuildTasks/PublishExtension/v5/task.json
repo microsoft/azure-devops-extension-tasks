@@ -177,6 +177,15 @@
       "groupName": "manifest"
     },
     {
+      "name": "updateFeatureConstraints",
+      "type": "boolean",
+      "label": "Override feature Id",
+      "defaultValue": "false",
+      "required": false,
+      "helpMarkDown": "Search for feature constraints in extension manifests and updates the featureId to match the actual extension id.",
+      "groupName": "manifest"
+    },
+    {
       "name": "updateTasksVersion",
       "type": "boolean",
       "label": "Override task version",
