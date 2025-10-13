@@ -16,7 +16,7 @@
     "uuidv5": "^1.0.0"
   },
   "devDependencies": {
-    "@types/node": "^20.19.18",
+    "@types/node": "^20.19.21",
     "@types/tmp": "^0.2.6"
   },
   "types": "./uuidv5.d.ts"
