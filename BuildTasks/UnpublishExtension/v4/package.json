@@ -14,6 +14,6 @@
     "uuidv5": "^1.0.0"
   },
   "devDependencies": {
-    "@types/node": "^20.19.18"
+    "@types/node": "^20.19.21"
   }
 }
