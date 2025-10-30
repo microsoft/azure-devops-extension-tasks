@@ -21,10 +21,15 @@ async function run() {
             };
 
             await promiseRetry(options,
-                (retry, attempt) => {
+                async (retry, attempt) => {
                     tl.debug(`Attempt: ${attempt}`);
-                    const result = tfx.execSync({ silent: false, failOnStdErr: false } as tlr.IExecSyncOptions);
-                    const json = JSON.parse(result.stdout);
+                    
+                    const outputStream = new common.TfxJsonOutputStream(console.log);
+                    const errorStream = new common.TfxJsonOutputStream(tl.error);
+                    
+                    await tfx.execAsync({ outStream: outputStream, errorStream: errorStream, failOnStdErr: false, ignoreReturnCode: true } as tlr.IExecOptions);
+                    
+                    const json = JSON.parse(outputStream.jsonString);
                     switch (json.status) {
                         case "pending":
                             return retry(json.status);
