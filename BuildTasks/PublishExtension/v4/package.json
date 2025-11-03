@@ -19,6 +19,5 @@
     "x2js": "^3.4.4"
   },
   "devDependencies": {
-    "@types/node": "^20.19.24"
   }
 }
