@@ -24,17 +24,10 @@ set NO_UPDATE_NOTIFIER=true
 
 REM cmd /c "npm run build:tasks"
 
-pushd BuildTasks\TfxInstaller\v4\TfxInstaller\v4
-node TfxInstaller.js
-popd
 pushd BuildTasks\TfxInstaller\v5\TfxInstaller\v5
 node TfxInstaller.js
 popd
 
-
-pushd BuildTasks\ExtensionVersion\v4\ExtensionVersion\v4
-node ExtensionVersion.js
-popd
 
 pushd BuildTasks\ExtensionVersion\v5\ExtensionVersion\v5
 node ExtensionVersion.js

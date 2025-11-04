@@ -30,10 +30,6 @@ cmd /c "npm run build:tasks"
 
 set __TFXPATH=C:\Users\JESSEH~1\AppData\Local\Temp\agent\tools\tfx\0.18.0\x64\
 
-pushd BuildTasks\PublishExtension\v4\PublishExtension\v5
-node PublishExtension.js
-popd
-
-pushd BuildTasks\PublishExtension\v4\PublishExtension\v4
+pushd BuildTasks\PublishExtension\v5\PublishExtension\v5
 node PublishExtension.js
 popd
