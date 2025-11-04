@@ -37,7 +37,6 @@ stages:
         $vswhereLatest = "https://github.com/Microsoft/vswhere/releases/latest/download/vswhere.exe"
 
         $targets = @(
-          ".\BuildTasks\PublishVSExtension\v4\tools\",
           ".\BuildTasks\PublishVSExtension\v5\tools\"
           ".\BuildTasks\PublishVSExtension\v5\PublishVSExtension\v5\tools\"
         )
@@ -104,7 +103,7 @@ stages:
 
         del -include @(
             "*.pem"
-        ) -recurse BuildTasks\*\v*\node_modules\azure-pipelines-tasks-azure-arm-rest\openssl\PEM\ -force  
+        ) -recurse BuildTasks\*\v*\node_modules\azure-pipelines-tasks-azure-arm-rest\openssl*\PEM\ -force  
       displayName: 'Delete unneeded files'
     - pwsh: |
         ./fix-manifest-file.ps1

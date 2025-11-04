@@ -16,7 +16,7 @@ set NO_UPDATE_NOTIFIER=true
 
 cmd /c "npm run build:tasks"
 
-pushd BuildTasks\TfxInstaller\v4\TfxInstaller\v4
+pushd BuildTasks\TfxInstaller\v5\TfxInstaller\v5
 node TfxInstaller.js
 popd
 
@@ -30,8 +30,6 @@ set INPUT_UPDATETASKSID=true
 set INPUT_UPDATETASKSVERSION=true
 set INPUT_UPDATETASKSVERSIONTYPE=minor
 set INPUT_PATTERNMANIFEST=vss-extension*.json
-pushd BuildTasks\PackageExtension\v4\PackageExtension\v4
-rem c:\TfsData\jessehouwing\externals.2.111.1\node\bin\node.exe PackageExtension.js
-rem c:\TfsData\jessehouwing\externals.2.136.1\node\bin\node.exe PackageExtension.js
+pushd BuildTasks\PackageExtension\v5\PackageExtension\v5
 node PackageExtension.js
 popd

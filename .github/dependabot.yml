@@ -5,200 +5,110 @@
 
 version: 2
 updates:
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-  - package-ecosystem: "npm" 
-    directory: "/"
-    schedule:
-      interval: "weekly"
-    groups:
-      ESLint:
-        patterns:
-          - esbuild
-          - eslint
-          - "@typescript-eslint/*"
-          - "@eslint/*"
-          - typescript-eslint
+- package-ecosystem: "github-actions"
+  directory: "/"
+  schedule:
+    interval: "weekly"
+- package-ecosystem: "npm"
+  directory: "/"
+  schedule:
+    interval: "weekly"
+  groups:
+    ESLint:
+      patterns:
+      - esbuild
+      - eslint
+      - "@typescript-eslint/*"
+      - "@eslint/*"
+      - typescript-eslint
 
-  - package-ecosystem: "npm" 
-    directory: "/BuildTasks/Common/v4"
-    schedule:
-      interval: "weekly"
-    ignore:
-    - dependency-name: "azure-pipelines-task-lib"
-      update-types: ["version-update:semver-major"]
-    - dependency-name: "@types/node"
-      update-types: ["version-update:semver-major"]
-  - package-ecosystem: "npm" 
-    directory: "/BuildTasks/ExtensionVersion/v4"
-    schedule:
-      interval: "weekly"
-    ignore:
-    - dependency-name: "azure-pipelines-task-lib"
-      update-types: ["version-update:semver-major"]
-    - dependency-name: "@types/node"
-      update-types: ["version-update:semver-major"]
-  - package-ecosystem: "npm" 
-    directory: "/BuildTasks/InstallExtension/v4"
-    schedule:
-      interval: "weekly"
-    ignore:
-    - dependency-name: "azure-pipelines-task-lib"
-      update-types: ["version-update:semver-major"]
-    - dependency-name: "@types/node"
-      update-types: ["version-update:semver-major"]
-  - package-ecosystem: "npm" 
-    directory: "/BuildTasks/IsValidExtensionAgent/v4"
-    schedule:
-      interval: "weekly"
-    ignore:
-    - dependency-name: "azure-pipelines-task-lib"
-      update-types: ["version-update:semver-major"]
-    - dependency-name: "@types/node"
-      update-types: ["version-update:semver-major"]
-  - package-ecosystem: "npm" 
-    directory: "/BuildTasks/PackageExtension/v4"
-    schedule:
-      interval: "weekly"
-    ignore:
-    - dependency-name: "azure-pipelines-task-lib"
-      update-types: ["version-update:semver-major"]
-    - dependency-name: "@types/node"
-      update-types: ["version-update:semver-major"]
-  - package-ecosystem: "npm" 
-    directory: "/BuildTasks/PublishExtension/v4"
-    schedule:
-      interval: "weekly"
-    ignore:
-    - dependency-name: "azure-pipelines-task-lib"
-      update-types: ["version-update:semver-major"]
-    - dependency-name: "@types/node"
-      update-types: ["version-update:semver-major"]
-  - package-ecosystem: "npm" 
-    directory: "/BuildTasks/PublishVSExtension/v4"
-    schedule:
-      interval: "weekly"
-    ignore:
-    - dependency-name: "azure-pipelines-task-lib"
-      update-types: ["version-update:semver-major"]
-    - dependency-name: "@types/node"
-      update-types: ["version-update:semver-major"]
-  - package-ecosystem: "npm" 
-    directory: "/BuildTasks/ShareExtension/v4"
-    schedule:
-      interval: "weekly"
-    ignore:
-    - dependency-name: "azure-pipelines-task-lib"
-      update-types: ["version-update:semver-major"]
-    - dependency-name: "@types/node"
-      update-types: ["version-update:semver-major"]
-  - package-ecosystem: "npm" 
-    directory: "/BuildTasks/TfxInstaller/v4"
-    schedule:
-      interval: "weekly"
-    ignore:
-    - dependency-name: "azure-pipelines-task-lib"
-      update-types: ["version-update:semver-major"]
-    - dependency-name: "@types/node"
-      update-types: ["version-update:semver-major"]
-  - package-ecosystem: "npm" 
-    directory: "/BuildTasks/UnpublishExtension/v4"
-    schedule:
-      interval: "weekly"
-    ignore:
-    - dependency-name: "azure-pipelines-task-lib"
-      update-types: ["version-update:semver-major"]
-    - dependency-name: "@types/node"
-      update-types: ["version-update:semver-major"]
-  - package-ecosystem: "npm" 
-    directory: "/BuildTasks/Common/v5"
-    schedule:
-      interval: "weekly"
-    ignore:
-    - dependency-name: "azure-pipelines-task-lib"
-      update-types: ["version-update:semver-major"]
-    - dependency-name: "@types/node"
-      update-types: ["version-update:semver-major"]
-  - package-ecosystem: "npm" 
-    directory: "/BuildTasks/ExtensionVersion/v5"
-    schedule:
-      interval: "weekly"
-    ignore:
-    - dependency-name: "azure-pipelines-task-lib"
-      update-types: ["version-update:semver-major"]
-    - dependency-name: "@types/node"
-      update-types: ["version-update:semver-major"]
-  - package-ecosystem: "npm" 
-    directory: "/BuildTasks/InstallExtension/v5"
-    schedule:
-      interval: "weekly"
-    ignore:
-    - dependency-name: "azure-pipelines-task-lib"
-      update-types: ["version-update:semver-major"]
-    - dependency-name: "@types/node"
-      update-types: ["version-update:semver-major"]
-  - package-ecosystem: "npm" 
-    directory: "/BuildTasks/IsValidExtensionAgent/v5"
-    schedule:
-      interval: "weekly"
-    ignore:
-    - dependency-name: "azure-pipelines-task-lib"
-      update-types: ["version-update:semver-major"]
-    - dependency-name: "@types/node"
-      update-types: ["version-update:semver-major"]
-  - package-ecosystem: "npm" 
-    directory: "/BuildTasks/PackageExtension/v5"
-    schedule:
-      interval: "weekly"
-    ignore:
-    - dependency-name: "azure-pipelines-task-lib"
-      update-types: ["version-update:semver-major"]
-    - dependency-name: "@types/node"
-      update-types: ["version-update:semver-major"]
-  - package-ecosystem: "npm" 
-    directory: "/BuildTasks/PublishExtension/v5"
-    schedule:
-      interval: "weekly"
-    ignore:
-    - dependency-name: "azure-pipelines-task-lib"
-      update-types: ["version-update:semver-major"]
-    - dependency-name: "@types/node"
-      update-types: ["version-update:semver-major"]
-  - package-ecosystem: "npm" 
-    directory: "/BuildTasks/PublishVSExtension/v5"
-    schedule:
-      interval: "weekly"
-    ignore:
-    - dependency-name: "azure-pipelines-task-lib"
-      update-types: ["version-update:semver-major"]
-    - dependency-name: "@types/node"
-      update-types: ["version-update:semver-major"]
-  - package-ecosystem: "npm" 
-    directory: "/BuildTasks/ShareExtension/v5"
-    schedule:
-      interval: "weekly"
-    ignore:
-    - dependency-name: "azure-pipelines-task-lib"
-      update-types: ["version-update:semver-major"]
-    - dependency-name: "@types/node"
-      update-types: ["version-update:semver-major"]
-  - package-ecosystem: "npm" 
-    directory: "/BuildTasks/TfxInstaller/v5"
-    schedule:
-      interval: "weekly"
-    ignore:
-    - dependency-name: "azure-pipelines-task-lib"
-      update-types: ["version-update:semver-major"]
-    - dependency-name: "@types/node"
-      update-types: ["version-update:semver-major"]
-  - package-ecosystem: "npm" 
-    directory: "/BuildTasks/UnpublishExtension/v5"
-    schedule:
-      interval: "weekly"
-    ignore:
-    - dependency-name: "azure-pipelines-task-lib"
-      update-types: ["version-update:semver-major"]
-    - dependency-name: "@types/node"
-      update-types: ["version-update:semver-major"]
+- package-ecosystem: "npm"
+  directory: "/BuildTasks/Common/v5"
+  schedule:
+    interval: "weekly"
+  ignore:
+  - dependency-name: "azure-pipelines-task-lib"
+    update-types: [ "version-update:semver-major" ]
+  - dependency-name: "@types/node"
+    update-types: [ "version-update:semver-major" ]
+- package-ecosystem: "npm"
+  directory: "/BuildTasks/ExtensionVersion/v5"
+  schedule:
+    interval: "weekly"
+  ignore:
+  - dependency-name: "azure-pipelines-task-lib"
+    update-types: [ "version-update:semver-major" ]
+  - dependency-name: "@types/node"
+    update-types: [ "version-update:semver-major" ]
+- package-ecosystem: "npm"
+  directory: "/BuildTasks/InstallExtension/v5"
+  schedule:
+    interval: "weekly"
+  ignore:
+  - dependency-name: "azure-pipelines-task-lib"
+    update-types: [ "version-update:semver-major" ]
+  - dependency-name: "@types/node"
+    update-types: [ "version-update:semver-major" ]
+- package-ecosystem: "npm"
+  directory: "/BuildTasks/IsValidExtensionAgent/v5"
+  schedule:
+    interval: "weekly"
+  ignore:
+  - dependency-name: "azure-pipelines-task-lib"
+    update-types: [ "version-update:semver-major" ]
+  - dependency-name: "@types/node"
+    update-types: [ "version-update:semver-major" ]
+- package-ecosystem: "npm"
+  directory: "/BuildTasks/PackageExtension/v5"
+  schedule:
+    interval: "weekly"
+  ignore:
+  - dependency-name: "azure-pipelines-task-lib"
+    update-types: [ "version-update:semver-major" ]
+  - dependency-name: "@types/node"
+    update-types: [ "version-update:semver-major" ]
+- package-ecosystem: "npm"
+  directory: "/BuildTasks/PublishExtension/v5"
+  schedule:
+    interval: "weekly"
+  ignore:
+  - dependency-name: "azure-pipelines-task-lib"
+    update-types: [ "version-update:semver-major" ]
+  - dependency-name: "@types/node"
+    update-types: [ "version-update:semver-major" ]
+- package-ecosystem: "npm"
+  directory: "/BuildTasks/PublishVSExtension/v5"
+  schedule:
+    interval: "weekly"
+  ignore:
+  - dependency-name: "azure-pipelines-task-lib"
+    update-types: [ "version-update:semver-major" ]
+  - dependency-name: "@types/node"
+    update-types: [ "version-update:semver-major" ]
+- package-ecosystem: "npm"
+  directory: "/BuildTasks/ShareExtension/v5"
+  schedule:
+    interval: "weekly"
+  ignore:
+  - dependency-name: "azure-pipelines-task-lib"
+    update-types: [ "version-update:semver-major" ]
+  - dependency-name: "@types/node"
+    update-types: [ "version-update:semver-major" ]
+- package-ecosystem: "npm"
+  directory: "/BuildTasks/TfxInstaller/v5"
+  schedule:
+    interval: "weekly"
+  ignore:
+  - dependency-name: "azure-pipelines-task-lib"
+    update-types: [ "version-update:semver-major" ]
+  - dependency-name: "@types/node"
+    update-types: [ "version-update:semver-major" ]
+- package-ecosystem: "npm"
+  directory: "/BuildTasks/UnpublishExtension/v5"
+  schedule:
+    interval: "weekly"
+  ignore:
+  - dependency-name: "azure-pipelines-task-lib"
+    update-types: [ "version-update:semver-major" ]
+  - dependency-name: "@types/node"
+    update-types: [ "version-update:semver-major" ]

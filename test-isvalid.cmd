@@ -26,13 +26,6 @@ pushd BuildTasks\TfxInstaller\v5\TfxInstaller\v5
 node TfxInstaller.js
 popd
 
-echo.
-echo ========================================
-echo Testing IsValidExtension v4
-echo ========================================
-pushd BuildTasks\IsValidExtensionAgent\v4\IsValidExtensionAgent\v4
-node IsValidExtension.js
-popd
 
 echo.
 echo ========================================
@@ -42,14 +35,6 @@ pushd BuildTasks\IsValidExtensionAgent\v5\IsValidExtensionAgent\v5
 node IsValidExtension.js
 popd
 
-echo.
-echo ========================================
-echo Testing IsValidExtension v4 with TFX_TRACE=1
-echo ========================================
-set TFX_TRACE=1
-pushd BuildTasks\IsValidExtensionAgent\v4\IsValidExtensionAgent\v4
-node IsValidExtension.js
-popd
 
 echo.
 echo ========================================
