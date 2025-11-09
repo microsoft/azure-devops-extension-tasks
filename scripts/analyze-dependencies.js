@@ -7,7 +7,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
+const { spawnSync } = require('child_process');
 
 const TASKS_DIR = path.join(__dirname, '../BuildTasks');
 const OUTPUT_FILE = path.join(__dirname, '../docs/dependency-size-report.md');
@@ -41,38 +41,45 @@ function getDirectorySize(dirPath) {
   }
   
   try {
-    // Use du command for accurate size calculation
-    const output = execSync(`du -sb "${dirPath}" 2>/dev/null || echo "0 ${dirPath}"`, { 
+    // Use du command for accurate size calculation with safe argument passing
+    const result = spawnSync('du', ['-sb', dirPath], { 
       encoding: 'utf8',
       stdio: ['pipe', 'pipe', 'ignore']
     });
-    const size = parseInt(output.split('\t')[0] || '0');
-    return size;
-  } catch (e) {
-    // Fallback to manual calculation
-    let size = 0;
     
-    function calculateSize(dir) {
-      const items = fs.readdirSync(dir);
-      for (const item of items) {
-        const fullPath = path.join(dir, item);
-        const stat = fs.statSync(fullPath);
-        if (stat.isDirectory()) {
-          calculateSize(fullPath);
-        } else {
-          size += stat.size;
-        }
+    if (result.status === 0 && result.stdout) {
+      const size = parseInt(result.stdout.split('\t')[0] || '0');
+      return size;
+    }
+    
+    // If du command failed, fall through to manual calculation
+  } catch (e) {
+    // Fall through to manual calculation
+  }
+  
+  // Fallback to manual calculation
+  let size = 0;
+  
+  function calculateSize(dir) {
+    const items = fs.readdirSync(dir);
+    for (const item of items) {
+      const fullPath = path.join(dir, item);
+      const stat = fs.statSync(fullPath);
+      if (stat.isDirectory()) {
+        calculateSize(fullPath);
+      } else {
+        size += stat.size;
       }
     }
-    
-    try {
-      calculateSize(dirPath);
-    } catch (e) {
-      return 0;
-    }
-    
-    return size;
   }
+  
+  try {
+    calculateSize(dirPath);
+  } catch (e) {
+    return 0;
+  }
+  
+  return size;
 }
 
 function formatBytes(bytes) {
