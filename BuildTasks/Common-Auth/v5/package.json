@@ -1,7 +1,7 @@
 {
-  "name": "vsts-developer-tools.commonv5",
+  "name": "vsts-developer-tools.common-authv5",
   "version": "5.0.0",
-  "description": "common",
+  "description": "Authentication helpers shared across extension tasks",
   "repository": {
     "type": "git",
     "url": "https://github.com/Microsoft/azure-devops-extension-tasks.git"
@@ -10,8 +10,6 @@
   "license": "MIT",
   "dependencies": {
     "azure-pipelines-task-lib": "^4.17.3",
-    "tmp": "^0.2.5",
-    "uuidv5": "^1.0.0"
-  },
-  "types": "./uuidv5.d.ts"
+    "azure-pipelines-tasks-azure-arm-rest": "^3.263.1"
+  }
 }

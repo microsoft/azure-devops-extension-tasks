@@ -1,6 +1,7 @@
 import tl from "azure-pipelines-task-lib";
 import tr from "azure-pipelines-task-lib/toolrunner.js";
 import * as common from "../../Common/v5/Common.js";
+import * as commonAuth from "../../Common-Auth/v5/CommonAuth.js";
 
 const extensionVersionOverrideVariable = tl.getInput("extensionVersionOverride", false);
 let usingOverride = false;
@@ -33,7 +34,7 @@ async function run() {
             try {
                 tfx.arg(["extension", "show", "--json", "--no-color"]);
 
-                await common.setTfxMarketplaceArguments(tfx);
+                await commonAuth.setTfxMarketplaceArguments(tfx);
                 common.validateAndSetTfxManifestArguments(tfx);
 
                 const versionAction = tl.getInput("versionAction", false);

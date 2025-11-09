@@ -17,7 +17,6 @@
     "uuidv5": "^1.0.0",
     "x2js": "^3.4.4"
   },
-  "devDependencies": {
-    "@types/tmp": "^0.2.6"
+    "devDependencies": {}
   }
 }

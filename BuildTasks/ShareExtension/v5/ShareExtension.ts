@@ -1,10 +1,11 @@
 import tl from "azure-pipelines-task-lib";
 import * as common from "../../Common/v5/Common.js";
+import * as commonAuth from "../../Common-Auth/v5/CommonAuth.js";
 
 await common.runTfx(async tfx => {
     tfx.arg(["extension", "share", "--no-color"]);
 
-    await common.setTfxMarketplaceArguments(tfx);
+    await commonAuth.setTfxMarketplaceArguments(tfx);
     common.validateAndSetTfxManifestArguments(tfx);
 
     // Installation targets
