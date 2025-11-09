@@ -1,34 +1,28 @@
 # Dependency Size Report
 
-Generated: 2025-11-09T16:36:36.488Z
+Generated: 2025-11-09T16:41:03.660Z
 
 ## Summary
 
 - **Total tasks analyzed:** 10
-- **Tasks with dependencies installed:** 0/10
-- **Total node_modules size:** 0 B
-- **Average size per task:** 0 B
-
-⚠️ **Note:** No dependencies are currently installed. To get actual size measurements, run:
-```bash
-npm run initdev
-```
-Then re-run this analysis script to see actual dependency sizes.
+- **Tasks with dependencies installed:** 10/10
+- **Total node_modules size:** 725.67 MB
+- **Average size per task:** 72.57 MB
 
 ## Size by Task
 
 | Task | Version | Dependencies | Dev Dependencies | node_modules Size | Installed |
 |------|---------|--------------|------------------|-------------------|------------|
-| Common | v5 | 5 | 1 | 0 B | ✗ |
-| ExtensionVersion | v5 | 5 | 0 | 0 B | ✗ |
-| InstallExtension | v5 | 5 | 0 | 0 B | ✗ |
-| IsValidExtensionAgent | v5 | 6 | 0 | 0 B | ✗ |
-| PackageExtension | v5 | 5 | 0 | 0 B | ✗ |
-| PublishExtension | v5 | 8 | 0 | 0 B | ✗ |
-| PublishVSExtension | v5 | 5 | 0 | 0 B | ✗ |
-| ShareExtension | v5 | 5 | 0 | 0 B | ✗ |
-| TfxInstaller | v5 | 7 | 0 | 0 B | ✗ |
-| UnpublishExtension | v5 | 5 | 0 | 0 B | ✗ |
+| TfxInstaller | v5 | 7 | 0 | 94.18 MB | ✓ |
+| PublishExtension | v5 | 8 | 0 | 80.89 MB | ✓ |
+| IsValidExtensionAgent | v5 | 6 | 0 | 68.87 MB | ✓ |
+| Common | v5 | 5 | 1 | 68.83 MB | ✓ |
+| PublishVSExtension | v5 | 5 | 0 | 68.82 MB | ✓ |
+| UnpublishExtension | v5 | 5 | 0 | 68.82 MB | ✓ |
+| ExtensionVersion | v5 | 5 | 0 | 68.82 MB | ✓ |
+| InstallExtension | v5 | 5 | 0 | 68.82 MB | ✓ |
+| PackageExtension | v5 | 5 | 0 | 68.82 MB | ✓ |
+| ShareExtension | v5 | 5 | 0 | 68.82 MB | ✓ |
 
 ## Common Dependencies
 
