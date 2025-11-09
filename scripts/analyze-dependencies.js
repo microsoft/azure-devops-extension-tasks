@@ -3,6 +3,11 @@
 /**
  * Script to generate dependency size reports for each task
  * Analyzes package.json and node_modules sizes
+ * 
+ * NOTE: To get actual size measurements, dependencies must be installed first:
+ *   npm run initdev
+ * 
+ * Without installed dependencies, the report will show 0 B for all tasks.
  */
 
 const fs = require('fs');
@@ -164,11 +169,21 @@ function generateMarkdown(allTasks) {
   
   const totalTasks = allTasks.length;
   const totalSize = allTasks.reduce((sum, t) => sum + t.nodeModulesSize, 0);
+  const installedCount = allTasks.filter(t => t.nodeModulesExists).length;
   
   markdown += `## Summary\n\n`;
   markdown += `- **Total tasks analyzed:** ${totalTasks}\n`;
+  markdown += `- **Tasks with dependencies installed:** ${installedCount}/${totalTasks}\n`;
   markdown += `- **Total node_modules size:** ${formatBytes(totalSize)}\n`;
   markdown += `- **Average size per task:** ${formatBytes(totalSize / totalTasks)}\n`;
+  
+  if (installedCount === 0) {
+    markdown += '\n⚠️ **Note:** No dependencies are currently installed. To get actual size measurements, run:\n';
+    markdown += '```bash\n';
+    markdown += 'npm run initdev\n';
+    markdown += '```\n';
+    markdown += 'Then re-run this analysis script to see actual dependency sizes.\n';
+  }
   markdown += '\n';
   
   // Size by task table

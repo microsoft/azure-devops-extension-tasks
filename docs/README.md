@@ -34,10 +34,13 @@ Analysis of environment variables and task inputs accessed through v5 code.
 Comprehensive analysis of package dependencies across all v5 tasks.
 
 **Includes:**
-- Size analysis (when node_modules are installed)
+- Size analysis (requires `npm run initdev` to install dependencies first)
 - Common dependencies across tasks
 - Candidates for removal/replacement
 - Complete unique dependency list
+- Security analysis (e.g., why `tmp` package must be kept)
+
+**Note:** To get actual size measurements, run `npm run initdev` before generating this report.
 
 ### 5. Shared Logic Analysis (`shared-logic-analysis.md`)
 Analysis of code duplication and shared functionality in v5 tasks.
@@ -99,13 +102,23 @@ To regenerate all reports after code changes:
 node scripts/run-discovery.js
 ```
 
+**For accurate dependency size measurements**, install dependencies first:
+
+```bash
+# Install all task dependencies (may take several minutes)
+npm run initdev
+
+# Then run dependency analysis
+node scripts/analyze-dependencies.js
+```
+
 Individual scripts can also be run:
 
 ```bash
 node scripts/extract-task-schemas.js
 node scripts/generate-task-matrix.js
 node scripts/enumerate-env-vars.js
-node scripts/analyze-dependencies.js
+node scripts/analyze-dependencies.js  # Run after npm run initdev for size data
 node scripts/analyze-shared-logic.js
 ```
 
