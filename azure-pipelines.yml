@@ -79,6 +79,10 @@ stages:
         ) -recurse BuildTasks\*\v*
 
         del -include @(
+            "msal-browser"
+        ) -recurse BuildTasks\*\v*\node_modules\@azure\
+
+        del -include @(
             ".package-lock.json",
             "*.map",
             ".github",
