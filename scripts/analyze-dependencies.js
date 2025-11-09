@@ -151,7 +151,7 @@ function findLargeDependencies() {
     'fs-extra': 'File system utilities - could use native fs',
     'q': 'Promise library - deprecated, use native Promises',
     'xmldom': 'XML parsing - check if needed',
-    'temp': 'Temporary file handling - could use native os.tmpdir',
+    'tmp': '**KEEP** - Provides security guarantees (unpredictable paths, race condition protection) critical for VSIX packaging; prevents content injection attacks',
     'promise-retry': 'Retry logic - could implement simple version'
   };
   

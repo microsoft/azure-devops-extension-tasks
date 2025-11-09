@@ -1,6 +1,6 @@
 # Dependency Size Report
 
-Generated: 2025-11-09T15:26:23.429Z
+Generated: 2025-11-09T16:25:45.392Z
 
 ## Summary
 
@@ -47,7 +47,7 @@ Known dependencies that could be optimized:
 | `fs-extra` | File system utilities - could use native fs |
 | `q` | Promise library - deprecated, use native Promises |
 | `xmldom` | XML parsing - check if needed |
-| `temp` | Temporary file handling - could use native os.tmpdir |
+| `tmp` | **KEEP** - Provides security guarantees (unpredictable paths, race condition protection) critical for VSIX packaging; prevents content injection attacks |
 | `promise-retry` | Retry logic - could implement simple version |
 
 ## All Unique Dependencies
