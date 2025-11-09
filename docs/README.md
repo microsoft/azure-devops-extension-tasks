@@ -51,6 +51,15 @@ Comprehensive analysis of package dependencies across all v5 tasks.
 - **azure-pipelines-tasks-azure-arm-rest**: High impact - investigate alternatives (~100-150 MB savings)
 - Total potential savings: 100-150 MB (14-21% reduction)
 
+### 4b. Task-Specific Dependency Analysis (`task-specific-dependency-analysis.md`)
+**NEW:** Analysis of task-specific dependencies and auth refactoring opportunity.
+
+**Key Findings:**
+- PublishExtension is 12 MB larger due to 7zip-bin, temp, and x2js
+- **8 of 10 tasks** include azure-arm-rest but don't use it
+- **common-auth refactoring**: Extract auth logic → save 80-120 MB (11-17% reduction)
+- Only PublishVSExtension actually needs Azure RM auth
+
 ### 5. Shared Logic Analysis (`shared-logic-analysis.md`)
 Analysis of code duplication and shared functionality in v5 tasks.
 
