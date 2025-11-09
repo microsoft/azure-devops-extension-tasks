@@ -11,7 +11,8 @@ SET ENDPOINT_AUTH_A={ "parameters": { "password": "%azdo_token%" }, "Scheme": "b
 set AGENT_WORKFOLDER=%temp%\agent\work
 set AGENT_TOOLSDIRECTORY=%temp%\agent\tools
 SET AGENT_TEMPDIRECTORY=%temp%\agent\tmp
-set __TFXPATH=E:\azure-devops-extension-tasks\BuildTasks\TfxInstaller\v5\node_modules\.bin
+set __TFXPATH=D:\azure-devops-extension-tasks\BuildTasks\TfxInstaller\v5\node_modules\.bin
+set PATH=%__TFXPATH%;%PATH%
 md %temp%\agent
 md %AGENT_WORKFOLDER%
 md %AGENT_TOOLSDIRECTORY%
