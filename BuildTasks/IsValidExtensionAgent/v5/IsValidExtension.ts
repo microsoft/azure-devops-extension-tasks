@@ -1,13 +1,14 @@
 import tl from "azure-pipelines-task-lib";
 import tr from "azure-pipelines-task-lib/toolrunner.js";
 import * as common from "../../Common/v5/Common.js";
+import * as commonAuth from "../../Common-Auth/v5/CommonAuth.js";
 import promiseRetry from "promise-retry";
 
 await common.runTfx(async tfx => {
     try {
         tfx.arg(["extension", "isvalid", "--json", "--no-color"]);
 
-        await common.setTfxMarketplaceArguments(tfx);
+    await commonAuth.setTfxMarketplaceArguments(tfx);
         common.validateAndSetTfxManifestArguments(tfx);
 
         const options = {

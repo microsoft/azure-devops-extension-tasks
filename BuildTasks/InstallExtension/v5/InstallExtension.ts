@@ -1,5 +1,6 @@
 import tl from "azure-pipelines-task-lib";
 import * as common from "../../Common/v5/Common.js";
+import * as commonAuth from "../../Common-Auth/v5/CommonAuth.js";
 
 const accounts = tl.getDelimitedInput("accounts", ",", true).map((value) => { return value.trim(); });
 
@@ -7,7 +8,7 @@ accounts.forEach(async (account) => await common.runTfx(async tfx => {
     try {
         tfx.arg(["extension", "install", "--no-color"]);
 
-        await common.setTfxMarketplaceArguments(tfx, false);
+    await commonAuth.setTfxMarketplaceArguments(tfx, false);
         common.validateAndSetTfxManifestArguments(tfx);
 
         // Installation targets

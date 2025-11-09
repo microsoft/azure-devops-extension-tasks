@@ -1,5 +1,6 @@
 import tl from "azure-pipelines-task-lib/task.js";
 import * as common from "../../Common/v5/Common.js";
+import * as commonAuth from "../../Common-Auth/v5/CommonAuth.js";
 import VsixEditor from "./vsixeditor.js";
 
 await common.runTfx(async tfx => {
@@ -9,7 +10,7 @@ await common.runTfx(async tfx => {
         tfx.arg(["extension", "publish", "--json", "--no-color"]);
         const outputVariable = tl.getInput("outputVariable", false);
 
-        await common.setTfxMarketplaceArguments(tfx);
+    await commonAuth.setTfxMarketplaceArguments(tfx);
 
         // Read file type
         const fileType = tl.getInput("fileType", true);
