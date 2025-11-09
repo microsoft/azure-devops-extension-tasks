@@ -74,7 +74,8 @@ stages:
             "tsconfig.json",
             ".snyk",
             "*.md",
-            "tsconfig.tsbuildinfo"
+            "tsconfig.tsbuildinfo",
+            "@types"
         ) -recurse BuildTasks\*\v*
 
         del -include @(
