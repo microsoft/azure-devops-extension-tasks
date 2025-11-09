@@ -23,6 +23,15 @@ updates:
       - typescript-eslint
 
 - package-ecosystem: "npm"
+  directory: "/BuildTasks/Common-Auth/v5"
+  schedule:
+    interval: "weekly"
+  ignore:
+  - dependency-name: "azure-pipelines-task-lib"
+    update-types: [ "version-update:semver-major" ]
+  - dependency-name: "@types/node"
+    update-types: [ "version-update:semver-major" ]
+- package-ecosystem: "npm"
   directory: "/BuildTasks/Common/v5"
   schedule:
     interval: "weekly"
