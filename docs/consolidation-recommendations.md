@@ -1,49 +1,49 @@
-# Consolidation Recommendations
+# Consolidation Recommendations for v6
 
 Generated: 2025-11-09
 
 ## Executive Summary
 
-This document provides recommendations for consolidating and optimizing the Azure DevOps Extension Tasks codebase based on the discovery and inventory analysis.
+This document provides recommendations for v6 consolidation based on analysis of v5 tasks only. Per project direction, v4 tasks are excluded from analysis as they will be removed.
 
 ## Key Findings
 
 ### Task Portfolio
-- **Total tasks:** 10 task families
-- **Total versions:** v4, v5, and serverless (IsValidExtension)
-- **Total task.json files:** 19
+- **Total v5 tasks:** 9 task families
+- **Analysis scope:** v5 only (v4 excluded as per deprecation plan)
+- **One serverless task:** IsValidExtension
 
 ### Code Organization
-- Shared code exists in `Common/v4` and `Common/v5`
-- Most tasks have both v4 and v5 implementations
-- One serverless task (IsValidExtension)
+- Shared code exists in `Common/v5`
+- Strong foundation with 19+ shared functions
+- Clean separation from legacy v4 code
 
 ## Recommendations
 
-### 1. Version Consolidation
+### 1. Runtime Modernization
 
-**Priority:** HIGH
+**Priority:** CRITICAL
 
 **Current State:**
-- Tasks maintain both v4 and v5 versions
-- Some duplication between versions
-- Different dependency requirements
+- v5 tasks support Node16 and Node20_1
+- GitHub Actions requires Node20 and Node24 support
+- Azure Pipelines moving to Node20+ exclusively
 
 **Recommendation:**
-- Focus v6 development on a single runtime (Node 20+)
-- Deprecate v4 gradually
-- Migrate all logic to v5/v6 pattern
+- v6 must support Node20 (current Azure DevOps) and Node24 (current GitHub Actions)
+- Drop Node16 support as it's reaching EOL
+- Test all tasks on both runtimes
 
 **Benefits:**
-- Reduced maintenance overhead
-- Simplified dependency management
-- Better alignment with Azure Pipelines runtime evolution
+- GitHub Actions compatibility
+- Future-proof against Node version updates
+- Access to modern Node.js features
 
 **Migration Path:**
-1. Complete v5 feature parity check
-2. Update documentation to recommend v5
-3. Mark v4 as deprecated in marketplace
-4. Set EOL timeline for v4
+1. Audit all dependencies for Node20/24 compatibility
+2. Update execution targets in task.json files
+3. Test on both Node20 and Node24
+4. Update CI/CD pipelines
 
 ---
 
@@ -86,16 +86,16 @@ This document provides recommendations for consolidating and optimizing the Azur
 **Priority:** HIGH
 
 **Current State:**
-- Common library exists for v4 and v5
-- Contains shared utilities and helpers
-- Some duplication still exists across tasks
+- Common v5 library exists with 19+ shared functions
+- Good foundation for shared functionality
+- Opportunities for further consolidation
 
 **Recommendations:**
 
 #### a) Expand Common Library
-Move these patterns to Common:
+Move these patterns to Common v5:
 - TFX CLI invocation helpers
-- Authentication/token handling
+- Authentication/token handling (especially WIF support)
 - Manifest file manipulation
 - Error handling and logging patterns
 - Validation utilities
@@ -105,18 +105,20 @@ Move these patterns to Common:
 - `manifest-helpers.ts` - Extension manifest operations  
 - `marketplace-helpers.ts` - Marketplace API operations
 - `validation-helpers.ts` - Input validation
-- `auth-helpers.ts` - Authentication patterns
+- `auth-helpers.ts` - Authentication patterns (PAT + WIF)
 
-#### c) Unified Common Library
-- Merge v4 and v5 Common libraries
-- Use conditional exports for version-specific code
-- Maintain backward compatibility during transition
+#### c) Package Size Optimization
+- Target: Keep final VSIX under 65MB
+- Current package.json optimizations are good foundation
+- Continue with `npm dedupe` and dev dependency removal
+- Consider bundling/minification for production
 
 **Benefits:**
 - Reduced code duplication
 - Easier maintenance and testing
 - Consistent behavior across tasks
 - Faster development of new tasks
+- Smaller package sizes
 
 ---
 
@@ -236,13 +238,15 @@ Define standard input schemas for:
 
 #### b) User Documentation
 - Updated task documentation
-- Migration guides (v4 → v5)
+- Migration guide script (migrate-yaml.js) for v4 → v5
+- Breaking changes documentation
 - Best practices
 - Troubleshooting guide
 
 #### c) Pipeline Examples
-- Sample YAML pipelines
+- Sample YAML pipelines for v5 tasks
 - Common scenarios
+- GitHub Actions integration examples
 - Integration patterns
 
 **Benefits:**
@@ -255,27 +259,30 @@ Define standard input schemas for:
 ## Implementation Roadmap
 
 ### Phase 1: Foundation (Weeks 1-4)
-- [ ] Complete inventory and analysis
+- [x] Complete inventory and analysis (v5 only)
 - [ ] Set up testing infrastructure
-- [ ] Create Common library enhancement plan
-- [ ] Document current architecture
+- [ ] Node20/24 compatibility audit
+- [ ] Document v5 architecture
 
 ### Phase 2: Optimization (Weeks 5-8)
-- [ ] Enhance Common library
-- [ ] Optimize dependencies
-- [ ] Standardize inputs
+- [ ] Enhance Common v5 library
+- [ ] Optimize dependencies for size
+- [ ] Standardize inputs across tasks
 - [ ] Add unit tests
+- [ ] VSIX size optimization (<65MB target)
 
-### Phase 3: Consolidation (Weeks 9-12)
-- [ ] Migrate duplicated code
-- [ ] Deprecate v4 (documentation)
+### Phase 3: Runtime Modernization (Weeks 9-12)
+- [ ] Implement Node20/24 support
+- [ ] Test on GitHub Actions
+- [ ] Update task.json execution targets
 - [ ] Improve build process
 - [ ] Update documentation
 
 ### Phase 4: Testing and Release (Weeks 13-16)
-- [ ] Comprehensive testing
+- [ ] Comprehensive testing (Node20 + Node24)
 - [ ] Beta release
 - [ ] User feedback
+- [ ] GitHub Actions compatibility validation
 - [ ] Production release
 
 ---
@@ -283,12 +290,12 @@ Define standard input schemas for:
 ## Risk Mitigation
 
 ### Breaking Changes
-- **Risk:** Changes may break existing pipelines
+- **Risk:** v6 introduces breaking changes
 - **Mitigation:** 
-  - Maintain v4/v5 compatibility
-  - Clear migration documentation
-  - Phased rollout
-  - Version pinning support
+  - YAML migration script (migrate-yaml.js) provided
+  - Clear breaking changes documentation
+  - Migration guides and examples
+  - Community support during transition
 
 ### Migration Effort
 - **Risk:** Teams may resist migration

@@ -1,14 +1,13 @@
 # Task Inputs and Outputs Matrix
 
-Generated: 2025-11-09T15:12:39.119Z
+Generated: 2025-11-09T15:26:23.314Z
 
-Total tasks analyzed: 19
+Total tasks analyzed: 9
 
 ## Table of Contents
 
 - [ExtensionVersion](#extensionversion)
 - [InstallExtension](#installextension)
-- [IsValidExtension](#isvalidextension)
 - [IsValidExtensionAgent](#isvalidextensionagent)
 - [PackageExtension](#packageextension)
 - [PublishExtension](#publishextension)
@@ -24,7 +23,6 @@ Total tasks analyzed: 19
 **Category:** Utility
 
 **Versions:**
-- v4: v4.4.0
 - v5: v5.0.0
 
 ### Inputs
@@ -46,7 +44,11 @@ Total tasks analyzed: 19
 
 ### Output Variables
 
-*No output variables defined*
+| Variable Name | Source | Description |
+|---------------|--------|-------------|
+| Extension.Version | code-analysis |  |
+
+*Declared in task.json: 0, Discovered in code: 1*
 
 ### Execution
 
@@ -64,7 +66,6 @@ Total tasks analyzed: 19
 **Category:** Deploy
 
 **Versions:**
-- v4: v4.4.0
 - v5: v5.0.0
 
 ### Inputs
@@ -97,39 +98,6 @@ Total tasks analyzed: 19
 
 ---
 
-## IsValidExtension
-
-**Description:** Check Marketplace validation status.
-
-**Category:** Deploy
-
-**Versions:**
-- task.json: v5.0.0
-
-### Inputs
-
-| Input Name | Type | Required | Default | Description |
-|------------|------|----------|---------|-------------|
-| connectTo | radio | Yes | `VsTeam` | Connect to Visual Studio Marketplace. |
-| connectedServiceName | connectedService:VstsMarketplacePublishing | Yes | `-` | Service endpoint connection to install the extension. |
-| method | radio | Yes | `id` | Validate using either an existing VSIX or using the Publisher, Extension ID and version. |
-| publisherId | string | Yes | `-` | Publisher ID of the extension to be installed. |
-| extensionId | string | Yes | `-` | Extension ID of the extension to be installed |
-| extensionTag | string | No | `-` | Extension Tag to append to the extension ID |
-| extensionVersion | string | No | `latest` | Extension version (enter 'latest' or leave the value empty to check the last submitted version). |
-
-### Output Variables
-
-*No output variables defined*
-
-### Execution
-
-**Supported runtimes:** HttpRequest
-
-- **HttpRequest:** N/A
-
----
-
 ## IsValidExtensionAgent
 
 **Description:** Check Visual Studio Marketplace validation status.
@@ -137,7 +105,6 @@ Total tasks analyzed: 19
 **Category:** Deploy
 
 **Versions:**
-- v4: v4.4.0
 - v5: v5.0.0
 
 ### Inputs
@@ -176,7 +143,6 @@ Total tasks analyzed: 19
 **Category:** Package
 
 **Versions:**
-- v4: v4.4.0
 - v5: v5.0.0
 
 ### Inputs
@@ -204,9 +170,11 @@ Total tasks analyzed: 19
 
 ### Output Variables
 
-| Variable Name | Description |
-|---------------|-------------|
-| Extension.OutputPath | Is set with the generated vsix path. |
+| Variable Name | Source | Description |
+|---------------|--------|-------------|
+| Extension.OutputPath | task.json | Is set with the generated vsix path. |
+
+*Declared in task.json: 1, Discovered in code: 1*
 
 ### Execution
 
@@ -224,7 +192,6 @@ Total tasks analyzed: 19
 **Category:** Deploy
 
 **Versions:**
-- v4: v4.4.0
 - v5: v5.0.0
 
 ### Inputs
@@ -259,9 +226,11 @@ Total tasks analyzed: 19
 
 ### Output Variables
 
-| Variable Name | Description |
-|---------------|-------------|
-| Extension.OutputPath | Is set with the generated vsix path. |
+| Variable Name | Source | Description |
+|---------------|--------|-------------|
+| Extension.OutputPath | task.json | Is set with the generated vsix path. |
+
+*Declared in task.json: 1, Discovered in code: 1*
 
 ### Execution
 
@@ -279,7 +248,6 @@ Total tasks analyzed: 19
 **Category:** Deploy
 
 **Versions:**
-- v4: v4.4.0
 - v5: v5.0.0
 
 ### Inputs
@@ -314,7 +282,6 @@ Total tasks analyzed: 19
 **Category:** Deploy
 
 **Versions:**
-- v4: v4.4.0
 - v5: v5.0.0
 
 ### Inputs
@@ -353,7 +320,6 @@ Total tasks analyzed: 19
 **Category:** Tool
 
 **Versions:**
-- v4: v4.4.0
 - v5: v5.0.0
 
 ### Inputs
@@ -383,7 +349,6 @@ Total tasks analyzed: 19
 **Category:** Deploy
 
 **Versions:**
-- v4: v4.4.0
 - v5: v5.0.0
 
 ### Inputs

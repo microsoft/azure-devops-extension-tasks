@@ -1,10 +1,10 @@
 # Dependency Size Report
 
-Generated: 2025-11-09T15:12:39.243Z
+Generated: 2025-11-09T15:26:23.429Z
 
 ## Summary
 
-- **Total tasks analyzed:** 20
+- **Total tasks analyzed:** 10
 - **Total node_modules size:** 0 B
 - **Average size per task:** 0 B
 
@@ -12,25 +12,15 @@ Generated: 2025-11-09T15:12:39.243Z
 
 | Task | Version | Dependencies | Dev Dependencies | node_modules Size | Installed |
 |------|---------|--------------|------------------|-------------------|------------|
-| Common | v4 | 4 | 1 | 0 B | ✗ |
 | Common | v5 | 5 | 1 | 0 B | ✗ |
-| ExtensionVersion | v4 | 4 | 0 | 0 B | ✗ |
 | ExtensionVersion | v5 | 5 | 0 | 0 B | ✗ |
-| InstallExtension | v4 | 4 | 0 | 0 B | ✗ |
 | InstallExtension | v5 | 5 | 0 | 0 B | ✗ |
-| IsValidExtensionAgent | v4 | 5 | 0 | 0 B | ✗ |
 | IsValidExtensionAgent | v5 | 6 | 0 | 0 B | ✗ |
-| PackageExtension | v4 | 4 | 0 | 0 B | ✗ |
 | PackageExtension | v5 | 5 | 0 | 0 B | ✗ |
-| PublishExtension | v4 | 9 | 0 | 0 B | ✗ |
 | PublishExtension | v5 | 8 | 0 | 0 B | ✗ |
-| PublishVSExtension | v4 | 4 | 0 | 0 B | ✗ |
 | PublishVSExtension | v5 | 5 | 0 | 0 B | ✗ |
-| ShareExtension | v4 | 4 | 0 | 0 B | ✗ |
 | ShareExtension | v5 | 5 | 0 | 0 B | ✗ |
-| TfxInstaller | v4 | 3 | 0 | 0 B | ✗ |
 | TfxInstaller | v5 | 7 | 0 | 0 B | ✗ |
-| UnpublishExtension | v4 | 4 | 0 | 0 B | ✗ |
 | UnpublishExtension | v5 | 5 | 0 | 0 B | ✗ |
 
 ## Common Dependencies
@@ -39,16 +29,11 @@ Dependencies used across multiple tasks:
 
 | Dependency | Used By # Tasks |
 |------------|----------------|
-| `azure-pipelines-task-lib` | 20 |
-| `tmp` | 20 |
-| `fs-extra` | 18 |
-| `uuidv5` | 18 |
+| `azure-pipelines-task-lib` | 10 |
 | `azure-pipelines-tasks-azure-arm-rest` | 10 |
-| `promise-retry` | 2 |
-| `core-js` | 2 |
-| `temp` | 2 |
-| `x2js` | 2 |
-| `azure-pipelines-tool-lib` | 2 |
+| `fs-extra` | 10 |
+| `tmp` | 10 |
+| `uuidv5` | 10 |
 
 ## Candidates for Removal/Replacement
 
@@ -69,16 +54,11 @@ Known dependencies that could be optimized:
 
 Complete list of all unique dependencies across tasks:
 
-**Total unique dependencies:** 15
+**Total unique dependencies:** 11
 
 ### 7zip
 
 - `7zip-bin`
-- `7zip-bin-win`
-
-### @xmldom
-
-- `@xmldom/xmldom`
 
 ### azure
 
@@ -86,17 +66,9 @@ Complete list of all unique dependencies across tasks:
 - `azure-pipelines-tasks-azure-arm-rest`
 - `azure-pipelines-tool-lib`
 
-### core
-
-- `core-js`
-
 ### fs
 
 - `fs-extra`
-
-### path
-
-- `path`
 
 ### promise
 

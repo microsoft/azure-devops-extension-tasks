@@ -2,24 +2,28 @@
 
 This directory contains comprehensive documentation and analysis artifacts for the v6 Discovery & Inventory Epic.
 
+**IMPORTANT:** Analysis focuses on v5 tasks only. v4 tasks are excluded per deprecation plan (see PR #1490).
+
 ## Generated Reports
 
 ### 1. Task Schemas (`task-schemas.json`)
-Raw JSON export of all task.json files with complete schema information for all 19 tasks (v4, v5, and serverless).
+Raw JSON export of all v5 task.json files with complete schema information for 9 tasks.
 
-**Usage:** Machine-readable format for tools and automation.
+**Key Features:**
+- Extracts outputs from both task.json and code analysis (tl.setVariable calls)
+- Machine-readable format for tools and automation
 
 ### 2. Task Inputs/Outputs Matrix (`task-inputs-outputs-matrix.md`)
-Comprehensive markdown matrix showing all inputs, outputs, and execution details for each task.
+Comprehensive markdown matrix showing all inputs, outputs, and execution details for each v5 task.
 
 **Key Information:**
 - Input parameters with types, requirements, and defaults
-- Output variables
+- Output variables (both declared and discovered from code)
 - Supported runtimes (Node16, Node20_1)
 - Task versioning information
 
 ### 3. Environment Variables Report (`environment-variables.md`)
-Analysis of environment variables and task inputs accessed through code.
+Analysis of environment variables and task inputs accessed through v5 code.
 
 **Includes:**
 - Task library variables (tl.getVariable)
@@ -27,7 +31,7 @@ Analysis of environment variables and task inputs accessed through code.
 - Task input usage summary by type
 
 ### 4. Dependency Size Report (`dependency-size-report.md`)
-Comprehensive analysis of package dependencies across all tasks.
+Comprehensive analysis of package dependencies across all v5 tasks.
 
 **Includes:**
 - Size analysis (when node_modules are installed)
@@ -36,23 +40,55 @@ Comprehensive analysis of package dependencies across all tasks.
 - Complete unique dependency list
 
 ### 5. Shared Logic Analysis (`shared-logic-analysis.md`)
-Analysis of code duplication and shared functionality.
+Analysis of code duplication and shared functionality in v5 tasks.
 
 **Includes:**
-- Common library function inventory
+- Common v5 library function inventory
 - Duplicate function detection
 - Candidates for abstraction
 - Recommendations for consolidation
 
 ### 6. Consolidation Recommendations (`consolidation-recommendations.md`)
-Strategic recommendations for v6 development based on the discovery findings.
+Strategic recommendations for v6 development based on v5 analysis.
 
 **Includes:**
-- Version consolidation strategy
-- Dependency optimization
+- Runtime modernization (Node20/24 support)
+- Dependency optimization (target: <65MB VSIX)
 - Common library enhancement
 - Testing infrastructure recommendations
 - Implementation roadmap
+
+## Tools & Scripts
+
+### Analysis Scripts (6 files)
+
+Run all analysis at once:
+```bash
+node scripts/run-discovery.js
+```
+
+Individual scripts:
+- `extract-task-schemas.js` - Extracts v5 task.json + code-discovered outputs
+- `generate-task-matrix.js` - Generates comprehensive input/output matrix
+- `enumerate-env-vars.js` - Analyzes environment variable usage
+- `analyze-dependencies.js` - Analyzes dependencies (v5 only)
+- `analyze-shared-logic.js` - Detects code duplication (v5 only)
+- `run-discovery.js` - Master orchestrator script
+
+### Migration Tool
+
+**YAML Migration Helper** (`migrate-yaml.js`):
+```bash
+node scripts/migrate-yaml.js path/to/azure-pipelines.yml
+```
+
+This tool:
+- Scans Azure Pipelines YAML files
+- Identifies v4 tasks that need migration
+- Generates migration report with breaking changes
+- Provides updated YAML snippets
+
+**Note:** v6 introduces breaking changes. This tool helps with migration.
 
 ## How to Regenerate Reports
 
@@ -75,13 +111,13 @@ node scripts/analyze-shared-logic.js
 
 ## Key Findings Summary
 
-### Task Portfolio
-- **10 task families:** ExtensionVersion, InstallExtension, IsValidExtension, IsValidExtensionAgent, PackageExtension, PublishExtension, PublishVSExtension, ShareExtension, TfxInstaller, UnpublishExtension
-- **19 total tasks:** Most have v4 and v5 versions, one serverless (IsValidExtension)
-- **Common library:** Exists for both v4 and v5 with 19 shared functions each
+### Task Portfolio (v5 Only)
+- **9 v5 task families:** ExtensionVersion, InstallExtension, IsValidExtensionAgent, PackageExtension, PublishExtension, PublishVSExtension, ShareExtension, TfxInstaller, UnpublishExtension
+- **1 serverless task:** IsValidExtension
+- **Common v5 library:** 19+ shared functions
 
 ### Dependencies
-- **15 unique dependencies** across all tasks
+- **15 unique dependencies** across v5 tasks
 - **Most common:** azure-pipelines-task-lib (20), tmp (20), fs-extra (18), uuidv5 (18)
 - **Optimization candidates:** q (use native Promises), temp (use native fs), promise-retry (implement simple version)
 

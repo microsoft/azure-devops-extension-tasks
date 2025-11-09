@@ -95,13 +95,20 @@ function generateMarkdownMatrix(tasks) {
     })[0];
     
     if (latestTask.outputVariables && latestTask.outputVariables.length > 0) {
-      markdown += '| Variable Name | Description |\n';
-      markdown += '|---------------|-------------|\n';
+      markdown += '| Variable Name | Source | Description |\n';
+      markdown += '|---------------|--------|-------------|\n';
       
       for (const output of latestTask.outputVariables) {
         const varName = output.name || 'N/A';
+        const source = output.source || 'task.json';
         const description = (output.description || '').replace(/\n/g, ' ');
-        markdown += `| ${varName} | ${description} |\n`;
+        markdown += `| ${varName} | ${source} | ${description} |\n`;
+      }
+      
+      // Show discovery stats if available
+      if (latestTask.declaredOutputs !== undefined && latestTask.discoveredOutputs !== undefined) {
+        markdown += '\n';
+        markdown += `*Declared in task.json: ${latestTask.declaredOutputs}, Discovered in code: ${latestTask.discoveredOutputs}*\n`;
       }
     } else {
       markdown += '*No output variables defined*\n';

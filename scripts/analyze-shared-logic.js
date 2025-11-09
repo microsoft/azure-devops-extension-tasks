@@ -25,6 +25,11 @@ function findSourceFiles(dir, excludeCommon = false) {
         continue;
       }
       
+      // Skip v4 directories
+      if (item === 'v4') {
+        continue;
+      }
+      
       const stat = fs.statSync(fullPath);
       
       if (stat.isDirectory() && item !== 'node_modules' && item !== '.git') {
@@ -175,20 +180,13 @@ function analyzeDuplication() {
 }
 
 function analyzeCommonLibrary() {
-  console.log('Analyzing Common library...');
+  console.log('Analyzing Common library (v5 only)...');
   
-  const commonV4Path = path.join(TASKS_DIR, 'Common/v4/Common.ts');
   const commonV5Path = path.join(TASKS_DIR, 'Common/v5/Common.ts');
   
   const analysis = {
-    v4: { exists: false, functions: [] },
     v5: { exists: false, functions: [] }
   };
-  
-  if (fs.existsSync(commonV4Path)) {
-    analysis.v4.exists = true;
-    analysis.v4.functions = extractFunctions(commonV4Path);
-  }
   
   if (fs.existsSync(commonV5Path)) {
     analysis.v5.exists = true;
@@ -210,20 +208,6 @@ function generateMarkdown(analysis, commonAnalysis) {
   // Common library analysis
   markdown += '## Common Library (Existing Shared Code)\n\n';
   
-  if (commonAnalysis.v4.exists) {
-    markdown += `### Common v4\n\n`;
-    markdown += `**Location:** \`BuildTasks/Common/v4/Common.ts\`\n\n`;
-    markdown += `**Functions exported:** ${commonAnalysis.v4.functions.length}\n\n`;
-    
-    if (commonAnalysis.v4.functions.length > 0) {
-      markdown += '**Function list:**\n\n';
-      for (const func of commonAnalysis.v4.functions) {
-        markdown += `- \`${func.name}\` (${func.lineCount} lines)\n`;
-      }
-      markdown += '\n';
-    }
-  }
-  
   if (commonAnalysis.v5.exists) {
     markdown += `### Common v5\n\n`;
     markdown += `**Location:** \`BuildTasks/Common/v5/Common.ts\`\n\n`;
@@ -236,6 +220,8 @@ function generateMarkdown(analysis, commonAnalysis) {
       }
       markdown += '\n';
     }
+  } else {
+    markdown += '*No v5 Common library found*\n\n';
   }
   
   // Duplicate functions
@@ -282,12 +268,12 @@ function generateMarkdown(analysis, commonAnalysis) {
   // Recommendations
   markdown += '## Recommendations\n\n';
   markdown += '### Short-term\n\n';
-  markdown += '1. Review duplicate functions and consider moving to Common library\n';
-  markdown += '2. Ensure all tasks use the Common library for shared functionality\n';
+  markdown += '1. Review duplicate functions and consider moving to Common v5 library\n';
+  markdown += '2. Ensure all v5 tasks use the Common v5 library for shared functionality\n';
   markdown += '3. Standardize error handling and logging patterns\n\n';
   
   markdown += '### Long-term\n\n';
-  markdown += '1. Create a unified Common library for both v4 and v5 (or migrate fully to v5)\n';
+  markdown += '1. Continue expanding the Common v5 library with reusable functionality\n';
   markdown += '2. Extract common patterns into reusable helper functions\n';
   markdown += '3. Consider creating domain-specific helper modules (e.g., tfx-helpers, validation-helpers)\n';
   markdown += '4. Implement shared testing utilities for task development\n\n';

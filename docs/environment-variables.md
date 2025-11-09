@@ -1,6 +1,6 @@
 # Environment Variables and Task Inputs
 
-Generated: 2025-11-09T15:12:39.181Z
+Generated: 2025-11-09T15:26:23.368Z
 
 ## Task Library Variables (tl.getVariable)
 
@@ -30,6 +30,6 @@ Overview of how many inputs each task type reads:
 | IsValidExtensionAgent | 3 | 0 | 0 | 0 | 3 |
 | PackageExtension | 2 | 0 | 0 | 0 | 2 |
 | PublishExtension | 11 | 1 | 4 | 1 | 17 |
-| PublishVSExtension | 6 | 2 | 0 | 0 | 8 |
+| PublishVSExtension | 5 | 2 | 0 | 0 | 7 |
 | ShareExtension | 0 | 0 | 0 | 1 | 1 |
 

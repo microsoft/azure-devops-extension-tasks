@@ -20,6 +20,12 @@ function findPackageJsonFiles(dir) {
     
     for (const item of items) {
       const fullPath = path.join(dir, item);
+      
+      // Skip v4 directories
+      if (item === 'v4') {
+        continue;
+      }
+      
       const stat = fs.statSync(fullPath);
       
       if (stat.isDirectory() && item !== 'node_modules' && item !== '.git') {
