@@ -4,7 +4,6 @@ import fs from "node:fs/promises";
 import tl from "azure-pipelines-task-lib";
 import { ToolRunner } from "azure-pipelines-task-lib/toolrunner.js";
 import { AzureRMEndpoint } from "azure-pipelines-tasks-azure-arm-rest/azure-arm-endpoint.js";
-import fse from "fs-extra";
 import uuidv5 from "uuidv5";
 import tmp from "tmp";
 
@@ -545,7 +544,8 @@ function getTaskManifestPaths(manifestPath: string, manifest: any): string[] {
 }
 
 export async function writeManifest(manifest: any, path: string): Promise<void> {
-    await fse.writeJSON(path, manifest);
+    const manifestJson = `${JSON.stringify(manifest, null, 2)}\n`;
+    await fs.writeFile(path, manifestJson, { encoding: "utf8" });
 }
 
 export async function checkUpdateTasksManifests(manifestFile?: string): Promise<void> {
