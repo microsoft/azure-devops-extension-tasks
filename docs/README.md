@@ -36,11 +36,20 @@ Comprehensive analysis of package dependencies across all v5 tasks.
 **Includes:**
 - Size analysis (requires `npm run initdev` to install dependencies first)
 - Common dependencies across tasks
-- Candidates for removal/replacement
+- Candidates for removal/replacement with priorities
 - Complete unique dependency list
 - Security analysis (e.g., why `tmp` package must be kept)
+- References detailed optimization analysis
 
 **Note:** To get actual size measurements, run `npm run initdev` before generating this report.
+
+### 4a. Dependency Optimization Analysis (`dependency-optimization-analysis.md`)
+**NEW:** Detailed analysis of optimization opportunities for shared dependencies.
+
+**Key Findings:**
+- **fs-extra**: Quick win - replace with native fs (~1 MB savings)
+- **azure-pipelines-tasks-azure-arm-rest**: High impact - investigate alternatives (~100-150 MB savings)
+- Total potential savings: 100-150 MB (14-21% reduction)
 
 ### 5. Shared Logic Analysis (`shared-logic-analysis.md`)
 Analysis of code duplication and shared functionality in v5 tasks.

@@ -36,6 +36,26 @@ Dependencies used across multiple tasks:
 | `tmp` | 10 |
 | `uuidv5` | 10 |
 
+## Optimization Opportunities for Shared Dependencies
+
+**Critical Finding:** Since these 5 dependencies are shared across all 10 tasks, they are duplicated 10 times, contributing significantly to the total 725.67 MB size.
+
+### Detailed Analysis
+
+See **[Dependency Optimization Analysis](dependency-optimization-analysis.md)** for comprehensive recommendations.
+
+**Quick Summary:**
+
+| Dependency | Used By | Total Impact | Recommendation | Est. Savings |
+|------------|---------|--------------|----------------|--------------|
+| **fs-extra** | 10 tasks | ~1 MB | **REPLACE** with native fs | ~1 MB (easy win) |
+| **azure-pipelines-tasks-azure-arm-rest** | 10 tasks | ~100-150 MB | **INVESTIGATE** alternatives | 100-150 MB (high impact) |
+| **uuidv5** | 10 tasks | ~100 KB | **KEEP** (tiny, specific) | - |
+| **tmp** | 10 tasks | ~500 KB | **KEEP** (security-critical) | - |
+| **azure-pipelines-task-lib** | 10 tasks | ~400-500 MB | **KEEP** (necessary) | - |
+
+**Total Potential Savings: ~100-150 MB (14-21% reduction)**
+
 ## Candidates for Removal/Replacement
 
 Known dependencies that could be optimized:
@@ -44,11 +64,12 @@ Known dependencies that could be optimized:
 |------------|----------------|
 | `@types/node` | TypeScript types - can potentially be unified |
 | `azure-pipelines-task-lib` | Core task library - necessary |
-| `azure-pipelines-tasks-azure-arm-rest` | Azure ARM REST - could be optimized |
-| `fs-extra` | File system utilities - could use native fs |
+| **`azure-pipelines-tasks-azure-arm-rest`** | **HIGHEST PRIORITY** - Brings in entire Azure SDK stack (~100-150 MB across 10 tasks); investigate lightweight alternatives |
+| **`fs-extra`** | **QUICK WIN** - Only 1 usage (writeJSON), easily replaced with native fs (~1 MB savings) |
 | `q` | Promise library - deprecated, use native Promises |
 | `xmldom` | XML parsing - check if needed |
 | `tmp` | **KEEP** - Provides security guarantees (unpredictable paths, race condition protection) critical for VSIX packaging; prevents content injection attacks |
+| `uuidv5` | **KEEP** - Tiny package (~10 KB), provides UUID v5 functionality |
 | `promise-retry` | Retry logic - could implement simple version |
 
 ## All Unique Dependencies
