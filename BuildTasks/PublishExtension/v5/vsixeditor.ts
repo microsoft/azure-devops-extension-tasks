@@ -1,7 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import os from "node:os";
-import tmp from "tmp";
 import tl from "azure-pipelines-task-lib";
 import tr from "azure-pipelines-task-lib/toolrunner.js";
 import * as common from "../../Common/v5/Common.js";
@@ -212,22 +211,19 @@ export default class VSIXEditor {
 
         const tempRoot = tl.getVariable("Agent.TempDirectory") || os.tmpdir();
         let dirPath: string | undefined;
-        let cleanupTempDir: (() => void) | undefined;
+        let cleanupTempDir: (() => Promise<void>) | undefined;
 
         try {
-            const tempDirResult = await new Promise<{ path: string; cleanup: () => void }>((resolve, reject) => {
-                tmp.dir({ prefix: "vsixeditor-", tmpdir: tempRoot, unsafeCleanup: true }, (error, directory, cleanupCallback) => {
-                    if (error) {
-                        reject(error);
-                        return;
-                    }
-
-                    resolve({ path: directory, cleanup: cleanupCallback });
-                });
-            });
-
-            dirPath = tempDirResult.path;
-            cleanupTempDir = tempDirResult.cleanup;
+            dirPath = await fs.mkdtemp(path.join(tempRoot, "vsixeditor-"));
+            const directoryToClean = dirPath;
+            cleanupTempDir = async () => {
+                try {
+                    await fs.rm(directoryToClean, { recursive: true, force: true });
+                } catch (error) {
+                    const cleanupError = error instanceof Error ? error.message : String(error);
+                    tl.debug(`Failed to remove temporary directory ${directoryToClean}: ${cleanupError}`);
+                }
+            };
             tl.debug("Extracting files to " + dirPath);
 
             await this.extractArchive(this.inputFile, dirPath);
@@ -247,7 +243,9 @@ export default class VSIXEditor {
 
             return manifestData.outputFileName;
         } finally {
-            cleanupTempDir?.();
+            if (cleanupTempDir) {
+                await cleanupTempDir();
+            }
         }
     }
 
