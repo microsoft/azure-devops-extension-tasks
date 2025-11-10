@@ -1,19 +1,36 @@
+import crypto from "node:crypto";
 import path from "node:path";
 import stream from "node:stream";
 import fs from "node:fs/promises";
+import fsSync from "node:fs";
+import os from "node:os";
 import tl from "azure-pipelines-task-lib";
 import { ToolRunner } from "azure-pipelines-task-lib/toolrunner.js";
 import uuidv5 from "uuidv5";
-import tmp from "tmp";
 
 function writeBuildTempFile(taskName: string, data: any): string {
-    const tempDir = tl.getVariable("Agent.TempDirectory");
-    const tempFile = tmp.tmpNameSync({ prefix: taskName, postfix: ".tmp", tmpdir: tempDir });
+    const baseTempDir = tl.getVariable("Agent.TempDirectory") || os.tmpdir();
+    fsSync.mkdirSync(baseTempDir, { recursive: true });
 
-    tl.debug(`Generating Build temp file: ${tempFile}`);
-    tl.writeFile(tempFile, data, { mode: 0o600, encoding: "utf8", flag: "wx+" });
+    for (let attempt = 0; attempt < 5; attempt++) {
+        const randomSuffix = crypto.randomBytes(16).toString("hex");
+        const tempFile = path.join(baseTempDir, `${taskName}-${randomSuffix}.tmp`);
 
-    return tempFile;
+        try {
+            tl.writeFile(tempFile, data, { mode: 0o600, encoding: "utf8", flag: "wx+" });
+            tl.debug(`Generating Build temp file: ${tempFile}`);
+            return tempFile;
+        } catch (error) {
+            const err = error as NodeJS.ErrnoException;
+            if (err.code === "EEXIST") {
+                tl.debug(`Temp file collision detected, retrying (${attempt + 1}/5).`);
+                continue;
+            }
+            throw error;
+        }
+    }
+
+    throw new Error("Unable to create unique temporary file after multiple attempts.");
 }
 
 async function deleteBuildTempFile(tempFile: string) {

@@ -11,9 +11,7 @@
   "dependencies": {
     "azure-pipelines-task-lib": "^4.17.3",
     "azure-pipelines-tool-lib": "^2.0.10",
-    "fs-extra": "^11.3.2",
     "tfx-cli": "^0.22.2",
-    "tmp": "^0.2.5",
     "uuidv5": "^1.0.0"
   }
 }
