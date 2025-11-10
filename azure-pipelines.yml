@@ -37,8 +37,8 @@ stages:
         $vswhereLatest = "https://github.com/Microsoft/vswhere/releases/latest/download/vswhere.exe"
 
         $targets = @(
-          ".\BuildTasks\PublishVSExtension\v5\tools\"
-          ".\BuildTasks\PublishVSExtension\v5\PublishVSExtension\v5\tools\"
+          ".\BuildTasks\PublishVSExtension\tools\"
+          ".\BuildTasks\PublishVSExtension\PublishVSExtension\tools\"
         )
 
         invoke-webrequest $vswhereLatest -OutFile $env:temp\vswhere.exe
@@ -65,8 +65,8 @@ stages:
 
     - pwsh: |
         $erroractionpreference = "silentlycontinue"
-        del BuildTasks\PublishExtension\v5\node_modules\7zip-bin\linux -recurse
-        del BuildTasks\PublishExtension\v5\node_modules\7zip-bin\mac -recurse
+        del BuildTasks\PublishExtension\node_modules\7zip-bin\linux -recurse
+        del BuildTasks\PublishExtension\node_modules\7zip-bin\mac -recurse
         del -include @(
             "package-lock.json",
             "*.ts",
