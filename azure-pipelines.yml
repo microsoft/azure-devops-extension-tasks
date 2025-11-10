@@ -37,8 +37,7 @@ stages:
         $vswhereLatest = "https://github.com/Microsoft/vswhere/releases/latest/download/vswhere.exe"
 
         $targets = @(
-          ".\BuildTasks\PublishVSExtension\v4\tools\",
-          ".\BuildTasks\PublishVSExtension\v5\tools\"
+          ".\BuildTasks\PublishVSExtension\v5\tools\",
           ".\BuildTasks\PublishVSExtension\v5\PublishVSExtension\v5\tools\"
         )
 
