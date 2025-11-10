@@ -76,11 +76,11 @@ stages:
             "*.md",
             "tsconfig.tsbuildinfo",
             "@types"
-        ) -recurse BuildTasks\*\v*
+        ) -recurse BuildTasks\*\
 
         del -include @(
             "msal-browser"
-        ) -recurse BuildTasks\*\v*\node_modules\@azure\
+        ) -recurse BuildTasks\*\node_modules\@azure\
 
         del -include @(
             ".package-lock.json",
@@ -104,11 +104,11 @@ stages:
             "LICENSE",
             "license",
             "AUTHORS"
-        ) -recurse BuildTasks\*\v*\node_modules -force  
+        ) -recurse BuildTasks\*\node_modules -force  
 
         del -include @(
             "*.pem"
-        ) -recurse BuildTasks\*\v*\node_modules\azure-pipelines-tasks-azure-arm-rest\openssl*\PEM\ -force  
+        ) -recurse BuildTasks\*\node_modules\azure-pipelines-tasks-azure-arm-rest\openssl*\PEM\ -force  
       displayName: 'Delete unneeded files'
     - pwsh: |
         ./fix-manifest-file.ps1

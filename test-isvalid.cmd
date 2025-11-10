@@ -24,7 +24,7 @@ set NO_UPDATE_NOTIFIER=true
 
 REM cmd /c "npm run build:tasks"
 
-pushd BuildTasks\TfxInstaller\v5\TfxInstaller\v5
+pushd BuildTasks\TfxInstaller\v5\TfxInstaller
 node TfxInstaller.js
 popd
 
@@ -33,7 +33,7 @@ echo.
 echo ========================================
 echo Testing IsValidExtension v5
 echo ========================================
-pushd BuildTasks\IsValidExtensionAgent\v5\IsValidExtensionAgent\v5
+pushd BuildTasks\IsValidExtensionAgent\IsValidExtensionAgent\v5
 node IsValidExtension.js
 popd
 
@@ -42,7 +42,7 @@ echo.
 echo ========================================
 echo Testing IsValidExtension v5 with TFX_TRACE=1
 echo ========================================
-pushd BuildTasks\IsValidExtensionAgent\v5\IsValidExtensionAgent\v5
+pushd BuildTasks\IsValidExtensionAgent\IsValidExtensionAgent\v5
 node IsValidExtension.js
 popd
 set TFX_TRACE=

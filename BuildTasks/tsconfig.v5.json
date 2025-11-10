@@ -17,11 +17,11 @@
     ]
   },
   "include": [
-    "./Common/v5/Common.ts",
-    "./Common/v5/uuidv5.d.ts",
-    "./Common-Auth/v5/CommonAuth.ts"
+    "./Common/Common.ts",
+    "./Common/uuidv5.d.ts",
+    "./Common-Auth/CommonAuth.ts"
   ],
   "exclude": [
-    "*/v5/**/*.js"
+    "*/**/*.js"
   ]
 }
