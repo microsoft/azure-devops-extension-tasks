@@ -1,5 +1,5 @@
 {
-  "id": "631511B4-50AB-47C8-B766-7AE2AA672733",
+  "id": "631511b4-50ab-47c8-b766-7ae2aa672733",
   "name": "PublishAzureDevOpsExtension",
   "friendlyName": "Publish Extension",
   "description": "Publish an Azure DevOps extension to the Visual Studio Marketplace",
