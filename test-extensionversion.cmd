@@ -10,7 +10,7 @@ SET INPUT_VERSION=builtin
 set azdo_token=
 SET ENDPOINT_URL_A=https://marketplace.visualstudio.com
 SET ENDPOINT_AUTH_A={ "parameters": { "password": "%azdo_token%" }, "Scheme": "basic" }
-set __TFXPATH=%~dp0BuildTasks\TfxInstaller\v5\node_modules\.bin
+set __TFXPATH=%~dp0BuildTasks\TfxInstaller\node_modules\.bin
 set PATH=%__TFXPATH%;%PATH%
 
 set AGENT_WORKFOLDER=%temp%\agent\work

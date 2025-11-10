@@ -12,7 +12,7 @@ set AGENT_WORKFOLDER=%temp%\agent\work
 set AGENT_TOOLSDIRECTORY=%temp%\agent\tools
 SET AGENT_TEMPDIRECTORY=%temp%\agent\tmp
 REM Use a relative path to make the script portable
-set __TFXPATH=%~dp0BuildTasks\TfxInstaller\v5\node_modules\.bin
+set __TFXPATH=%~dp0BuildTasks\TfxInstaller\node_modules\.bin
 set PATH=%__TFXPATH%;%PATH%
 md %temp%\agent
 md %AGENT_WORKFOLDER%
@@ -24,7 +24,7 @@ set NO_UPDATE_NOTIFIER=true
 
 REM cmd /c "npm run build:tasks"
 
-pushd BuildTasks\TfxInstaller\v5\TfxInstaller
+pushd BuildTasks\TfxInstaller\TfxInstaller
 node TfxInstaller.js
 popd
 
@@ -33,7 +33,7 @@ echo.
 echo ========================================
 echo Testing IsValidExtension v5
 echo ========================================
-pushd BuildTasks\IsValidExtensionAgent\IsValidExtensionAgent\v5
+pushd BuildTasks\IsValidExtensionAgent\IsValidExtensionAgent
 node IsValidExtension.js
 popd
 
@@ -42,7 +42,7 @@ echo.
 echo ========================================
 echo Testing IsValidExtension v5 with TFX_TRACE=1
 echo ========================================
-pushd BuildTasks\IsValidExtensionAgent\IsValidExtensionAgent\v5
+pushd BuildTasks\IsValidExtensionAgent\IsValidExtensionAgent
 node IsValidExtension.js
 popd
 set TFX_TRACE=
