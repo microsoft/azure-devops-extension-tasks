@@ -145,6 +145,19 @@ stages:
         extensionVisibility: 'private'
 
     - task: PackageAzureDevOpsExtension@5
+      name: 'packagedebug'
+      displayName: 'Package the private extension'
+      inputs:
+        rootFolder: '$(Build.SourcesDirectory)'
+        outputPath: '$(Build.ArtifactStagingDirectory)\jessehouwing.vsts-developer-tools-build-tasks-dev.vsix'
+        publisherId: 'jessehouwing'
+        extensionName: 'Azure DevOps Extension Tasks'
+        extensionId: 'vsts-developer-tools-build-tasks'
+        extensionVersion: '$(Build.BuildNumber)'
+        extensionTag: '-dev'
+        extensionVisibility: 'private'
+
+    - task: PackageAzureDevOpsExtension@5
       displayName: 'Package the public extension'
       name: 'packagepublic'
       inputs:
