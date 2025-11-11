@@ -45,7 +45,7 @@ Purpose: Help agents quickly contribute to Azure DevOps Extension Tasks (publish
 ## Common Pitfalls
 - Forgetting to install per-task dependencies after adding a new task: rerun `npm run initdev`.
 - Wildcard file patterns resolving to none or multiple files must fail early with `tl.setResult(Failed, ...)`.
-- Ensure new task inputs align with environment variable naming used in test scripts (`INPUT_<lowercased input name>` pattern in legacy tests).
+- Ensure new task inputs align with environment variable naming used in test scripts (`INPUT_<uppercased input name>` pattern in legacy tests).
 - Maintain Node version compatibility (avoid APIs newer than Node16 unless guarded).
 
 ## External Integrations
