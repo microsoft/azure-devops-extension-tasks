@@ -33,7 +33,7 @@ Visual Studio
 * **Query Version**: `All accessible organizations`, `Marketplace (read)`
 * **Is Valid**: `All accessible organizations`, `Marketplace (read)`
 
-![Permissions](permissions.png)
+![Permissions](./Metadata/Images/permissions.png)
 
 ## Contribute
 

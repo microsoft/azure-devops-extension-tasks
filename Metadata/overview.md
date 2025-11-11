@@ -4,7 +4,7 @@ This extension provides build and release tasks for packaging and publishing Azu
 
 After installing the extension, you can add one (or more) of the tasks to [your pipeline](https://docs.microsoft.com/en-us/azure/devops/pipelines/?WT.mc_id=DOP-MVP-5001511&view=azure-devops). You can find an [example YAML pipeline in the form of the pipeline which publishes this extension](https://github.com/microsoft/azure-devops-extension-tasks/blob/main/azure-pipelines.yml).
 
-![add-task](add-task.png)
+![add-task](./Images/add-task.png)
 
 If you plan to publish to the Marketplace, you will need to [create a personal access token](https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?WT.mc_id=DOP-MVP-5001511&view=azure-devops&tabs=preview-page).
 
@@ -35,7 +35,7 @@ Visual Studio
 * **Query Version**: `All accessible organisations`, `Marketplace (read)`
 * **Is Valid**: `All accessible organisations`, `Marketplace (read)`
 
-![Permissions](permissions.png)
+![Permissions](./Images/permissions.png)
 
 ## Get the source
 
@@ -47,4 +47,4 @@ This extension was created by Microsoft with help from the community. We'd like 
 
 ## Feedback and issues
 
-If you have feedback or issues, please [send an email](mailto:jhouwing@xpirit.com) or file an issue on [GitHub](https://github.com/Microsoft/azure-devops-extension-tasks/issues)
+If you have feedback or issues, please [send an email](mailto:jesse.houwing@xebia.com) or file an issue on [GitHub](https://github.com/Microsoft/azure-devops-extension-tasks/issues)
