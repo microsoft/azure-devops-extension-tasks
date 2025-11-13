@@ -83,6 +83,10 @@ stages:
         ) -recurse BuildTasks\*\node_modules\@azure\
 
         del -include @(
+            "_tests"
+        ) -recurse BuildTasks\TfxInstaller\node_modules\tfx-cli\
+
+        del -include @(
             ".package-lock.json",
             "*.map",
             ".github",
