@@ -107,7 +107,10 @@ stages:
             "LICENSE-MIT",
             "LICENSE",
             "license",
-            "AUTHORS"
+            "AUTHORS",
+            "tfx-cli-0.22.2.tgz",
+            "typings",
+            "browser"
         ) -recurse BuildTasks\*\node_modules -force  
 
         del -include @(
