@@ -11,6 +11,7 @@ if (-not (Test-Path "vss-extension.json")) {
 }
 
 $extensionManifest = Get-Content -Raw "vss-extension.json" | ConvertFrom-Json
+$repoRoot = (Get-Location).Path
 
 Write-Host "Original file count in manifest: $($extensionManifest.files.Count)" -ForegroundColor Cyan
 
@@ -23,12 +24,30 @@ $removedCount = $originalCount - $extensionManifest.files.Count
 
 Write-Host "Removed $removedCount files with contentType 'application/octet-stream'" -ForegroundColor Yellow
 
-# Get all files in BuildTasks\* folders
-Write-Host "Scanning BuildTasks\* folders for files without extensions..." -ForegroundColor Yellow
+# Get all files in BuildTasks folders referenced by the manifest
+$manifestTaskDirectories = $extensionManifest.files |
+    Where-Object { $_.path -like "BuildTasks/*" } |
+    ForEach-Object {
+        $fullPath = Join-Path -Path $repoRoot -ChildPath ($_.path -replace '/', '\')
+        if (Test-Path -LiteralPath $fullPath -PathType Container) {
+            $fullPath
+        }
+    } |
+    Sort-Object -Unique
 
-$buildTasksFiles = Get-ChildItem -Path "BuildTasks\*" -File -Recurse | Where-Object {
-    # Select files that don't have an extension (no dot in the name or ends with a dot)
-    $_.Name -notmatch '\.[^.]+$' -or $_.Name.EndsWith('.')
+$buildTasksFiles = @()
+
+if ($manifestTaskDirectories.Count -eq 0) {
+    Write-Host "No BuildTasks directories referenced in manifest; skipping scan." -ForegroundColor Yellow
+} else {
+    Write-Host "Scanning BuildTasks folders referenced in manifest for files without extensions..." -ForegroundColor Yellow
+
+    $buildTasksFiles = $manifestTaskDirectories | ForEach-Object {
+        Get-ChildItem -Path $_ -File -Recurse
+    } | Where-Object {
+        # Select files that don't have an extension (no dot in the name or ends with a dot)
+        $_.Name -notmatch '\.[^.]+$' -or $_.Name.EndsWith('.')
+    }
 }
 
 Write-Host "Found $($buildTasksFiles.Count) files without extensions" -ForegroundColor Cyan
@@ -44,7 +63,7 @@ foreach ($file in $extensionManifest.files) {
 # Add files without extensions to the manifest if they're not already there
 $addedCount = 0
 foreach ($file in $buildTasksFiles) {
-    $relativePath = $file.FullName.Substring((Get-Location).Path.Length + 1).Replace('\', '/')
+    $relativePath = $file.FullName.Substring($repoRoot.Length + 1).Replace('\', '/')
     
     if (-not $existingFilePaths.ContainsKey($relativePath)) {
         $extensionManifest.files += @{

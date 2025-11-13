@@ -37,9 +37,8 @@ stages:
         $vswhereLatest = "https://github.com/Microsoft/vswhere/releases/latest/download/vswhere.exe"
 
         $targets = @(
-          ".\BuildTasks\PublishVSExtension\v4\tools\",
-          ".\BuildTasks\PublishVSExtension\v5\tools\"
-          ".\BuildTasks\PublishVSExtension\v5\PublishVSExtension\v5\tools\"
+          ".\BuildTasks\PublishVSExtension\tools\"
+          ".\BuildTasks\PublishVSExtension\PublishVSExtension\tools\"
         )
 
         invoke-webrequest $vswhereLatest -OutFile $env:temp\vswhere.exe
@@ -66,8 +65,8 @@ stages:
 
     - pwsh: |
         $erroractionpreference = "silentlycontinue"
-        del BuildTasks\PublishExtension\v5\node_modules\7zip-bin\linux -recurse
-        del BuildTasks\PublishExtension\v5\node_modules\7zip-bin\mac -recurse
+        del BuildTasks\PublishExtension\node_modules\7zip-bin\linux -recurse
+        del BuildTasks\PublishExtension\node_modules\7zip-bin\mac -recurse
         del -include @(
             "package-lock.json",
             "*.ts",
@@ -75,8 +74,17 @@ stages:
             "tsconfig.json",
             ".snyk",
             "*.md",
-            "tsconfig.tsbuildinfo"
-        ) -recurse BuildTasks\*\v*
+            "tsconfig.tsbuildinfo",
+            "@types"
+        ) -recurse BuildTasks\*\
+
+        del -include @(
+            "msal-browser"
+        ) -recurse BuildTasks\*\node_modules\@azure\
+
+        del -include @(
+            "_tests"
+        ) -recurse BuildTasks\TfxInstaller\node_modules\tfx-cli\
 
         del -include @(
             ".package-lock.json",
@@ -99,12 +107,15 @@ stages:
             "LICENSE-MIT",
             "LICENSE",
             "license",
-            "AUTHORS"
-        ) -recurse BuildTasks\*\v*\node_modules -force  
+            "AUTHORS",
+            "tfx-cli-0.22.2.tgz",
+            "typings",
+            "browser"
+        ) -recurse BuildTasks\*\node_modules -force  
 
         del -include @(
             "*.pem"
-        ) -recurse BuildTasks\*\v*\node_modules\azure-pipelines-tasks-azure-arm-rest\openssl\PEM\ -force  
+        ) -recurse BuildTasks\*\node_modules\azure-pipelines-tasks-azure-arm-rest\openssl*\PEM\ -force  
       displayName: 'Delete unneeded files'
     - pwsh: |
         ./fix-manifest-file.ps1
@@ -134,6 +145,19 @@ stages:
         rootFolder: '$(Build.SourcesDirectory)'
         outputPath: '$(Build.ArtifactStagingDirectory)\vsts-developer-tools-build-tasks-private.vsix'
         publisherId: 'ms-devlabs'
+        extensionName: 'Azure DevOps Extension Tasks'
+        extensionId: 'vsts-developer-tools-build-tasks'
+        extensionVersion: '$(Build.BuildNumber)'
+        extensionTag: '-dev'
+        extensionVisibility: 'private'
+
+    - task: PackageAzureDevOpsExtension@5
+      name: 'packagedebug'
+      displayName: 'Package the private extension'
+      inputs:
+        rootFolder: '$(Build.SourcesDirectory)'
+        outputPath: '$(Build.ArtifactStagingDirectory)\jessehouwing.vsts-developer-tools-build-tasks-dev.vsix'
+        publisherId: 'jessehouwing'
         extensionName: 'Azure DevOps Extension Tasks'
         extensionId: 'vsts-developer-tools-build-tasks'
         extensionVersion: '$(Build.BuildNumber)'

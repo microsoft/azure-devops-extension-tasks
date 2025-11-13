@@ -20,7 +20,7 @@
     "Visual Studio Extensions"
   ],
   "icons": {
-    "default": "tools-icon.png"
+    "default": "Metadata/Images/tools-icon.png"
   },
   "public": true,
   "targets": [
@@ -34,7 +34,7 @@
   ],
   "content": {
     "details": {
-      "path": "overview.md"
+      "path": "Metadata/overview.md"
     },
     "license": {
       "path": "license.txt"
@@ -94,11 +94,11 @@
       "path": "BuildTasks/TfxInstaller"
     },
     {
-      "path": "add-task.png",
+      "path": "Metadata/Images/add-task.png",
       "addressable": true
     },
     {
-      "path": "permissions.png",
+      "path": "Metadata/Images/permissions.png",
       "addressable": true
     }
   ],
