@@ -42,7 +42,7 @@ catch (error: any) {
 async function getTfx(versionSpec: string, checkLatest: boolean): Promise<void> {
     if (versionSpec === "builtin") {
         const currentDir = path.dirname(fileURLToPath(import.meta.url));
-        const builtInTfxPath = findTfxExecutablePath(path.join(currentDir, "..", ".."));
+        const builtInTfxPath = findTfxExecutablePath(path.join(currentDir, ".."));
 
         if (os.platform() !== "win32") {
             
