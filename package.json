@@ -43,7 +43,7 @@
     "eslint": "^9.39.2",
     "glob-exec": "^0.1.1",
     "globals": "^16.5.0",
-    "tfx-cli": "^0.22.5",
+    "tfx-cli": "^0.22.6",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.50.0"
   }
