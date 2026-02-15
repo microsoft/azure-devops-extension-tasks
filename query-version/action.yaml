@@ -1,9 +1,9 @@
-name: Unpublish Azure DevOps Extension
-description: Remove an Azure DevOps extension from the Visual Studio Marketplace
+name: Query Azure DevOps Extension Version
+description: Query extension version from marketplace with optional version increment logic
 author: Jesse Houwing
 branding:
-  icon: trash-2
-  color: red
+  icon: search
+  color: blue
 inputs:
   auth-type:
     description: |-
@@ -112,13 +112,60 @@ inputs:
 
       **Example:** `my-extension` or `azure-devops-tasks`
     required: true
+  extension-tag:
+    description: |-
+      **Tag suffix** appended to extension ID for creating variants.
+
+      **Use cases:**
+      - Create dev/test versions: `-dev`, `-test`
+      - Preview releases: `-preview`, `-beta`
+      - Branch-specific builds
+
+      **Example:** If Extension ID is `my-extension` and tag is `-dev`, the actual ID becomes `my-extension-dev`
+    required: false
+  version-action:
+    description: |-
+      **Action to apply to the marketplace version**.
+
+      - `None`: Use the current latest marketplace version
+      - `Major`: Increment major and reset minor/patch
+      - `Minor`: Increment minor and reset patch
+      - `Patch`: Increment patch
+
+      **Example:** If latest is `1.2.3` and action is `Minor`, result is `1.3.0`
+    required: false
+    default: None
+  extension-version-override:
+    description: |-
+      **Variable name containing a version override**.
+
+      If set and the variable exists, that value is used instead of querying marketplace.
+
+      **Example:** `MY_VERSION` where `${{ env.MY_VERSION }}` is `2.1.0`
+    required: false
+  output-variable:
+    description: |-
+      **Name to use for storing output** (deprecated - use outputs instead).
+
+      **Package:** Stores path to generated .vsix file
+      **Show:** Stores JSON metadata about the extension
+
+      **Note:** Prefer using action outputs (`steps.<id>.outputs.vsix-path`)
+    required: false
+outputs:
+  proposed-version:
+    description: '**Proposed extension version** after applying version action (query-version operation only).'
+    value: ${{ steps.query-version.outputs.proposed-version }}
+  current-version:
+    description: '**Current marketplace version** before applying version action (query-version operation only).'
+    value: ${{ steps.query-version.outputs.current-version }}
 runs:
   using: composite
   steps:
-    - id: unpublish
+    - id: query-version
       uses: jessehouwing/azure-devops-extension-tasks@v6
       with:
-        operation: unpublish
+        operation: query-version
         auth-type: ${{ inputs.auth-type }}
         token: ${{ inputs.token }}
         username: ${{ inputs.username }}
@@ -128,3 +175,7 @@ runs:
         tfx-version: ${{ inputs.tfx-version }}
         publisher-id: ${{ inputs.publisher-id }}
         extension-id: ${{ inputs.extension-id }}
+        extension-tag: ${{ inputs.extension-tag }}
+        version-action: ${{ inputs.version-action }}
+        extension-version-override: ${{ inputs.extension-version-override }}
+        output-variable: ${{ inputs.output-variable }}

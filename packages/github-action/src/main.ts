@@ -10,8 +10,9 @@ import {
   unshareExtension,
   installExtension,
   showExtension,
-  isValidExtension,
-  verifyInstall,
+  queryVersion,
+  waitForValidation,
+  waitForInstallation,
   validateExtensionId,
   validatePublisherId,
   validateVersion,
@@ -108,7 +109,7 @@ async function run(): Promise<void> {
     }
 
     // Validate account URLs for operations that need them
-    if (operation === 'install' || operation === 'verify-install') {
+    if (operation === 'install' || operation === 'wait-for-installation') {
       const accounts = platform.getDelimitedInput('accounts', ';', false);
       accounts.forEach(account => {
         if (account) {
@@ -146,13 +147,17 @@ async function run(): Promise<void> {
       case 'show':
         await runShow(platform, tfxManager, auth!);
         break;
-      
-      case 'is-valid':
-        await runIsValid(platform, tfxManager, auth!);
+
+      case 'query-version':
+        await runQueryVersion(platform, tfxManager, auth!);
         break;
       
-      case 'verify-install':
-        await runVerifyInstall(platform, auth!);
+      case 'wait-for-validation':
+        await runWaitForValidation(platform, tfxManager, auth!);
+        break;
+      
+      case 'wait-for-installation':
+        await runWaitForInstallation(platform, auth!);
         break;
       
       default:
@@ -263,8 +268,31 @@ async function runShow(platform: GitHubAdapter, tfxManager: TfxManager, auth: an
   }
 }
 
-async function runIsValid(platform: GitHubAdapter, tfxManager: TfxManager, auth: any): Promise<void> {
-  const result = await isValidExtension({
+async function runQueryVersion(platform: GitHubAdapter, tfxManager: TfxManager, auth: any): Promise<void> {
+  const result = await queryVersion(
+    {
+      publisherId: platform.getInput('publisher-id', true)!,
+      extensionId: platform.getInput('extension-id', true)!,
+      extensionTag: platform.getInput('extension-tag'),
+      versionAction: (platform.getInput('version-action') as
+        | 'None'
+        | 'Major'
+        | 'Minor'
+        | 'Patch') ?? 'None',
+      extensionVersionOverrideVariable: platform.getInput('extension-version-override'),
+      outputVariable: platform.getInput('output-variable'),
+    },
+    auth,
+    tfxManager,
+    platform
+  );
+
+  platform.setOutput('proposed-version', result.proposedVersion);
+  platform.setOutput('current-version', result.currentVersion);
+}
+
+async function runWaitForValidation(platform: GitHubAdapter, tfxManager: TfxManager, auth: any): Promise<void> {
+  const result = await waitForValidation({
     publisherId: platform.getInput('publisher-id', true)!,
     extensionId: platform.getInput('extension-id', true)!,
     rootFolder: platform.getInput('root-folder'),
@@ -279,7 +307,7 @@ async function runIsValid(platform: GitHubAdapter, tfxManager: TfxManager, auth:
   }
 }
 
-async function runVerifyInstall(platform: GitHubAdapter, auth: any): Promise<void> {
+async function runWaitForInstallation(platform: GitHubAdapter, auth: any): Promise<void> {
   const expectedTasksInput = platform.getInput('expected-tasks');
   let expectedTasks;
   if (expectedTasksInput) {
@@ -290,7 +318,7 @@ async function runVerifyInstall(platform: GitHubAdapter, auth: any): Promise<voi
     }
   }
 
-  const result = await verifyInstall({
+  const result = await waitForInstallation({
     publisherId: platform.getInput('publisher-id', true)!,
     extensionId: platform.getInput('extension-id', true)!,
     accounts: platform.getDelimitedInput('accounts', '\n', true),

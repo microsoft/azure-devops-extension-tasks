@@ -7,7 +7,7 @@ Verify that an Azure DevOps extension has been installed correctly and that all 
 ### Verify with Manifest
 
 ```yaml
-- uses: jessehouwing/azure-devops-extension-tasks/verify-install@v6
+- uses: jessehouwing/azure-devops-extension-tasks/wait-for-installation@v6
   with:
     token: ${{ secrets.MARKETPLACE_TOKEN }}
     publisher-id: 'my-publisher'
@@ -19,7 +19,7 @@ Verify that an Azure DevOps extension has been installed correctly and that all 
 ### Verify with VSIX
 
 ```yaml
-- uses: jessehouwing/azure-devops-extension-tasks/verify-install@v6
+- uses: jessehouwing/azure-devops-extension-tasks/wait-for-installation@v6
   with:
     token: ${{ secrets.MARKETPLACE_TOKEN }}
     publisher-id: 'my-publisher'
@@ -31,7 +31,7 @@ Verify that an Azure DevOps extension has been installed correctly and that all 
 ### Verify with Expected Tasks JSON
 
 ```yaml
-- uses: jessehouwing/azure-devops-extension-tasks/verify-install@v6
+- uses: jessehouwing/azure-devops-extension-tasks/wait-for-installation@v6
   with:
     token: ${{ secrets.MARKETPLACE_TOKEN }}
     publisher-id: 'my-publisher'
@@ -47,7 +47,7 @@ Verify that an Azure DevOps extension has been installed correctly and that all 
 ### Verify Multiple Accounts
 
 ```yaml
-- uses: jessehouwing/azure-devops-extension-tasks/verify-install@v6
+- uses: jessehouwing/azure-devops-extension-tasks/wait-for-installation@v6
   with:
     token: ${{ secrets.MARKETPLACE_TOKEN }}
     publisher-id: 'my-publisher'
@@ -62,7 +62,7 @@ Verify that an Azure DevOps extension has been installed correctly and that all 
 ### With Custom Timeout and Polling
 
 ```yaml
-- uses: jessehouwing/azure-devops-extension-tasks/verify-install@v6
+- uses: jessehouwing/azure-devops-extension-tasks/wait-for-installation@v6
   with:
     token: ${{ secrets.MARKETPLACE_TOKEN }}
     publisher-id: 'my-publisher'
@@ -82,7 +82,7 @@ Verify that an Azure DevOps extension has been installed correctly and that all 
     tenant-id: ${{ secrets.AZURE_TENANT_ID }}
     subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-- uses: jessehouwing/azure-devops-extension-tasks/verify-install@v6
+- uses: jessehouwing/azure-devops-extension-tasks/wait-for-installation@v6
   with:
     auth-type: 'oidc'
     publisher-id: 'my-publisher'
@@ -165,7 +165,7 @@ jobs:
           accounts: 'production-org'
       
       - name: Verify Installation
-        uses: jessehouwing/azure-devops-extension-tasks/verify-install@v6
+        uses: jessehouwing/azure-devops-extension-tasks/wait-for-installation@v6
         with:
           token: ${{ secrets.MARKETPLACE_TOKEN }}
           publisher-id: 'my-publisher'
@@ -202,6 +202,6 @@ Each task can have multiple versions. The verification succeeds if ALL specified
 ## See Also
 
 - [Install](../install) - Install extension to accounts
-- [Is Valid](../is-valid) - Validate extension in marketplace
+- [Wait for Validation](../wait-for-validation) - Validate extension in marketplace
 - [Show](../show) - Display extension metadata
 - [Main Action](../) - All-in-one action with all commands

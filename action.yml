@@ -18,8 +18,9 @@ inputs:
       - `unshare`: Unshare extension from organizations
       - `install`: Install extension to Azure DevOps organizations
       - `show`: Query and display extension metadata
-      - `is-valid`: Validate extension is properly configured
-      - `verify-install`: Verify tasks are available after installation
+      - `query-version`: Query latest extension version and optionally increment it
+      - `wait-for-validation`: Wait for extension validation to complete
+      - `wait-for-installation`: Wait for tasks to be available after installation
     required: true
   
   # Authentication
@@ -120,7 +121,7 @@ inputs:
       **Publisher ID** that owns the extension.
       
       - Must match publisher in manifest (or override it)
-      - Required for all operations except package (if not in manifest)
+      - Required for command: install, query-version, share, show, unpublish, unshare, wait-for-installation, wait-for-validation.
       - Alphanumeric with hyphens, dots, underscores only
       
       **Example:** `mycompany` or `my-publisher-id`
@@ -131,7 +132,7 @@ inputs:
       
       - Must match ID in manifest (or override it)
       - Combined with Publisher ID forms full identifier: `publisherId.extensionId`
-      - Required for all operations except package (if not in manifest)
+      - Required for command: install, query-version, share, show, unpublish, unshare, wait-for-installation, wait-for-validation.
       - Alphanumeric with hyphens, dots, underscores only
       
       **Example:** `my-extension` or `azure-devops-tasks`
@@ -273,7 +274,7 @@ inputs:
     description: |
       **Organizations to share extension with** (newline-separated).
       
-      - Required for private extensions
+      - Required for command: share.
       - Format: organization name only (not full URL)
       
       **Example:**
@@ -322,6 +323,7 @@ inputs:
     description: |
       **Organizations to unshare extension from** (newline-separated).
       
+      - Required for command: unshare.
       - Removes extension access from specified organizations
       - Format: organization name only (not full URL)
       
@@ -337,6 +339,7 @@ inputs:
     description: |
       **Azure DevOps accounts/organizations** to install extension to (newline-separated).
       
+      - Required for command: install, wait-for-installation.
       - Format: Full organization URL or organization name
       - Organizations must have access to the extension (shared if private)
       - Requires organization administrator permissions
@@ -354,7 +357,7 @@ inputs:
       ```
     required: false
   
-  # IsValid Options
+  # WaitForValidation Options
   max-retries:
     description: |
       **Maximum retry attempts** for extension validation.
@@ -385,8 +388,30 @@ inputs:
       **Default:** `15`
     required: false
     default: '15'
+
+  # QueryVersion Options
+  version-action:
+    description: |
+      **Action to apply to the marketplace version**.
+
+      - `None`: Use the current latest marketplace version
+      - `Major`: Increment major and reset minor/patch
+      - `Minor`: Increment minor and reset patch
+      - `Patch`: Increment patch
+
+      **Example:** If latest is `1.2.3` and action is `Minor`, result is `1.3.0`
+    required: false
+    default: 'None'
+  extension-version-override:
+    description: |
+      **Variable name containing a version override**.
+
+      If set and the variable exists, that value is used instead of querying marketplace.
+
+      **Example:** `MY_VERSION` where `${{ env.MY_VERSION }}` is `2.1.0`
+    required: false
   
-  # VerifyInstall Options
+  # WaitForInstallation Options
   expected-tasks:
     description: |
       **Expected tasks as JSON** - manually specify tasks to verify.
@@ -479,6 +504,12 @@ outputs:
       
       - run: echo '${{ steps.show.outputs.extension-metadata }}' | jq .
       ```
+  proposed-version:
+    description: |
+      **Proposed extension version** after applying version action (query-version operation only).
+  current-version:
+    description: |
+      **Current marketplace version** before applying version action (query-version operation only).
 
 runs:
   using: 'node20'

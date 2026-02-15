@@ -1,9 +1,9 @@
-name: Unpublish Azure DevOps Extension
-description: Remove an Azure DevOps extension from the Visual Studio Marketplace
+name: Validate Azure DevOps Extension
+description: Validate an Azure DevOps extension in the marketplace
 author: Jesse Houwing
 branding:
-  icon: trash-2
-  color: red
+  icon: check-circle
+  color: green
 inputs:
   auth-type:
     description: |-
@@ -112,13 +112,43 @@ inputs:
 
       **Example:** `my-extension` or `azure-devops-tasks`
     required: true
+  max-retries:
+    description: |-
+      **Maximum retry attempts** for extension validation.
+
+      - Validation can take time as marketplace processes the extension
+      - Task retries with exponential backoff
+
+      **Default:** `10`
+    required: false
+    default: '10'
+  min-timeout:
+    description: |-
+      **Minimum timeout between retry attempts** (in minutes).
+
+      - Initial wait time before first retry
+      - Increases exponentially up to max-timeout
+
+      **Default:** `1`
+    required: false
+    default: '1'
+  max-timeout:
+    description: |-
+      **Maximum timeout between retry attempts** (in minutes).
+
+      - Maximum wait time between retries
+      - Timeout increases exponentially from min-timeout
+
+      **Default:** `15`
+    required: false
+    default: '15'
 runs:
   using: composite
   steps:
-    - id: unpublish
+    - id: wait-for-validation
       uses: jessehouwing/azure-devops-extension-tasks@v6
       with:
-        operation: unpublish
+        operation: wait-for-validation
         auth-type: ${{ inputs.auth-type }}
         token: ${{ inputs.token }}
         username: ${{ inputs.username }}
@@ -128,3 +158,6 @@ runs:
         tfx-version: ${{ inputs.tfx-version }}
         publisher-id: ${{ inputs.publisher-id }}
         extension-id: ${{ inputs.extension-id }}
+        max-retries: ${{ inputs.max-retries }}
+        min-timeout: ${{ inputs.min-timeout }}
+        max-timeout: ${{ inputs.max-timeout }}

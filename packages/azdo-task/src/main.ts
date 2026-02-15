@@ -10,8 +10,9 @@ import {
   unshareExtension,
   installExtension,
   showExtension,
-  isValidExtension,
-  verifyInstall,
+  queryVersion,
+  waitForValidation,
+  waitForInstallation,
   validateExtensionId,
   validatePublisherId,
   validateVersion,
@@ -94,7 +95,7 @@ async function run(): Promise<void> {
     }
 
     // Validate account URLs for operations that need them
-    if (operation === 'install' || operation === 'verifyInstall') {
+    if (operation === 'install' || operation === 'waitForInstallation') {
       const accounts = platform.getDelimitedInput('accounts', ';', false);
       accounts.forEach(account => {
         if (account) {
@@ -132,13 +133,18 @@ async function run(): Promise<void> {
       case 'show':
         await runShow(platform, tfxManager, auth!);
         break;
-      
-      case 'isValid':
-        await runIsValid(platform, tfxManager, auth!);
+
+      case 'QueryVersion':
+      case 'queryVersion':
+        await runQueryVersion(platform, tfxManager, auth!);
         break;
       
-      case 'verifyInstall':
-        await runVerifyInstall(platform, auth!);
+      case 'waitForValidation':
+        await runWaitForValidation(platform, tfxManager, auth!);
+        break;
+      
+      case 'waitForInstallation':
+        await runWaitForInstallation(platform, auth!);
         break;
       
       default:
@@ -250,8 +256,35 @@ async function runShow(platform: AzdoAdapter, tfxManager: TfxManager, auth: any)
   }
 }
 
-async function runIsValid(platform: AzdoAdapter, tfxManager: TfxManager, auth: any): Promise<void> {
-  const result = await isValidExtension({
+async function runQueryVersion(platform: AzdoAdapter, tfxManager: TfxManager, auth: any): Promise<void> {
+  const result = await queryVersion(
+    {
+      publisherId: platform.getInput('publisherId', true)!,
+      extensionId: platform.getInput('extensionId', true)!,
+      extensionTag: platform.getInput('extensionTag'),
+      versionAction: (platform.getInput('versionAction') as
+        | 'None'
+        | 'Major'
+        | 'Minor'
+        | 'Patch') ?? 'None',
+      extensionVersionOverrideVariable: platform.getInput('extensionVersionOverride'),
+      outputVariable: platform.getInput('outputVariable'),
+    },
+    auth,
+    tfxManager,
+    platform
+  );
+
+  if (platform.getBoolInput('setBuildNumber')) {
+    tl.command('build.updatebuildnumber', undefined, result.proposedVersion);
+  }
+
+  platform.setOutput('Extension.ProposedVersion', result.proposedVersion);
+  platform.setOutput('Extension.CurrentVersion', result.currentVersion);
+}
+
+async function runWaitForValidation(platform: AzdoAdapter, tfxManager: TfxManager, auth: any): Promise<void> {
+  const result = await waitForValidation({
     publisherId: platform.getInput('publisherId', true)!,
     extensionId: platform.getInput('extensionId', true)!,
     rootFolder: platform.getInput('rootFolder'),
@@ -266,7 +299,7 @@ async function runIsValid(platform: AzdoAdapter, tfxManager: TfxManager, auth: a
   }
 }
 
-async function runVerifyInstall(platform: AzdoAdapter, auth: any): Promise<void> {
+async function runWaitForInstallation(platform: AzdoAdapter, auth: any): Promise<void> {
   const expectedTasksInput = platform.getInput('expectedTasks');
   let expectedTasks;
   if (expectedTasksInput) {
@@ -277,7 +310,7 @@ async function runVerifyInstall(platform: AzdoAdapter, auth: any): Promise<void>
     }
   }
 
-  const result = await verifyInstall({
+  const result = await waitForInstallation({
     publisherId: platform.getInput('publisherId', true)!,
     extensionId: platform.getInput('extensionId', true)!,
     accounts: platform.getDelimitedInput('accounts', '\n', true),

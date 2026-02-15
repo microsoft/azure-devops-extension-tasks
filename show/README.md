@@ -106,5 +106,5 @@ jobs:
 ## See Also
 
 - [Publish](../publish) - Publish extension to marketplace
-- [Is Valid](../is-valid) - Validate extension
+- [Wait for Validation](../wait-for-validation) - Validate extension
 - [Main Action](../) - All-in-one action with all commands

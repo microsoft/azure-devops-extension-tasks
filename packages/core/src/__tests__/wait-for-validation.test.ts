@@ -1,10 +1,10 @@
-import { describe, it, expect, beforeEach, jest } from '@jest/globals';
-import { isValidExtension } from '../commands/is-valid.js';
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
+import type { AuthCredentials } from '../auth.js';
+import { waitForValidation } from '../commands/wait-for-validation.js';
 import { TfxManager } from '../tfx-manager.js';
 import { MockPlatformAdapter } from './helpers/mock-platform.js';
-import type { AuthCredentials } from '../auth.js';
 
-describe('isValidExtension', () => {
+describe('waitForValidation', () => {
   let platform: MockPlatformAdapter;
   let tfxManager: TfxManager;
   let auth: AuthCredentials;
@@ -12,7 +12,7 @@ describe('isValidExtension', () => {
   beforeEach(() => {
     platform = new MockPlatformAdapter();
     platform.registerTool('tfx', '/usr/bin/tfx');
-    tfxManager = new TfxManager({ version: 'built-in', platform });
+    tfxManager = new TfxManager({ tfxVersion: 'built-in', platform });
     auth = {
       authType: 'pat',
       serviceUrl: 'https://marketplace.visualstudio.com',
@@ -29,7 +29,7 @@ describe('isValidExtension', () => {
       stderr: '',
     });
 
-    const result = await isValidExtension(
+    const result = await waitForValidation(
       {
         publisherId: 'pub',
         extensionId: 'ext',
@@ -69,7 +69,7 @@ describe('isValidExtension', () => {
       stderr: '',
     });
 
-    const result = await isValidExtension(
+    const result = await waitForValidation(
       {
         publisherId: 'pub',
         extensionId: 'ext',
@@ -96,7 +96,7 @@ describe('isValidExtension', () => {
       stderr: '',
     });
 
-    const result = await isValidExtension(
+    const result = await waitForValidation(
       {
         publisherId: 'pub',
         extensionId: 'ext',
@@ -121,7 +121,7 @@ describe('isValidExtension', () => {
       stderr: '',
     });
 
-    const result = await isValidExtension(
+    const result = await waitForValidation(
       {
         publisherId: 'pub',
         extensionId: 'ext',
@@ -148,7 +148,7 @@ describe('isValidExtension', () => {
       stderr: '',
     });
 
-    await isValidExtension(
+    await waitForValidation(
       {
         publisherId: 'pub',
         extensionId: 'ext',
@@ -177,7 +177,7 @@ describe('isValidExtension', () => {
       stderr: '',
     });
 
-    await isValidExtension(
+    await waitForValidation(
       {
         publisherId: 'pub',
         extensionId: 'ext',
@@ -202,7 +202,7 @@ describe('isValidExtension', () => {
       stderr: '',
     });
 
-    await isValidExtension(
+    await waitForValidation(
       {
         publisherId: 'pub',
         extensionId: 'ext',
@@ -230,7 +230,7 @@ describe('isValidExtension', () => {
       stderr: '',
     });
 
-    await isValidExtension(
+    await waitForValidation(
       {
         publisherId: 'pub',
         extensionId: 'ext',

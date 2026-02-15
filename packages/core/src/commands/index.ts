@@ -9,7 +9,8 @@ export * from './share.js';
 export * from './unshare.js';
 export * from './install.js';
 export * from './show.js';
-export * from './is-valid.js';
-export * from './verify-install.js';
+export * from './query-version.js';
+export * from './wait-for-validation.js';
+export * from './wait-for-installation.js';
 // Additional commands will be exported here as they are implemented
-// export * from './verify-install.js';
+// export * from './wait-for-installation.js';

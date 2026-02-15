@@ -1,9 +1,9 @@
 import { WebApi, getPersonalAccessTokenHandler } from 'azure-devops-node-api';
 import type { ITaskAgentApi } from 'azure-devops-node-api/TaskAgentApi.js';
 import type { TaskDefinition } from 'azure-devops-node-api/interfaces/TaskAgentInterfaces.js';
-import type { IPlatformAdapter } from '../platform.js';
 import type { AuthCredentials } from '../auth.js';
 import { readManifest, resolveTaskManifestPaths } from '../manifest-utils.js';
+import type { IPlatformAdapter } from '../platform.js';
 import { VsixReader } from '../vsix-reader.js';
 
 export interface ExpectedTask {
@@ -11,7 +11,7 @@ export interface ExpectedTask {
   versions: string[]; // Expected versions (major.minor.patch)
 }
 
-export interface VerifyInstallOptions {
+export interface WaitForInstallationOptions {
   publisherId: string;
   extensionId: string;
   extensionTag?: string;
@@ -31,7 +31,7 @@ export interface InstalledTask {
   matchesExpected: boolean; // True if this version is one of the expected versions
 }
 
-export interface VerifyInstallResult {
+export interface WaitForInstallationResult {
   success: boolean;
   accountResults: {
     accountUrl: string;
@@ -48,7 +48,7 @@ export interface VerifyInstallResult {
  * Resolve expected tasks from various sources
  */
 async function resolveExpectedTasks(
-  options: VerifyInstallOptions,
+  options: WaitForInstallationOptions,
   platform: IPlatformAdapter
 ): Promise<ExpectedTask[]> {
   // If expectedTasks is provided directly, use it
@@ -129,11 +129,11 @@ async function resolveExpectedTasks(
  * Verify that an extension's tasks are installed and available in Azure DevOps organizations.
  * Uses Azure DevOps REST API to poll for task availability.
  */
-export async function verifyInstall(
-  options: VerifyInstallOptions,
+export async function waitForInstallation(
+  options: WaitForInstallationOptions,
   auth: AuthCredentials,
   platform: IPlatformAdapter
-): Promise<VerifyInstallResult> {
+): Promise<WaitForInstallationResult> {
   const fullExtensionId = options.extensionTag
     ? `${options.extensionId}${options.extensionTag}`
     : options.extensionId;
@@ -148,7 +148,7 @@ export async function verifyInstall(
   // Resolve expected tasks with versions
   const expectedTasks = await resolveExpectedTasks(options, platform);
 
-  const accountResults: VerifyInstallResult['accountResults'] = [];
+  const accountResults: WaitForInstallationResult['accountResults'] = [];
 
   for (const accountUrl of options.accounts) {
     platform.debug(`Checking account: ${accountUrl}`);
@@ -159,7 +159,7 @@ export async function verifyInstall(
     try {
       // Create Azure DevOps API connection
       if (!auth.token) {
-        throw new Error('PAT token is required for verifyInstall command');
+        throw new Error('PAT token is required for waitForInstallation command');
       }
 
       const handler = getPersonalAccessTokenHandler(auth.token);

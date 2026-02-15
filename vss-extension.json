@@ -3,7 +3,7 @@
   "id": "vsts-developer-tools-build-tasks",
   "publisher": "ms-devlabs",
   "name": "Azure DevOps Extension Tasks",
-  "version": "5.0.0",
+  "version": "6.0.0",
   "description": "Azure Pipelines tasks for packaging and publishing Azure Devops and Visual Studio extensions to the Visual Studio Marketplace.",
   "tags": [
     "Extension",
@@ -62,34 +62,10 @@
   ],
   "files": [
     {
-      "path": "BuildTasks/ExtensionVersion"
+      "path": "packages/azdo-task"
     },
     {
-      "path": "BuildTasks/InstallExtension"
-    },
-    {
-      "path": "BuildTasks/IsValidExtension"
-    },
-    {
-      "path": "BuildTasks/IsValidExtensionAgent"
-    },
-    {
-      "path": "BuildTasks/PackageExtension"
-    },
-    {
-      "path": "BuildTasks/PublishExtension"
-    },
-    {
-      "path": "BuildTasks/UnpublishExtension"
-    },
-    {
-      "path": "BuildTasks/PublishVSExtension"
-    },
-    {
-      "path": "BuildTasks/ShareExtension"
-    },
-    {
-      "path": "BuildTasks/TfxInstaller"
+      "path": "packages/azdo-server-task"
     },
     {
       "path": "Metadata/Images/add-task.png",
@@ -102,83 +78,19 @@
   ],
   "contributions": [
     {
-      "id": "package-extension-build-task",
+      "id": "all-in-one",
       "type": "ms.vss-distributed-task.task",
       "targets": ["ms.vss-distributed-task.tasks"],
       "properties": {
-        "name": "BuildTasks/PackageExtension"
+        "name": "packages/azdo-task"
       }
     },
     {
-      "id": "publish-extension-build-task",
+      "id": "wait-for-validation",
       "type": "ms.vss-distributed-task.task",
       "targets": ["ms.vss-distributed-task.tasks"],
       "properties": {
-        "name": "BuildTasks/PublishExtension"
-      }
-    },
-    {
-      "id": "unpublish-extension-build-task",
-      "type": "ms.vss-distributed-task.task",
-      "targets": ["ms.vss-distributed-task.tasks"],
-      "properties": {
-        "name": "BuildTasks/UnpublishExtension"
-      }
-    },
-    {
-      "id": "publish-vs-extension-build-task",
-      "type": "ms.vss-distributed-task.task",
-      "targets": ["ms.vss-distributed-task.tasks"],
-      "properties": {
-        "name": "BuildTasks/PublishVSExtension"
-      }
-    },
-    {
-      "id": "install-extension-build-task",
-      "type": "ms.vss-distributed-task.task",
-      "targets": ["ms.vss-distributed-task.tasks"],
-      "properties": {
-        "name": "BuildTasks/InstallExtension"
-      }
-    },
-    {
-      "id": "is-valid-extension-build-task",
-      "type": "ms.vss-distributed-task.task",
-      "targets": ["ms.vss-distributed-task.tasks"],
-      "properties": {
-        "name": "BuildTasks/IsValidExtension"
-      }
-    },
-    {
-      "id": "is-valid-extension-agent-build-task",
-      "type": "ms.vss-distributed-task.task",
-      "targets": ["ms.vss-distributed-task.tasks"],
-      "properties": {
-        "name": "BuildTasks/IsValidExtensionAgent"
-      }
-    },
-    {
-      "id": "extension-version-build-task",
-      "type": "ms.vss-distributed-task.task",
-      "targets": ["ms.vss-distributed-task.tasks"],
-      "properties": {
-        "name": "BuildTasks/ExtensionVersion"
-      }
-    },
-    {
-      "id": "share-extension-build-task",
-      "type": "ms.vss-distributed-task.task",
-      "targets": ["ms.vss-distributed-task.tasks"],
-      "properties": {
-        "name": "BuildTasks/ShareExtension"
-      }
-    },
-    {
-      "id": "tfx-installer-build-task",
-      "type": "ms.vss-distributed-task.task",
-      "targets": ["ms.vss-distributed-task.tasks"],
-      "properties": {
-        "name": "BuildTasks/TfxInstaller"
+        "name": "packages/azdo-server-task"
       }
     },
     {

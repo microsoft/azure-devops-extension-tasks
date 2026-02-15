@@ -1,93 +1,258 @@
-name: 'Publish Azure DevOps Extension'
-description: 'Publish an Azure DevOps extension to the Visual Studio Marketplace'
-author: 'Jesse Houwing'
+name: Publish Azure DevOps Extension
+description: Publish an Azure DevOps extension to the Visual Studio Marketplace
+author: Jesse Houwing
 branding:
-  icon: 'upload-cloud'
-  color: 'blue'
-
+  icon: upload-cloud
+  color: blue
 inputs:
-  # Authentication (Required for publish)
   auth-type:
-    description: 'Authentication type: pat or oidc (default: pat)'
+    description: |-
+      Authentication type: 'pat', 'basic', or 'oidc'
+      - pat: Use Personal Access Token (recommended for most users)
+      - basic: Use username/password authentication (for on-premises Azure DevOps Server)
+      - oidc: Use Azure OIDC via azure/login action (requires setup, see below)
+
+      PAT Setup:
+      Provide a Personal Access Token via the 'token' input
+
+      Basic Auth Setup:
+      Provide username and password via 'username' and 'password' inputs
+
+      OIDC Setup:
+      Run azure/login action BEFORE this action:
+
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      Then use auth-type: oidc (no token needed)
+
+      See: https://jessehouwing.net/authenticate-connect-mggraph-using-oidc-in-github-actions/
+
+      Default: pat
     required: false
-    default: 'pat'
+    default: pat
   token:
-    description: 'Personal Access Token (required when auth-type is pat)'
+    description: |-
+      Personal Access Token for marketplace authentication
+      Required when auth-type is 'pat'
+      Not needed for other auth types
+
+      Required scopes: Marketplace (Publish)
+      Create a PAT at: https://dev.azure.com/_usersSettings/tokens
     required: false
-  
-  # TFX Configuration
+  username:
+    description: |-
+      Username for basic authentication
+      Required when auth-type is 'basic'
+      Not needed for other auth types
+
+      Use for on-premises TFS or Azure DevOps Server deployments
+    required: false
+  password:
+    description: |-
+      Password for basic authentication
+      Required when auth-type is 'basic'
+      Not needed for other auth types
+
+      Use for on-premises TFS or Azure DevOps Server deployments
+    required: false
+  service-url:
+    description: |-
+      Azure DevOps service URL (optional)
+
+      - Defaults to marketplace URL for cloud operations
+      - Specify custom URL for on-premises Azure DevOps Server
+      - Must be HTTPS and valid Azure DevOps domain
+
+      Examples:
+      - https://marketplace.visualstudio.com (default)
+      - https://dev.azure.com/myorg
+      - https://myserver.com/tfs
+    required: false
+  marketplace-url:
+    description: |-
+      Visual Studio Marketplace URL (optional)
+
+      - Defaults to: https://marketplace.visualstudio.com
+      - Only needed for custom marketplace endpoints
+      - Must be HTTPS URL
+
+      Example: https://marketplace.visualstudio.com
+    required: false
   tfx-version:
-    description: "Version of tfx-cli to use: 'built-in' (bundled), 'path' (system), or version spec (e.g., '^0.17', 'latest')"
+    description: |-
+      **Version of tfx-cli to use:**
+
+      - `built-in` (default): Use tfx-cli bundled with this action
+      - `path`: Use tfx-cli from system PATH
+      - Version spec: Download specific version from npm (e.g., `^0.17`, `0.17.0`, `latest`)
+
+      **Examples:** `built-in`, `path`, `^0.17`, `latest`
     required: false
-    default: 'built-in'
-  
-  # Extension Identity
+    default: built-in
   publisher-id:
-    description: 'Publisher ID'
+    description: |-
+      **Publisher ID** that owns the extension.
+
+      - Must match publisher in manifest (or override it)
+      - Alphanumeric with hyphens, dots, underscores only
+
+      **Example:** `mycompany` or `my-publisher-id`
     required: false
   extension-id:
-    description: 'Extension ID'
+    description: |-
+      **Extension ID** - unique identifier within the publisher namespace.
+
+      - Must match ID in manifest (or override it)
+      - Combined with Publisher ID forms full identifier: `publisherId.extensionId`
+      - Alphanumeric with hyphens, dots, underscores only
+
+      **Example:** `my-extension` or `azure-devops-tasks`
     required: false
   extension-tag:
-    description: 'Extension tag to append to extension ID'
+    description: |-
+      **Tag suffix** appended to extension ID for creating variants.
+
+      **Use cases:**
+      - Create dev/test versions: `-dev`, `-test`
+      - Preview releases: `-preview`, `-beta`
+      - Branch-specific builds
+
+      **Example:** If Extension ID is `my-extension` and tag is `-dev`, the actual ID becomes `my-extension-dev`
     required: false
-  
-  # Source Selection
   publish-source:
-    description: 'Source for publish: manifest or vsix (default: manifest)'
+    description: |-
+      **Source for publish operation:**
+
+      - `manifest` (default): Build extension from manifest and source files
+      - `vsix`: Publish a pre-built .vsix package
+
+      **Use VSIX when:** You've already packaged the extension separately
     required: false
-    default: 'manifest'
-  
-  # Manifest Source (when publish-source is manifest)
+    default: manifest
   root-folder:
-    description: 'Root folder for extension files'
+    description: |-
+      **Root folder** containing extension manifest and source files.
+
+      - Defaults to repository root if not specified
+      - All file paths in manifest are relative to this folder
+      - Must contain `vss-extension.json` (or other manifest specified in manifest-globs)
     required: false
   manifest-globs:
-    description: 'Manifest file patterns (newline-separated)'
+    description: |-
+      **Glob patterns for manifest files** (newline-separated).
+
+      - Defaults to `vss-extension.json` if not specified
+      - Can specify multiple patterns for multi-manifest scenarios
+      - Patterns are relative to root-folder
+
+      **Example:**
+      ```
+      vss-extension.json
+      manifests/**/*.json
+      ```
     required: false
-  
-  # VSIX Source (when publish-source is vsix)
   vsix-file:
-    description: 'Path to .vsix file'
+    description: |-
+      **Path to pre-built .vsix file** (for publish operation).
+
+      - Use when publish-source is 'vsix'
+      - File must be a valid extension package
+      - Supports GitHub Actions expressions
+
+      **Example:** `${{ github.workspace }}/dist/my-extension.vsix`
     required: false
-  
-  # Metadata Overrides
   extension-version:
-    description: 'Extension version override'
+    description: |-
+      **Override extension version** specified in manifest.
+
+      - Must follow semantic versioning: `major.minor.patch`
+      - Useful for CI/CD pipelines to inject build numbers
+
+      **Examples:** `1.2.3`, `1.0.${{ github.run_number }}`
     required: false
   extension-name:
-    description: 'Extension name override'
+    description: |-
+      **Override extension display name** shown in marketplace.
+
+      - Does not affect the extension ID
+      - Useful for creating branded variants (e.g., "My Extension (Dev)")
+
+      **Example:** `My Extension - Development`
     required: false
   extension-visibility:
-    description: 'Extension visibility (private, public, private_preview, public_preview)'
+    description: |-
+      **Override extension visibility** in marketplace.
+
+      - `private`: Only visible to organizations you share it with
+      - `public`: Visible to everyone in the marketplace
+      - `private_preview`: Private extension in preview mode
+      - `public_preview`: Public extension in preview mode
+
+      **Note:** Private extensions must be explicitly shared with organizations
     required: false
-  
-  # Publish Options
   share-with:
-    description: 'Organizations to share with (newline-separated)'
+    description: |-
+      **Organizations to share extension with** (newline-separated).
+
+      - Format: organization name only (not full URL)
+
+      **Example:**
+      ```
+      myorg1
+      myorg2
+      contoso
+      ```
     required: false
   no-wait-validation:
-    description: 'Do not wait for validation to complete'
+    description: |-
+      **Do not wait for marketplace validation** after publishing.
+
+      - By default, action waits for validation (can take several minutes)
+      - Enable to publish and continue immediately
+      - Extension may not be immediately available
+
+      **Default:** `false` (waits for validation)
     required: false
     default: 'false'
   update-tasks-version:
-    description: 'Update task versions to match extension version'
+    description: |-
+      **Automatically update task versions** to match extension version.
+
+      - Updates all task.json files in the extension
+      - Useful for keeping task and extension versions in sync
+
+      **Default:** `false`
     required: false
     default: 'false'
   update-tasks-id:
-    description: 'Update task IDs (generates new deterministic IDs)'
+    description: |-
+      **Generate new deterministic task IDs** for all tasks.
+
+      - Creates UUID v5 IDs based on publisher + extension + task name
+      - Use when creating extension variants (dev, test versions)
+
+      **Warning:** Changing task IDs creates new tasks - existing pipelines won't auto-update
+
+      **Default:** `false`
     required: false
     default: 'false'
-
 runs:
-  using: 'composite'
+  using: composite
   steps:
     - id: publish
       uses: jessehouwing/azure-devops-extension-tasks@v6
       with:
-        operation: 'publish'
+        operation: publish
         auth-type: ${{ inputs.auth-type }}
         token: ${{ inputs.token }}
+        username: ${{ inputs.username }}
+        password: ${{ inputs.password }}
+        service-url: ${{ inputs.service-url }}
+        marketplace-url: ${{ inputs.marketplace-url }}
         tfx-version: ${{ inputs.tfx-version }}
         publisher-id: ${{ inputs.publisher-id }}
         extension-id: ${{ inputs.extension-id }}

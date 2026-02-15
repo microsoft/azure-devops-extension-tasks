@@ -35,6 +35,15 @@ When creating a personal access token for use by your pipeline, make sure the to
 
 ![Permissions](./Metadata/Images/permissions.png)
 
+## Documentation
+
+- [v6 docs index](./docs/README.md)
+- [Using v6 in Azure Pipelines](./docs/azure-pipelines.md)
+- [Using v6 in GitHub Actions](./docs/github-actions.md)
+- [Authentication and OIDC](./docs/authentication-and-oidc.md)
+- [Design and architecture](./docs/design-and-architecture.md)
+- [Contributing guide](./docs/contributing.md)
+
 ## Contribute
 
 1. From the root of the repo run `npm run initdev`. This will pull down the necessary modules and TypeScript declare files.

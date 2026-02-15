@@ -1,69 +1,206 @@
-name: 'Verify Azure DevOps Extension Installation'
-description: 'Verify that an Azure DevOps extension has been installed correctly'
-author: 'Jesse Houwing'
+name: Verify Azure DevOps Extension Installation
+description: Verify that an Azure DevOps extension has been installed correctly
+author: Jesse Houwing
 branding:
-  icon: 'check-square'
-  color: 'green'
-
+  icon: check-square
+  color: green
 inputs:
-  # Authentication (Required)
   auth-type:
-    description: 'Authentication type: pat or oidc (default: pat)'
+    description: |-
+      Authentication type: 'pat', 'basic', or 'oidc'
+      - pat: Use Personal Access Token (recommended for most users)
+      - basic: Use username/password authentication (for on-premises Azure DevOps Server)
+      - oidc: Use Azure OIDC via azure/login action (requires setup, see below)
+
+      PAT Setup:
+      Provide a Personal Access Token via the 'token' input
+
+      Basic Auth Setup:
+      Provide username and password via 'username' and 'password' inputs
+
+      OIDC Setup:
+      Run azure/login action BEFORE this action:
+
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      Then use auth-type: oidc (no token needed)
+
+      See: https://jessehouwing.net/authenticate-connect-mggraph-using-oidc-in-github-actions/
+
+      Default: pat
     required: false
-    default: 'pat'
+    default: pat
   token:
-    description: 'Personal Access Token (required when auth-type is pat)'
+    description: |-
+      Personal Access Token for marketplace authentication
+      Required when auth-type is 'pat'
+      Not needed for other auth types
+
+      Required scopes: Marketplace (Publish)
+      Create a PAT at: https://dev.azure.com/_usersSettings/tokens
     required: false
-  
-  # TFX Configuration
+  username:
+    description: |-
+      Username for basic authentication
+      Required when auth-type is 'basic'
+      Not needed for other auth types
+
+      Use for on-premises TFS or Azure DevOps Server deployments
+    required: false
+  password:
+    description: |-
+      Password for basic authentication
+      Required when auth-type is 'basic'
+      Not needed for other auth types
+
+      Use for on-premises TFS or Azure DevOps Server deployments
+    required: false
+  service-url:
+    description: |-
+      Azure DevOps service URL (optional)
+
+      - Defaults to marketplace URL for cloud operations
+      - Specify custom URL for on-premises Azure DevOps Server
+      - Must be HTTPS and valid Azure DevOps domain
+
+      Examples:
+      - https://marketplace.visualstudio.com (default)
+      - https://dev.azure.com/myorg
+      - https://myserver.com/tfs
+    required: false
+  marketplace-url:
+    description: |-
+      Visual Studio Marketplace URL (optional)
+
+      - Defaults to: https://marketplace.visualstudio.com
+      - Only needed for custom marketplace endpoints
+      - Must be HTTPS URL
+
+      Example: https://marketplace.visualstudio.com
+    required: false
   tfx-version:
-    description: "Version of tfx-cli to use: 'built-in' (bundled), 'path' (system), or version spec (e.g., '^0.17', 'latest')"
+    description: |-
+      **Version of tfx-cli to use:**
+
+      - `built-in` (default): Use tfx-cli bundled with this action
+      - `path`: Use tfx-cli from system PATH
+      - Version spec: Download specific version from npm (e.g., `^0.17`, `0.17.0`, `latest`)
+
+      **Examples:** `built-in`, `path`, `^0.17`, `latest`
     required: false
-    default: 'built-in'
-  
-  # Extension Identity (Required)
+    default: built-in
   publisher-id:
-    description: 'Publisher ID'
+    description: |-
+      **Publisher ID** that owns the extension.
+
+      - Must match publisher in manifest (or override it)
+      - Alphanumeric with hyphens, dots, underscores only
+
+      **Example:** `mycompany` or `my-publisher-id`
     required: true
   extension-id:
-    description: 'Extension ID'
+    description: |-
+      **Extension ID** - unique identifier within the publisher namespace.
+
+      - Must match ID in manifest (or override it)
+      - Combined with Publisher ID forms full identifier: `publisherId.extensionId`
+      - Alphanumeric with hyphens, dots, underscores only
+
+      **Example:** `my-extension` or `azure-devops-tasks`
     required: true
-  
-  # Account (Required)
   accounts:
-    description: 'Azure DevOps accounts/organizations to verify (newline-separated)'
+    description: |-
+      **Azure DevOps accounts/organizations** to install extension to (newline-separated).
+
+      - Format: Full organization URL or organization name
+      - Organizations must have access to the extension (shared if private)
+      - Requires organization administrator permissions
+
+      **Example:**
+      ```
+      https://dev.azure.com/myorg1
+      https://dev.azure.com/myorg2
+      ```
+
+      Or just:
+      ```
+      myorg1
+      myorg2
+      ```
     required: true
-  
-  # Expected Tasks (at least one required)
   expected-tasks:
-    description: 'Expected tasks JSON (array of {name, versions})'
+    description: |-
+      **Expected tasks as JSON** - manually specify tasks to verify.
+
+      **Format:** Array of objects with `name` and `versions` properties
+
+      **Example:**
+      ```json
+      [
+        {"name": "MyTask", "versions": ["1.0.0", "1.0.1"]},
+        {"name": "AnotherTask", "versions": ["2.0.0"]}
+      ]
+      ```
+
+      **Note:** Use this OR auto-discovery options (manifest-path/vsix-path), not both
     required: false
   manifest-path:
-    description: 'Path to extension manifest (auto-discovers task versions)'
+    description: |-
+      **Path to extension manifest** for auto-discovering task versions.
+
+      - Reads manifest to find all tasks and their versions
+      - More convenient than manually specifying expected tasks
+
+      **Note:** Use this OR expected-tasks/vsix-path, not multiple
     required: false
   vsix-path:
-    description: 'Path to .vsix file (extracts task versions)'
+    description: |-
+      **Path to .vsix file** for auto-extracting task versions.
+
+      - Extracts task.json files from VSIX package
+      - Most convenient when verifying immediately after packaging
+
+      **Note:** Use this OR expected-tasks/manifest-path, not multiple
     required: false
-  
-  # Verification Options
   timeout-minutes:
-    description: 'Timeout for verification (minutes)'
+    description: |-
+      **Maximum time to wait** for tasks to become available (in minutes).
+
+      - Task polls Azure DevOps at regular intervals
+      - If tasks don't appear within timeout, verification fails
+
+      **Default:** `10`
     required: false
     default: '10'
   polling-interval-seconds:
-    description: 'Polling interval (seconds)'
+    description: |-
+      **Interval between task availability checks** (in seconds).
+
+      - How often to check if tasks are available
+      - Lower values detect availability faster but create more API calls
+
+      **Recommendation:** 30-60 seconds is usually sufficient
+
+      **Default:** `30`
     required: false
     default: '30'
-
 runs:
-  using: 'composite'
+  using: composite
   steps:
-    - id: verify-install
+    - id: wait-for-installation
       uses: jessehouwing/azure-devops-extension-tasks@v6
       with:
-        operation: 'verify-install'
+        operation: wait-for-installation
         auth-type: ${{ inputs.auth-type }}
         token: ${{ inputs.token }}
+        username: ${{ inputs.username }}
+        password: ${{ inputs.password }}
+        service-url: ${{ inputs.service-url }}
+        marketplace-url: ${{ inputs.marketplace-url }}
         tfx-version: ${{ inputs.tfx-version }}
         publisher-id: ${{ inputs.publisher-id }}
         extension-id: ${{ inputs.extension-id }}

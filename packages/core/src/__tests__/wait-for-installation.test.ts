@@ -1,15 +1,18 @@
-import { describe, it, expect } from '@jest/globals';
-import type { VerifyInstallOptions, ExpectedTask } from '../commands/verify-install.js';
+import { describe, expect, it } from '@jest/globals';
+import type {
+    ExpectedTask,
+    WaitForInstallationOptions,
+} from '../commands/wait-for-installation.js';
 
-describe('verifyInstall', () => {
-  it('should export verifyInstall function', async () => {
-    const { verifyInstall } = await import('../commands/verify-install.js');
-    expect(verifyInstall).toBeDefined();
-    expect(typeof verifyInstall).toBe('function');
+describe('waitForInstallation', () => {
+  it('should export waitForInstallation function', async () => {
+    const { waitForInstallation } = await import('../commands/wait-for-installation.js');
+    expect(waitForInstallation).toBeDefined();
+    expect(typeof waitForInstallation).toBe('function');
   });
 
   it('should have correct option types', () => {
-    const options: VerifyInstallOptions = {
+    const options: WaitForInstallationOptions = {
       publisherId: 'test',
       extensionId: 'test',
       accounts: ['https://dev.azure.com/org'],
@@ -20,7 +23,7 @@ describe('verifyInstall', () => {
   });
 
   it('should support optional timeout and polling options', () => {
-    const options: VerifyInstallOptions = {
+    const options: WaitForInstallationOptions = {
       publisherId: 'test',
       extensionId: 'test',
       accounts: ['https://dev.azure.com/org'],
@@ -39,7 +42,7 @@ describe('verifyInstall', () => {
       { name: 'PackageExtension', versions: ['6.0.0'] },
     ];
 
-    const options: VerifyInstallOptions = {
+    const options: WaitForInstallationOptions = {
       publisherId: 'test',
       extensionId: 'test',
       accounts: ['https://dev.azure.com/org'],
@@ -57,7 +60,7 @@ describe('verifyInstall', () => {
       { name: 'PackageExtension', versions: ['6.0.0', '6.1.0'] },
     ];
 
-    const options: VerifyInstallOptions = {
+    const options: WaitForInstallationOptions = {
       publisherId: 'test',
       extensionId: 'test',
       accounts: ['https://dev.azure.com/org'],
@@ -73,7 +76,7 @@ describe('verifyInstall', () => {
   });
 
   it('should support manifestPath option', () => {
-    const options: VerifyInstallOptions = {
+    const options: WaitForInstallationOptions = {
       publisherId: 'test',
       extensionId: 'test',
       accounts: ['https://dev.azure.com/org'],
@@ -83,7 +86,7 @@ describe('verifyInstall', () => {
   });
 
   it('should support vsixPath option', () => {
-    const options: VerifyInstallOptions = {
+    const options: WaitForInstallationOptions = {
       publisherId: 'test',
       extensionId: 'test',
       accounts: ['https://dev.azure.com/org'],
@@ -93,7 +96,7 @@ describe('verifyInstall', () => {
   });
 
   it('should support multiple Azure DevOps accounts', () => {
-    const options: VerifyInstallOptions = {
+    const options: WaitForInstallationOptions = {
       publisherId: 'test',
       extensionId: 'test',
       accounts: [
@@ -113,7 +116,7 @@ describe('verifyInstall', () => {
       { name: 'AnyVersionTask', versions: [] },
     ];
 
-    const options: VerifyInstallOptions = {
+    const options: WaitForInstallationOptions = {
       publisherId: 'test',
       extensionId: 'test',
       accounts: ['https://dev.azure.com/org'],
@@ -124,18 +127,18 @@ describe('verifyInstall', () => {
   });
 
   it('should properly type InstalledTask with matchesExpected field', async () => {
-    const { verifyInstall } = await import('../commands/verify-install.js');
+    const { waitForInstallation } = await import('../commands/wait-for-installation.js');
     
     // This test just verifies the type compiles correctly
     // Actual verification would require mocking Azure DevOps API
-    expect(verifyInstall).toBeDefined();
+    expect(waitForInstallation).toBeDefined();
   });
 
-  it('should properly type VerifyInstallResult with missingVersions', async () => {
-    const { verifyInstall } = await import('../commands/verify-install.js');
+  it('should properly type WaitForInstallationResult with missingVersions', async () => {
+    const { waitForInstallation } = await import('../commands/wait-for-installation.js');
     
     // This test just verifies the type compiles correctly
     // The result should have both missingTasks and missingVersions arrays
-    expect(verifyInstall).toBeDefined();
+    expect(waitForInstallation).toBeDefined();
   });
 });

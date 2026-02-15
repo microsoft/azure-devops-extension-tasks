@@ -15,10 +15,12 @@ packages/
 │   │   ├── auth/         # Authentication providers
 │   │   ├── tfx-manager.ts # tfx-cli lifecycle management
 │   │   └── validation.ts  # Input validation
-│   └── dist/             # Bundled output
+│   └── dist/             # Compiled output
 ├── azdo-task/            # Azure Pipelines Task adapter
 │   ├── src/main.ts       # Entry point, routes to core commands
 │   └── dist/             # Bundled for Azure Pipelines
+├── azdo-server-task/     # Azure Pipelines Server Task (validation gate)
+│   └── task.json         # Server task definition (no code, runs on server)
 └── github-action/        # GitHub Actions adapter
     ├── src/main.ts       # Entry point, routes to core commands
     └── dist/             # Bundled for GitHub Actions
@@ -43,17 +45,14 @@ npm run lint             # Lint all packages
 
 ### Building
 ```bash
-npm run build:core       # Build core library only
-npm run build:azdo       # Build Azure Pipelines task
-npm run build:github     # Build GitHub Action
+npm run build            # Build all packages
 npm run bundle           # Bundle for distribution
 ```
 
 ### Testing
 ```bash
 npm test                 # Run all tests
-npm run test:core        # Test core library
-npm run test:integration # Run integration tests
+npm run test:coverage    # Run tests with coverage
 ```
 
 ## Platform Adapters Pattern
@@ -422,8 +421,8 @@ external: [
 ```
 
 **Platform-specific bundles:**
-- `packages/azdo-task/dist/main.js` - Azure Pipelines bundle
-- `packages/github-action/dist/main.js` - GitHub Actions bundle
+- `packages/azdo-task/dist/bundle.js` - Azure Pipelines bundle
+- `packages/github-action/dist/bundle.js` - GitHub Actions bundle
 
 **Build command:**
 ```bash
@@ -693,6 +692,16 @@ npm test           # Run tests
 npm run lint       # Lint code
 ```
 
+### CRITICAL: End-of-Job Verification
+**Before completing any coding session, ALWAYS run:**
+```bash
+npm run format          # Fix formatting issues
+npm run lint:fix        # Fix linting issues  
+npm run test            # Verify all tests pass
+npm run bundle          # Regenerate distribution bundles
+```
+This ensures code style consistency, no regressions, and bundle files stay in sync. CI will fail otherwise.
+
 ### Key Files
 - `packages/core/src/commands/` - Command implementations
 - `packages/core/src/manifest-*` - Manifest architecture
@@ -707,4 +716,4 @@ npm run lint       # Lint code
 - `CommandOptions` - Command input parameters
 - `CommandResult` - Command return value
 
-This document focuses exclusively on v6 architecture. V5 code (BuildTasks/) will be removed when v6 is production-ready.
+This document covers the v6 architecture. The v5 code has been removed.

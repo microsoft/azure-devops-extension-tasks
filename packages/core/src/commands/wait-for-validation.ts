@@ -1,11 +1,11 @@
 /**
- * IsValid command - Validates extension against marketplace with retry
+ * WaitForValidation command - Validates extension against marketplace with retry
  */
 
+import { ArgBuilder } from '../arg-builder.js';
+import type { AuthCredentials } from '../auth.js';
 import type { IPlatformAdapter } from '../platform.js';
 import type { TfxManager } from '../tfx-manager.js';
-import type { AuthCredentials } from '../auth.js';
-import { ArgBuilder } from '../arg-builder.js';
 
 /**
  * Validation status from marketplace
@@ -13,9 +13,9 @@ import { ArgBuilder } from '../arg-builder.js';
 export type ValidationStatus = 'pending' | 'success' | 'failed' | 'error';
 
 /**
- * Options for isValid command
+ * Options for waitForValidation command
  */
-export interface IsValidOptions {
+export interface WaitForValidationOptions {
   /** Publisher ID */
   publisherId: string;
   /** Extension ID */
@@ -35,9 +35,9 @@ export interface IsValidOptions {
 }
 
 /**
- * Result from isValid command
+ * Result from waitForValidation command
  */
-export interface IsValidResult {
+export interface WaitForValidationResult {
   /** Validation status */
   status: ValidationStatus;
   /** Whether extension is valid */
@@ -55,18 +55,18 @@ export interface IsValidResult {
 /**
  * Validate extension against marketplace
  * Retries if validation is pending
- * @param options IsValid options
+ * @param options WaitForValidation options
  * @param auth Authentication credentials
  * @param tfx TfxManager instance
  * @param platform Platform adapter
- * @returns IsValid result
+ * @returns WaitForValidation result
  */
-export async function isValidExtension(
-  options: IsValidOptions,
+export async function waitForValidation(
+  options: WaitForValidationOptions,
   auth: AuthCredentials,
   tfx: TfxManager,
   platform: IPlatformAdapter
-): Promise<IsValidResult> {
+): Promise<WaitForValidationResult> {
   platform.info(`Validating extension ${options.publisherId}.${options.extensionId}...`);
 
   // Build extension ID with tag if provided

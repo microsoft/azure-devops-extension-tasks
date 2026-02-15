@@ -1,8 +1,0 @@
-*/Common/
-*/*Extension*/
-*/*Installer*/
-*/*.js
-*/*.js.map
-*/*.tsbuildinfo
-*/node_modules/
-vswhere.exe

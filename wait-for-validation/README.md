@@ -1,44 +1,30 @@
-# Install Azure DevOps Extension
+# Validate Azure DevOps Extension (wait-for-validation)
 
-Install an Azure DevOps extension to specific accounts/organizations.
+Validate that an Azure DevOps extension has been successfully processed by the marketplace.
 
 ## Usage
 
-### Install to Single Account
+### Basic Validation
 
 ```yaml
-- uses: jessehouwing/azure-devops-extension-tasks/install@v6
+- uses: jessehouwing/azure-devops-extension-tasks/wait-for-validation@v6
   with:
     token: ${{ secrets.MARKETPLACE_TOKEN }}
     publisher-id: 'my-publisher'
     extension-id: 'my-extension'
-    accounts: 'myorg'
 ```
 
-### Install to Multiple Accounts
+### With Custom Retry Settings
 
 ```yaml
-- uses: jessehouwing/azure-devops-extension-tasks/install@v6
+- uses: jessehouwing/azure-devops-extension-tasks/wait-for-validation@v6
   with:
     token: ${{ secrets.MARKETPLACE_TOKEN }}
     publisher-id: 'my-publisher'
     extension-id: 'my-extension'
-    accounts: |
-      myorg1
-      myorg2
-      myorg3
-```
-
-### Install Specific Version
-
-```yaml
-- uses: jessehouwing/azure-devops-extension-tasks/install@v6
-  with:
-    token: ${{ secrets.MARKETPLACE_TOKEN }}
-    publisher-id: 'my-publisher'
-    extension-id: 'my-extension'
-    extension-version: '1.2.3'
-    accounts: 'myorg'
+    max-retries: '20'
+    min-timeout: '2'
+    max-timeout: '30'
 ```
 
 ### With OIDC Authentication
@@ -50,12 +36,11 @@ Install an Azure DevOps extension to specific accounts/organizations.
     tenant-id: ${{ secrets.AZURE_TENANT_ID }}
     subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-- uses: jessehouwing/azure-devops-extension-tasks/install@v6
+- uses: jessehouwing/azure-devops-extension-tasks/wait-for-validation@v6
   with:
     auth-type: 'oidc'
     publisher-id: 'my-publisher'
     extension-id: 'my-extension'
-    accounts: 'myorg'
 ```
 
 ## Inputs
@@ -64,7 +49,6 @@ Install an Azure DevOps extension to specific accounts/organizations.
 
 - `publisher-id`: Publisher ID
 - `extension-id`: Extension ID
-- `accounts`: Azure DevOps accounts/organizations (newline-separated)
 - `token`: Personal Access Token (required when auth-type is `pat`)
 
 OR
@@ -80,17 +64,19 @@ OR
 #### TFX Configuration
 - `tfx-version`: Version of tfx-cli to use (default: `built-in`)
 
-#### Extension Options
-- `extension-version`: Specific version to install (default: latest)
+#### Validation Options
+- `max-retries`: Maximum retry attempts (default: `10`)
+- `min-timeout`: Minimum timeout between retries in minutes (default: `1`)
+- `max-timeout`: Maximum timeout between retries in minutes (default: `15`)
 
 ## Outputs
 
-None
+None - Action succeeds if extension is valid, fails otherwise.
 
-## Example: Install After Publishing
+## Example: Validate After Publishing
 
 ```yaml
-name: Publish and Install Extension
+name: Publish and Validate Extension
 
 on:
   push:
@@ -107,19 +93,29 @@ jobs:
         with:
           token: ${{ secrets.MARKETPLACE_TOKEN }}
           root-folder: './extension'
-          extension-version: '1.0.${{ github.run_number }}'
       
-      - name: Install to Test Org
-        uses: jessehouwing/azure-devops-extension-tasks/install@v6
+      - name: Validate Extension
+        uses: jessehouwing/azure-devops-extension-tasks/wait-for-validation@v6
         with:
           token: ${{ secrets.MARKETPLACE_TOKEN }}
           publisher-id: 'my-publisher'
           extension-id: 'my-extension'
-          accounts: 'test-org'
+          max-retries: '15'
 ```
+
+## How It Works
+
+This action polls the marketplace to check if your extension has been successfully validated after publishing. The marketplace validation process can take several minutes, so the action uses exponential backoff with configurable retry settings.
+
+**Retry Logic**:
+- Starts with minimum timeout
+- Increases timeout exponentially on each retry
+- Caps at maximum timeout
+- Stops after max-retries attempts
 
 ## See Also
 
+- [Publish](../publish) - Publish extension (use with no-wait-validation)
 - [Wait for Installation](../wait-for-installation) - Verify extension installation
-- [Share](../share) - Share extension before installing
+- [Show](../show) - Display extension metadata
 - [Main Action](../) - All-in-one action with all commands
