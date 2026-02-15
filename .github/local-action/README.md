@@ -104,14 +104,14 @@ Then run with local-action:
 1. **Use absolute paths** or ensure working directory is correct
 2. **Set MARKETPLACE_TOKEN** environment variable for authenticated operations
 3. **Check logs** in the Docker container for debugging
-4. **Build first** - Run `npm run build:v6` before testing
+4. **Build first** - Run `npm run build` before testing
 5. **Bundle for testing** - Run `npm run bundle` to test with bundled code
 
 ## Troubleshooting
 
 ### Action fails to start
 
-- Ensure you've built the action: `npm run build:v6`
+- Ensure you've built the action: `npm run build`
 - Check that action.yml exists in the root
 
 ### Authentication errors

@@ -3,7 +3,7 @@
   "tasks": [
     {
       "type": "npm",
-      "script": "build:v6",
+      "script": "build",
       "problemMatcher": ["$tsc"],
       "label": "npm: build",
       "detail": "Build all v6 packages"

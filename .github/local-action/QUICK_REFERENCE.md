@@ -153,7 +153,7 @@ AGENT_TOOLSDIRECTORY=./.cache
 
 ```bash
 npm install
-npm run build:v6
+npm run build
 ```
 
 ### Bundle

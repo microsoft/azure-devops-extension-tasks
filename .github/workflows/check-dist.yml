@@ -24,7 +24,7 @@ jobs:
 
       - name: Build and bundle
         run: |
-          npm run build:v6
+          npm run build
           npm run bundle
 
       - name: Compare the expected and actual dist/ directories
