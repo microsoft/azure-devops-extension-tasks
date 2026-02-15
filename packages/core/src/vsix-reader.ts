@@ -329,10 +329,51 @@ export class VsixReader extends ManifestReader {
    * Close the VSIX file and clean up resources
    */
   async close(): Promise<void> {
-    if (this.zipFile) {
-      this.zipFile.close();
-      this.zipFile = null;
+    const zipFile = this.zipFile;
+    this.zipFile = null;
+
+    if (zipFile) {
+      await new Promise<void>((resolve) => {
+        let settled = false;
+
+        const complete = () => {
+          if (!settled) {
+            settled = true;
+            resolve();
+          }
+        };
+
+        const onClose = () => {
+          zipFile.removeListener('error', onError);
+          complete();
+        };
+
+        const onError = () => {
+          zipFile.removeListener('close', onClose);
+          complete();
+        };
+
+        zipFile.once('close', onClose);
+        zipFile.once('error', onError);
+
+        try {
+          zipFile.close();
+        } catch {
+          zipFile.removeListener('close', onClose);
+          zipFile.removeListener('error', onError);
+          complete();
+          return;
+        }
+
+        // Safety fallback: avoid hanging if no close/error event is emitted
+        setTimeout(() => {
+          zipFile.removeListener('close', onClose);
+          zipFile.removeListener('error', onError);
+          complete();
+        }, 200);
+      });
     }
+
     this.fileCache.clear();
     this.entriesCache = null;
   }
