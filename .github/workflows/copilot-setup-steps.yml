@@ -37,13 +37,11 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: '3.x'
-          cache: pip
 
       - name: Setup Go
         uses: actions/setup-go@v6
         with:
           go-version: stable
-          cache: true
 
       - name: Ensure Azure CLI is installed
         run: |
