@@ -1,7 +1,7 @@
 {
   "manifestVersion": 1,
-  "id": "my-extension",
-  "publisher": "custom-publisher",
+  "id": "vsts-developer-tools-build-tasks",
+  "publisher": "jessehouwing",
   "name": "Azure DevOps Extension Tasks",
   "version": "6.0.0",
   "description": "Azure Pipelines tasks for packaging and publishing Azure Devops and Visual Studio extensions to the Visual Studio Marketplace.",

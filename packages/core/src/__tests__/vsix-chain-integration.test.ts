@@ -4,21 +4,13 @@
  * These tests verify the end-to-end workflow and efficient ZIP updates
  */
 
-import { describe, it, expect, beforeEach } from '@jest/globals';
-import { VsixReader } from '../vsix-reader.js';
-import { ManifestEditor } from '../manifest-editor.js';
-import {
-  writeFileSync,
-  mkdirSync,
-  existsSync,
-  statSync,
-  readFileSync,
-  createWriteStream,
-} from 'fs';
-import { join } from 'path';
+import { beforeEach, describe, expect, it } from '@jest/globals';
+import { createWriteStream, existsSync, mkdirSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
+import { join } from 'path';
 import yazl from 'yazl';
-import yauzl from 'yauzl';
+import { ManifestEditor } from '../manifest-editor.js';
+import { VsixReader } from '../vsix-reader.js';
 
 describe('VSIX Chain Integration Tests', () => {
   let testVsixPath: string;
@@ -101,8 +93,8 @@ describe('VSIX Chain Integration Tests', () => {
     zipFile.addBuffer(Buffer.from('# README\n\nThis is a test'), 'README.md');
 
     await new Promise<void>((resolve, reject) => {
-      zipFile.outputStream
-        .pipe(createWriteStream(testVsixPath))
+      (zipFile.outputStream as any)
+        .pipe(createWriteStream(testVsixPath) as any)
         .on('finish', resolve)
         .on('error', reject);
       zipFile.end();
@@ -166,8 +158,8 @@ describe('VSIX Chain Integration Tests', () => {
     const outputIcon = await outputReader.readFile('icon.png');
 
     // Verify byte-for-byte equality
-    expect(outputReadme.equals(originalReadme)).toBe(true);
-    expect(outputIcon.equals(originalIcon)).toBe(true);
+    expect(Buffer.compare(outputReadme, originalReadme)).toBe(0);
+    expect(Buffer.compare(outputIcon, originalIcon)).toBe(0);
 
     await outputReader.close();
   });

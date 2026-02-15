@@ -1,12 +1,7 @@
-import { VsixReader } from '../vsix-reader.js';
-import { writeFileSync, mkdirSync, rmSync } from 'fs';
+import { createWriteStream, mkdirSync, rmSync } from 'fs';
 import { join } from 'path';
 import yazl from 'yazl';
-import { promisify } from 'util';
-import { pipeline } from 'stream';
-import { createWriteStream } from 'fs';
-
-const pipelineAsync = promisify(pipeline);
+import { VsixReader } from '../vsix-reader.js';
 
 describe('VsixReader', () => {
   const testDir = '/tmp/vsix-reader-tests';
@@ -359,5 +354,10 @@ async function createTestVsix(outputPath: string): Promise<void> {
   zip.end();
 
   // Write to file
-  await pipelineAsync(zip.outputStream, createWriteStream(outputPath));
+  await new Promise<void>((resolve, reject) => {
+    (zip.outputStream as any)
+      .pipe(createWriteStream(outputPath) as any)
+      .on('finish', resolve)
+      .on('error', reject);
+  });
 }

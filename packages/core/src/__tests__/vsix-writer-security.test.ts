@@ -4,13 +4,13 @@
  * Verifies zip slip protection and path validation in the writer
  */
 
-import { describe, it, expect, beforeEach } from '@jest/globals';
-import { VsixReader } from '../vsix-reader.js';
-import { ManifestEditor } from '../manifest-editor.js';
-import { mkdirSync, writeFileSync, createWriteStream } from 'fs';
-import { join } from 'path';
+import { beforeEach, describe, expect, it } from '@jest/globals';
+import { createWriteStream, mkdirSync } from 'fs';
 import { tmpdir } from 'os';
+import { join } from 'path';
 import yazl from 'yazl';
+import { ManifestEditor } from '../manifest-editor.js';
+import { VsixReader } from '../vsix-reader.js';
 
 describe('VsixWriter Security Tests', () => {
   let testVsixPath: string;
@@ -36,8 +36,8 @@ describe('VsixWriter Security Tests', () => {
     zipFile.addBuffer(Buffer.from(JSON.stringify(manifest)), 'vss-extension.json');
 
     await new Promise<void>((resolve, reject) => {
-      zipFile.outputStream
-        .pipe(createWriteStream(testVsixPath))
+      (zipFile.outputStream as any)
+        .pipe(createWriteStream(testVsixPath) as any)
         .on('finish', resolve)
         .on('error', reject);
       zipFile.end();

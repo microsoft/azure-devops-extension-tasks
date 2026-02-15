@@ -8,9 +8,9 @@
  * Centralizes all logic for calculating UUIDs, updating task versions, etc.
  */
 
-import { v5 as uuidv5 } from 'uuid';
-import type { ManifestReader, ExtensionManifest, TaskManifest } from './manifest-reader.js';
 import { Buffer } from 'buffer';
+import { v5 as uuidv5 } from 'uuid';
+import type { ExtensionManifest, ManifestReader, TaskManifest } from './manifest-reader.js';
 
 /**
  * Tracks a file modification
@@ -45,6 +45,9 @@ export interface ApplyManifestOptions {
   updateTasksVersion?: boolean;
   updateTasksVersionType?: 'major' | 'minor' | 'patch';
   updateTasksId?: boolean;
+
+  // Manifest file updates
+  synchronizeBinaryFileEntries?: boolean;
 }
 
 /**
@@ -83,6 +86,7 @@ export class ManifestEditor {
   private modifications: Map<string, FileModification> = new Map();
   private manifestModifications: Partial<ExtensionManifest> = {};
   private taskManifestModifications: Map<string, Partial<TaskManifest>> = new Map();
+  private synchronizeBinaryFileEntries = false;
 
   // Track original task IDs for updating extension manifest references
   private taskIdUpdates: Map<string, { oldId: string; newId: string }> = new Map();
@@ -143,6 +147,10 @@ export class ManifestEditor {
 
     if (options.updateTasksId) {
       await this.updateAllTaskIds();
+    }
+
+    if (options.synchronizeBinaryFileEntries) {
+      this.synchronizeBinaryFileEntries = true;
     }
 
     return this;
@@ -520,5 +528,13 @@ export class ManifestEditor {
    */
   getTaskIdUpdates(): Map<string, { oldId: string; newId: string }> {
     return this.taskIdUpdates;
+  }
+
+  /**
+   * Indicates whether filesystem writer should synchronize extension binary file entries
+   * @internal
+   */
+  shouldSynchronizeBinaryFileEntries(): boolean {
+    return this.synchronizeBinaryFileEntries;
   }
 }

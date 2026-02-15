@@ -43,10 +43,6 @@ stages:
               verbose: false
               customCommand: 'run bundle'
 
-          - pwsh: |
-              ./fix-manifest-file.ps1
-            displayName: 'Fix the manifest file'
-
           - task: ExtensionTasks@6
             displayName: 'Package Extension: $(Build.SourcesDirectory)'
             name: 'packagebuild'

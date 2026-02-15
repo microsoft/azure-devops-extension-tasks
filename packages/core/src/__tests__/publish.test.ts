@@ -1,13 +1,13 @@
-import { describe, it, expect, beforeEach, jest } from '@jest/globals';
-import { publishExtension } from '../commands/publish.js';
-import { TfxManager } from '../tfx-manager.js';
-import { MockPlatformAdapter } from './helpers/mock-platform.js';
-import type { AuthCredentials } from '../auth.js';
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { promises as fs } from 'fs';
-import { join } from 'path';
 import { tmpdir } from 'os';
-import { VsixReader } from '../vsix-reader.js';
+import { join } from 'path';
+import type { AuthCredentials } from '../auth.js';
+import { publishExtension } from '../commands/publish.js';
 import { ManifestEditor } from '../manifest-editor.js';
+import { TfxManager } from '../tfx-manager.js';
+import { VsixReader } from '../vsix-reader.js';
+import { MockPlatformAdapter } from './helpers/mock-platform.js';
 
 describe('publishExtension', () => {
   let platform: MockPlatformAdapter;
@@ -102,23 +102,44 @@ describe('publishExtension', () => {
         stderr: '',
       });
 
-      await publishExtension(
-        {
-          publishSource: 'manifest',
-          rootFolder: '/project',
-          manifestGlobs: ['vss-extension.json'],
-          publisherId: 'pub',
-          extensionId: 'ext',
-          extensionVersion: '2.0.0',
-        },
-        auth,
-        tfxManager,
-        platform
+      const rootFolder = await fs.mkdtemp(join(tmpdir(), 'publish-manifest-options-'));
+      await fs.writeFile(
+        join(rootFolder, 'vss-extension.json'),
+        JSON.stringify(
+          {
+            manifestVersion: 1,
+            id: 'test-extension',
+            publisher: 'test-publisher',
+            version: '1.0.0',
+            name: 'Test Extension',
+            files: [],
+          },
+          null,
+          2
+        )
       );
+
+      try {
+        await publishExtension(
+          {
+            publishSource: 'manifest',
+            rootFolder,
+            manifestGlobs: ['vss-extension.json'],
+            publisherId: 'pub',
+            extensionId: 'ext',
+            extensionVersion: '2.0.0',
+          },
+          auth,
+          tfxManager,
+          platform
+        );
+      } finally {
+        await fs.rm(rootFolder, { recursive: true, force: true });
+      }
 
       const callArgs = mockExecute.mock.calls[0][0];
       expect(callArgs).toContain('--root');
-      expect(callArgs).toContain('/project');
+      expect(callArgs).toContain(rootFolder);
       expect(callArgs).toContain('--manifest-globs');
       expect(callArgs).toContain('vss-extension.json');
       expect(callArgs).toContain('--publisher');

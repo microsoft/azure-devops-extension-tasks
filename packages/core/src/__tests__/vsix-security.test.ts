@@ -3,13 +3,12 @@
  * Tests protection against zip slip and other security vulnerabilities
  */
 
-import { VsixReader } from '../vsix-reader.js';
-import { writeFileSync, mkdirSync, rmSync } from 'fs';
+import { createWriteStream, mkdirSync, rmSync } from 'fs';
 import { join } from 'path';
-import yazl from 'yazl';
-import { promisify } from 'util';
 import { pipeline } from 'stream';
-import { createWriteStream } from 'fs';
+import { promisify } from 'util';
+import yazl from 'yazl';
+import { VsixReader } from '../vsix-reader.js';
 
 const pipelineAsync = promisify(pipeline);
 
@@ -183,7 +182,7 @@ async function createMaliciousVsix(outputPath: string, maliciousPath: string): P
 
   zip.end();
 
-  await pipelineAsync(zip.outputStream, createWriteStream(outputPath));
+  await pipelineAsync(zip.outputStream as any, createWriteStream(outputPath) as any);
 }
 
 /**
@@ -205,7 +204,7 @@ async function createSafeVsix(outputPath: string): Promise<void> {
 
   zip.end();
 
-  await pipelineAsync(zip.outputStream, createWriteStream(outputPath));
+  await pipelineAsync(zip.outputStream as any, createWriteStream(outputPath) as any);
 }
 
 /**
@@ -230,5 +229,5 @@ async function createVsixWithEdgeCases(outputPath: string): Promise<void> {
 
   zip.end();
 
-  await pipelineAsync(zip.outputStream, createWriteStream(outputPath));
+  await pipelineAsync(zip.outputStream as any, createWriteStream(outputPath) as any);
 }

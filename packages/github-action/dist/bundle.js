@@ -478,17 +478,21 @@ var init_filesystem_manifest_writer = __esm({
         const taskManifestMods = this.editor.getTaskManifestModifications();
         const fileMods = this.editor.getModifications();
         this.platform.debug("Writing manifests to filesystem...");
+        let synchronizedManifests = [];
+        if (this.editor.shouldSynchronizeBinaryFileEntries()) {
+          synchronizedManifests = await this.synchronizeBinaryFileEntries(reader, rootFolder);
+        }
         if (taskManifestMods.size > 0) {
           await this.writeTaskManifests(reader, rootFolder, taskManifestMods);
         }
-        if (Object.keys(manifestMods).length > 0) {
-          await this.writeExtensionManifest(reader, manifestMods);
+        if (Object.keys(manifestMods).length > 0 || synchronizedManifests.length > 0) {
+          await this.writeSynchronizedManifests(reader, manifestMods, synchronizedManifests);
         }
         for (const [filePath, mod] of fileMods) {
           if (mod.type === "modify" && mod.content) {
             const absolutePath = path3.isAbsolute(filePath) ? filePath : path3.join(rootFolder, filePath);
             this.platform.debug(`Writing file: ${absolutePath}`);
-            await writeFile(absolutePath, mod.content);
+            await writeFile(absolutePath, new Uint8Array(mod.content));
           }
         }
         await this.generateOverridesFile(manifestMods);
@@ -537,7 +541,7 @@ var init_filesystem_manifest_writer = __esm({
             continue;
           }
           const taskJsonPath = path3.join(fallbackTaskDir, "task.json");
-          const content = await readFile(taskJsonPath, "utf-8");
+          const content = (await readFile(taskJsonPath)).toString("utf8");
           const manifest = JSON.parse(content);
           Object.assign(manifest, mods);
           this.platform.debug(`Fallback writing task manifest: ${taskJsonPath}`);
@@ -567,7 +571,7 @@ var init_filesystem_manifest_writer = __esm({
               continue;
             }
             try {
-              const content = await readFile(absolutePath, "utf-8");
+              const content = (await readFile(absolutePath)).toString("utf8");
               const manifest = JSON.parse(content);
               if (manifest.name === taskName) {
                 return path3.dirname(absolutePath);
@@ -581,16 +585,158 @@ var init_filesystem_manifest_writer = __esm({
       /**
        * Write extension manifest modifications to filesystem
        */
-      async writeExtensionManifest(reader, manifestMods) {
-        const manifest = await reader.readExtensionManifest();
+      async writeExtensionManifest(reader, manifestMods, baseManifest) {
+        const manifest = baseManifest ?? await reader.readExtensionManifest();
         Object.assign(manifest, manifestMods);
         const manifestPath = reader.getManifestPath();
         if (!manifestPath) {
           throw new Error("Extension manifest path not resolved");
         }
         this.platform.debug(`Writing extension manifest: ${manifestPath}`);
+        await this.writeManifestAtPath(manifestPath, manifest);
+      }
+      async writeSynchronizedManifests(reader, manifestMods, synchronizedManifests) {
+        const primaryManifestPath = reader.getManifestPath();
+        const synchronizedByPath = new Map(synchronizedManifests.map((item) => [item.manifestPath, item.manifest]));
+        if (Object.keys(manifestMods).length > 0) {
+          const primaryBaseManifest = primaryManifestPath ? synchronizedByPath.get(primaryManifestPath) : void 0;
+          await this.writeExtensionManifest(reader, manifestMods, primaryBaseManifest);
+          if (primaryManifestPath) {
+            synchronizedByPath.delete(primaryManifestPath);
+          }
+        }
+        for (const [manifestPath, manifest] of synchronizedByPath) {
+          this.platform.debug(`Writing synchronized extension manifest: ${manifestPath}`);
+          await this.writeManifestAtPath(manifestPath, manifest);
+        }
+      }
+      async writeManifestAtPath(manifestPath, manifest) {
         const manifestJson = JSON.stringify(manifest, null, 2) + "\n";
         await writeFile(manifestPath, manifestJson, "utf-8");
+      }
+      /**
+       * Synchronize extension manifest file entries for extensionless files.
+       *
+      * Behavior ported from the legacy manifest-fix workflow:
+       * 1) Remove all explicit application/octet-stream file entries
+       * 2) Re-scan manifest-referenced directories
+       * 3) Add extensionless files back as application/octet-stream
+       *
+       * packagePath mapping is preserved for added file entries.
+       */
+      async synchronizeBinaryFileEntries(reader, rootFolder) {
+        const allManifests = await reader.readAllExtensionManifests();
+        if (allManifests.length === 0) {
+          this.platform.debug("No extension manifest files array found; skipping binary file sync");
+          return [];
+        }
+        const changedManifests = [];
+        let totalRemovedCount = 0;
+        let totalAddedCount = 0;
+        for (const { path: manifestPath, manifest } of allManifests) {
+          const originalFiles = Array.isArray(manifest.files) ? manifest.files : [];
+          if (originalFiles.length === 0) {
+            continue;
+          }
+          const retainedFiles = originalFiles.filter((entry) => entry.contentType !== "application/octet-stream");
+          const removedCount = originalFiles.length - retainedFiles.length;
+          totalRemovedCount += removedCount;
+          const scanRoots = await this.getManifestDirectoryScanRoots(rootFolder, retainedFiles);
+          const existingKeys = /* @__PURE__ */ new Set();
+          for (const entry of retainedFiles) {
+            existingKeys.add(this.getManifestEntryKey(entry.path, entry.packagePath));
+          }
+          const addedEntries = [];
+          for (const scanRoot of scanRoots) {
+            const files = await this.collectFilesRecursive(scanRoot.absolutePath);
+            for (const absoluteFilePath of files) {
+              const fileName = path3.basename(absoluteFilePath);
+              if (!this.isExtensionlessFileName(fileName)) {
+                continue;
+              }
+              const relativeInsideRoot = this.toPosixPath(path3.relative(scanRoot.absolutePath, absoluteFilePath));
+              const filePath = this.joinManifestPath(scanRoot.manifestPathPrefix, relativeInsideRoot);
+              const packagePath = scanRoot.packagePathPrefix ? this.joinManifestPath(scanRoot.packagePathPrefix, relativeInsideRoot) : void 0;
+              const key = this.getManifestEntryKey(filePath, packagePath);
+              if (existingKeys.has(key)) {
+                continue;
+              }
+              existingKeys.add(key);
+              addedEntries.push({
+                path: filePath,
+                packagePath,
+                contentType: "application/octet-stream"
+              });
+            }
+          }
+          totalAddedCount += addedEntries.length;
+          if (removedCount > 0 || addedEntries.length > 0) {
+            manifest.files = [...retainedFiles, ...addedEntries];
+            changedManifests.push({ manifestPath, manifest });
+          }
+        }
+        if (changedManifests.length === 0) {
+          this.platform.debug("Binary file sync: no changes required");
+          return [];
+        }
+        this.platform.info(`Synchronized binary file entries in extension manifests (removed ${totalRemovedCount}, added ${totalAddedCount})`);
+        return changedManifests;
+      }
+      async getManifestDirectoryScanRoots(rootFolder, fileEntries) {
+        const roots = [];
+        for (const entry of fileEntries) {
+          if (!entry.path) {
+            continue;
+          }
+          const absolutePath = path3.isAbsolute(entry.path) ? entry.path : path3.join(rootFolder, entry.path.replace(/\//g, path3.sep));
+          let stats;
+          try {
+            stats = await readdir(absolutePath, { withFileTypes: true });
+          } catch {
+            continue;
+          }
+          if (Array.isArray(stats)) {
+            roots.push({
+              absolutePath,
+              manifestPathPrefix: this.toPosixPath(entry.path),
+              packagePathPrefix: entry.packagePath ? this.toPosixPath(entry.packagePath) : void 0
+            });
+          }
+        }
+        return roots;
+      }
+      async collectFilesRecursive(directory) {
+        const files = [];
+        const entries = await readdir(directory, { withFileTypes: true });
+        for (const entry of entries) {
+          const absolutePath = path3.join(directory, entry.name);
+          if (entry.isDirectory()) {
+            const nestedFiles = await this.collectFilesRecursive(absolutePath);
+            files.push(...nestedFiles);
+          } else if (entry.isFile()) {
+            files.push(absolutePath);
+          }
+        }
+        return files;
+      }
+      isExtensionlessFileName(fileName) {
+        return !/\.[^.]+$/.test(fileName) || fileName.endsWith(".");
+      }
+      toPosixPath(inputPath) {
+        return inputPath.replace(/\\/g, "/").replace(/^\.\//, "");
+      }
+      joinManifestPath(basePath, relativePath) {
+        const normalizedBase = this.toPosixPath(basePath).replace(/\/$/, "");
+        const normalizedRelative = this.toPosixPath(relativePath).replace(/^\//, "");
+        if (!normalizedRelative) {
+          return normalizedBase;
+        }
+        return `${normalizedBase}/${normalizedRelative}`;
+      }
+      getManifestEntryKey(filePath, packagePath) {
+        const normalizedPath = this.toPosixPath(filePath);
+        const normalizedPackagePath = packagePath ? this.toPosixPath(packagePath) : "";
+        return `${normalizedPath}::${normalizedPackagePath}`;
       }
       /**
        * Generate overrides.json file in temp directory
@@ -663,6 +809,7 @@ var init_manifest_editor = __esm({
       modifications = /* @__PURE__ */ new Map();
       manifestModifications = {};
       taskManifestModifications = /* @__PURE__ */ new Map();
+      synchronizeBinaryFileEntries = false;
       // Track original task IDs for updating extension manifest references
       taskIdUpdates = /* @__PURE__ */ new Map();
       constructor(options) {
@@ -709,6 +856,9 @@ var init_manifest_editor = __esm({
         }
         if (options.updateTasksId) {
           await this.updateAllTaskIds();
+        }
+        if (options.synchronizeBinaryFileEntries) {
+          this.synchronizeBinaryFileEntries = true;
         }
         return this;
       }
@@ -1018,6 +1168,13 @@ var init_manifest_editor = __esm({
       getTaskIdUpdates() {
         return this.taskIdUpdates;
       }
+      /**
+       * Indicates whether filesystem writer should synchronize extension binary file entries
+       * @internal
+       */
+      shouldSynchronizeBinaryFileEntries() {
+        return this.synchronizeBinaryFileEntries;
+      }
     };
   }
 });
@@ -1039,6 +1196,7 @@ var init_filesystem_manifest_reader = __esm({
       manifestGlobs;
       platform;
       manifestPath = null;
+      manifestPaths = null;
       extensionManifest = null;
       // Map of packagePath (task name) to actual source path
       packagePathMap = null;
@@ -1049,11 +1207,11 @@ var init_filesystem_manifest_reader = __esm({
         this.platform = options.platform;
       }
       /**
-       * Find and resolve the extension manifest file path
+       * Find and resolve all extension manifest file paths
        */
-      async resolveManifestPath() {
-        if (this.manifestPath) {
-          return this.manifestPath;
+      async resolveManifestPaths() {
+        if (this.manifestPaths) {
+          return this.manifestPaths;
         }
         const matches = await this.platform.findMatch(this.rootFolder, this.manifestGlobs);
         if (matches.length === 0) {
@@ -1061,17 +1219,26 @@ var init_filesystem_manifest_reader = __esm({
           for (const name of commonNames) {
             const candidate = path4.join(this.rootFolder, name);
             if (await this.platform.fileExists(candidate)) {
+              this.manifestPaths = [candidate];
               this.manifestPath = candidate;
-              return candidate;
+              return this.manifestPaths;
             }
           }
           throw new Error(`Extension manifest not found in ${this.rootFolder}. Tried patterns: ${this.manifestGlobs.join(", ")}`);
         }
         if (matches.length > 1) {
-          this.platform.warning(`Multiple manifest files found: ${matches.join(", ")}. Using first match.`);
+          this.platform.warning(`Multiple manifest files found: ${matches.join(", ")}. Using first match as primary.`);
         }
+        this.manifestPaths = matches;
         this.manifestPath = matches[0];
-        return this.manifestPath;
+        return this.manifestPaths;
+      }
+      /**
+       * Find and resolve the extension manifest file path
+       */
+      async resolveManifestPath() {
+        const paths = await this.resolveManifestPaths();
+        return paths[0];
       }
       /**
        * Read the extension manifest from filesystem
@@ -1082,7 +1249,7 @@ var init_filesystem_manifest_reader = __esm({
           return this.extensionManifest;
         }
         const manifestPath = await this.resolveManifestPath();
-        const content = await readFile2(manifestPath, "utf-8");
+        const content = (await readFile2(manifestPath)).toString("utf8");
         this.extensionManifest = JSON.parse(content);
         return this.extensionManifest;
       }
@@ -1160,7 +1327,7 @@ var init_filesystem_manifest_reader = __esm({
         if (!await this.platform.fileExists(taskJsonPath)) {
           throw new Error(`Task manifest not found: ${taskJsonPath}`);
         }
-        const content = await readFile2(taskJsonPath, "utf-8");
+        const content = (await readFile2(taskJsonPath)).toString("utf8");
         return JSON.parse(content);
       }
       /**
@@ -1170,7 +1337,23 @@ var init_filesystem_manifest_reader = __esm({
       async close() {
         this.extensionManifest = null;
         this.manifestPath = null;
+        this.manifestPaths = null;
         this.packagePathMap = null;
+      }
+      /**
+       * Read all extension manifests matched by manifest globs
+       */
+      async readAllExtensionManifests() {
+        const paths = await this.resolveManifestPaths();
+        const manifests = [];
+        for (const manifestPath of paths) {
+          const content = (await readFile2(manifestPath)).toString("utf8");
+          manifests.push({
+            path: manifestPath,
+            manifest: JSON.parse(content)
+          });
+        }
+        return manifests;
       }
       /**
        * Get the root folder path
@@ -2839,7 +3022,8 @@ async function packageExtension(options, tfx, platform) {
     args.flag("--rev-version");
   }
   let cleanupWriter = null;
-  const shouldApplyManifestOptions = options.updateTasksVersion || options.updateTasksId || options.extensionVersion || options.extensionName || options.extensionVisibility;
+  const synchronizeBinaryFileEntries = true;
+  const shouldApplyManifestOptions = options.updateTasksVersion || options.updateTasksId || options.extensionVersion || options.extensionName || options.extensionVisibility || options.extensionPricing || synchronizeBinaryFileEntries;
   if (shouldApplyManifestOptions) {
     platform.info("Updating task manifests before packaging...");
     try {
@@ -2857,9 +3041,11 @@ async function packageExtension(options, tfx, platform) {
         extensionVersion: options.extensionVersion,
         extensionName: options.extensionName,
         extensionVisibility: options.extensionVisibility,
+        extensionPricing: options.extensionPricing,
         updateTasksVersion: options.updateTasksVersion,
         updateTasksVersionType: options.updateTasksVersionType,
-        updateTasksId: options.updateTasksId
+        updateTasksId: options.updateTasksId,
+        synchronizeBinaryFileEntries
       });
       const writer = await editor.toWriter();
       await writer.writeToFilesystem();
@@ -2995,7 +3181,8 @@ async function publishExtension(options, auth, tfx, platform) {
       args.option("--extension-visibility", options.extensionVisibility);
     }
     let cleanupWriter = null;
-    if (options.updateTasksVersion || options.updateTasksId) {
+    const synchronizeBinaryFileEntries = true;
+    if (options.updateTasksVersion || options.updateTasksId || options.extensionPricing || synchronizeBinaryFileEntries) {
       platform.info("Updating task manifests before publishing...");
       try {
         const { FilesystemManifestReader: FilesystemManifestReader2 } = await Promise.resolve().then(() => (init_filesystem_manifest_reader(), filesystem_manifest_reader_exports));
@@ -3014,9 +3201,11 @@ async function publishExtension(options, auth, tfx, platform) {
           extensionVersion: options.extensionVersion,
           extensionName: options.extensionName,
           extensionVisibility: options.extensionVisibility,
+          extensionPricing: options.extensionPricing,
           updateTasksVersion: options.updateTasksVersion,
           updateTasksVersionType: options.updateTasksVersionType,
-          updateTasksId: options.updateTasksId
+          updateTasksId: options.updateTasksId,
+          synchronizeBinaryFileEntries
         });
         const writer = await editor.toWriter();
         await writer.writeToFilesystem();
@@ -3050,7 +3239,7 @@ async function publishExtension(options, auth, tfx, platform) {
     if (!fileExists) {
       throw new Error(`VSIX file not found: ${options.vsixFile}`);
     }
-    const needsModification = options.publisherId || options.extensionId || options.extensionVersion || options.extensionName || options.extensionVisibility || options.updateTasksVersion || options.updateTasksId;
+    const needsModification = options.publisherId || options.extensionId || options.extensionVersion || options.extensionName || options.extensionVisibility || options.extensionPricing || options.updateTasksVersion || options.updateTasksId;
     if (needsModification) {
       platform.info("Modifying VSIX before publishing...");
       const reader = await VsixReader.open(options.vsixFile);
@@ -3061,6 +3250,7 @@ async function publishExtension(options, auth, tfx, platform) {
         extensionVersion: options.extensionVersion,
         extensionName: options.extensionName,
         extensionVisibility: options.extensionVisibility,
+        extensionPricing: options.extensionPricing,
         updateTasksVersion: options.updateTasksVersion,
         updateTasksVersionType: options.updateTasksVersionType,
         updateTasksId: options.updateTasksId

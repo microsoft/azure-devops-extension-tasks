@@ -4,14 +4,14 @@
  * Tests the unified options application that eliminates code duplication
  */
 
-import { describe, it, expect, beforeEach } from '@jest/globals';
+import { beforeEach, describe, expect, it } from '@jest/globals';
+import { createWriteStream, mkdirSync, rmSync } from 'fs';
+import { tmpdir } from 'os';
+import { join } from 'path';
+import yazl from 'yazl';
 import { ManifestEditor } from '../manifest-editor.js';
 import { VsixReader } from '../vsix-reader.js';
 import { MockPlatformAdapter } from './helpers/mock-platform.js';
-import { writeFileSync, mkdirSync, createWriteStream, rmSync } from 'fs';
-import { join } from 'path';
-import { tmpdir } from 'os';
-import yazl from 'yazl';
 
 describe('ManifestEditor.applyOptions()', () => {
   let testVsixPath: string;
@@ -69,8 +69,8 @@ describe('ManifestEditor.applyOptions()', () => {
 
     // Write to file
     await new Promise<void>((resolve, reject) => {
-      zipFile.outputStream
-        .pipe(createWriteStream(testVsixPath))
+      (zipFile.outputStream as any)
+        .pipe(createWriteStream(testVsixPath) as any)
         .on('finish', resolve)
         .on('error', reject);
       zipFile.end();
@@ -321,6 +321,19 @@ describe('ManifestEditor.applyOptions()', () => {
     });
 
     expect(result).toBe(editor);
+
+    await reader.close();
+  });
+
+  it('should enable binary file synchronization when requested', async () => {
+    const reader = await VsixReader.open(testVsixPath);
+    const editor = ManifestEditor.fromReader(reader);
+
+    await editor.applyOptions({
+      synchronizeBinaryFileEntries: true,
+    });
+
+    expect(editor.shouldSynchronizeBinaryFileEntries()).toBe(true);
 
     await reader.close();
   });

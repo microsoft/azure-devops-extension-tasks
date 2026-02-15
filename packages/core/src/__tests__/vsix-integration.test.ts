@@ -3,13 +3,12 @@
  * These tests actually read and write VSIX files to ensure correct behavior
  */
 
-import { VsixReader } from '../vsix-reader.js';
-import { writeFileSync, mkdirSync, rmSync, readFileSync, existsSync } from 'fs';
+import { createWriteStream, mkdirSync, rmSync, writeFileSync } from 'fs';
 import { join } from 'path';
-import yazl from 'yazl';
-import { promisify } from 'util';
 import { pipeline } from 'stream';
-import { createWriteStream } from 'fs';
+import { promisify } from 'util';
+import yazl from 'yazl';
+import { VsixReader } from '../vsix-reader.js';
 
 const pipelineAsync = promisify(pipeline);
 
@@ -421,5 +420,5 @@ async function createRealWorldVsix(outputPath: string): Promise<void> {
   zip.end();
 
   // Write to file
-  await pipelineAsync(zip.outputStream, createWriteStream(outputPath));
+  await pipelineAsync(zip.outputStream as any, createWriteStream(outputPath) as any);
 }

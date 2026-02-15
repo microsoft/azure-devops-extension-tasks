@@ -82,6 +82,12 @@ export class FilesystemManifestWriter {
 
     this.platform.debug('Writing manifests to filesystem...');
 
+    // Optional: synchronize extension manifest binary file entries
+    let synchronizedManifests: Array<{ manifestPath: string; manifest: ExtensionManifest }> = [];
+    if (this.editor.shouldSynchronizeBinaryFileEntries()) {
+      synchronizedManifests = await this.synchronizeBinaryFileEntries(reader, rootFolder);
+    }
+
     // Step 1: Write task manifest modifications
     if (taskManifestMods.size > 0) {
       await this.writeTaskManifests(reader, rootFolder, taskManifestMods);
@@ -90,8 +96,8 @@ export class FilesystemManifestWriter {
     // Step 2: Write extension manifest modifications (if directly modifying source)
     // Note: For package command, we typically use overrides.json instead
     // But we support direct writes for other scenarios
-    if (Object.keys(manifestMods).length > 0) {
-      await this.writeExtensionManifest(reader, manifestMods);
+    if (Object.keys(manifestMods).length > 0 || synchronizedManifests.length > 0) {
+      await this.writeSynchronizedManifests(reader, manifestMods, synchronizedManifests);
     }
 
     // Step 3: Write any additional file modifications
@@ -100,7 +106,7 @@ export class FilesystemManifestWriter {
         const absolutePath = path.isAbsolute(filePath) ? filePath : path.join(rootFolder, filePath);
 
         this.platform.debug(`Writing file: ${absolutePath}`);
-        await writeFile(absolutePath, mod.content);
+        await writeFile(absolutePath, new Uint8Array(mod.content));
       }
     }
 
@@ -183,7 +189,7 @@ export class FilesystemManifestWriter {
       }
 
       const taskJsonPath = path.join(fallbackTaskDir, 'task.json');
-      const content = await readFile(taskJsonPath, 'utf-8');
+      const content = (await readFile(taskJsonPath)).toString('utf8');
       const manifest = JSON.parse(content) as TaskManifest;
       Object.assign(manifest, mods);
 
@@ -224,7 +230,7 @@ export class FilesystemManifestWriter {
         }
 
         try {
-          const content = await readFile(absolutePath, 'utf-8');
+          const content = (await readFile(absolutePath)).toString('utf8');
           const manifest = JSON.parse(content) as TaskManifest;
           if (manifest.name === taskName) {
             return path.dirname(absolutePath);
@@ -243,9 +249,10 @@ export class FilesystemManifestWriter {
    */
   private async writeExtensionManifest(
     reader: FilesystemManifestReader,
-    manifestMods: Partial<ExtensionManifest>
+    manifestMods: Partial<ExtensionManifest>,
+    baseManifest?: ExtensionManifest
   ): Promise<void> {
-    const manifest = await reader.readExtensionManifest();
+    const manifest = baseManifest ?? (await reader.readExtensionManifest());
     Object.assign(manifest, manifestMods);
 
     // Get manifest path from reader
@@ -255,8 +262,223 @@ export class FilesystemManifestWriter {
     }
 
     this.platform.debug(`Writing extension manifest: ${manifestPath}`);
+    await this.writeManifestAtPath(manifestPath, manifest);
+  }
+
+  private async writeSynchronizedManifests(
+    reader: FilesystemManifestReader,
+    manifestMods: Partial<ExtensionManifest>,
+    synchronizedManifests: Array<{ manifestPath: string; manifest: ExtensionManifest }>
+  ): Promise<void> {
+    const primaryManifestPath = (reader as any).getManifestPath() as string | null;
+    const synchronizedByPath = new Map<string, ExtensionManifest>(
+      synchronizedManifests.map((item) => [item.manifestPath, item.manifest])
+    );
+
+    // Apply explicit extension manifest modifications to primary manifest only.
+    if (Object.keys(manifestMods).length > 0) {
+      const primaryBaseManifest = primaryManifestPath
+        ? synchronizedByPath.get(primaryManifestPath)
+        : undefined;
+      await this.writeExtensionManifest(reader, manifestMods, primaryBaseManifest);
+
+      if (primaryManifestPath) {
+        synchronizedByPath.delete(primaryManifestPath);
+      }
+    }
+
+    // Write remaining synchronized manifests without extension-level overrides.
+    for (const [manifestPath, manifest] of synchronizedByPath) {
+      this.platform.debug(`Writing synchronized extension manifest: ${manifestPath}`);
+      await this.writeManifestAtPath(manifestPath, manifest);
+    }
+  }
+
+  private async writeManifestAtPath(
+    manifestPath: string,
+    manifest: ExtensionManifest
+  ): Promise<void> {
     const manifestJson = JSON.stringify(manifest, null, 2) + '\n';
     await writeFile(manifestPath, manifestJson, 'utf-8');
+  }
+
+  /**
+   * Synchronize extension manifest file entries for extensionless files.
+   *
+   * Behavior ported from the legacy manifest-fix workflow:
+   * 1) Remove all explicit application/octet-stream file entries
+   * 2) Re-scan manifest-referenced directories
+   * 3) Add extensionless files back as application/octet-stream
+   *
+   * packagePath mapping is preserved for added file entries.
+   */
+  private async synchronizeBinaryFileEntries(
+    reader: FilesystemManifestReader,
+    rootFolder: string
+  ): Promise<Array<{ manifestPath: string; manifest: ExtensionManifest }>> {
+    const allManifests = await reader.readAllExtensionManifests();
+
+    if (allManifests.length === 0) {
+      this.platform.debug('No extension manifest files array found; skipping binary file sync');
+      return [];
+    }
+
+    const changedManifests: Array<{ manifestPath: string; manifest: ExtensionManifest }> = [];
+    let totalRemovedCount = 0;
+    let totalAddedCount = 0;
+
+    for (const { path: manifestPath, manifest } of allManifests) {
+      const originalFiles = Array.isArray(manifest.files) ? manifest.files : [];
+      if (originalFiles.length === 0) {
+        continue;
+      }
+
+      const retainedFiles = originalFiles.filter(
+        (entry) => entry.contentType !== 'application/octet-stream'
+      );
+      const removedCount = originalFiles.length - retainedFiles.length;
+      totalRemovedCount += removedCount;
+
+      const scanRoots = await this.getManifestDirectoryScanRoots(rootFolder, retainedFiles);
+
+      const existingKeys = new Set<string>();
+      for (const entry of retainedFiles) {
+        existingKeys.add(this.getManifestEntryKey(entry.path, entry.packagePath));
+      }
+
+      const addedEntries: Array<{ path: string; packagePath?: string; contentType: string }> = [];
+
+      for (const scanRoot of scanRoots) {
+        const files = await this.collectFilesRecursive(scanRoot.absolutePath);
+
+        for (const absoluteFilePath of files) {
+          const fileName = path.basename(absoluteFilePath);
+          if (!this.isExtensionlessFileName(fileName)) {
+            continue;
+          }
+
+          const relativeInsideRoot = this.toPosixPath(
+            path.relative(scanRoot.absolutePath, absoluteFilePath)
+          );
+
+          const filePath = this.joinManifestPath(scanRoot.manifestPathPrefix, relativeInsideRoot);
+          const packagePath = scanRoot.packagePathPrefix
+            ? this.joinManifestPath(scanRoot.packagePathPrefix, relativeInsideRoot)
+            : undefined;
+
+          const key = this.getManifestEntryKey(filePath, packagePath);
+          if (existingKeys.has(key)) {
+            continue;
+          }
+
+          existingKeys.add(key);
+          addedEntries.push({
+            path: filePath,
+            packagePath,
+            contentType: 'application/octet-stream',
+          });
+        }
+      }
+
+      totalAddedCount += addedEntries.length;
+
+      if (removedCount > 0 || addedEntries.length > 0) {
+        manifest.files = [...retainedFiles, ...addedEntries];
+        changedManifests.push({ manifestPath, manifest });
+      }
+    }
+
+    if (changedManifests.length === 0) {
+      this.platform.debug('Binary file sync: no changes required');
+      return [];
+    }
+
+    this.platform.info(
+      `Synchronized binary file entries in extension manifests (removed ${totalRemovedCount}, added ${totalAddedCount})`
+    );
+    return changedManifests;
+  }
+
+  private async getManifestDirectoryScanRoots(
+    rootFolder: string,
+    fileEntries: Array<{ path: string; packagePath?: string }>
+  ): Promise<
+    Array<{ absolutePath: string; manifestPathPrefix: string; packagePathPrefix?: string }>
+  > {
+    const roots: Array<{
+      absolutePath: string;
+      manifestPathPrefix: string;
+      packagePathPrefix?: string;
+    }> = [];
+
+    for (const entry of fileEntries) {
+      if (!entry.path) {
+        continue;
+      }
+
+      const absolutePath = path.isAbsolute(entry.path)
+        ? entry.path
+        : path.join(rootFolder, entry.path.replace(/\//g, path.sep));
+
+      let stats;
+      try {
+        stats = await readdir(absolutePath, { withFileTypes: true });
+      } catch {
+        continue;
+      }
+
+      // If directory is readable, we consider it a scan root
+      if (Array.isArray(stats)) {
+        roots.push({
+          absolutePath,
+          manifestPathPrefix: this.toPosixPath(entry.path),
+          packagePathPrefix: entry.packagePath ? this.toPosixPath(entry.packagePath) : undefined,
+        });
+      }
+    }
+
+    return roots;
+  }
+
+  private async collectFilesRecursive(directory: string): Promise<string[]> {
+    const files: string[] = [];
+    const entries = await readdir(directory, { withFileTypes: true });
+
+    for (const entry of entries) {
+      const absolutePath = path.join(directory, entry.name);
+
+      if (entry.isDirectory()) {
+        const nestedFiles = await this.collectFilesRecursive(absolutePath);
+        files.push(...nestedFiles);
+      } else if (entry.isFile()) {
+        files.push(absolutePath);
+      }
+    }
+
+    return files;
+  }
+
+  private isExtensionlessFileName(fileName: string): boolean {
+    return !/\.[^.]+$/.test(fileName) || fileName.endsWith('.');
+  }
+
+  private toPosixPath(inputPath: string): string {
+    return inputPath.replace(/\\/g, '/').replace(/^\.\//, '');
+  }
+
+  private joinManifestPath(basePath: string, relativePath: string): string {
+    const normalizedBase = this.toPosixPath(basePath).replace(/\/$/, '');
+    const normalizedRelative = this.toPosixPath(relativePath).replace(/^\//, '');
+    if (!normalizedRelative) {
+      return normalizedBase;
+    }
+    return `${normalizedBase}/${normalizedRelative}`;
+  }
+
+  private getManifestEntryKey(filePath: string, packagePath?: string): string {
+    const normalizedPath = this.toPosixPath(filePath);
+    const normalizedPackagePath = packagePath ? this.toPosixPath(packagePath) : '';
+    return `${normalizedPath}::${normalizedPackagePath}`;
   }
 
   /**

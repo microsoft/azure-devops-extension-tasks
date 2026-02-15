@@ -2,14 +2,13 @@
  * Tests for FilesystemManifestWriter
  */
 
-import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
+import { afterEach, beforeEach, describe, expect, it } from '@jest/globals';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs';
+import { tmpdir } from 'os';
+import { join } from 'path';
 import { FilesystemManifestReader } from '../filesystem-manifest-reader.js';
-import { FilesystemManifestWriter } from '../filesystem-manifest-writer.js';
 import { ManifestEditor } from '../manifest-editor.js';
 import { MockPlatformAdapter } from './helpers/mock-platform.js';
-import { writeFileSync, mkdirSync, rmSync, readFileSync, existsSync, mkdtempSync } from 'fs';
-import { join } from 'path';
-import { tmpdir } from 'os';
 
 describe('FilesystemManifestWriter', () => {
   let testDir: string;
@@ -881,6 +880,114 @@ describe('FilesystemManifestWriter', () => {
         readFileSync(join(testDir, 'build', 'cli-utils', 'v2', 'task.json'), 'utf-8')
       );
       expect(cliUtilsJson.version.Major).toBe(4);
+
+      await writer.close();
+      await reader.close();
+    });
+  });
+
+  describe('binary file entry synchronization', () => {
+    it('should remove old octet-stream entries and add current extensionless files', async () => {
+      const extManifest = {
+        id: 'test-ext',
+        publisher: 'test-pub',
+        version: '1.0.0',
+        files: [
+          { path: 'packages/azdo-task' },
+          {
+            path: 'packages/azdo-task/stale-binary',
+            contentType: 'application/octet-stream',
+          },
+        ],
+      };
+
+      writeFileSync(join(testDir, 'vss-extension.json'), JSON.stringify(extManifest));
+
+      mkdirSync(join(testDir, 'packages', 'azdo-task', 'bin'), { recursive: true });
+      writeFileSync(join(testDir, 'packages', 'azdo-task', 'bin', 'node'), 'binary');
+      writeFileSync(join(testDir, 'packages', 'azdo-task', 'bin', 'tool.'), 'binary');
+      writeFileSync(join(testDir, 'packages', 'azdo-task', 'bin', 'script.sh'), '#!/bin/sh');
+
+      const reader = new FilesystemManifestReader({
+        rootFolder: testDir,
+        platform: mockPlatform,
+      });
+
+      const editor = ManifestEditor.fromReader(reader);
+      await editor.applyOptions({ synchronizeBinaryFileEntries: true });
+
+      const writer = await editor.toWriter();
+      await writer.writeToFilesystem();
+
+      const updatedManifest = JSON.parse(
+        readFileSync(join(testDir, 'vss-extension.json'), 'utf-8')
+      );
+      const files = updatedManifest.files as Array<{
+        path: string;
+        contentType?: string;
+      }>;
+
+      expect(files.some((f) => f.path === 'packages/azdo-task/stale-binary')).toBe(false);
+      expect(
+        files.some(
+          (f) =>
+            f.path === 'packages/azdo-task/bin/node' && f.contentType === 'application/octet-stream'
+        )
+      ).toBe(true);
+      expect(
+        files.some(
+          (f) =>
+            f.path === 'packages/azdo-task/bin/tool.' &&
+            f.contentType === 'application/octet-stream'
+        )
+      ).toBe(true);
+      expect(files.some((f) => f.path === 'packages/azdo-task/bin/script.sh')).toBe(false);
+
+      await writer.close();
+      await reader.close();
+    });
+
+    it('should preserve packagePath mapping for added binary file entries', async () => {
+      const extManifest = {
+        id: 'test-ext',
+        publisher: 'test-pub',
+        version: '1.0.0',
+        files: [{ path: 'compiled/cli', packagePath: 'CLI' }],
+      };
+
+      writeFileSync(join(testDir, 'vss-extension.json'), JSON.stringify(extManifest));
+
+      mkdirSync(join(testDir, 'compiled', 'cli', 'v2'), { recursive: true });
+      writeFileSync(join(testDir, 'compiled', 'cli', 'v2', 'node'), 'binary');
+
+      const reader = new FilesystemManifestReader({
+        rootFolder: testDir,
+        platform: mockPlatform,
+      });
+
+      const editor = ManifestEditor.fromReader(reader);
+      await editor.applyOptions({ synchronizeBinaryFileEntries: true });
+
+      const writer = await editor.toWriter();
+      await writer.writeToFilesystem();
+
+      const updatedManifest = JSON.parse(
+        readFileSync(join(testDir, 'vss-extension.json'), 'utf-8')
+      );
+      const files = updatedManifest.files as Array<{
+        path: string;
+        packagePath?: string;
+        contentType?: string;
+      }>;
+
+      expect(
+        files.some(
+          (f) =>
+            f.path === 'compiled/cli/v2/node' &&
+            f.packagePath === 'CLI/v2/node' &&
+            f.contentType === 'application/octet-stream'
+        )
+      ).toBe(true);
 
       await writer.close();
       await reader.close();

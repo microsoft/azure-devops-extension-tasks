@@ -221,7 +221,14 @@ export async function publishExtension(
     // This uses the same approach as package.ts
     let cleanupWriter: (() => Promise<void>) | null = null;
 
-    if (options.updateTasksVersion || options.updateTasksId || options.extensionPricing) {
+    const synchronizeBinaryFileEntries = true;
+
+    if (
+      options.updateTasksVersion ||
+      options.updateTasksId ||
+      options.extensionPricing ||
+      synchronizeBinaryFileEntries
+    ) {
       platform.info('Updating task manifests before publishing...');
 
       try {
@@ -251,6 +258,7 @@ export async function publishExtension(
           updateTasksVersion: options.updateTasksVersion,
           updateTasksVersionType: options.updateTasksVersionType,
           updateTasksId: options.updateTasksId,
+          synchronizeBinaryFileEntries,
         });
 
         // Write modifications to filesystem

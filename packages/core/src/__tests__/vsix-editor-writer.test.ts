@@ -4,15 +4,15 @@
  * These tests verify the chaining behavior and modification tracking
  */
 
-import { describe, it, expect, beforeEach } from '@jest/globals';
-import { VsixReader } from '../vsix-reader.js';
+import { beforeEach, describe, expect, it } from '@jest/globals';
+import { createWriteStream, existsSync, mkdirSync, writeFileSync } from 'fs';
+import { tmpdir } from 'os';
+import { join } from 'path';
+import yazl from 'yazl';
 import { ManifestEditor } from '../manifest-editor.js';
+import { VsixReader } from '../vsix-reader.js';
 import { VsixWriter } from '../vsix-writer.js';
 import { MockPlatformAdapter } from './helpers/mock-platform.js';
-import { writeFileSync, mkdirSync, existsSync, readFileSync, createWriteStream } from 'fs';
-import { join } from 'path';
-import { tmpdir } from 'os';
-import yazl from 'yazl';
 
 describe('ManifestEditor', () => {
   let testVsixPath: string;
@@ -71,8 +71,8 @@ describe('ManifestEditor', () => {
 
     // Write to file
     await new Promise<void>((resolve, reject) => {
-      zipFile.outputStream
-        .pipe(createWriteStream(testVsixPath))
+      (zipFile.outputStream as any)
+        .pipe(createWriteStream(testVsixPath) as any)
         .on('finish', resolve)
         .on('error', reject);
       zipFile.end();
@@ -250,8 +250,8 @@ describe('VsixWriter', () => {
     zipFile.addBuffer(Buffer.from('unchanged content'), 'file2.txt');
 
     await new Promise<void>((resolve, reject) => {
-      zipFile.outputStream
-        .pipe(createWriteStream(testVsixPath))
+      (zipFile.outputStream as any)
+        .pipe(createWriteStream(testVsixPath) as any)
         .on('finish', resolve)
         .on('error', reject);
       zipFile.end();

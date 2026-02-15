@@ -113,6 +113,7 @@ export async function packageExtension(
 
   // Handle manifest updates using the unified architecture
   let cleanupWriter: (() => Promise<void>) | null = null;
+  const synchronizeBinaryFileEntries = true;
 
   const shouldApplyManifestOptions =
     options.updateTasksVersion ||
@@ -120,7 +121,8 @@ export async function packageExtension(
     options.extensionVersion ||
     options.extensionName ||
     options.extensionVisibility ||
-    options.extensionPricing;
+    options.extensionPricing ||
+    synchronizeBinaryFileEntries;
 
   if (shouldApplyManifestOptions) {
     platform.info('Updating task manifests before packaging...');
@@ -148,6 +150,7 @@ export async function packageExtension(
         updateTasksVersion: options.updateTasksVersion,
         updateTasksVersionType: options.updateTasksVersionType,
         updateTasksId: options.updateTasksId,
+        synchronizeBinaryFileEntries,
       });
 
       // Write modifications to filesystem

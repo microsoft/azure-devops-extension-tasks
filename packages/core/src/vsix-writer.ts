@@ -7,9 +7,9 @@
  * Chain: Reader → ManifestEditor → Writer
  */
 
-import yazl from 'yazl';
 import { Buffer } from 'buffer';
 import { createWriteStream } from 'fs';
+import yazl from 'yazl';
 import type { ManifestEditor } from './manifest-editor.js';
 import type { ExtensionManifest, TaskManifest } from './manifest-reader.js';
 
@@ -257,7 +257,7 @@ export class VsixWriter {
         resolve();
       });
 
-      this.zipFile.outputStream.pipe(outputStream).on('error', (err: Error) => {
+      this.zipFile.outputStream.pipe(outputStream as any).on('error', (err: Error) => {
         reject(new Error(`Failed to write VSIX stream: ${err.message}`));
       });
 

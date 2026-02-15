@@ -32,6 +32,7 @@ export class FilesystemManifestReader extends ManifestReader {
   private readonly manifestGlobs: string[];
   private readonly platform: IPlatformAdapter;
   private manifestPath: string | null = null;
+  private manifestPaths: string[] | null = null;
   private extensionManifest: ExtensionManifest | null = null;
   // Map of packagePath (task name) to actual source path
   private packagePathMap: Map<string, string> | null = null;
@@ -48,26 +49,26 @@ export class FilesystemManifestReader extends ManifestReader {
   }
 
   /**
-   * Find and resolve the extension manifest file path
+   * Find and resolve all extension manifest file paths
    */
-  private async resolveManifestPath(): Promise<string> {
-    if (this.manifestPath) {
-      return this.manifestPath;
+  private async resolveManifestPaths(): Promise<string[]> {
+    if (this.manifestPaths) {
+      return this.manifestPaths;
     }
 
-    // Try to find manifest using globs
     const matches = await this.platform.findMatch(this.rootFolder, this.manifestGlobs);
 
     if (matches.length === 0) {
-      // Fallback: check for common manifest names
       const commonNames = ['vss-extension.json', 'extension.vsomanifest'];
       for (const name of commonNames) {
         const candidate = path.join(this.rootFolder, name);
         if (await this.platform.fileExists(candidate)) {
+          this.manifestPaths = [candidate];
           this.manifestPath = candidate;
-          return candidate;
+          return this.manifestPaths;
         }
       }
+
       throw new Error(
         `Extension manifest not found in ${this.rootFolder}. ` +
           `Tried patterns: ${this.manifestGlobs.join(', ')}`
@@ -76,12 +77,21 @@ export class FilesystemManifestReader extends ManifestReader {
 
     if (matches.length > 1) {
       this.platform.warning(
-        `Multiple manifest files found: ${matches.join(', ')}. Using first match.`
+        `Multiple manifest files found: ${matches.join(', ')}. Using first match as primary.`
       );
     }
 
+    this.manifestPaths = matches;
     this.manifestPath = matches[0];
-    return this.manifestPath;
+    return this.manifestPaths;
+  }
+
+  /**
+   * Find and resolve the extension manifest file path
+   */
+  private async resolveManifestPath(): Promise<string> {
+    const paths = await this.resolveManifestPaths();
+    return paths[0];
   }
 
   /**
@@ -94,7 +104,7 @@ export class FilesystemManifestReader extends ManifestReader {
     }
 
     const manifestPath = await this.resolveManifestPath();
-    const content = await readFile(manifestPath, 'utf-8');
+    const content = (await readFile(manifestPath)).toString('utf8');
     this.extensionManifest = JSON.parse(content);
     return this.extensionManifest;
   }
@@ -208,7 +218,7 @@ export class FilesystemManifestReader extends ManifestReader {
       throw new Error(`Task manifest not found: ${taskJsonPath}`);
     }
 
-    const content = await readFile(taskJsonPath, 'utf-8');
+    const content = (await readFile(taskJsonPath)).toString('utf8');
     return JSON.parse(content);
   }
 
@@ -220,7 +230,26 @@ export class FilesystemManifestReader extends ManifestReader {
     // No resources to clean up
     this.extensionManifest = null;
     this.manifestPath = null;
+    this.manifestPaths = null;
     this.packagePathMap = null;
+  }
+
+  /**
+   * Read all extension manifests matched by manifest globs
+   */
+  async readAllExtensionManifests(): Promise<Array<{ path: string; manifest: ExtensionManifest }>> {
+    const paths = await this.resolveManifestPaths();
+    const manifests: Array<{ path: string; manifest: ExtensionManifest }> = [];
+
+    for (const manifestPath of paths) {
+      const content = (await readFile(manifestPath)).toString('utf8');
+      manifests.push({
+        path: manifestPath,
+        manifest: JSON.parse(content) as ExtensionManifest,
+      });
+    }
+
+    return manifests;
   }
 
   /**
