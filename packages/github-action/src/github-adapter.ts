@@ -21,6 +21,11 @@ export class GitHubAdapter implements IPlatformAdapter {
   }
 
   getBoolInput(name: string, required?: boolean): boolean {
+    const value = core.getInput(name, { required: required || false });
+    if (!value) {
+      return false;
+    }
+
     return core.getBooleanInput(name, { required: required || false });
   }
 

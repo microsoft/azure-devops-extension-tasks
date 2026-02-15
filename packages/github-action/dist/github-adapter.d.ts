@@ -1,4 +1,4 @@
-import { IPlatformAdapter, TaskResult, ExecOptions } from '@extension-tasks/core';
+import { ExecOptions, IPlatformAdapter, TaskResult } from '@extension-tasks/core';
 /**
  * GitHub Actions platform adapter
  * Implements IPlatformAdapter using @actions/* packages

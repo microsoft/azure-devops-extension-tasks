@@ -37,6 +37,1157 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   mod
 ));
 
+// packages/core/dist/manifest-reader.js
+var ManifestReader;
+var init_manifest_reader = __esm({
+  "packages/core/dist/manifest-reader.js"() {
+    "use strict";
+    ManifestReader = class {
+      /**
+       * Read all task manifests in the extension
+       * Default implementation using findTaskPaths() and readTaskManifest()
+       * Subclasses can override for optimization
+       * @returns Array of task manifests with their paths
+       */
+      async readTaskManifests() {
+        const taskPaths = await this.findTaskPaths();
+        const results = [];
+        for (const taskPath of taskPaths) {
+          try {
+            const manifest = await this.readTaskManifest(taskPath);
+            results.push({ path: taskPath, manifest });
+          } catch {
+          }
+        }
+        return results;
+      }
+      /**
+       * Get quick metadata about the extension
+       * Default implementation using readExtensionManifest()
+       * @returns Extension metadata
+       */
+      async getMetadata() {
+        const manifest = await this.readExtensionManifest();
+        return {
+          publisher: manifest.publisher,
+          extensionId: manifest.id,
+          version: manifest.version,
+          name: manifest.name,
+          description: manifest.description
+        };
+      }
+      /**
+       * Get information about all tasks in the extension
+       * Default implementation using readTaskManifests()
+       * @returns Array of task information
+       */
+      async getTasksInfo() {
+        const tasks = await this.readTaskManifests();
+        return tasks.map(({ path: path10, manifest }) => ({
+          name: manifest.name,
+          friendlyName: manifest.friendlyName,
+          version: `${manifest.version.Major}.${manifest.version.Minor}.${manifest.version.Patch}`,
+          path: path10
+        }));
+      }
+    };
+  }
+});
+
+// node_modules/uuid/dist-node/regex.js
+var regex_default;
+var init_regex = __esm({
+  "node_modules/uuid/dist-node/regex.js"() {
+    regex_default = /^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$/i;
+  }
+});
+
+// node_modules/uuid/dist-node/validate.js
+function validate(uuid) {
+  return typeof uuid === "string" && regex_default.test(uuid);
+}
+var validate_default;
+var init_validate = __esm({
+  "node_modules/uuid/dist-node/validate.js"() {
+    init_regex();
+    validate_default = validate;
+  }
+});
+
+// node_modules/uuid/dist-node/parse.js
+function parse(uuid) {
+  if (!validate_default(uuid)) {
+    throw TypeError("Invalid UUID");
+  }
+  let v;
+  return Uint8Array.of((v = parseInt(uuid.slice(0, 8), 16)) >>> 24, v >>> 16 & 255, v >>> 8 & 255, v & 255, (v = parseInt(uuid.slice(9, 13), 16)) >>> 8, v & 255, (v = parseInt(uuid.slice(14, 18), 16)) >>> 8, v & 255, (v = parseInt(uuid.slice(19, 23), 16)) >>> 8, v & 255, (v = parseInt(uuid.slice(24, 36), 16)) / 1099511627776 & 255, v / 4294967296 & 255, v >>> 24 & 255, v >>> 16 & 255, v >>> 8 & 255, v & 255);
+}
+var parse_default;
+var init_parse = __esm({
+  "node_modules/uuid/dist-node/parse.js"() {
+    init_validate();
+    parse_default = parse;
+  }
+});
+
+// node_modules/uuid/dist-node/stringify.js
+function unsafeStringify(arr, offset = 0) {
+  return (byteToHex[arr[offset + 0]] + byteToHex[arr[offset + 1]] + byteToHex[arr[offset + 2]] + byteToHex[arr[offset + 3]] + "-" + byteToHex[arr[offset + 4]] + byteToHex[arr[offset + 5]] + "-" + byteToHex[arr[offset + 6]] + byteToHex[arr[offset + 7]] + "-" + byteToHex[arr[offset + 8]] + byteToHex[arr[offset + 9]] + "-" + byteToHex[arr[offset + 10]] + byteToHex[arr[offset + 11]] + byteToHex[arr[offset + 12]] + byteToHex[arr[offset + 13]] + byteToHex[arr[offset + 14]] + byteToHex[arr[offset + 15]]).toLowerCase();
+}
+var byteToHex;
+var init_stringify = __esm({
+  "node_modules/uuid/dist-node/stringify.js"() {
+    byteToHex = [];
+    for (let i = 0; i < 256; ++i) {
+      byteToHex.push((i + 256).toString(16).slice(1));
+    }
+  }
+});
+
+// node_modules/uuid/dist-node/v35.js
+function stringToBytes(str) {
+  str = unescape(encodeURIComponent(str));
+  const bytes = new Uint8Array(str.length);
+  for (let i = 0; i < str.length; ++i) {
+    bytes[i] = str.charCodeAt(i);
+  }
+  return bytes;
+}
+function v35(version, hash, value, namespace, buf, offset) {
+  const valueBytes = typeof value === "string" ? stringToBytes(value) : value;
+  const namespaceBytes = typeof namespace === "string" ? parse_default(namespace) : namespace;
+  if (typeof namespace === "string") {
+    namespace = parse_default(namespace);
+  }
+  if (namespace?.length !== 16) {
+    throw TypeError("Namespace must be array-like (16 iterable integer values, 0-255)");
+  }
+  let bytes = new Uint8Array(16 + valueBytes.length);
+  bytes.set(namespaceBytes);
+  bytes.set(valueBytes, namespaceBytes.length);
+  bytes = hash(bytes);
+  bytes[6] = bytes[6] & 15 | version;
+  bytes[8] = bytes[8] & 63 | 128;
+  if (buf) {
+    offset = offset || 0;
+    for (let i = 0; i < 16; ++i) {
+      buf[offset + i] = bytes[i];
+    }
+    return buf;
+  }
+  return unsafeStringify(bytes);
+}
+var DNS, URL2;
+var init_v35 = __esm({
+  "node_modules/uuid/dist-node/v35.js"() {
+    init_parse();
+    init_stringify();
+    DNS = "6ba7b810-9dad-11d1-80b4-00c04fd430c8";
+    URL2 = "6ba7b811-9dad-11d1-80b4-00c04fd430c8";
+  }
+});
+
+// node_modules/uuid/dist-node/sha1.js
+import { createHash } from "node:crypto";
+function sha1(bytes) {
+  if (Array.isArray(bytes)) {
+    bytes = Buffer.from(bytes);
+  } else if (typeof bytes === "string") {
+    bytes = Buffer.from(bytes, "utf8");
+  }
+  return createHash("sha1").update(bytes).digest();
+}
+var sha1_default;
+var init_sha1 = __esm({
+  "node_modules/uuid/dist-node/sha1.js"() {
+    sha1_default = sha1;
+  }
+});
+
+// node_modules/uuid/dist-node/v5.js
+function v5(value, namespace, buf, offset) {
+  return v35(80, sha1_default, value, namespace, buf, offset);
+}
+var v5_default;
+var init_v5 = __esm({
+  "node_modules/uuid/dist-node/v5.js"() {
+    init_sha1();
+    init_v35();
+    v5.DNS = DNS;
+    v5.URL = URL2;
+    v5_default = v5;
+  }
+});
+
+// node_modules/uuid/dist-node/index.js
+var init_dist_node = __esm({
+  "node_modules/uuid/dist-node/index.js"() {
+    init_v5();
+  }
+});
+
+// packages/core/dist/vsix-writer.js
+var vsix_writer_exports = {};
+__export(vsix_writer_exports, {
+  VsixWriter: () => VsixWriter
+});
+import yazl from "yazl";
+import { Buffer as Buffer2 } from "buffer";
+import { createWriteStream } from "fs";
+function validateZipPath(filePath) {
+  const normalizedPath = filePath.replace(/\\/g, "/");
+  if (normalizedPath.startsWith("/") || /^[A-Z]:/i.test(normalizedPath)) {
+    throw new Error(`Security: Absolute paths are not allowed: ${filePath}`);
+  }
+  if (normalizedPath.includes("../") || normalizedPath.startsWith("..")) {
+    throw new Error(`Security: Path traversal detected: ${filePath}`);
+  }
+  if (normalizedPath.includes("\0")) {
+    throw new Error(`Security: Null byte detected in path: ${filePath}`);
+  }
+}
+var VsixWriter;
+var init_vsix_writer = __esm({
+  "packages/core/dist/vsix-writer.js"() {
+    "use strict";
+    VsixWriter = class _VsixWriter {
+      editor;
+      zipFile = null;
+      constructor(editor) {
+        this.editor = editor;
+      }
+      /**
+       * Create a writer from an editor
+       * @param editor The ManifestEditor with modifications
+       * @returns VsixWriter instance
+       */
+      static fromEditor(editor) {
+        return new _VsixWriter(editor);
+      }
+      /**
+       * Write the modified VSIX to a file
+       *
+       * This method efficiently copies unchanged entries from the source VSIX
+       * without recompression, significantly improving performance for large files.
+       *
+       * @param outputPath Path where the new VSIX should be written
+       * @returns Promise that resolves when writing is complete
+       */
+      async writeToFile(outputPath) {
+        const reader = this.editor.getReader();
+        const modifications = this.editor.getModifications();
+        const manifestMods = this.editor.getManifestModifications();
+        const taskManifestMods = this.editor.getTaskManifestModifications();
+        this.zipFile = new yazl.ZipFile();
+        const addedFiles = /* @__PURE__ */ new Set();
+        const manifestPath = await this.determineManifestPath(reader);
+        if (Object.keys(manifestMods).length > 0 || taskManifestMods.size > 0) {
+          await this.applyManifestModifications(reader, manifestPath, manifestMods, taskManifestMods, addedFiles);
+        }
+        for (const [path10, mod] of modifications) {
+          validateZipPath(path10);
+          if (mod.type === "remove") {
+            addedFiles.add(path10);
+          } else if (mod.type === "modify" && mod.content) {
+            this.zipFile.addBuffer(mod.content, path10);
+            addedFiles.add(path10);
+          }
+        }
+        await this.copyUnchangedFiles(reader, addedFiles);
+        await this.finalizeZip(outputPath);
+      }
+      /**
+       * Write the modified VSIX to a buffer in memory
+       * @returns Promise<Buffer> containing the complete VSIX
+       */
+      async writeToBuffer() {
+        const reader = this.editor.getReader();
+        const modifications = this.editor.getModifications();
+        const manifestMods = this.editor.getManifestModifications();
+        const taskManifestMods = this.editor.getTaskManifestModifications();
+        this.zipFile = new yazl.ZipFile();
+        const addedFiles = /* @__PURE__ */ new Set();
+        const manifestPath = await this.determineManifestPath(reader);
+        if (Object.keys(manifestMods).length > 0 || taskManifestMods.size > 0) {
+          await this.applyManifestModifications(reader, manifestPath, manifestMods, taskManifestMods, addedFiles);
+        }
+        for (const [path10, mod] of modifications) {
+          validateZipPath(path10);
+          if (mod.type === "remove") {
+            addedFiles.add(path10);
+          } else if (mod.type === "modify" && mod.content) {
+            this.zipFile.addBuffer(mod.content, path10);
+            addedFiles.add(path10);
+          }
+        }
+        await this.copyUnchangedFiles(reader, addedFiles);
+        return this.finalizeZipToBuffer();
+      }
+      /**
+       * Determine which manifest file to use
+       */
+      async determineManifestPath(reader) {
+        if (await reader.fileExists("extension.vsomanifest")) {
+          return "extension.vsomanifest";
+        }
+        if (await reader.fileExists("vss-extension.json")) {
+          return "vss-extension.json";
+        }
+        throw new Error("No extension manifest found in source VSIX");
+      }
+      /**
+       * Apply modifications to manifests
+       */
+      async applyManifestModifications(reader, manifestPath, manifestMods, taskManifestMods, addedFiles) {
+        const manifest = await reader.readExtensionManifest();
+        Object.assign(manifest, manifestMods);
+        const manifestJson = JSON.stringify(manifest, null, 2);
+        this.zipFile.addBuffer(Buffer2.from(manifestJson, "utf-8"), manifestPath);
+        addedFiles.add(manifestPath);
+        if (taskManifestMods.size > 0) {
+          const taskManifests = await reader.readTaskManifests();
+          for (const taskManifest of taskManifests) {
+            const mods = taskManifestMods.get(taskManifest.manifest.name);
+            if (mods) {
+              Object.assign(taskManifest.manifest, mods);
+              const taskJson = JSON.stringify(taskManifest.manifest, null, 2);
+              const taskPath = `${taskManifest.path}/task.json`;
+              this.zipFile.addBuffer(Buffer2.from(taskJson, "utf-8"), taskPath);
+              addedFiles.add(taskPath);
+            }
+          }
+        }
+      }
+      /**
+       * Copy unchanged files from source VSIX
+       *
+       * This is the key optimization: files are copied directly from the source
+       * ZIP without decompression/recompression, preserving original compression.
+       */
+      async copyUnchangedFiles(reader, addedFiles) {
+        const allFiles = await reader.listFiles();
+        for (const file of allFiles) {
+          if (!addedFiles.has(file.path)) {
+            try {
+              const content = await reader.readFile(file.path);
+              this.zipFile.addBuffer(content, file.path);
+            } catch (err) {
+              console.warn(`Warning: Could not copy file ${file.path}: ${err.message}`);
+            }
+          }
+        }
+      }
+      /**
+       * Finalize ZIP and write to file
+       */
+      async finalizeZip(outputPath) {
+        if (!this.zipFile) {
+          throw new Error("ZIP file not initialized");
+        }
+        return new Promise((resolve, reject) => {
+          const outputStream = createWriteStream(outputPath);
+          outputStream.on("error", (err) => {
+            reject(new Error(`Failed to write VSIX file: ${err.message}`));
+          });
+          outputStream.on("finish", () => {
+            resolve();
+          });
+          this.zipFile.outputStream.pipe(outputStream).on("error", (err) => {
+            reject(new Error(`Failed to write VSIX stream: ${err.message}`));
+          });
+          this.zipFile.end();
+        });
+      }
+      /**
+       * Finalize ZIP to buffer
+       */
+      async finalizeZipToBuffer() {
+        if (!this.zipFile) {
+          throw new Error("ZIP file not initialized");
+        }
+        return new Promise((resolve, reject) => {
+          const chunks = [];
+          this.zipFile.outputStream.on("data", (chunk) => {
+            chunks.push(chunk);
+          });
+          this.zipFile.outputStream.on("end", () => {
+            resolve(Buffer2.concat(chunks));
+          });
+          this.zipFile.outputStream.on("error", (err) => {
+            reject(new Error(`Failed to create VSIX buffer: ${err.message}`));
+          });
+          this.zipFile.end();
+        });
+      }
+      /**
+       * Close and cleanup resources
+       */
+      async close() {
+        this.zipFile = null;
+      }
+    };
+  }
+});
+
+// packages/core/dist/filesystem-manifest-writer.js
+var filesystem_manifest_writer_exports = {};
+__export(filesystem_manifest_writer_exports, {
+  FilesystemManifestWriter: () => FilesystemManifestWriter
+});
+import { mkdir, readFile, readdir, writeFile } from "fs/promises";
+import path3 from "path";
+var FilesystemManifestWriter;
+var init_filesystem_manifest_writer = __esm({
+  "packages/core/dist/filesystem-manifest-writer.js"() {
+    "use strict";
+    FilesystemManifestWriter = class _FilesystemManifestWriter {
+      editor;
+      platform;
+      overridesPath = null;
+      constructor(editor, platform) {
+        this.editor = editor;
+        this.platform = platform;
+      }
+      /**
+       * Create a writer from an editor
+       * @param editor The editor with modifications
+       * @returns FilesystemManifestWriter instance
+       */
+      static fromEditor(editor) {
+        const reader = editor.getReader();
+        if (reader.constructor.name !== "FilesystemManifestReader") {
+          throw new Error("FilesystemManifestWriter can only be used with FilesystemManifestReader");
+        }
+        const fsReader = reader;
+        const platform = fsReader.platform;
+        return new _FilesystemManifestWriter(editor, platform);
+      }
+      /**
+       * Write modified manifests to the filesystem
+       *
+       * This updates task.json files directly and writes extension manifest changes.
+       * It also generates an overrides.json in the temp directory that can be passed
+       * to tfx with --overrides-file.
+       *
+       * @returns Promise that resolves when writing is complete
+       */
+      async writeToFilesystem() {
+        const reader = this.editor.getReader();
+        const rootFolder = reader.getRootFolder();
+        const manifestMods = this.editor.getManifestModifications();
+        const taskManifestMods = this.editor.getTaskManifestModifications();
+        const fileMods = this.editor.getModifications();
+        this.platform.debug("Writing manifests to filesystem...");
+        if (taskManifestMods.size > 0) {
+          await this.writeTaskManifests(reader, rootFolder, taskManifestMods);
+        }
+        if (Object.keys(manifestMods).length > 0) {
+          await this.writeExtensionManifest(reader, manifestMods);
+        }
+        for (const [filePath, mod] of fileMods) {
+          if (mod.type === "modify" && mod.content) {
+            const absolutePath = path3.isAbsolute(filePath) ? filePath : path3.join(rootFolder, filePath);
+            this.platform.debug(`Writing file: ${absolutePath}`);
+            await writeFile(absolutePath, mod.content);
+          }
+        }
+        await this.generateOverridesFile(manifestMods);
+        this.platform.info("Manifests written to filesystem successfully");
+      }
+      /**
+       * Write task manifest modifications to filesystem
+       */
+      async writeTaskManifests(reader, rootFolder, taskManifestMods) {
+        const tasks = await reader.readTaskManifests();
+        const appliedTaskNames = /* @__PURE__ */ new Set();
+        const packagePathMap = await reader.buildPackagePathMap();
+        for (const { path: taskPath, manifest } of tasks) {
+          const mods = taskManifestMods.get(manifest.name);
+          if (mods) {
+            appliedTaskNames.add(manifest.name);
+            Object.assign(manifest, mods);
+            let actualPath = taskPath;
+            const normalizedTaskPath = taskPath.replace(/\\/g, "/");
+            for (const [pkgPath, sourcePath] of packagePathMap.entries()) {
+              const normalizedPkgPath = pkgPath.replace(/\\/g, "/");
+              if (normalizedTaskPath === normalizedPkgPath) {
+                actualPath = sourcePath;
+                break;
+              } else if (normalizedTaskPath.startsWith(normalizedPkgPath + "/")) {
+                const remainder = normalizedTaskPath.substring(normalizedPkgPath.length + 1);
+                actualPath = path3.join(sourcePath, remainder);
+                break;
+              }
+            }
+            this.platform.debug(`Writing task manifest: taskPath='${taskPath}', actualPath='${actualPath}'`);
+            const absoluteTaskPath = path3.isAbsolute(actualPath) ? actualPath : path3.join(rootFolder, actualPath);
+            const taskJsonPath = path3.join(absoluteTaskPath, "task.json");
+            this.platform.debug(`Writing to file: ${taskJsonPath}`);
+            const manifestJson = JSON.stringify(manifest, null, 2) + "\n";
+            await writeFile(taskJsonPath, manifestJson, "utf-8");
+          }
+        }
+        for (const [taskName, mods] of taskManifestMods.entries()) {
+          if (appliedTaskNames.has(taskName)) {
+            continue;
+          }
+          const fallbackTaskDir = await this.findTaskDirectoryByName(rootFolder, taskName);
+          if (!fallbackTaskDir) {
+            this.platform.debug(`No task.json found for task '${taskName}' during fallback write`);
+            continue;
+          }
+          const taskJsonPath = path3.join(fallbackTaskDir, "task.json");
+          const content = await readFile(taskJsonPath, "utf-8");
+          const manifest = JSON.parse(content);
+          Object.assign(manifest, mods);
+          this.platform.debug(`Fallback writing task manifest: ${taskJsonPath}`);
+          await writeFile(taskJsonPath, JSON.stringify(manifest, null, 2) + "\n", "utf-8");
+        }
+      }
+      /**
+       * Recursively find a task directory by task manifest name
+       */
+      async findTaskDirectoryByName(rootFolder, taskName) {
+        const stack = [rootFolder];
+        while (stack.length > 0) {
+          const current = stack.pop();
+          let entries;
+          try {
+            entries = await readdir(current, { withFileTypes: true });
+          } catch {
+            continue;
+          }
+          for (const entry of entries) {
+            const absolutePath = path3.join(current, entry.name);
+            if (entry.isDirectory()) {
+              stack.push(absolutePath);
+              continue;
+            }
+            if (!entry.isFile() || entry.name !== "task.json") {
+              continue;
+            }
+            try {
+              const content = await readFile(absolutePath, "utf-8");
+              const manifest = JSON.parse(content);
+              if (manifest.name === taskName) {
+                return path3.dirname(absolutePath);
+              }
+            } catch {
+            }
+          }
+        }
+        return null;
+      }
+      /**
+       * Write extension manifest modifications to filesystem
+       */
+      async writeExtensionManifest(reader, manifestMods) {
+        const manifest = await reader.readExtensionManifest();
+        Object.assign(manifest, manifestMods);
+        const manifestPath = reader.getManifestPath();
+        if (!manifestPath) {
+          throw new Error("Extension manifest path not resolved");
+        }
+        this.platform.debug(`Writing extension manifest: ${manifestPath}`);
+        const manifestJson = JSON.stringify(manifest, null, 2) + "\n";
+        await writeFile(manifestPath, manifestJson, "utf-8");
+      }
+      /**
+       * Generate overrides.json file in temp directory
+       *
+       * This file can be passed to tfx with --overrides-file to override
+       * extension manifest values during packaging without modifying source files.
+       */
+      async generateOverridesFile(manifestMods) {
+        if (Object.keys(manifestMods).length === 0) {
+          this.platform.debug("No manifest modifications, skipping overrides.json generation");
+          return;
+        }
+        const overrides = {};
+        if (manifestMods.publisher) {
+          overrides.publisher = manifestMods.publisher;
+        }
+        if (manifestMods.id) {
+          overrides.id = manifestMods.id;
+        }
+        if (manifestMods.version) {
+          overrides.version = manifestMods.version;
+        }
+        if (manifestMods.name) {
+          overrides.name = manifestMods.name;
+        }
+        if (manifestMods.description) {
+          overrides.description = manifestMods.description;
+        }
+        if (manifestMods.galleryFlags) {
+          overrides.galleryFlags = manifestMods.galleryFlags;
+        }
+        const tempDir = this.platform.getTempDir();
+        await mkdir(tempDir, { recursive: true });
+        this.overridesPath = path3.join(tempDir, `overrides-${Date.now()}.json`);
+        this.platform.debug(`Writing overrides file: ${this.overridesPath}`);
+        const overridesJson = JSON.stringify(overrides, null, 2) + "\n";
+        await writeFile(this.overridesPath, overridesJson, "utf-8");
+        this.platform.info(`Generated overrides file: ${this.overridesPath}`);
+      }
+      /**
+       * Get the path to the generated overrides.json file
+       * This can be passed to tfx with --overrides-file
+       * @returns Path to overrides.json or null if not generated
+       */
+      getOverridesPath() {
+        return this.overridesPath;
+      }
+      /**
+       * Close and cleanup resources
+       */
+      async close() {
+      }
+    };
+  }
+});
+
+// packages/core/dist/manifest-editor.js
+var manifest_editor_exports = {};
+__export(manifest_editor_exports, {
+  ManifestEditor: () => ManifestEditor
+});
+import { Buffer as Buffer3 } from "buffer";
+var ManifestEditor;
+var init_manifest_editor = __esm({
+  "packages/core/dist/manifest-editor.js"() {
+    "use strict";
+    init_dist_node();
+    ManifestEditor = class _ManifestEditor {
+      reader;
+      modifications = /* @__PURE__ */ new Map();
+      manifestModifications = {};
+      taskManifestModifications = /* @__PURE__ */ new Map();
+      // Track original task IDs for updating extension manifest references
+      taskIdUpdates = /* @__PURE__ */ new Map();
+      constructor(options) {
+        this.reader = options.reader;
+      }
+      /**
+       * Create an editor from a reader
+       * @param reader The manifest reader (VSIX or filesystem)
+       * @returns ManifestEditor instance
+       */
+      static fromReader(reader) {
+        return new _ManifestEditor({ reader });
+      }
+      /**
+       * Apply a set of options to the manifest
+       * This is the main entry point for batch modifications
+       * All conditional logic for applying changes is contained here
+       *
+       * @param options Options to apply
+       * @returns Promise<this> for async chaining
+       */
+      async applyOptions(options) {
+        if (options.publisherId) {
+          this.setPublisher(options.publisherId);
+        }
+        if (options.extensionId) {
+          this.setExtensionId(options.extensionId);
+        }
+        if (options.extensionVersion) {
+          this.setVersion(options.extensionVersion);
+        }
+        if (options.extensionName) {
+          this.setName(options.extensionName);
+        }
+        if (options.extensionVisibility) {
+          this.setVisibility(options.extensionVisibility);
+        }
+        if (options.extensionPricing) {
+          this.setPricing(options.extensionPricing);
+        }
+        if (options.updateTasksVersion && options.extensionVersion) {
+          const versionType = options.updateTasksVersionType || "major";
+          await this.updateAllTaskVersions(options.extensionVersion, versionType);
+        }
+        if (options.updateTasksId) {
+          await this.updateAllTaskIds();
+        }
+        return this;
+      }
+      /**
+       * Set the publisher ID
+       * @param publisher New publisher ID
+       * @returns This editor for chaining
+       */
+      setPublisher(publisher) {
+        this.manifestModifications.publisher = publisher;
+        return this;
+      }
+      /**
+       * Set the extension ID
+       * @param id New extension ID
+       * @returns This editor for chaining
+       */
+      setExtensionId(id) {
+        this.manifestModifications.id = id;
+        return this;
+      }
+      /**
+       * Set the extension version
+       * @param version New version (e.g., "1.2.3")
+       * @returns This editor for chaining
+       */
+      setVersion(version) {
+        this.manifestModifications.version = version;
+        return this;
+      }
+      /**
+       * Set the extension name
+       * @param name New display name
+       * @returns This editor for chaining
+       */
+      setName(name) {
+        this.manifestModifications.name = name;
+        return this;
+      }
+      /**
+       * Set the extension description
+       * @param description New description
+       * @returns This editor for chaining
+       */
+      setDescription(description) {
+        this.manifestModifications.description = description;
+        return this;
+      }
+      /**
+       * Set extension visibility in gallery
+       * @param visibility 'public', 'private', 'public_preview', or 'private_preview'
+       * @returns This editor for chaining
+       */
+      setVisibility(visibility) {
+        if (!this.manifestModifications.galleryFlags) {
+          this.manifestModifications.galleryFlags = [];
+        }
+        const flags = this.manifestModifications.galleryFlags;
+        const visibilityFlags = ["Public", "Private", "Preview"];
+        for (const flag of visibilityFlags) {
+          const index = flags.indexOf(flag);
+          if (index >= 0) {
+            flags.splice(index, 1);
+          }
+        }
+        if (visibility === "public") {
+          flags.push("Public");
+        } else if (visibility === "private") {
+          flags.push("Private");
+        } else if (visibility === "public_preview") {
+          flags.push("Public", "Preview");
+        } else if (visibility === "private_preview") {
+          flags.push("Private", "Preview");
+        }
+        return this;
+      }
+      /**
+       * Set extension pricing model
+       * @param pricing 'free', 'paid', or 'trial'
+       * @returns This editor for chaining
+       */
+      setPricing(pricing) {
+        if (!this.manifestModifications.galleryFlags) {
+          this.manifestModifications.galleryFlags = [];
+        }
+        const flags = this.manifestModifications.galleryFlags;
+        const pricingFlags = ["Free", "Paid", "Trial"];
+        for (const flag of pricingFlags) {
+          const index = flags.indexOf(flag);
+          if (index >= 0) {
+            flags.splice(index, 1);
+          }
+        }
+        const flagMap = { free: "Free", paid: "Paid", trial: "Trial" };
+        flags.push(flagMap[pricing]);
+        return this;
+      }
+      /**
+       * Update a specific task's version
+       * @param taskName Name of the task
+       * @param extensionVersion Extension version to apply (e.g., "1.2.3")
+       * @param versionType How to apply the version: 'major', 'minor', or 'patch'
+       * @returns This editor for chaining
+       */
+      updateTaskVersion(taskName, extensionVersion, versionType = "major") {
+        const versionParts = extensionVersion.split(".");
+        if (versionParts.length > 3) {
+        }
+        const newVersion = {
+          major: parseInt(versionParts[0], 10) || 0,
+          minor: parseInt(versionParts[1], 10) || 0,
+          patch: parseInt(versionParts[2], 10) || 0
+        };
+        if (!this.taskManifestModifications.has(taskName)) {
+          this.taskManifestModifications.set(taskName, {});
+        }
+        const taskMods = this.taskManifestModifications.get(taskName);
+        const existingVersion = taskMods.version || { Major: 0, Minor: 0, Patch: 0 };
+        switch (versionType) {
+          case "major":
+            taskMods.version = {
+              Major: newVersion.major,
+              Minor: newVersion.minor,
+              Patch: newVersion.patch
+            };
+            break;
+          case "minor":
+            taskMods.version = {
+              Major: existingVersion.Major,
+              Minor: newVersion.minor,
+              Patch: newVersion.patch
+            };
+            break;
+          case "patch":
+            taskMods.version = {
+              Major: existingVersion.Major,
+              Minor: existingVersion.Minor,
+              Patch: newVersion.patch
+            };
+            break;
+        }
+        return this;
+      }
+      /**
+       * Update a specific task's ID (UUID) using v5 namespacing
+       * @param taskName Name of the task
+       * @param publisherId Publisher ID (for UUID generation)
+       * @param extensionId Extension ID (for UUID generation)
+       * @returns This editor for chaining
+       */
+      updateTaskId(taskName, publisherId, extensionId) {
+        const marketplaceNamespace = v5_default("https://marketplace.visualstudio.com/vsts", v5_default.URL);
+        const taskNamespace = `${publisherId}.${extensionId}.${taskName}`;
+        const newId = v5_default(taskNamespace, marketplaceNamespace);
+        if (!this.taskManifestModifications.has(taskName)) {
+          this.taskManifestModifications.set(taskName, {});
+        }
+        const taskMods = this.taskManifestModifications.get(taskName);
+        taskMods.id = newId;
+        return this;
+      }
+      /**
+       * Update all tasks' versions in the extension
+       * Reads all tasks from the reader and updates their versions
+       * @param extensionVersion Extension version to apply
+       * @param versionType How to apply the version: 'major', 'minor', or 'patch'
+       * @returns Promise<this> for async chaining
+       */
+      async updateAllTaskVersions(extensionVersion, versionType = "major") {
+        const tasks = await this.reader.getTasksInfo();
+        const versionParts = extensionVersion.split(".");
+        const parsedVersion = {
+          major: parseInt(versionParts[0], 10) || 0,
+          minor: parseInt(versionParts[1], 10) || 0,
+          patch: parseInt(versionParts[2], 10) || 0
+        };
+        for (const task of tasks) {
+          const existingParts = (task.version || "0.0.0").split(".");
+          const existingVersion = {
+            Major: parseInt(existingParts[0], 10) || 0,
+            Minor: parseInt(existingParts[1], 10) || 0,
+            Patch: parseInt(existingParts[2], 10) || 0
+          };
+          if (!this.taskManifestModifications.has(task.name)) {
+            this.taskManifestModifications.set(task.name, {});
+          }
+          const taskMods = this.taskManifestModifications.get(task.name);
+          switch (versionType) {
+            case "major":
+              taskMods.version = {
+                Major: parsedVersion.major,
+                Minor: parsedVersion.minor,
+                Patch: parsedVersion.patch
+              };
+              break;
+            case "minor":
+              taskMods.version = {
+                Major: existingVersion.Major,
+                Minor: parsedVersion.minor,
+                Patch: parsedVersion.patch
+              };
+              break;
+            case "patch":
+              taskMods.version = {
+                Major: existingVersion.Major,
+                Minor: existingVersion.Minor,
+                Patch: parsedVersion.patch
+              };
+              break;
+          }
+        }
+        return this;
+      }
+      /**
+       * Update all tasks' IDs in the extension using v5 namespacing
+       * Reads extension manifest for publisher/ID and all tasks from reader
+       * @returns Promise<this> for async chaining
+       */
+      async updateAllTaskIds() {
+        const manifest = await this.reader.readExtensionManifest();
+        const publisherId = this.manifestModifications.publisher || manifest.publisher;
+        const extensionId = this.manifestModifications.id || manifest.id;
+        const tasks = await this.reader.getTasksInfo();
+        for (const task of tasks) {
+          this.updateTaskId(task.name, publisherId, extensionId);
+        }
+        return this;
+      }
+      /**
+       * Add or modify a file
+       * @param path Path to the file
+       * @param content File content
+       * @returns This editor for chaining
+       */
+      setFile(path10, content) {
+        const buffer = Buffer3.isBuffer(content) ? content : Buffer3.from(content, "utf-8");
+        const normalizedPath = path10.replace(/\\/g, "/");
+        this.modifications.set(normalizedPath, {
+          type: "modify",
+          path: normalizedPath,
+          content: buffer
+        });
+        return this;
+      }
+      /**
+       * Remove a file
+       * @param path Path to the file
+       * @returns This editor for chaining
+       */
+      removeFile(path10) {
+        const normalizedPath = path10.replace(/\\/g, "/");
+        this.modifications.set(normalizedPath, {
+          type: "remove",
+          path: normalizedPath
+        });
+        return this;
+      }
+      /**
+       * Convert to a writer for output
+       * The writer type depends on the reader type
+       * @returns Promise<Writer> ready to write (VsixWriter or FilesystemManifestWriter)
+       */
+      async toWriter() {
+        const readerConstructorName = this.reader.constructor.name;
+        if (readerConstructorName === "VsixReader") {
+          const { VsixWriter: VsixWriter2 } = await Promise.resolve().then(() => (init_vsix_writer(), vsix_writer_exports));
+          return VsixWriter2.fromEditor(this);
+        } else if (readerConstructorName === "FilesystemManifestReader") {
+          const { FilesystemManifestWriter: FilesystemManifestWriter2 } = await Promise.resolve().then(() => (init_filesystem_manifest_writer(), filesystem_manifest_writer_exports));
+          return FilesystemManifestWriter2.fromEditor(this);
+        } else {
+          throw new Error(`Unsupported reader type: ${readerConstructorName}`);
+        }
+      }
+      /**
+       * Get the source reader
+       * @internal
+       */
+      getReader() {
+        return this.reader;
+      }
+      /**
+       * Get all file modifications
+       * @internal
+       */
+      getModifications() {
+        return this.modifications;
+      }
+      /**
+       * Get manifest modifications
+       * @internal
+       */
+      getManifestModifications() {
+        return this.manifestModifications;
+      }
+      /**
+       * Get task manifest modifications
+       * @internal
+       */
+      getTaskManifestModifications() {
+        return this.taskManifestModifications;
+      }
+      /**
+       * Get task ID updates (for updating extension manifest references)
+       * @internal
+       */
+      getTaskIdUpdates() {
+        return this.taskIdUpdates;
+      }
+    };
+  }
+});
+
+// packages/core/dist/filesystem-manifest-reader.js
+var filesystem_manifest_reader_exports = {};
+__export(filesystem_manifest_reader_exports, {
+  FilesystemManifestReader: () => FilesystemManifestReader
+});
+import { readFile as readFile2 } from "fs/promises";
+import path4 from "path";
+var FilesystemManifestReader;
+var init_filesystem_manifest_reader = __esm({
+  "packages/core/dist/filesystem-manifest-reader.js"() {
+    "use strict";
+    init_manifest_reader();
+    FilesystemManifestReader = class extends ManifestReader {
+      rootFolder;
+      manifestGlobs;
+      platform;
+      manifestPath = null;
+      extensionManifest = null;
+      // Map of packagePath (task name) to actual source path
+      packagePathMap = null;
+      constructor(options) {
+        super();
+        this.rootFolder = options.rootFolder;
+        this.manifestGlobs = options.manifestGlobs || ["vss-extension.json"];
+        this.platform = options.platform;
+      }
+      /**
+       * Find and resolve the extension manifest file path
+       */
+      async resolveManifestPath() {
+        if (this.manifestPath) {
+          return this.manifestPath;
+        }
+        const matches = await this.platform.findMatch(this.rootFolder, this.manifestGlobs);
+        if (matches.length === 0) {
+          const commonNames = ["vss-extension.json", "extension.vsomanifest"];
+          for (const name of commonNames) {
+            const candidate = path4.join(this.rootFolder, name);
+            if (await this.platform.fileExists(candidate)) {
+              this.manifestPath = candidate;
+              return candidate;
+            }
+          }
+          throw new Error(`Extension manifest not found in ${this.rootFolder}. Tried patterns: ${this.manifestGlobs.join(", ")}`);
+        }
+        if (matches.length > 1) {
+          this.platform.warning(`Multiple manifest files found: ${matches.join(", ")}. Using first match.`);
+        }
+        this.manifestPath = matches[0];
+        return this.manifestPath;
+      }
+      /**
+       * Read the extension manifest from filesystem
+       * @returns Parsed extension manifest
+       */
+      async readExtensionManifest() {
+        if (this.extensionManifest) {
+          return this.extensionManifest;
+        }
+        const manifestPath = await this.resolveManifestPath();
+        const content = await readFile2(manifestPath, "utf-8");
+        this.extensionManifest = JSON.parse(content);
+        return this.extensionManifest;
+      }
+      /**
+       * Build a map of packagePath to actual source path from files array
+       * This handles cases where task.json is in a different directory than the final package path
+       * @returns Map of packagePath to source path
+       */
+      async buildPackagePathMap() {
+        if (this.packagePathMap) {
+          return this.packagePathMap;
+        }
+        this.packagePathMap = /* @__PURE__ */ new Map();
+        const manifest = await this.readExtensionManifest();
+        if (manifest.files) {
+          for (const file of manifest.files) {
+            if (file.packagePath) {
+              this.packagePathMap.set(file.packagePath, file.path);
+              this.platform.debug(`Mapped packagePath '${file.packagePath}' to source path '${file.path}'`);
+            }
+          }
+        }
+        return this.packagePathMap;
+      }
+      /**
+       * Find task paths from the extension manifest
+       * @returns Array of task directory paths (relative to rootFolder)
+       */
+      async findTaskPaths() {
+        const manifest = await this.readExtensionManifest();
+        const taskPaths = [];
+        if (manifest.contributions) {
+          for (const contribution of manifest.contributions) {
+            if (contribution.type === "ms.vss-distributed-task.task" && contribution.properties) {
+              const name = contribution.properties.name;
+              if (name) {
+                taskPaths.push(name);
+              }
+            }
+          }
+        }
+        if (taskPaths.length === 0 && manifest.files) {
+          for (const file of manifest.files) {
+            const taskJsonPath = path4.join(this.rootFolder, file.path, "task.json");
+            if (await this.platform.fileExists(taskJsonPath)) {
+              taskPaths.push(file.path);
+            }
+          }
+        }
+        return taskPaths;
+      }
+      /**
+       * Read a task manifest from filesystem
+       * @param taskPath Path to the task directory (relative to rootFolder) or packagePath
+       * @returns Parsed task manifest
+       */
+      async readTaskManifest(taskPath) {
+        const packagePathMap = await this.buildPackagePathMap();
+        let actualPath = taskPath;
+        const normalizedTaskPath = taskPath.replace(/\\/g, "/");
+        for (const [pkgPath, sourcePath] of packagePathMap.entries()) {
+          const normalizedPkgPath = pkgPath.replace(/\\/g, "/");
+          if (normalizedTaskPath === normalizedPkgPath) {
+            actualPath = sourcePath;
+            break;
+          } else if (normalizedTaskPath.startsWith(normalizedPkgPath + "/")) {
+            const remainder = normalizedTaskPath.substring(normalizedPkgPath.length + 1);
+            actualPath = path4.join(sourcePath, remainder);
+            break;
+          }
+        }
+        this.platform.debug(`Reading task manifest: taskPath='${taskPath}', actualPath='${actualPath}'`);
+        const absoluteTaskPath = path4.isAbsolute(actualPath) ? actualPath : path4.join(this.rootFolder, actualPath);
+        const taskJsonPath = path4.join(absoluteTaskPath, "task.json");
+        if (!await this.platform.fileExists(taskJsonPath)) {
+          throw new Error(`Task manifest not found: ${taskJsonPath}`);
+        }
+        const content = await readFile2(taskJsonPath, "utf-8");
+        return JSON.parse(content);
+      }
+      /**
+       * Close and clean up resources
+       * No-op for filesystem reader as there are no persistent resources
+       */
+      async close() {
+        this.extensionManifest = null;
+        this.manifestPath = null;
+        this.packagePathMap = null;
+      }
+      /**
+       * Get the root folder path
+       */
+      getRootFolder() {
+        return this.rootFolder;
+      }
+      /**
+       * Get the resolved manifest path (if already resolved)
+       */
+      getManifestPath() {
+        return this.manifestPath;
+      }
+    };
+  }
+});
+
 // node_modules/concat-map/index.js
 var require_concat_map = __commonJS({
   "node_modules/concat-map/index.js"(exports, module) {
@@ -830,1867 +1981,8 @@ var require_minimatch = __commonJS({
   }
 });
 
-// packages/core/dist/manifest-reader.js
-var ManifestReader;
-var init_manifest_reader = __esm({
-  "packages/core/dist/manifest-reader.js"() {
-    "use strict";
-    ManifestReader = class {
-      /**
-       * Read all task manifests in the extension
-       * Default implementation using findTaskPaths() and readTaskManifest()
-       * Subclasses can override for optimization
-       * @returns Array of task manifests with their paths
-       */
-      async readTaskManifests() {
-        const taskPaths = await this.findTaskPaths();
-        const results = [];
-        for (const taskPath of taskPaths) {
-          try {
-            const manifest = await this.readTaskManifest(taskPath);
-            results.push({ path: taskPath, manifest });
-          } catch {
-          }
-        }
-        return results;
-      }
-      /**
-       * Get quick metadata about the extension
-       * Default implementation using readExtensionManifest()
-       * @returns Extension metadata
-       */
-      async getMetadata() {
-        const manifest = await this.readExtensionManifest();
-        return {
-          publisher: manifest.publisher,
-          extensionId: manifest.id,
-          version: manifest.version,
-          name: manifest.name,
-          description: manifest.description
-        };
-      }
-      /**
-       * Get information about all tasks in the extension
-       * Default implementation using readTaskManifests()
-       * @returns Array of task information
-       */
-      async getTasksInfo() {
-        const tasks = await this.readTaskManifests();
-        return tasks.map(({ path: path10, manifest }) => ({
-          name: manifest.name,
-          friendlyName: manifest.friendlyName,
-          version: `${manifest.version.Major}.${manifest.version.Minor}.${manifest.version.Patch}`,
-          path: path10
-        }));
-      }
-    };
-  }
-});
-
-// node_modules/uuid/dist-node/regex.js
-var regex_default;
-var init_regex = __esm({
-  "node_modules/uuid/dist-node/regex.js"() {
-    regex_default = /^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$/i;
-  }
-});
-
-// node_modules/uuid/dist-node/validate.js
-function validate(uuid) {
-  return typeof uuid === "string" && regex_default.test(uuid);
-}
-var validate_default;
-var init_validate = __esm({
-  "node_modules/uuid/dist-node/validate.js"() {
-    init_regex();
-    validate_default = validate;
-  }
-});
-
-// node_modules/uuid/dist-node/parse.js
-function parse(uuid) {
-  if (!validate_default(uuid)) {
-    throw TypeError("Invalid UUID");
-  }
-  let v;
-  return Uint8Array.of((v = parseInt(uuid.slice(0, 8), 16)) >>> 24, v >>> 16 & 255, v >>> 8 & 255, v & 255, (v = parseInt(uuid.slice(9, 13), 16)) >>> 8, v & 255, (v = parseInt(uuid.slice(14, 18), 16)) >>> 8, v & 255, (v = parseInt(uuid.slice(19, 23), 16)) >>> 8, v & 255, (v = parseInt(uuid.slice(24, 36), 16)) / 1099511627776 & 255, v / 4294967296 & 255, v >>> 24 & 255, v >>> 16 & 255, v >>> 8 & 255, v & 255);
-}
-var parse_default;
-var init_parse = __esm({
-  "node_modules/uuid/dist-node/parse.js"() {
-    init_validate();
-    parse_default = parse;
-  }
-});
-
-// node_modules/uuid/dist-node/stringify.js
-function unsafeStringify(arr, offset = 0) {
-  return (byteToHex[arr[offset + 0]] + byteToHex[arr[offset + 1]] + byteToHex[arr[offset + 2]] + byteToHex[arr[offset + 3]] + "-" + byteToHex[arr[offset + 4]] + byteToHex[arr[offset + 5]] + "-" + byteToHex[arr[offset + 6]] + byteToHex[arr[offset + 7]] + "-" + byteToHex[arr[offset + 8]] + byteToHex[arr[offset + 9]] + "-" + byteToHex[arr[offset + 10]] + byteToHex[arr[offset + 11]] + byteToHex[arr[offset + 12]] + byteToHex[arr[offset + 13]] + byteToHex[arr[offset + 14]] + byteToHex[arr[offset + 15]]).toLowerCase();
-}
-var byteToHex;
-var init_stringify = __esm({
-  "node_modules/uuid/dist-node/stringify.js"() {
-    byteToHex = [];
-    for (let i = 0; i < 256; ++i) {
-      byteToHex.push((i + 256).toString(16).slice(1));
-    }
-  }
-});
-
-// node_modules/uuid/dist-node/v35.js
-function stringToBytes(str) {
-  str = unescape(encodeURIComponent(str));
-  const bytes = new Uint8Array(str.length);
-  for (let i = 0; i < str.length; ++i) {
-    bytes[i] = str.charCodeAt(i);
-  }
-  return bytes;
-}
-function v35(version, hash, value, namespace, buf, offset) {
-  const valueBytes = typeof value === "string" ? stringToBytes(value) : value;
-  const namespaceBytes = typeof namespace === "string" ? parse_default(namespace) : namespace;
-  if (typeof namespace === "string") {
-    namespace = parse_default(namespace);
-  }
-  if (namespace?.length !== 16) {
-    throw TypeError("Namespace must be array-like (16 iterable integer values, 0-255)");
-  }
-  let bytes = new Uint8Array(16 + valueBytes.length);
-  bytes.set(namespaceBytes);
-  bytes.set(valueBytes, namespaceBytes.length);
-  bytes = hash(bytes);
-  bytes[6] = bytes[6] & 15 | version;
-  bytes[8] = bytes[8] & 63 | 128;
-  if (buf) {
-    offset = offset || 0;
-    for (let i = 0; i < 16; ++i) {
-      buf[offset + i] = bytes[i];
-    }
-    return buf;
-  }
-  return unsafeStringify(bytes);
-}
-var DNS, URL2;
-var init_v35 = __esm({
-  "node_modules/uuid/dist-node/v35.js"() {
-    init_parse();
-    init_stringify();
-    DNS = "6ba7b810-9dad-11d1-80b4-00c04fd430c8";
-    URL2 = "6ba7b811-9dad-11d1-80b4-00c04fd430c8";
-  }
-});
-
-// node_modules/uuid/dist-node/sha1.js
-import { createHash } from "node:crypto";
-function sha1(bytes) {
-  if (Array.isArray(bytes)) {
-    bytes = Buffer.from(bytes);
-  } else if (typeof bytes === "string") {
-    bytes = Buffer.from(bytes, "utf8");
-  }
-  return createHash("sha1").update(bytes).digest();
-}
-var sha1_default;
-var init_sha1 = __esm({
-  "node_modules/uuid/dist-node/sha1.js"() {
-    sha1_default = sha1;
-  }
-});
-
-// node_modules/uuid/dist-node/v5.js
-function v5(value, namespace, buf, offset) {
-  return v35(80, sha1_default, value, namespace, buf, offset);
-}
-var v5_default;
-var init_v5 = __esm({
-  "node_modules/uuid/dist-node/v5.js"() {
-    init_sha1();
-    init_v35();
-    v5.DNS = DNS;
-    v5.URL = URL2;
-    v5_default = v5;
-  }
-});
-
-// node_modules/uuid/dist-node/index.js
-var init_dist_node = __esm({
-  "node_modules/uuid/dist-node/index.js"() {
-    init_v5();
-  }
-});
-
-// packages/core/dist/vsix-writer.js
-var vsix_writer_exports = {};
-__export(vsix_writer_exports, {
-  VsixWriter: () => VsixWriter
-});
-import yazl from "yazl";
-import { Buffer as Buffer2 } from "buffer";
-import { createWriteStream } from "fs";
-function validateZipPath(filePath) {
-  const normalizedPath = filePath.replace(/\\/g, "/");
-  if (normalizedPath.startsWith("/") || /^[A-Z]:/i.test(normalizedPath)) {
-    throw new Error(`Security: Absolute paths are not allowed: ${filePath}`);
-  }
-  if (normalizedPath.includes("../") || normalizedPath.startsWith("..")) {
-    throw new Error(`Security: Path traversal detected: ${filePath}`);
-  }
-  if (normalizedPath.includes("\0")) {
-    throw new Error(`Security: Null byte detected in path: ${filePath}`);
-  }
-}
-var VsixWriter;
-var init_vsix_writer = __esm({
-  "packages/core/dist/vsix-writer.js"() {
-    "use strict";
-    VsixWriter = class _VsixWriter {
-      editor;
-      zipFile = null;
-      constructor(editor) {
-        this.editor = editor;
-      }
-      /**
-       * Create a writer from an editor
-       * @param editor The ManifestEditor with modifications
-       * @returns VsixWriter instance
-       */
-      static fromEditor(editor) {
-        return new _VsixWriter(editor);
-      }
-      /**
-       * Write the modified VSIX to a file
-       *
-       * This method efficiently copies unchanged entries from the source VSIX
-       * without recompression, significantly improving performance for large files.
-       *
-       * @param outputPath Path where the new VSIX should be written
-       * @returns Promise that resolves when writing is complete
-       */
-      async writeToFile(outputPath) {
-        const reader = this.editor.getReader();
-        const modifications = this.editor.getModifications();
-        const manifestMods = this.editor.getManifestModifications();
-        const taskManifestMods = this.editor.getTaskManifestModifications();
-        this.zipFile = new yazl.ZipFile();
-        const addedFiles = /* @__PURE__ */ new Set();
-        const manifestPath = await this.determineManifestPath(reader);
-        if (Object.keys(manifestMods).length > 0 || taskManifestMods.size > 0) {
-          await this.applyManifestModifications(reader, manifestPath, manifestMods, taskManifestMods, addedFiles);
-        }
-        for (const [path10, mod] of modifications) {
-          validateZipPath(path10);
-          if (mod.type === "remove") {
-            addedFiles.add(path10);
-          } else if (mod.type === "modify" && mod.content) {
-            this.zipFile.addBuffer(mod.content, path10);
-            addedFiles.add(path10);
-          }
-        }
-        await this.copyUnchangedFiles(reader, addedFiles);
-        await this.finalizeZip(outputPath);
-      }
-      /**
-       * Write the modified VSIX to a buffer in memory
-       * @returns Promise<Buffer> containing the complete VSIX
-       */
-      async writeToBuffer() {
-        const reader = this.editor.getReader();
-        const modifications = this.editor.getModifications();
-        const manifestMods = this.editor.getManifestModifications();
-        const taskManifestMods = this.editor.getTaskManifestModifications();
-        this.zipFile = new yazl.ZipFile();
-        const addedFiles = /* @__PURE__ */ new Set();
-        const manifestPath = await this.determineManifestPath(reader);
-        if (Object.keys(manifestMods).length > 0 || taskManifestMods.size > 0) {
-          await this.applyManifestModifications(reader, manifestPath, manifestMods, taskManifestMods, addedFiles);
-        }
-        for (const [path10, mod] of modifications) {
-          validateZipPath(path10);
-          if (mod.type === "remove") {
-            addedFiles.add(path10);
-          } else if (mod.type === "modify" && mod.content) {
-            this.zipFile.addBuffer(mod.content, path10);
-            addedFiles.add(path10);
-          }
-        }
-        await this.copyUnchangedFiles(reader, addedFiles);
-        return this.finalizeZipToBuffer();
-      }
-      /**
-       * Determine which manifest file to use
-       */
-      async determineManifestPath(reader) {
-        if (await reader.fileExists("extension.vsomanifest")) {
-          return "extension.vsomanifest";
-        }
-        if (await reader.fileExists("vss-extension.json")) {
-          return "vss-extension.json";
-        }
-        throw new Error("No extension manifest found in source VSIX");
-      }
-      /**
-       * Apply modifications to manifests
-       */
-      async applyManifestModifications(reader, manifestPath, manifestMods, taskManifestMods, addedFiles) {
-        const manifest = await reader.readExtensionManifest();
-        Object.assign(manifest, manifestMods);
-        const manifestJson = JSON.stringify(manifest, null, 2);
-        this.zipFile.addBuffer(Buffer2.from(manifestJson, "utf-8"), manifestPath);
-        addedFiles.add(manifestPath);
-        if (taskManifestMods.size > 0) {
-          const taskManifests = await reader.readTaskManifests();
-          for (const taskManifest of taskManifests) {
-            const mods = taskManifestMods.get(taskManifest.manifest.name);
-            if (mods) {
-              Object.assign(taskManifest.manifest, mods);
-              const taskJson = JSON.stringify(taskManifest.manifest, null, 2);
-              const taskPath = `${taskManifest.path}/task.json`;
-              this.zipFile.addBuffer(Buffer2.from(taskJson, "utf-8"), taskPath);
-              addedFiles.add(taskPath);
-            }
-          }
-        }
-      }
-      /**
-       * Copy unchanged files from source VSIX
-       *
-       * This is the key optimization: files are copied directly from the source
-       * ZIP without decompression/recompression, preserving original compression.
-       */
-      async copyUnchangedFiles(reader, addedFiles) {
-        const allFiles = await reader.listFiles();
-        for (const file of allFiles) {
-          if (!addedFiles.has(file.path)) {
-            try {
-              const content = await reader.readFile(file.path);
-              this.zipFile.addBuffer(content, file.path);
-            } catch (err) {
-              console.warn(`Warning: Could not copy file ${file.path}: ${err.message}`);
-            }
-          }
-        }
-      }
-      /**
-       * Finalize ZIP and write to file
-       */
-      async finalizeZip(outputPath) {
-        if (!this.zipFile) {
-          throw new Error("ZIP file not initialized");
-        }
-        return new Promise((resolve, reject) => {
-          const outputStream = createWriteStream(outputPath);
-          outputStream.on("error", (err) => {
-            reject(new Error(`Failed to write VSIX file: ${err.message}`));
-          });
-          outputStream.on("finish", () => {
-            resolve();
-          });
-          this.zipFile.outputStream.pipe(outputStream).on("error", (err) => {
-            reject(new Error(`Failed to write VSIX stream: ${err.message}`));
-          });
-          this.zipFile.end();
-        });
-      }
-      /**
-       * Finalize ZIP to buffer
-       */
-      async finalizeZipToBuffer() {
-        if (!this.zipFile) {
-          throw new Error("ZIP file not initialized");
-        }
-        return new Promise((resolve, reject) => {
-          const chunks = [];
-          this.zipFile.outputStream.on("data", (chunk) => {
-            chunks.push(chunk);
-          });
-          this.zipFile.outputStream.on("end", () => {
-            resolve(Buffer2.concat(chunks));
-          });
-          this.zipFile.outputStream.on("error", (err) => {
-            reject(new Error(`Failed to create VSIX buffer: ${err.message}`));
-          });
-          this.zipFile.end();
-        });
-      }
-      /**
-       * Close and cleanup resources
-       */
-      async close() {
-        this.zipFile = null;
-      }
-    };
-  }
-});
-
-// packages/core/dist/filesystem-manifest-writer.js
-var filesystem_manifest_writer_exports = {};
-__export(filesystem_manifest_writer_exports, {
-  FilesystemManifestWriter: () => FilesystemManifestWriter
-});
-import { mkdir, readFile, readdir, writeFile } from "fs/promises";
-import path7 from "path";
-var FilesystemManifestWriter;
-var init_filesystem_manifest_writer = __esm({
-  "packages/core/dist/filesystem-manifest-writer.js"() {
-    "use strict";
-    FilesystemManifestWriter = class _FilesystemManifestWriter {
-      editor;
-      platform;
-      overridesPath = null;
-      constructor(editor, platform) {
-        this.editor = editor;
-        this.platform = platform;
-      }
-      /**
-       * Create a writer from an editor
-       * @param editor The editor with modifications
-       * @returns FilesystemManifestWriter instance
-       */
-      static fromEditor(editor) {
-        const reader = editor.getReader();
-        if (reader.constructor.name !== "FilesystemManifestReader") {
-          throw new Error("FilesystemManifestWriter can only be used with FilesystemManifestReader");
-        }
-        const fsReader = reader;
-        const platform = fsReader.platform;
-        return new _FilesystemManifestWriter(editor, platform);
-      }
-      /**
-       * Write modified manifests to the filesystem
-       *
-       * This updates task.json files directly and writes extension manifest changes.
-       * It also generates an overrides.json in the temp directory that can be passed
-       * to tfx with --overrides-file.
-       *
-       * @returns Promise that resolves when writing is complete
-       */
-      async writeToFilesystem() {
-        const reader = this.editor.getReader();
-        const rootFolder = reader.getRootFolder();
-        const manifestMods = this.editor.getManifestModifications();
-        const taskManifestMods = this.editor.getTaskManifestModifications();
-        const fileMods = this.editor.getModifications();
-        this.platform.debug("Writing manifests to filesystem...");
-        if (taskManifestMods.size > 0) {
-          await this.writeTaskManifests(reader, rootFolder, taskManifestMods);
-        }
-        if (Object.keys(manifestMods).length > 0) {
-          await this.writeExtensionManifest(reader, manifestMods);
-        }
-        for (const [filePath, mod] of fileMods) {
-          if (mod.type === "modify" && mod.content) {
-            const absolutePath = path7.isAbsolute(filePath) ? filePath : path7.join(rootFolder, filePath);
-            this.platform.debug(`Writing file: ${absolutePath}`);
-            await writeFile(absolutePath, mod.content);
-          }
-        }
-        await this.generateOverridesFile(manifestMods);
-        this.platform.info("Manifests written to filesystem successfully");
-      }
-      /**
-       * Write task manifest modifications to filesystem
-       */
-      async writeTaskManifests(reader, rootFolder, taskManifestMods) {
-        const tasks = await reader.readTaskManifests();
-        const appliedTaskNames = /* @__PURE__ */ new Set();
-        const packagePathMap = await reader.buildPackagePathMap();
-        for (const { path: taskPath, manifest } of tasks) {
-          const mods = taskManifestMods.get(manifest.name);
-          if (mods) {
-            appliedTaskNames.add(manifest.name);
-            Object.assign(manifest, mods);
-            let actualPath = taskPath;
-            const normalizedTaskPath = taskPath.replace(/\\/g, "/");
-            for (const [pkgPath, sourcePath] of packagePathMap.entries()) {
-              const normalizedPkgPath = pkgPath.replace(/\\/g, "/");
-              if (normalizedTaskPath === normalizedPkgPath) {
-                actualPath = sourcePath;
-                break;
-              } else if (normalizedTaskPath.startsWith(normalizedPkgPath + "/")) {
-                const remainder = normalizedTaskPath.substring(normalizedPkgPath.length + 1);
-                actualPath = path7.join(sourcePath, remainder);
-                break;
-              }
-            }
-            this.platform.debug(`Writing task manifest: taskPath='${taskPath}', actualPath='${actualPath}'`);
-            const absoluteTaskPath = path7.isAbsolute(actualPath) ? actualPath : path7.join(rootFolder, actualPath);
-            const taskJsonPath = path7.join(absoluteTaskPath, "task.json");
-            this.platform.debug(`Writing to file: ${taskJsonPath}`);
-            const manifestJson = JSON.stringify(manifest, null, 2) + "\n";
-            await writeFile(taskJsonPath, manifestJson, "utf-8");
-          }
-        }
-        for (const [taskName, mods] of taskManifestMods.entries()) {
-          if (appliedTaskNames.has(taskName)) {
-            continue;
-          }
-          const fallbackTaskDir = await this.findTaskDirectoryByName(rootFolder, taskName);
-          if (!fallbackTaskDir) {
-            this.platform.debug(`No task.json found for task '${taskName}' during fallback write`);
-            continue;
-          }
-          const taskJsonPath = path7.join(fallbackTaskDir, "task.json");
-          const content = await readFile(taskJsonPath, "utf-8");
-          const manifest = JSON.parse(content);
-          Object.assign(manifest, mods);
-          this.platform.debug(`Fallback writing task manifest: ${taskJsonPath}`);
-          await writeFile(taskJsonPath, JSON.stringify(manifest, null, 2) + "\n", "utf-8");
-        }
-      }
-      /**
-       * Recursively find a task directory by task manifest name
-       */
-      async findTaskDirectoryByName(rootFolder, taskName) {
-        const stack = [rootFolder];
-        while (stack.length > 0) {
-          const current = stack.pop();
-          let entries;
-          try {
-            entries = await readdir(current, { withFileTypes: true });
-          } catch {
-            continue;
-          }
-          for (const entry of entries) {
-            const absolutePath = path7.join(current, entry.name);
-            if (entry.isDirectory()) {
-              stack.push(absolutePath);
-              continue;
-            }
-            if (!entry.isFile() || entry.name !== "task.json") {
-              continue;
-            }
-            try {
-              const content = await readFile(absolutePath, "utf-8");
-              const manifest = JSON.parse(content);
-              if (manifest.name === taskName) {
-                return path7.dirname(absolutePath);
-              }
-            } catch {
-            }
-          }
-        }
-        return null;
-      }
-      /**
-       * Write extension manifest modifications to filesystem
-       */
-      async writeExtensionManifest(reader, manifestMods) {
-        const manifest = await reader.readExtensionManifest();
-        Object.assign(manifest, manifestMods);
-        const manifestPath = reader.getManifestPath();
-        if (!manifestPath) {
-          throw new Error("Extension manifest path not resolved");
-        }
-        this.platform.debug(`Writing extension manifest: ${manifestPath}`);
-        const manifestJson = JSON.stringify(manifest, null, 2) + "\n";
-        await writeFile(manifestPath, manifestJson, "utf-8");
-      }
-      /**
-       * Generate overrides.json file in temp directory
-       *
-       * This file can be passed to tfx with --overrides-file to override
-       * extension manifest values during packaging without modifying source files.
-       */
-      async generateOverridesFile(manifestMods) {
-        if (Object.keys(manifestMods).length === 0) {
-          this.platform.debug("No manifest modifications, skipping overrides.json generation");
-          return;
-        }
-        const overrides = {};
-        if (manifestMods.publisher) {
-          overrides.publisher = manifestMods.publisher;
-        }
-        if (manifestMods.id) {
-          overrides.id = manifestMods.id;
-        }
-        if (manifestMods.version) {
-          overrides.version = manifestMods.version;
-        }
-        if (manifestMods.name) {
-          overrides.name = manifestMods.name;
-        }
-        if (manifestMods.description) {
-          overrides.description = manifestMods.description;
-        }
-        if (manifestMods.galleryFlags) {
-          overrides.galleryFlags = manifestMods.galleryFlags;
-        }
-        const tempDir = this.platform.getTempDir();
-        await mkdir(tempDir, { recursive: true });
-        this.overridesPath = path7.join(tempDir, `overrides-${Date.now()}.json`);
-        this.platform.debug(`Writing overrides file: ${this.overridesPath}`);
-        const overridesJson = JSON.stringify(overrides, null, 2) + "\n";
-        await writeFile(this.overridesPath, overridesJson, "utf-8");
-        this.platform.info(`Generated overrides file: ${this.overridesPath}`);
-      }
-      /**
-       * Get the path to the generated overrides.json file
-       * This can be passed to tfx with --overrides-file
-       * @returns Path to overrides.json or null if not generated
-       */
-      getOverridesPath() {
-        return this.overridesPath;
-      }
-      /**
-       * Close and cleanup resources
-       */
-      async close() {
-      }
-    };
-  }
-});
-
-// packages/core/dist/manifest-editor.js
-var manifest_editor_exports = {};
-__export(manifest_editor_exports, {
-  ManifestEditor: () => ManifestEditor
-});
-import { Buffer as Buffer3 } from "buffer";
-var ManifestEditor;
-var init_manifest_editor = __esm({
-  "packages/core/dist/manifest-editor.js"() {
-    "use strict";
-    init_dist_node();
-    ManifestEditor = class _ManifestEditor {
-      reader;
-      modifications = /* @__PURE__ */ new Map();
-      manifestModifications = {};
-      taskManifestModifications = /* @__PURE__ */ new Map();
-      // Track original task IDs for updating extension manifest references
-      taskIdUpdates = /* @__PURE__ */ new Map();
-      constructor(options) {
-        this.reader = options.reader;
-      }
-      /**
-       * Create an editor from a reader
-       * @param reader The manifest reader (VSIX or filesystem)
-       * @returns ManifestEditor instance
-       */
-      static fromReader(reader) {
-        return new _ManifestEditor({ reader });
-      }
-      /**
-       * Apply a set of options to the manifest
-       * This is the main entry point for batch modifications
-       * All conditional logic for applying changes is contained here
-       *
-       * @param options Options to apply
-       * @returns Promise<this> for async chaining
-       */
-      async applyOptions(options) {
-        if (options.publisherId) {
-          this.setPublisher(options.publisherId);
-        }
-        if (options.extensionId) {
-          this.setExtensionId(options.extensionId);
-        }
-        if (options.extensionVersion) {
-          this.setVersion(options.extensionVersion);
-        }
-        if (options.extensionName) {
-          this.setName(options.extensionName);
-        }
-        if (options.extensionVisibility) {
-          this.setVisibility(options.extensionVisibility);
-        }
-        if (options.extensionPricing) {
-          this.setPricing(options.extensionPricing);
-        }
-        if (options.updateTasksVersion && options.extensionVersion) {
-          const versionType = options.updateTasksVersionType || "major";
-          await this.updateAllTaskVersions(options.extensionVersion, versionType);
-        }
-        if (options.updateTasksId) {
-          await this.updateAllTaskIds();
-        }
-        return this;
-      }
-      /**
-       * Set the publisher ID
-       * @param publisher New publisher ID
-       * @returns This editor for chaining
-       */
-      setPublisher(publisher) {
-        this.manifestModifications.publisher = publisher;
-        return this;
-      }
-      /**
-       * Set the extension ID
-       * @param id New extension ID
-       * @returns This editor for chaining
-       */
-      setExtensionId(id) {
-        this.manifestModifications.id = id;
-        return this;
-      }
-      /**
-       * Set the extension version
-       * @param version New version (e.g., "1.2.3")
-       * @returns This editor for chaining
-       */
-      setVersion(version) {
-        this.manifestModifications.version = version;
-        return this;
-      }
-      /**
-       * Set the extension name
-       * @param name New display name
-       * @returns This editor for chaining
-       */
-      setName(name) {
-        this.manifestModifications.name = name;
-        return this;
-      }
-      /**
-       * Set the extension description
-       * @param description New description
-       * @returns This editor for chaining
-       */
-      setDescription(description) {
-        this.manifestModifications.description = description;
-        return this;
-      }
-      /**
-       * Set extension visibility in gallery
-       * @param visibility 'public', 'private', 'public_preview', or 'private_preview'
-       * @returns This editor for chaining
-       */
-      setVisibility(visibility) {
-        if (!this.manifestModifications.galleryFlags) {
-          this.manifestModifications.galleryFlags = [];
-        }
-        const flags = this.manifestModifications.galleryFlags;
-        const visibilityFlags = ["Public", "Private", "Preview"];
-        for (const flag of visibilityFlags) {
-          const index = flags.indexOf(flag);
-          if (index >= 0) {
-            flags.splice(index, 1);
-          }
-        }
-        if (visibility === "public") {
-          flags.push("Public");
-        } else if (visibility === "private") {
-          flags.push("Private");
-        } else if (visibility === "public_preview") {
-          flags.push("Public", "Preview");
-        } else if (visibility === "private_preview") {
-          flags.push("Private", "Preview");
-        }
-        return this;
-      }
-      /**
-       * Set extension pricing model
-       * @param pricing 'free', 'paid', or 'trial'
-       * @returns This editor for chaining
-       */
-      setPricing(pricing) {
-        if (!this.manifestModifications.galleryFlags) {
-          this.manifestModifications.galleryFlags = [];
-        }
-        const flags = this.manifestModifications.galleryFlags;
-        const pricingFlags = ["Free", "Paid", "Trial"];
-        for (const flag of pricingFlags) {
-          const index = flags.indexOf(flag);
-          if (index >= 0) {
-            flags.splice(index, 1);
-          }
-        }
-        const flagMap = { free: "Free", paid: "Paid", trial: "Trial" };
-        flags.push(flagMap[pricing]);
-        return this;
-      }
-      /**
-       * Update a specific task's version
-       * @param taskName Name of the task
-       * @param extensionVersion Extension version to apply (e.g., "1.2.3")
-       * @param versionType How to apply the version: 'major', 'minor', or 'patch'
-       * @returns This editor for chaining
-       */
-      updateTaskVersion(taskName, extensionVersion, versionType = "major") {
-        const versionParts = extensionVersion.split(".");
-        if (versionParts.length > 3) {
-        }
-        const newVersion = {
-          major: parseInt(versionParts[0], 10) || 0,
-          minor: parseInt(versionParts[1], 10) || 0,
-          patch: parseInt(versionParts[2], 10) || 0
-        };
-        if (!this.taskManifestModifications.has(taskName)) {
-          this.taskManifestModifications.set(taskName, {});
-        }
-        const taskMods = this.taskManifestModifications.get(taskName);
-        const existingVersion = taskMods.version || { Major: 0, Minor: 0, Patch: 0 };
-        switch (versionType) {
-          case "major":
-            taskMods.version = {
-              Major: newVersion.major,
-              Minor: newVersion.minor,
-              Patch: newVersion.patch
-            };
-            break;
-          case "minor":
-            taskMods.version = {
-              Major: existingVersion.Major,
-              Minor: newVersion.minor,
-              Patch: newVersion.patch
-            };
-            break;
-          case "patch":
-            taskMods.version = {
-              Major: existingVersion.Major,
-              Minor: existingVersion.Minor,
-              Patch: newVersion.patch
-            };
-            break;
-        }
-        return this;
-      }
-      /**
-       * Update a specific task's ID (UUID) using v5 namespacing
-       * @param taskName Name of the task
-       * @param publisherId Publisher ID (for UUID generation)
-       * @param extensionId Extension ID (for UUID generation)
-       * @returns This editor for chaining
-       */
-      updateTaskId(taskName, publisherId, extensionId) {
-        const marketplaceNamespace = v5_default("https://marketplace.visualstudio.com/vsts", v5_default.URL);
-        const taskNamespace = `${publisherId}.${extensionId}.${taskName}`;
-        const newId = v5_default(taskNamespace, marketplaceNamespace);
-        if (!this.taskManifestModifications.has(taskName)) {
-          this.taskManifestModifications.set(taskName, {});
-        }
-        const taskMods = this.taskManifestModifications.get(taskName);
-        taskMods.id = newId;
-        return this;
-      }
-      /**
-       * Update all tasks' versions in the extension
-       * Reads all tasks from the reader and updates their versions
-       * @param extensionVersion Extension version to apply
-       * @param versionType How to apply the version: 'major', 'minor', or 'patch'
-       * @returns Promise<this> for async chaining
-       */
-      async updateAllTaskVersions(extensionVersion, versionType = "major") {
-        const tasks = await this.reader.getTasksInfo();
-        const versionParts = extensionVersion.split(".");
-        const parsedVersion = {
-          major: parseInt(versionParts[0], 10) || 0,
-          minor: parseInt(versionParts[1], 10) || 0,
-          patch: parseInt(versionParts[2], 10) || 0
-        };
-        for (const task of tasks) {
-          const existingParts = (task.version || "0.0.0").split(".");
-          const existingVersion = {
-            Major: parseInt(existingParts[0], 10) || 0,
-            Minor: parseInt(existingParts[1], 10) || 0,
-            Patch: parseInt(existingParts[2], 10) || 0
-          };
-          if (!this.taskManifestModifications.has(task.name)) {
-            this.taskManifestModifications.set(task.name, {});
-          }
-          const taskMods = this.taskManifestModifications.get(task.name);
-          switch (versionType) {
-            case "major":
-              taskMods.version = {
-                Major: parsedVersion.major,
-                Minor: parsedVersion.minor,
-                Patch: parsedVersion.patch
-              };
-              break;
-            case "minor":
-              taskMods.version = {
-                Major: existingVersion.Major,
-                Minor: parsedVersion.minor,
-                Patch: parsedVersion.patch
-              };
-              break;
-            case "patch":
-              taskMods.version = {
-                Major: existingVersion.Major,
-                Minor: existingVersion.Minor,
-                Patch: parsedVersion.patch
-              };
-              break;
-          }
-        }
-        return this;
-      }
-      /**
-       * Update all tasks' IDs in the extension using v5 namespacing
-       * Reads extension manifest for publisher/ID and all tasks from reader
-       * @returns Promise<this> for async chaining
-       */
-      async updateAllTaskIds() {
-        const manifest = await this.reader.readExtensionManifest();
-        const publisherId = this.manifestModifications.publisher || manifest.publisher;
-        const extensionId = this.manifestModifications.id || manifest.id;
-        const tasks = await this.reader.getTasksInfo();
-        for (const task of tasks) {
-          this.updateTaskId(task.name, publisherId, extensionId);
-        }
-        return this;
-      }
-      /**
-       * Add or modify a file
-       * @param path Path to the file
-       * @param content File content
-       * @returns This editor for chaining
-       */
-      setFile(path10, content) {
-        const buffer = Buffer3.isBuffer(content) ? content : Buffer3.from(content, "utf-8");
-        const normalizedPath = path10.replace(/\\/g, "/");
-        this.modifications.set(normalizedPath, {
-          type: "modify",
-          path: normalizedPath,
-          content: buffer
-        });
-        return this;
-      }
-      /**
-       * Remove a file
-       * @param path Path to the file
-       * @returns This editor for chaining
-       */
-      removeFile(path10) {
-        const normalizedPath = path10.replace(/\\/g, "/");
-        this.modifications.set(normalizedPath, {
-          type: "remove",
-          path: normalizedPath
-        });
-        return this;
-      }
-      /**
-       * Convert to a writer for output
-       * The writer type depends on the reader type
-       * @returns Promise<Writer> ready to write (VsixWriter or FilesystemManifestWriter)
-       */
-      async toWriter() {
-        const readerConstructorName = this.reader.constructor.name;
-        if (readerConstructorName === "VsixReader") {
-          const { VsixWriter: VsixWriter2 } = await Promise.resolve().then(() => (init_vsix_writer(), vsix_writer_exports));
-          return VsixWriter2.fromEditor(this);
-        } else if (readerConstructorName === "FilesystemManifestReader") {
-          const { FilesystemManifestWriter: FilesystemManifestWriter2 } = await Promise.resolve().then(() => (init_filesystem_manifest_writer(), filesystem_manifest_writer_exports));
-          return FilesystemManifestWriter2.fromEditor(this);
-        } else {
-          throw new Error(`Unsupported reader type: ${readerConstructorName}`);
-        }
-      }
-      /**
-       * Get the source reader
-       * @internal
-       */
-      getReader() {
-        return this.reader;
-      }
-      /**
-       * Get all file modifications
-       * @internal
-       */
-      getModifications() {
-        return this.modifications;
-      }
-      /**
-       * Get manifest modifications
-       * @internal
-       */
-      getManifestModifications() {
-        return this.manifestModifications;
-      }
-      /**
-       * Get task manifest modifications
-       * @internal
-       */
-      getTaskManifestModifications() {
-        return this.taskManifestModifications;
-      }
-      /**
-       * Get task ID updates (for updating extension manifest references)
-       * @internal
-       */
-      getTaskIdUpdates() {
-        return this.taskIdUpdates;
-      }
-    };
-  }
-});
-
-// packages/core/dist/filesystem-manifest-reader.js
-var filesystem_manifest_reader_exports = {};
-__export(filesystem_manifest_reader_exports, {
-  FilesystemManifestReader: () => FilesystemManifestReader
-});
-import { readFile as readFile2 } from "fs/promises";
-import path8 from "path";
-var FilesystemManifestReader;
-var init_filesystem_manifest_reader = __esm({
-  "packages/core/dist/filesystem-manifest-reader.js"() {
-    "use strict";
-    init_manifest_reader();
-    FilesystemManifestReader = class extends ManifestReader {
-      rootFolder;
-      manifestGlobs;
-      platform;
-      manifestPath = null;
-      extensionManifest = null;
-      // Map of packagePath (task name) to actual source path
-      packagePathMap = null;
-      constructor(options) {
-        super();
-        this.rootFolder = options.rootFolder;
-        this.manifestGlobs = options.manifestGlobs || ["vss-extension.json"];
-        this.platform = options.platform;
-      }
-      /**
-       * Find and resolve the extension manifest file path
-       */
-      async resolveManifestPath() {
-        if (this.manifestPath) {
-          return this.manifestPath;
-        }
-        const matches = await this.platform.findMatch(this.rootFolder, this.manifestGlobs);
-        if (matches.length === 0) {
-          const commonNames = ["vss-extension.json", "extension.vsomanifest"];
-          for (const name of commonNames) {
-            const candidate = path8.join(this.rootFolder, name);
-            if (await this.platform.fileExists(candidate)) {
-              this.manifestPath = candidate;
-              return candidate;
-            }
-          }
-          throw new Error(`Extension manifest not found in ${this.rootFolder}. Tried patterns: ${this.manifestGlobs.join(", ")}`);
-        }
-        if (matches.length > 1) {
-          this.platform.warning(`Multiple manifest files found: ${matches.join(", ")}. Using first match.`);
-        }
-        this.manifestPath = matches[0];
-        return this.manifestPath;
-      }
-      /**
-       * Read the extension manifest from filesystem
-       * @returns Parsed extension manifest
-       */
-      async readExtensionManifest() {
-        if (this.extensionManifest) {
-          return this.extensionManifest;
-        }
-        const manifestPath = await this.resolveManifestPath();
-        const content = await readFile2(manifestPath, "utf-8");
-        this.extensionManifest = JSON.parse(content);
-        return this.extensionManifest;
-      }
-      /**
-       * Build a map of packagePath to actual source path from files array
-       * This handles cases where task.json is in a different directory than the final package path
-       * @returns Map of packagePath to source path
-       */
-      async buildPackagePathMap() {
-        if (this.packagePathMap) {
-          return this.packagePathMap;
-        }
-        this.packagePathMap = /* @__PURE__ */ new Map();
-        const manifest = await this.readExtensionManifest();
-        if (manifest.files) {
-          for (const file of manifest.files) {
-            if (file.packagePath) {
-              this.packagePathMap.set(file.packagePath, file.path);
-              this.platform.debug(`Mapped packagePath '${file.packagePath}' to source path '${file.path}'`);
-            }
-          }
-        }
-        return this.packagePathMap;
-      }
-      /**
-       * Find task paths from the extension manifest
-       * @returns Array of task directory paths (relative to rootFolder)
-       */
-      async findTaskPaths() {
-        const manifest = await this.readExtensionManifest();
-        const taskPaths = [];
-        if (manifest.contributions) {
-          for (const contribution of manifest.contributions) {
-            if (contribution.type === "ms.vss-distributed-task.task" && contribution.properties) {
-              const name = contribution.properties.name;
-              if (name) {
-                taskPaths.push(name);
-              }
-            }
-          }
-        }
-        if (taskPaths.length === 0 && manifest.files) {
-          for (const file of manifest.files) {
-            const taskJsonPath = path8.join(this.rootFolder, file.path, "task.json");
-            if (await this.platform.fileExists(taskJsonPath)) {
-              taskPaths.push(file.path);
-            }
-          }
-        }
-        return taskPaths;
-      }
-      /**
-       * Read a task manifest from filesystem
-       * @param taskPath Path to the task directory (relative to rootFolder) or packagePath
-       * @returns Parsed task manifest
-       */
-      async readTaskManifest(taskPath) {
-        const packagePathMap = await this.buildPackagePathMap();
-        let actualPath = taskPath;
-        const normalizedTaskPath = taskPath.replace(/\\/g, "/");
-        for (const [pkgPath, sourcePath] of packagePathMap.entries()) {
-          const normalizedPkgPath = pkgPath.replace(/\\/g, "/");
-          if (normalizedTaskPath === normalizedPkgPath) {
-            actualPath = sourcePath;
-            break;
-          } else if (normalizedTaskPath.startsWith(normalizedPkgPath + "/")) {
-            const remainder = normalizedTaskPath.substring(normalizedPkgPath.length + 1);
-            actualPath = path8.join(sourcePath, remainder);
-            break;
-          }
-        }
-        this.platform.debug(`Reading task manifest: taskPath='${taskPath}', actualPath='${actualPath}'`);
-        const absoluteTaskPath = path8.isAbsolute(actualPath) ? actualPath : path8.join(this.rootFolder, actualPath);
-        const taskJsonPath = path8.join(absoluteTaskPath, "task.json");
-        if (!await this.platform.fileExists(taskJsonPath)) {
-          throw new Error(`Task manifest not found: ${taskJsonPath}`);
-        }
-        const content = await readFile2(taskJsonPath, "utf-8");
-        return JSON.parse(content);
-      }
-      /**
-       * Close and clean up resources
-       * No-op for filesystem reader as there are no persistent resources
-       */
-      async close() {
-        this.extensionManifest = null;
-        this.manifestPath = null;
-        this.packagePathMap = null;
-      }
-      /**
-       * Get the root folder path
-       */
-      getRootFolder() {
-        return this.rootFolder;
-      }
-      /**
-       * Get the resolved manifest path (if already resolved)
-       */
-      getManifestPath() {
-        return this.manifestPath;
-      }
-    };
-  }
-});
-
 // packages/github-action/src/main.ts
 import * as core6 from "@actions/core";
-
-// packages/github-action/src/github-adapter.ts
-import * as core4 from "@actions/core";
-import * as exec from "@actions/exec";
-import * as tc from "@actions/tool-cache";
-import * as io from "@actions/io";
-
-// node_modules/@actions/glob/lib/internal-globber.js
-import * as core2 from "@actions/core";
-import * as fs from "fs";
-
-// node_modules/@actions/glob/lib/internal-glob-options-helper.js
-import * as core from "@actions/core";
-function getOptions(copy) {
-  const result = {
-    followSymbolicLinks: true,
-    implicitDescendants: true,
-    matchDirectories: true,
-    omitBrokenSymbolicLinks: true,
-    excludeHiddenFiles: false
-  };
-  if (copy) {
-    if (typeof copy.followSymbolicLinks === "boolean") {
-      result.followSymbolicLinks = copy.followSymbolicLinks;
-      core.debug(`followSymbolicLinks '${result.followSymbolicLinks}'`);
-    }
-    if (typeof copy.implicitDescendants === "boolean") {
-      result.implicitDescendants = copy.implicitDescendants;
-      core.debug(`implicitDescendants '${result.implicitDescendants}'`);
-    }
-    if (typeof copy.matchDirectories === "boolean") {
-      result.matchDirectories = copy.matchDirectories;
-      core.debug(`matchDirectories '${result.matchDirectories}'`);
-    }
-    if (typeof copy.omitBrokenSymbolicLinks === "boolean") {
-      result.omitBrokenSymbolicLinks = copy.omitBrokenSymbolicLinks;
-      core.debug(`omitBrokenSymbolicLinks '${result.omitBrokenSymbolicLinks}'`);
-    }
-    if (typeof copy.excludeHiddenFiles === "boolean") {
-      result.excludeHiddenFiles = copy.excludeHiddenFiles;
-      core.debug(`excludeHiddenFiles '${result.excludeHiddenFiles}'`);
-    }
-  }
-  return result;
-}
-
-// node_modules/@actions/glob/lib/internal-globber.js
-import * as path4 from "path";
-
-// node_modules/@actions/glob/lib/internal-path-helper.js
-import * as path from "path";
-import assert from "assert";
-var IS_WINDOWS = process.platform === "win32";
-function dirname2(p) {
-  p = safeTrimTrailingSeparator(p);
-  if (IS_WINDOWS && /^\\\\[^\\]+(\\[^\\]+)?$/.test(p)) {
-    return p;
-  }
-  let result = path.dirname(p);
-  if (IS_WINDOWS && /^\\\\[^\\]+\\[^\\]+\\$/.test(result)) {
-    result = safeTrimTrailingSeparator(result);
-  }
-  return result;
-}
-function ensureAbsoluteRoot(root, itemPath) {
-  assert(root, `ensureAbsoluteRoot parameter 'root' must not be empty`);
-  assert(itemPath, `ensureAbsoluteRoot parameter 'itemPath' must not be empty`);
-  if (hasAbsoluteRoot(itemPath)) {
-    return itemPath;
-  }
-  if (IS_WINDOWS) {
-    if (itemPath.match(/^[A-Z]:[^\\/]|^[A-Z]:$/i)) {
-      let cwd = process.cwd();
-      assert(cwd.match(/^[A-Z]:\\/i), `Expected current directory to start with an absolute drive root. Actual '${cwd}'`);
-      if (itemPath[0].toUpperCase() === cwd[0].toUpperCase()) {
-        if (itemPath.length === 2) {
-          return `${itemPath[0]}:\\${cwd.substr(3)}`;
-        } else {
-          if (!cwd.endsWith("\\")) {
-            cwd += "\\";
-          }
-          return `${itemPath[0]}:\\${cwd.substr(3)}${itemPath.substr(2)}`;
-        }
-      } else {
-        return `${itemPath[0]}:\\${itemPath.substr(2)}`;
-      }
-    } else if (normalizeSeparators(itemPath).match(/^\\$|^\\[^\\]/)) {
-      const cwd = process.cwd();
-      assert(cwd.match(/^[A-Z]:\\/i), `Expected current directory to start with an absolute drive root. Actual '${cwd}'`);
-      return `${cwd[0]}:\\${itemPath.substr(1)}`;
-    }
-  }
-  assert(hasAbsoluteRoot(root), `ensureAbsoluteRoot parameter 'root' must have an absolute root`);
-  if (root.endsWith("/") || IS_WINDOWS && root.endsWith("\\")) {
-  } else {
-    root += path.sep;
-  }
-  return root + itemPath;
-}
-function hasAbsoluteRoot(itemPath) {
-  assert(itemPath, `hasAbsoluteRoot parameter 'itemPath' must not be empty`);
-  itemPath = normalizeSeparators(itemPath);
-  if (IS_WINDOWS) {
-    return itemPath.startsWith("\\\\") || /^[A-Z]:\\/i.test(itemPath);
-  }
-  return itemPath.startsWith("/");
-}
-function hasRoot(itemPath) {
-  assert(itemPath, `isRooted parameter 'itemPath' must not be empty`);
-  itemPath = normalizeSeparators(itemPath);
-  if (IS_WINDOWS) {
-    return itemPath.startsWith("\\") || /^[A-Z]:/i.test(itemPath);
-  }
-  return itemPath.startsWith("/");
-}
-function normalizeSeparators(p) {
-  p = p || "";
-  if (IS_WINDOWS) {
-    p = p.replace(/\//g, "\\");
-    const isUnc = /^\\\\+[^\\]/.test(p);
-    return (isUnc ? "\\" : "") + p.replace(/\\\\+/g, "\\");
-  }
-  return p.replace(/\/\/+/g, "/");
-}
-function safeTrimTrailingSeparator(p) {
-  if (!p) {
-    return "";
-  }
-  p = normalizeSeparators(p);
-  if (!p.endsWith(path.sep)) {
-    return p;
-  }
-  if (p === path.sep) {
-    return p;
-  }
-  if (IS_WINDOWS && /^[A-Z]:\\$/i.test(p)) {
-    return p;
-  }
-  return p.substr(0, p.length - 1);
-}
-
-// node_modules/@actions/glob/lib/internal-match-kind.js
-var MatchKind;
-(function(MatchKind2) {
-  MatchKind2[MatchKind2["None"] = 0] = "None";
-  MatchKind2[MatchKind2["Directory"] = 1] = "Directory";
-  MatchKind2[MatchKind2["File"] = 2] = "File";
-  MatchKind2[MatchKind2["All"] = 3] = "All";
-})(MatchKind || (MatchKind = {}));
-
-// node_modules/@actions/glob/lib/internal-pattern-helper.js
-var IS_WINDOWS2 = process.platform === "win32";
-function getSearchPaths(patterns) {
-  patterns = patterns.filter((x) => !x.negate);
-  const searchPathMap = {};
-  for (const pattern of patterns) {
-    const key = IS_WINDOWS2 ? pattern.searchPath.toUpperCase() : pattern.searchPath;
-    searchPathMap[key] = "candidate";
-  }
-  const result = [];
-  for (const pattern of patterns) {
-    const key = IS_WINDOWS2 ? pattern.searchPath.toUpperCase() : pattern.searchPath;
-    if (searchPathMap[key] === "included") {
-      continue;
-    }
-    let foundAncestor = false;
-    let tempKey = key;
-    let parent = dirname2(tempKey);
-    while (parent !== tempKey) {
-      if (searchPathMap[parent]) {
-        foundAncestor = true;
-        break;
-      }
-      tempKey = parent;
-      parent = dirname2(tempKey);
-    }
-    if (!foundAncestor) {
-      result.push(pattern.searchPath);
-      searchPathMap[key] = "included";
-    }
-  }
-  return result;
-}
-function match(patterns, itemPath) {
-  let result = MatchKind.None;
-  for (const pattern of patterns) {
-    if (pattern.negate) {
-      result &= ~pattern.match(itemPath);
-    } else {
-      result |= pattern.match(itemPath);
-    }
-  }
-  return result;
-}
-function partialMatch(patterns, itemPath) {
-  return patterns.some((x) => !x.negate && x.partialMatch(itemPath));
-}
-
-// node_modules/@actions/glob/lib/internal-pattern.js
-import * as os from "os";
-import * as path3 from "path";
-var import_minimatch = __toESM(require_minimatch(), 1);
-import assert3 from "assert";
-
-// node_modules/@actions/glob/lib/internal-path.js
-import * as path2 from "path";
-import assert2 from "assert";
-var IS_WINDOWS3 = process.platform === "win32";
-var Path = class {
-  /**
-   * Constructs a Path
-   * @param itemPath Path or array of segments
-   */
-  constructor(itemPath) {
-    this.segments = [];
-    if (typeof itemPath === "string") {
-      assert2(itemPath, `Parameter 'itemPath' must not be empty`);
-      itemPath = safeTrimTrailingSeparator(itemPath);
-      if (!hasRoot(itemPath)) {
-        this.segments = itemPath.split(path2.sep);
-      } else {
-        let remaining = itemPath;
-        let dir = dirname2(remaining);
-        while (dir !== remaining) {
-          const basename3 = path2.basename(remaining);
-          this.segments.unshift(basename3);
-          remaining = dir;
-          dir = dirname2(remaining);
-        }
-        this.segments.unshift(remaining);
-      }
-    } else {
-      assert2(itemPath.length > 0, `Parameter 'itemPath' must not be an empty array`);
-      for (let i = 0; i < itemPath.length; i++) {
-        let segment = itemPath[i];
-        assert2(segment, `Parameter 'itemPath' must not contain any empty segments`);
-        segment = normalizeSeparators(itemPath[i]);
-        if (i === 0 && hasRoot(segment)) {
-          segment = safeTrimTrailingSeparator(segment);
-          assert2(segment === dirname2(segment), `Parameter 'itemPath' root segment contains information for multiple segments`);
-          this.segments.push(segment);
-        } else {
-          assert2(!segment.includes(path2.sep), `Parameter 'itemPath' contains unexpected path separators`);
-          this.segments.push(segment);
-        }
-      }
-    }
-  }
-  /**
-   * Converts the path to it's string representation
-   */
-  toString() {
-    let result = this.segments[0];
-    let skipSlash = result.endsWith(path2.sep) || IS_WINDOWS3 && /^[A-Z]:$/i.test(result);
-    for (let i = 1; i < this.segments.length; i++) {
-      if (skipSlash) {
-        skipSlash = false;
-      } else {
-        result += path2.sep;
-      }
-      result += this.segments[i];
-    }
-    return result;
-  }
-};
-
-// node_modules/@actions/glob/lib/internal-pattern.js
-var { Minimatch } = import_minimatch.default;
-var IS_WINDOWS4 = process.platform === "win32";
-var Pattern = class _Pattern {
-  constructor(patternOrNegate, isImplicitPattern = false, segments, homedir2) {
-    this.negate = false;
-    let pattern;
-    if (typeof patternOrNegate === "string") {
-      pattern = patternOrNegate.trim();
-    } else {
-      segments = segments || [];
-      assert3(segments.length, `Parameter 'segments' must not empty`);
-      const root = _Pattern.getLiteral(segments[0]);
-      assert3(root && hasAbsoluteRoot(root), `Parameter 'segments' first element must be a root path`);
-      pattern = new Path(segments).toString().trim();
-      if (patternOrNegate) {
-        pattern = `!${pattern}`;
-      }
-    }
-    while (pattern.startsWith("!")) {
-      this.negate = !this.negate;
-      pattern = pattern.substr(1).trim();
-    }
-    pattern = _Pattern.fixupPattern(pattern, homedir2);
-    this.segments = new Path(pattern).segments;
-    this.trailingSeparator = normalizeSeparators(pattern).endsWith(path3.sep);
-    pattern = safeTrimTrailingSeparator(pattern);
-    let foundGlob = false;
-    const searchSegments = this.segments.map((x) => _Pattern.getLiteral(x)).filter((x) => !foundGlob && !(foundGlob = x === ""));
-    this.searchPath = new Path(searchSegments).toString();
-    this.rootRegExp = new RegExp(_Pattern.regExpEscape(searchSegments[0]), IS_WINDOWS4 ? "i" : "");
-    this.isImplicitPattern = isImplicitPattern;
-    const minimatchOptions = {
-      dot: true,
-      nobrace: true,
-      nocase: IS_WINDOWS4,
-      nocomment: true,
-      noext: true,
-      nonegate: true
-    };
-    pattern = IS_WINDOWS4 ? pattern.replace(/\\/g, "/") : pattern;
-    this.minimatch = new Minimatch(pattern, minimatchOptions);
-  }
-  /**
-   * Matches the pattern against the specified path
-   */
-  match(itemPath) {
-    if (this.segments[this.segments.length - 1] === "**") {
-      itemPath = normalizeSeparators(itemPath);
-      if (!itemPath.endsWith(path3.sep) && this.isImplicitPattern === false) {
-        itemPath = `${itemPath}${path3.sep}`;
-      }
-    } else {
-      itemPath = safeTrimTrailingSeparator(itemPath);
-    }
-    if (this.minimatch.match(itemPath)) {
-      return this.trailingSeparator ? MatchKind.Directory : MatchKind.All;
-    }
-    return MatchKind.None;
-  }
-  /**
-   * Indicates whether the pattern may match descendants of the specified path
-   */
-  partialMatch(itemPath) {
-    itemPath = safeTrimTrailingSeparator(itemPath);
-    if (dirname2(itemPath) === itemPath) {
-      return this.rootRegExp.test(itemPath);
-    }
-    return this.minimatch.matchOne(itemPath.split(IS_WINDOWS4 ? /\\+/ : /\/+/), this.minimatch.set[0], true);
-  }
-  /**
-   * Escapes glob patterns within a path
-   */
-  static globEscape(s) {
-    return (IS_WINDOWS4 ? s : s.replace(/\\/g, "\\\\")).replace(/(\[)(?=[^/]+\])/g, "[[]").replace(/\?/g, "[?]").replace(/\*/g, "[*]");
-  }
-  /**
-   * Normalizes slashes and ensures absolute root
-   */
-  static fixupPattern(pattern, homedir2) {
-    assert3(pattern, "pattern cannot be empty");
-    const literalSegments = new Path(pattern).segments.map((x) => _Pattern.getLiteral(x));
-    assert3(literalSegments.every((x, i) => (x !== "." || i === 0) && x !== ".."), `Invalid pattern '${pattern}'. Relative pathing '.' and '..' is not allowed.`);
-    assert3(!hasRoot(pattern) || literalSegments[0], `Invalid pattern '${pattern}'. Root segment must not contain globs.`);
-    pattern = normalizeSeparators(pattern);
-    if (pattern === "." || pattern.startsWith(`.${path3.sep}`)) {
-      pattern = _Pattern.globEscape(process.cwd()) + pattern.substr(1);
-    } else if (pattern === "~" || pattern.startsWith(`~${path3.sep}`)) {
-      homedir2 = homedir2 || os.homedir();
-      assert3(homedir2, "Unable to determine HOME directory");
-      assert3(hasAbsoluteRoot(homedir2), `Expected HOME directory to be a rooted path. Actual '${homedir2}'`);
-      pattern = _Pattern.globEscape(homedir2) + pattern.substr(1);
-    } else if (IS_WINDOWS4 && (pattern.match(/^[A-Z]:$/i) || pattern.match(/^[A-Z]:[^\\]/i))) {
-      let root = ensureAbsoluteRoot("C:\\dummy-root", pattern.substr(0, 2));
-      if (pattern.length > 2 && !root.endsWith("\\")) {
-        root += "\\";
-      }
-      pattern = _Pattern.globEscape(root) + pattern.substr(2);
-    } else if (IS_WINDOWS4 && (pattern === "\\" || pattern.match(/^\\[^\\]/))) {
-      let root = ensureAbsoluteRoot("C:\\dummy-root", "\\");
-      if (!root.endsWith("\\")) {
-        root += "\\";
-      }
-      pattern = _Pattern.globEscape(root) + pattern.substr(1);
-    } else {
-      pattern = ensureAbsoluteRoot(_Pattern.globEscape(process.cwd()), pattern);
-    }
-    return normalizeSeparators(pattern);
-  }
-  /**
-   * Attempts to unescape a pattern segment to create a literal path segment.
-   * Otherwise returns empty string.
-   */
-  static getLiteral(segment) {
-    let literal = "";
-    for (let i = 0; i < segment.length; i++) {
-      const c = segment[i];
-      if (c === "\\" && !IS_WINDOWS4 && i + 1 < segment.length) {
-        literal += segment[++i];
-        continue;
-      } else if (c === "*" || c === "?") {
-        return "";
-      } else if (c === "[" && i + 1 < segment.length) {
-        let set = "";
-        let closed = -1;
-        for (let i2 = i + 1; i2 < segment.length; i2++) {
-          const c2 = segment[i2];
-          if (c2 === "\\" && !IS_WINDOWS4 && i2 + 1 < segment.length) {
-            set += segment[++i2];
-            continue;
-          } else if (c2 === "]") {
-            closed = i2;
-            break;
-          } else {
-            set += c2;
-          }
-        }
-        if (closed >= 0) {
-          if (set.length > 1) {
-            return "";
-          }
-          if (set) {
-            literal += set;
-            i = closed;
-            continue;
-          }
-        }
-      }
-      literal += c;
-    }
-    return literal;
-  }
-  /**
-   * Escapes regexp special characters
-   * https://javascript.info/regexp-escaping
-   */
-  static regExpEscape(s) {
-    return s.replace(/[[\\^$.|?*+()]/g, "\\$&");
-  }
-};
-
-// node_modules/@actions/glob/lib/internal-search-state.js
-var SearchState = class {
-  constructor(path10, level) {
-    this.path = path10;
-    this.level = level;
-  }
-};
-
-// node_modules/@actions/glob/lib/internal-globber.js
-var __awaiter = function(thisArg, _arguments, P, generator) {
-  function adopt(value) {
-    return value instanceof P ? value : new P(function(resolve) {
-      resolve(value);
-    });
-  }
-  return new (P || (P = Promise))(function(resolve, reject) {
-    function fulfilled(value) {
-      try {
-        step(generator.next(value));
-      } catch (e) {
-        reject(e);
-      }
-    }
-    function rejected(value) {
-      try {
-        step(generator["throw"](value));
-      } catch (e) {
-        reject(e);
-      }
-    }
-    function step(result) {
-      result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
-    }
-    step((generator = generator.apply(thisArg, _arguments || [])).next());
-  });
-};
-var __asyncValues = function(o) {
-  if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
-  var m = o[Symbol.asyncIterator], i;
-  return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function() {
-    return this;
-  }, i);
-  function verb(n) {
-    i[n] = o[n] && function(v) {
-      return new Promise(function(resolve, reject) {
-        v = o[n](v), settle(resolve, reject, v.done, v.value);
-      });
-    };
-  }
-  function settle(resolve, reject, d, v) {
-    Promise.resolve(v).then(function(v2) {
-      resolve({ value: v2, done: d });
-    }, reject);
-  }
-};
-var __await = function(v) {
-  return this instanceof __await ? (this.v = v, this) : new __await(v);
-};
-var __asyncGenerator = function(thisArg, _arguments, generator) {
-  if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
-  var g = generator.apply(thisArg, _arguments || []), i, q = [];
-  return i = Object.create((typeof AsyncIterator === "function" ? AsyncIterator : Object).prototype), verb("next"), verb("throw"), verb("return", awaitReturn), i[Symbol.asyncIterator] = function() {
-    return this;
-  }, i;
-  function awaitReturn(f) {
-    return function(v) {
-      return Promise.resolve(v).then(f, reject);
-    };
-  }
-  function verb(n, f) {
-    if (g[n]) {
-      i[n] = function(v) {
-        return new Promise(function(a, b) {
-          q.push([n, v, a, b]) > 1 || resume(n, v);
-        });
-      };
-      if (f) i[n] = f(i[n]);
-    }
-  }
-  function resume(n, v) {
-    try {
-      step(g[n](v));
-    } catch (e) {
-      settle(q[0][3], e);
-    }
-  }
-  function step(r) {
-    r.value instanceof __await ? Promise.resolve(r.value.v).then(fulfill, reject) : settle(q[0][2], r);
-  }
-  function fulfill(value) {
-    resume("next", value);
-  }
-  function reject(value) {
-    resume("throw", value);
-  }
-  function settle(f, v) {
-    if (f(v), q.shift(), q.length) resume(q[0][0], q[0][1]);
-  }
-};
-var IS_WINDOWS5 = process.platform === "win32";
-var DefaultGlobber = class _DefaultGlobber {
-  constructor(options) {
-    this.patterns = [];
-    this.searchPaths = [];
-    this.options = getOptions(options);
-  }
-  getSearchPaths() {
-    return this.searchPaths.slice();
-  }
-  glob() {
-    return __awaiter(this, void 0, void 0, function* () {
-      var _a, e_1, _b, _c;
-      const result = [];
-      try {
-        for (var _d = true, _e = __asyncValues(this.globGenerator()), _f; _f = yield _e.next(), _a = _f.done, !_a; _d = true) {
-          _c = _f.value;
-          _d = false;
-          const itemPath = _c;
-          result.push(itemPath);
-        }
-      } catch (e_1_1) {
-        e_1 = { error: e_1_1 };
-      } finally {
-        try {
-          if (!_d && !_a && (_b = _e.return)) yield _b.call(_e);
-        } finally {
-          if (e_1) throw e_1.error;
-        }
-      }
-      return result;
-    });
-  }
-  globGenerator() {
-    return __asyncGenerator(this, arguments, function* globGenerator_1() {
-      const options = getOptions(this.options);
-      const patterns = [];
-      for (const pattern of this.patterns) {
-        patterns.push(pattern);
-        if (options.implicitDescendants && (pattern.trailingSeparator || pattern.segments[pattern.segments.length - 1] !== "**")) {
-          patterns.push(new Pattern(pattern.negate, true, pattern.segments.concat("**")));
-        }
-      }
-      const stack = [];
-      for (const searchPath of getSearchPaths(patterns)) {
-        core2.debug(`Search path '${searchPath}'`);
-        try {
-          yield __await(fs.promises.lstat(searchPath));
-        } catch (err) {
-          if (err.code === "ENOENT") {
-            continue;
-          }
-          throw err;
-        }
-        stack.unshift(new SearchState(searchPath, 1));
-      }
-      const traversalChain = [];
-      while (stack.length) {
-        const item = stack.pop();
-        const match2 = match(patterns, item.path);
-        const partialMatch2 = !!match2 || partialMatch(patterns, item.path);
-        if (!match2 && !partialMatch2) {
-          continue;
-        }
-        const stats = yield __await(
-          _DefaultGlobber.stat(item, options, traversalChain)
-          // Broken symlink, or symlink cycle detected, or no longer exists
-        );
-        if (!stats) {
-          continue;
-        }
-        if (options.excludeHiddenFiles && path4.basename(item.path).match(/^\./)) {
-          continue;
-        }
-        if (stats.isDirectory()) {
-          if (match2 & MatchKind.Directory && options.matchDirectories) {
-            yield yield __await(item.path);
-          } else if (!partialMatch2) {
-            continue;
-          }
-          const childLevel = item.level + 1;
-          const childItems = (yield __await(fs.promises.readdir(item.path))).map((x) => new SearchState(path4.join(item.path, x), childLevel));
-          stack.push(...childItems.reverse());
-        } else if (match2 & MatchKind.File) {
-          yield yield __await(item.path);
-        }
-      }
-    });
-  }
-  /**
-   * Constructs a DefaultGlobber
-   */
-  static create(patterns, options) {
-    return __awaiter(this, void 0, void 0, function* () {
-      const result = new _DefaultGlobber(options);
-      if (IS_WINDOWS5) {
-        patterns = patterns.replace(/\r\n/g, "\n");
-        patterns = patterns.replace(/\r/g, "\n");
-      }
-      const lines = patterns.split("\n").map((x) => x.trim());
-      for (const line of lines) {
-        if (!line || line.startsWith("#")) {
-          continue;
-        } else {
-          result.patterns.push(new Pattern(line));
-        }
-      }
-      result.searchPaths.push(...getSearchPaths(result.patterns));
-      return result;
-    });
-  }
-  static stat(item, options, traversalChain) {
-    return __awaiter(this, void 0, void 0, function* () {
-      let stats;
-      if (options.followSymbolicLinks) {
-        try {
-          stats = yield fs.promises.stat(item.path);
-        } catch (err) {
-          if (err.code === "ENOENT") {
-            if (options.omitBrokenSymbolicLinks) {
-              core2.debug(`Broken symlink '${item.path}'`);
-              return void 0;
-            }
-            throw new Error(`No information found for the path '${item.path}'. This may indicate a broken symbolic link.`);
-          }
-          throw err;
-        }
-      } else {
-        stats = yield fs.promises.lstat(item.path);
-      }
-      if (stats.isDirectory() && options.followSymbolicLinks) {
-        const realPath = yield fs.promises.realpath(item.path);
-        while (traversalChain.length >= item.level) {
-          traversalChain.pop();
-        }
-        if (traversalChain.some((x) => x === realPath)) {
-          core2.debug(`Symlink cycle detected for path '${item.path}' and realpath '${realPath}'`);
-          return void 0;
-        }
-        traversalChain.push(realPath);
-      }
-      return stats;
-    });
-  }
-};
-
-// node_modules/@actions/glob/lib/internal-hash-files.js
-import * as core3 from "@actions/core";
-
-// node_modules/@actions/glob/lib/glob.js
-var __awaiter2 = function(thisArg, _arguments, P, generator) {
-  function adopt(value) {
-    return value instanceof P ? value : new P(function(resolve) {
-      resolve(value);
-    });
-  }
-  return new (P || (P = Promise))(function(resolve, reject) {
-    function fulfilled(value) {
-      try {
-        step(generator.next(value));
-      } catch (e) {
-        reject(e);
-      }
-    }
-    function rejected(value) {
-      try {
-        step(generator["throw"](value));
-      } catch (e) {
-        reject(e);
-      }
-    }
-    function step(result) {
-      result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
-    }
-    step((generator = generator.apply(thisArg, _arguments || [])).next());
-  });
-};
-function create(patterns, options) {
-  return __awaiter2(this, void 0, void 0, function* () {
-    return yield DefaultGlobber.create(patterns, options);
-  });
-}
 
 // packages/core/dist/platform.js
 var TaskResult;
@@ -2844,7 +2136,7 @@ var JsonOutputStream = class extends Writable {
 };
 
 // packages/core/dist/manifest-utils.js
-import path5 from "path";
+import path from "path";
 async function readManifest(manifestPath, platform) {
   const content = await platform.readFile(manifestPath);
   return JSON.parse(content);
@@ -2855,14 +2147,14 @@ function resolveTaskManifestPaths(extensionManifest, extensionManifestPath, _pla
   if (taskContributions.length === 0) {
     return [];
   }
-  const manifestDir = path5.dirname(extensionManifestPath);
+  const manifestDir = path.dirname(extensionManifestPath);
   const taskPaths = [];
   for (const contrib of taskContributions) {
     const taskName = contrib.properties?.name;
     if (!taskName) {
       continue;
     }
-    const taskManifestPath = path5.join(manifestDir, taskName, "task.json");
+    const taskManifestPath = path.join(manifestDir, taskName, "task.json");
     taskPaths.push(taskManifestPath);
   }
   return taskPaths;
@@ -2875,8 +2167,8 @@ function getTaskContributions(manifest) {
 }
 
 // packages/core/dist/tfx-manager.js
-import fs2 from "fs/promises";
-import path6 from "path";
+import fs from "fs/promises";
+import path2 from "path";
 var TfxManager = class {
   resolvedPath;
   tfxVersion;
@@ -2927,25 +2219,25 @@ var TfxManager = class {
     if (!entrypoint) {
       throw new Error("Built-in tfx-cli resolution failed: process.argv[1] is not set.");
     }
-    const entryDir = path6.dirname(path6.resolve(entrypoint));
+    const entryDir = path2.dirname(path2.resolve(entrypoint));
     const tfxExecutable = process.platform === "win32" ? "tfx.cmd" : "tfx";
     const candidateDirs = [entryDir];
-    const normalizedEntrypoint = path6.resolve(entrypoint).replace(/\\/g, "/");
+    const normalizedEntrypoint = path2.resolve(entrypoint).replace(/\\/g, "/");
     if (normalizedEntrypoint.includes("/node_modules/")) {
       candidateDirs.push(process.cwd());
     }
     for (const candidateDir of candidateDirs) {
-      const builtInPath = path6.join(candidateDir, "node_modules", ".bin", tfxExecutable);
+      const builtInPath = path2.join(candidateDir, "node_modules", ".bin", tfxExecutable);
       if (await this.pathExists(builtInPath)) {
         this.platform.debug(`Resolved built-in tfx at: ${builtInPath}`);
         return builtInPath;
       }
     }
-    throw new Error(`Built-in tfx-cli not found at expected path: ${path6.join(entryDir, "node_modules", ".bin", tfxExecutable)}.`);
+    throw new Error(`Built-in tfx-cli not found at expected path: ${path2.join(entryDir, "node_modules", ".bin", tfxExecutable)}.`);
   }
   async pathExists(filePath) {
     try {
-      await fs2.access(filePath);
+      await fs.access(filePath);
       return true;
     } catch {
       return false;
@@ -3006,8 +2298,8 @@ var TfxManager = class {
   async downloadAndCache(exactVersion) {
     this.platform.info(`Installing tfx-cli@${exactVersion} from npm...`);
     const tempDir = this.platform.getTempDir();
-    const installDir = path6.join(tempDir, `tfx-install-${Date.now()}`);
-    await fs2.mkdir(installDir, { recursive: true });
+    const installDir = path2.join(tempDir, `tfx-install-${Date.now()}`);
+    await fs.mkdir(installDir, { recursive: true });
     try {
       this.platform.debug(`Running npm install tfx-cli@${exactVersion} in ${installDir}`);
       const npmPath = await this.platform.which("npm", true);
@@ -3015,19 +2307,19 @@ var TfxManager = class {
       if (exitCode !== 0) {
         throw new Error(`npm install failed with exit code ${exitCode}`);
       }
-      const tfxPackageDir = path6.join(installDir, "node_modules", "tfx-cli");
+      const tfxPackageDir = path2.join(installDir, "node_modules", "tfx-cli");
       try {
-        await fs2.access(tfxPackageDir);
+        await fs.access(tfxPackageDir);
       } catch {
         throw new Error(`tfx-cli not found at ${tfxPackageDir} after npm install`);
       }
       this.platform.info(`Successfully installed tfx-cli@${exactVersion} with dependencies`);
       await this.ensureExecutable(tfxPackageDir);
       this.platform.info(`Caching tfx-cli@${exactVersion}...`);
-      const nodeModulesDir = path6.join(installDir, "node_modules");
+      const nodeModulesDir = path2.join(installDir, "node_modules");
       const cachedDir = await this.platform.cacheDir(nodeModulesDir, "tfx-cli", exactVersion);
       this.platform.info(`Cached tfx-cli@${exactVersion} to ${cachedDir}`);
-      const binDir = path6.join(cachedDir, "tfx-cli", "bin");
+      const binDir = path2.join(cachedDir, "tfx-cli", "bin");
       return this.getTfxExecutable(binDir);
     } catch (error2) {
       this.platform.warning(`Failed to install tfx-cli@${exactVersion}: ${error2 instanceof Error ? error2.message : String(error2)}`);
@@ -3057,8 +2349,8 @@ var TfxManager = class {
       return;
     }
     try {
-      const tfxBin = path6.join(tfxPackageDir, "bin", "tfx");
-      await fs2.chmod(tfxBin, 493);
+      const tfxBin = path2.join(tfxPackageDir, "bin", "tfx");
+      await fs.chmod(tfxBin, 493);
       this.platform.debug(`Made tfx executable: ${tfxBin}`);
     } catch (error2) {
       this.platform.warning(`Failed to chmod tfx: ${error2}`);
@@ -3072,10 +2364,10 @@ var TfxManager = class {
   getTfxExecutable(dir) {
     const isWindows = process.platform === "win32";
     if (isWindows) {
-      const cmdPath = path6.join(dir, "tfx.cmd");
+      const cmdPath = path2.join(dir, "tfx.cmd");
       return cmdPath;
     }
-    return path6.join(dir, "tfx");
+    return path2.join(dir, "tfx");
   }
   /**
    * Execute tfx with given arguments
@@ -4439,62 +3731,886 @@ async function waitForInstallation(options, auth, platform) {
   };
 }
 
+// packages/github-action/src/auth/basic-auth.ts
+async function getBasicAuth(username, password, serviceUrl, platform) {
+  if (!username) {
+    throw new Error("Username is required for basic authentication");
+  }
+  if (password === void 0 || password === null) {
+    throw new Error("Password is required for basic authentication");
+  }
+  platform.setSecret(password);
+  const finalServiceUrl = serviceUrl || "https://marketplace.visualstudio.com";
+  return {
+    authType: "basic",
+    serviceUrl: finalServiceUrl,
+    username,
+    password
+  };
+}
+
+// packages/github-action/src/auth/oidc-auth.ts
+import * as core from "@actions/core";
+import * as exec from "@actions/exec";
+async function getOidcAuth(serviceUrl, platform) {
+  const tokenResource = serviceUrl || "https://marketplace.visualstudio.com";
+  const finalServiceUrl = serviceUrl || "https://marketplace.visualstudio.com";
+  core.info("Getting Azure AD token via Azure CLI (requires azure/login action)...");
+  try {
+    let output = "";
+    let errorOutput = "";
+    const exitCode = await exec.exec(
+      "az",
+      ["account", "get-access-token", "--resource", tokenResource, "--output", "json"],
+      {
+        silent: true,
+        listeners: {
+          stdout: (data) => {
+            output += data.toString();
+          },
+          stderr: (data) => {
+            errorOutput += data.toString();
+          }
+        }
+      }
+    );
+    if (exitCode !== 0) {
+      throw new Error(`Azure CLI exited with code ${exitCode}: ${errorOutput}`);
+    }
+    const result = JSON.parse(output);
+    const token = result.accessToken;
+    if (!token) {
+      throw new Error("No accessToken in Azure CLI response");
+    }
+    core.setSecret(token);
+    platform.setSecret(token);
+    core.info("Successfully obtained Azure AD token via Azure CLI");
+    return {
+      authType: "pat",
+      // Use 'pat' type as the token format is similar
+      serviceUrl: finalServiceUrl,
+      token
+    };
+  } catch (error2) {
+    const message = error2 instanceof Error ? error2.message : String(error2);
+    throw new Error(
+      `Failed to get Azure AD token via Azure CLI: ${message}
+
+Make sure you have run the azure/login action before this action:
+  - uses: azure/login@v2
+    with:
+      client-id: \${{ secrets.AZURE_CLIENT_ID }}
+      tenant-id: \${{ secrets.AZURE_TENANT_ID }}
+      subscription-id: \${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+See: https://jessehouwing.net/authenticate-connect-mggraph-using-oidc-in-github-actions/`
+    );
+  }
+}
+
+// packages/github-action/src/auth/pat-auth.ts
+async function getPatAuth(token, serviceUrl, platform) {
+  if (!token) {
+    throw new Error("PAT token is required");
+  }
+  platform.setSecret(token);
+  const finalServiceUrl = serviceUrl || "https://marketplace.visualstudio.com";
+  return {
+    authType: "pat",
+    serviceUrl: finalServiceUrl,
+    token
+  };
+}
+
+// packages/github-action/src/auth/index.ts
+async function getAuth(authType, platform, options) {
+  const finalServiceUrl = options.serviceUrl;
+  switch (authType) {
+    case "pat":
+      if (!options.token) {
+        throw new Error("Token is required for PAT authentication");
+      }
+      return getPatAuth(options.token, finalServiceUrl, platform);
+    case "basic":
+      if (!options.username || !options.password) {
+        throw new Error("Username and password are required for basic authentication");
+      }
+      return getBasicAuth(options.username, options.password, finalServiceUrl, platform);
+    case "oidc":
+      return getOidcAuth(finalServiceUrl, platform);
+    default:
+      throw new Error(`Unsupported auth type: ${authType}`);
+  }
+}
+
 // packages/github-action/src/github-adapter.ts
+import * as core5 from "@actions/core";
+import * as exec3 from "@actions/exec";
+
+// node_modules/@actions/glob/lib/internal-globber.js
+import * as core3 from "@actions/core";
+import * as fs2 from "fs";
+
+// node_modules/@actions/glob/lib/internal-glob-options-helper.js
+import * as core2 from "@actions/core";
+function getOptions(copy) {
+  const result = {
+    followSymbolicLinks: true,
+    implicitDescendants: true,
+    matchDirectories: true,
+    omitBrokenSymbolicLinks: true,
+    excludeHiddenFiles: false
+  };
+  if (copy) {
+    if (typeof copy.followSymbolicLinks === "boolean") {
+      result.followSymbolicLinks = copy.followSymbolicLinks;
+      core2.debug(`followSymbolicLinks '${result.followSymbolicLinks}'`);
+    }
+    if (typeof copy.implicitDescendants === "boolean") {
+      result.implicitDescendants = copy.implicitDescendants;
+      core2.debug(`implicitDescendants '${result.implicitDescendants}'`);
+    }
+    if (typeof copy.matchDirectories === "boolean") {
+      result.matchDirectories = copy.matchDirectories;
+      core2.debug(`matchDirectories '${result.matchDirectories}'`);
+    }
+    if (typeof copy.omitBrokenSymbolicLinks === "boolean") {
+      result.omitBrokenSymbolicLinks = copy.omitBrokenSymbolicLinks;
+      core2.debug(`omitBrokenSymbolicLinks '${result.omitBrokenSymbolicLinks}'`);
+    }
+    if (typeof copy.excludeHiddenFiles === "boolean") {
+      result.excludeHiddenFiles = copy.excludeHiddenFiles;
+      core2.debug(`excludeHiddenFiles '${result.excludeHiddenFiles}'`);
+    }
+  }
+  return result;
+}
+
+// node_modules/@actions/glob/lib/internal-globber.js
+import * as path8 from "path";
+
+// node_modules/@actions/glob/lib/internal-path-helper.js
+import * as path5 from "path";
+import assert from "assert";
+var IS_WINDOWS = process.platform === "win32";
+function dirname2(p) {
+  p = safeTrimTrailingSeparator(p);
+  if (IS_WINDOWS && /^\\\\[^\\]+(\\[^\\]+)?$/.test(p)) {
+    return p;
+  }
+  let result = path5.dirname(p);
+  if (IS_WINDOWS && /^\\\\[^\\]+\\[^\\]+\\$/.test(result)) {
+    result = safeTrimTrailingSeparator(result);
+  }
+  return result;
+}
+function ensureAbsoluteRoot(root, itemPath) {
+  assert(root, `ensureAbsoluteRoot parameter 'root' must not be empty`);
+  assert(itemPath, `ensureAbsoluteRoot parameter 'itemPath' must not be empty`);
+  if (hasAbsoluteRoot(itemPath)) {
+    return itemPath;
+  }
+  if (IS_WINDOWS) {
+    if (itemPath.match(/^[A-Z]:[^\\/]|^[A-Z]:$/i)) {
+      let cwd = process.cwd();
+      assert(cwd.match(/^[A-Z]:\\/i), `Expected current directory to start with an absolute drive root. Actual '${cwd}'`);
+      if (itemPath[0].toUpperCase() === cwd[0].toUpperCase()) {
+        if (itemPath.length === 2) {
+          return `${itemPath[0]}:\\${cwd.substr(3)}`;
+        } else {
+          if (!cwd.endsWith("\\")) {
+            cwd += "\\";
+          }
+          return `${itemPath[0]}:\\${cwd.substr(3)}${itemPath.substr(2)}`;
+        }
+      } else {
+        return `${itemPath[0]}:\\${itemPath.substr(2)}`;
+      }
+    } else if (normalizeSeparators(itemPath).match(/^\\$|^\\[^\\]/)) {
+      const cwd = process.cwd();
+      assert(cwd.match(/^[A-Z]:\\/i), `Expected current directory to start with an absolute drive root. Actual '${cwd}'`);
+      return `${cwd[0]}:\\${itemPath.substr(1)}`;
+    }
+  }
+  assert(hasAbsoluteRoot(root), `ensureAbsoluteRoot parameter 'root' must have an absolute root`);
+  if (root.endsWith("/") || IS_WINDOWS && root.endsWith("\\")) {
+  } else {
+    root += path5.sep;
+  }
+  return root + itemPath;
+}
+function hasAbsoluteRoot(itemPath) {
+  assert(itemPath, `hasAbsoluteRoot parameter 'itemPath' must not be empty`);
+  itemPath = normalizeSeparators(itemPath);
+  if (IS_WINDOWS) {
+    return itemPath.startsWith("\\\\") || /^[A-Z]:\\/i.test(itemPath);
+  }
+  return itemPath.startsWith("/");
+}
+function hasRoot(itemPath) {
+  assert(itemPath, `isRooted parameter 'itemPath' must not be empty`);
+  itemPath = normalizeSeparators(itemPath);
+  if (IS_WINDOWS) {
+    return itemPath.startsWith("\\") || /^[A-Z]:/i.test(itemPath);
+  }
+  return itemPath.startsWith("/");
+}
+function normalizeSeparators(p) {
+  p = p || "";
+  if (IS_WINDOWS) {
+    p = p.replace(/\//g, "\\");
+    const isUnc = /^\\\\+[^\\]/.test(p);
+    return (isUnc ? "\\" : "") + p.replace(/\\\\+/g, "\\");
+  }
+  return p.replace(/\/\/+/g, "/");
+}
+function safeTrimTrailingSeparator(p) {
+  if (!p) {
+    return "";
+  }
+  p = normalizeSeparators(p);
+  if (!p.endsWith(path5.sep)) {
+    return p;
+  }
+  if (p === path5.sep) {
+    return p;
+  }
+  if (IS_WINDOWS && /^[A-Z]:\\$/i.test(p)) {
+    return p;
+  }
+  return p.substr(0, p.length - 1);
+}
+
+// node_modules/@actions/glob/lib/internal-match-kind.js
+var MatchKind;
+(function(MatchKind2) {
+  MatchKind2[MatchKind2["None"] = 0] = "None";
+  MatchKind2[MatchKind2["Directory"] = 1] = "Directory";
+  MatchKind2[MatchKind2["File"] = 2] = "File";
+  MatchKind2[MatchKind2["All"] = 3] = "All";
+})(MatchKind || (MatchKind = {}));
+
+// node_modules/@actions/glob/lib/internal-pattern-helper.js
+var IS_WINDOWS2 = process.platform === "win32";
+function getSearchPaths(patterns) {
+  patterns = patterns.filter((x) => !x.negate);
+  const searchPathMap = {};
+  for (const pattern of patterns) {
+    const key = IS_WINDOWS2 ? pattern.searchPath.toUpperCase() : pattern.searchPath;
+    searchPathMap[key] = "candidate";
+  }
+  const result = [];
+  for (const pattern of patterns) {
+    const key = IS_WINDOWS2 ? pattern.searchPath.toUpperCase() : pattern.searchPath;
+    if (searchPathMap[key] === "included") {
+      continue;
+    }
+    let foundAncestor = false;
+    let tempKey = key;
+    let parent = dirname2(tempKey);
+    while (parent !== tempKey) {
+      if (searchPathMap[parent]) {
+        foundAncestor = true;
+        break;
+      }
+      tempKey = parent;
+      parent = dirname2(tempKey);
+    }
+    if (!foundAncestor) {
+      result.push(pattern.searchPath);
+      searchPathMap[key] = "included";
+    }
+  }
+  return result;
+}
+function match(patterns, itemPath) {
+  let result = MatchKind.None;
+  for (const pattern of patterns) {
+    if (pattern.negate) {
+      result &= ~pattern.match(itemPath);
+    } else {
+      result |= pattern.match(itemPath);
+    }
+  }
+  return result;
+}
+function partialMatch(patterns, itemPath) {
+  return patterns.some((x) => !x.negate && x.partialMatch(itemPath));
+}
+
+// node_modules/@actions/glob/lib/internal-pattern.js
+import * as os from "os";
+import * as path7 from "path";
+var import_minimatch = __toESM(require_minimatch(), 1);
+import assert3 from "assert";
+
+// node_modules/@actions/glob/lib/internal-path.js
+import * as path6 from "path";
+import assert2 from "assert";
+var IS_WINDOWS3 = process.platform === "win32";
+var Path = class {
+  /**
+   * Constructs a Path
+   * @param itemPath Path or array of segments
+   */
+  constructor(itemPath) {
+    this.segments = [];
+    if (typeof itemPath === "string") {
+      assert2(itemPath, `Parameter 'itemPath' must not be empty`);
+      itemPath = safeTrimTrailingSeparator(itemPath);
+      if (!hasRoot(itemPath)) {
+        this.segments = itemPath.split(path6.sep);
+      } else {
+        let remaining = itemPath;
+        let dir = dirname2(remaining);
+        while (dir !== remaining) {
+          const basename3 = path6.basename(remaining);
+          this.segments.unshift(basename3);
+          remaining = dir;
+          dir = dirname2(remaining);
+        }
+        this.segments.unshift(remaining);
+      }
+    } else {
+      assert2(itemPath.length > 0, `Parameter 'itemPath' must not be an empty array`);
+      for (let i = 0; i < itemPath.length; i++) {
+        let segment = itemPath[i];
+        assert2(segment, `Parameter 'itemPath' must not contain any empty segments`);
+        segment = normalizeSeparators(itemPath[i]);
+        if (i === 0 && hasRoot(segment)) {
+          segment = safeTrimTrailingSeparator(segment);
+          assert2(segment === dirname2(segment), `Parameter 'itemPath' root segment contains information for multiple segments`);
+          this.segments.push(segment);
+        } else {
+          assert2(!segment.includes(path6.sep), `Parameter 'itemPath' contains unexpected path separators`);
+          this.segments.push(segment);
+        }
+      }
+    }
+  }
+  /**
+   * Converts the path to it's string representation
+   */
+  toString() {
+    let result = this.segments[0];
+    let skipSlash = result.endsWith(path6.sep) || IS_WINDOWS3 && /^[A-Z]:$/i.test(result);
+    for (let i = 1; i < this.segments.length; i++) {
+      if (skipSlash) {
+        skipSlash = false;
+      } else {
+        result += path6.sep;
+      }
+      result += this.segments[i];
+    }
+    return result;
+  }
+};
+
+// node_modules/@actions/glob/lib/internal-pattern.js
+var { Minimatch } = import_minimatch.default;
+var IS_WINDOWS4 = process.platform === "win32";
+var Pattern = class _Pattern {
+  constructor(patternOrNegate, isImplicitPattern = false, segments, homedir2) {
+    this.negate = false;
+    let pattern;
+    if (typeof patternOrNegate === "string") {
+      pattern = patternOrNegate.trim();
+    } else {
+      segments = segments || [];
+      assert3(segments.length, `Parameter 'segments' must not empty`);
+      const root = _Pattern.getLiteral(segments[0]);
+      assert3(root && hasAbsoluteRoot(root), `Parameter 'segments' first element must be a root path`);
+      pattern = new Path(segments).toString().trim();
+      if (patternOrNegate) {
+        pattern = `!${pattern}`;
+      }
+    }
+    while (pattern.startsWith("!")) {
+      this.negate = !this.negate;
+      pattern = pattern.substr(1).trim();
+    }
+    pattern = _Pattern.fixupPattern(pattern, homedir2);
+    this.segments = new Path(pattern).segments;
+    this.trailingSeparator = normalizeSeparators(pattern).endsWith(path7.sep);
+    pattern = safeTrimTrailingSeparator(pattern);
+    let foundGlob = false;
+    const searchSegments = this.segments.map((x) => _Pattern.getLiteral(x)).filter((x) => !foundGlob && !(foundGlob = x === ""));
+    this.searchPath = new Path(searchSegments).toString();
+    this.rootRegExp = new RegExp(_Pattern.regExpEscape(searchSegments[0]), IS_WINDOWS4 ? "i" : "");
+    this.isImplicitPattern = isImplicitPattern;
+    const minimatchOptions = {
+      dot: true,
+      nobrace: true,
+      nocase: IS_WINDOWS4,
+      nocomment: true,
+      noext: true,
+      nonegate: true
+    };
+    pattern = IS_WINDOWS4 ? pattern.replace(/\\/g, "/") : pattern;
+    this.minimatch = new Minimatch(pattern, minimatchOptions);
+  }
+  /**
+   * Matches the pattern against the specified path
+   */
+  match(itemPath) {
+    if (this.segments[this.segments.length - 1] === "**") {
+      itemPath = normalizeSeparators(itemPath);
+      if (!itemPath.endsWith(path7.sep) && this.isImplicitPattern === false) {
+        itemPath = `${itemPath}${path7.sep}`;
+      }
+    } else {
+      itemPath = safeTrimTrailingSeparator(itemPath);
+    }
+    if (this.minimatch.match(itemPath)) {
+      return this.trailingSeparator ? MatchKind.Directory : MatchKind.All;
+    }
+    return MatchKind.None;
+  }
+  /**
+   * Indicates whether the pattern may match descendants of the specified path
+   */
+  partialMatch(itemPath) {
+    itemPath = safeTrimTrailingSeparator(itemPath);
+    if (dirname2(itemPath) === itemPath) {
+      return this.rootRegExp.test(itemPath);
+    }
+    return this.minimatch.matchOne(itemPath.split(IS_WINDOWS4 ? /\\+/ : /\/+/), this.minimatch.set[0], true);
+  }
+  /**
+   * Escapes glob patterns within a path
+   */
+  static globEscape(s) {
+    return (IS_WINDOWS4 ? s : s.replace(/\\/g, "\\\\")).replace(/(\[)(?=[^/]+\])/g, "[[]").replace(/\?/g, "[?]").replace(/\*/g, "[*]");
+  }
+  /**
+   * Normalizes slashes and ensures absolute root
+   */
+  static fixupPattern(pattern, homedir2) {
+    assert3(pattern, "pattern cannot be empty");
+    const literalSegments = new Path(pattern).segments.map((x) => _Pattern.getLiteral(x));
+    assert3(literalSegments.every((x, i) => (x !== "." || i === 0) && x !== ".."), `Invalid pattern '${pattern}'. Relative pathing '.' and '..' is not allowed.`);
+    assert3(!hasRoot(pattern) || literalSegments[0], `Invalid pattern '${pattern}'. Root segment must not contain globs.`);
+    pattern = normalizeSeparators(pattern);
+    if (pattern === "." || pattern.startsWith(`.${path7.sep}`)) {
+      pattern = _Pattern.globEscape(process.cwd()) + pattern.substr(1);
+    } else if (pattern === "~" || pattern.startsWith(`~${path7.sep}`)) {
+      homedir2 = homedir2 || os.homedir();
+      assert3(homedir2, "Unable to determine HOME directory");
+      assert3(hasAbsoluteRoot(homedir2), `Expected HOME directory to be a rooted path. Actual '${homedir2}'`);
+      pattern = _Pattern.globEscape(homedir2) + pattern.substr(1);
+    } else if (IS_WINDOWS4 && (pattern.match(/^[A-Z]:$/i) || pattern.match(/^[A-Z]:[^\\]/i))) {
+      let root = ensureAbsoluteRoot("C:\\dummy-root", pattern.substr(0, 2));
+      if (pattern.length > 2 && !root.endsWith("\\")) {
+        root += "\\";
+      }
+      pattern = _Pattern.globEscape(root) + pattern.substr(2);
+    } else if (IS_WINDOWS4 && (pattern === "\\" || pattern.match(/^\\[^\\]/))) {
+      let root = ensureAbsoluteRoot("C:\\dummy-root", "\\");
+      if (!root.endsWith("\\")) {
+        root += "\\";
+      }
+      pattern = _Pattern.globEscape(root) + pattern.substr(1);
+    } else {
+      pattern = ensureAbsoluteRoot(_Pattern.globEscape(process.cwd()), pattern);
+    }
+    return normalizeSeparators(pattern);
+  }
+  /**
+   * Attempts to unescape a pattern segment to create a literal path segment.
+   * Otherwise returns empty string.
+   */
+  static getLiteral(segment) {
+    let literal = "";
+    for (let i = 0; i < segment.length; i++) {
+      const c = segment[i];
+      if (c === "\\" && !IS_WINDOWS4 && i + 1 < segment.length) {
+        literal += segment[++i];
+        continue;
+      } else if (c === "*" || c === "?") {
+        return "";
+      } else if (c === "[" && i + 1 < segment.length) {
+        let set = "";
+        let closed = -1;
+        for (let i2 = i + 1; i2 < segment.length; i2++) {
+          const c2 = segment[i2];
+          if (c2 === "\\" && !IS_WINDOWS4 && i2 + 1 < segment.length) {
+            set += segment[++i2];
+            continue;
+          } else if (c2 === "]") {
+            closed = i2;
+            break;
+          } else {
+            set += c2;
+          }
+        }
+        if (closed >= 0) {
+          if (set.length > 1) {
+            return "";
+          }
+          if (set) {
+            literal += set;
+            i = closed;
+            continue;
+          }
+        }
+      }
+      literal += c;
+    }
+    return literal;
+  }
+  /**
+   * Escapes regexp special characters
+   * https://javascript.info/regexp-escaping
+   */
+  static regExpEscape(s) {
+    return s.replace(/[[\\^$.|?*+()]/g, "\\$&");
+  }
+};
+
+// node_modules/@actions/glob/lib/internal-search-state.js
+var SearchState = class {
+  constructor(path10, level) {
+    this.path = path10;
+    this.level = level;
+  }
+};
+
+// node_modules/@actions/glob/lib/internal-globber.js
+var __awaiter = function(thisArg, _arguments, P, generator) {
+  function adopt(value) {
+    return value instanceof P ? value : new P(function(resolve) {
+      resolve(value);
+    });
+  }
+  return new (P || (P = Promise))(function(resolve, reject) {
+    function fulfilled(value) {
+      try {
+        step(generator.next(value));
+      } catch (e) {
+        reject(e);
+      }
+    }
+    function rejected(value) {
+      try {
+        step(generator["throw"](value));
+      } catch (e) {
+        reject(e);
+      }
+    }
+    function step(result) {
+      result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
+    }
+    step((generator = generator.apply(thisArg, _arguments || [])).next());
+  });
+};
+var __asyncValues = function(o) {
+  if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+  var m = o[Symbol.asyncIterator], i;
+  return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function() {
+    return this;
+  }, i);
+  function verb(n) {
+    i[n] = o[n] && function(v) {
+      return new Promise(function(resolve, reject) {
+        v = o[n](v), settle(resolve, reject, v.done, v.value);
+      });
+    };
+  }
+  function settle(resolve, reject, d, v) {
+    Promise.resolve(v).then(function(v2) {
+      resolve({ value: v2, done: d });
+    }, reject);
+  }
+};
+var __await = function(v) {
+  return this instanceof __await ? (this.v = v, this) : new __await(v);
+};
+var __asyncGenerator = function(thisArg, _arguments, generator) {
+  if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+  var g = generator.apply(thisArg, _arguments || []), i, q = [];
+  return i = Object.create((typeof AsyncIterator === "function" ? AsyncIterator : Object).prototype), verb("next"), verb("throw"), verb("return", awaitReturn), i[Symbol.asyncIterator] = function() {
+    return this;
+  }, i;
+  function awaitReturn(f) {
+    return function(v) {
+      return Promise.resolve(v).then(f, reject);
+    };
+  }
+  function verb(n, f) {
+    if (g[n]) {
+      i[n] = function(v) {
+        return new Promise(function(a, b) {
+          q.push([n, v, a, b]) > 1 || resume(n, v);
+        });
+      };
+      if (f) i[n] = f(i[n]);
+    }
+  }
+  function resume(n, v) {
+    try {
+      step(g[n](v));
+    } catch (e) {
+      settle(q[0][3], e);
+    }
+  }
+  function step(r) {
+    r.value instanceof __await ? Promise.resolve(r.value.v).then(fulfill, reject) : settle(q[0][2], r);
+  }
+  function fulfill(value) {
+    resume("next", value);
+  }
+  function reject(value) {
+    resume("throw", value);
+  }
+  function settle(f, v) {
+    if (f(v), q.shift(), q.length) resume(q[0][0], q[0][1]);
+  }
+};
+var IS_WINDOWS5 = process.platform === "win32";
+var DefaultGlobber = class _DefaultGlobber {
+  constructor(options) {
+    this.patterns = [];
+    this.searchPaths = [];
+    this.options = getOptions(options);
+  }
+  getSearchPaths() {
+    return this.searchPaths.slice();
+  }
+  glob() {
+    return __awaiter(this, void 0, void 0, function* () {
+      var _a, e_1, _b, _c;
+      const result = [];
+      try {
+        for (var _d = true, _e = __asyncValues(this.globGenerator()), _f; _f = yield _e.next(), _a = _f.done, !_a; _d = true) {
+          _c = _f.value;
+          _d = false;
+          const itemPath = _c;
+          result.push(itemPath);
+        }
+      } catch (e_1_1) {
+        e_1 = { error: e_1_1 };
+      } finally {
+        try {
+          if (!_d && !_a && (_b = _e.return)) yield _b.call(_e);
+        } finally {
+          if (e_1) throw e_1.error;
+        }
+      }
+      return result;
+    });
+  }
+  globGenerator() {
+    return __asyncGenerator(this, arguments, function* globGenerator_1() {
+      const options = getOptions(this.options);
+      const patterns = [];
+      for (const pattern of this.patterns) {
+        patterns.push(pattern);
+        if (options.implicitDescendants && (pattern.trailingSeparator || pattern.segments[pattern.segments.length - 1] !== "**")) {
+          patterns.push(new Pattern(pattern.negate, true, pattern.segments.concat("**")));
+        }
+      }
+      const stack = [];
+      for (const searchPath of getSearchPaths(patterns)) {
+        core3.debug(`Search path '${searchPath}'`);
+        try {
+          yield __await(fs2.promises.lstat(searchPath));
+        } catch (err) {
+          if (err.code === "ENOENT") {
+            continue;
+          }
+          throw err;
+        }
+        stack.unshift(new SearchState(searchPath, 1));
+      }
+      const traversalChain = [];
+      while (stack.length) {
+        const item = stack.pop();
+        const match2 = match(patterns, item.path);
+        const partialMatch2 = !!match2 || partialMatch(patterns, item.path);
+        if (!match2 && !partialMatch2) {
+          continue;
+        }
+        const stats = yield __await(
+          _DefaultGlobber.stat(item, options, traversalChain)
+          // Broken symlink, or symlink cycle detected, or no longer exists
+        );
+        if (!stats) {
+          continue;
+        }
+        if (options.excludeHiddenFiles && path8.basename(item.path).match(/^\./)) {
+          continue;
+        }
+        if (stats.isDirectory()) {
+          if (match2 & MatchKind.Directory && options.matchDirectories) {
+            yield yield __await(item.path);
+          } else if (!partialMatch2) {
+            continue;
+          }
+          const childLevel = item.level + 1;
+          const childItems = (yield __await(fs2.promises.readdir(item.path))).map((x) => new SearchState(path8.join(item.path, x), childLevel));
+          stack.push(...childItems.reverse());
+        } else if (match2 & MatchKind.File) {
+          yield yield __await(item.path);
+        }
+      }
+    });
+  }
+  /**
+   * Constructs a DefaultGlobber
+   */
+  static create(patterns, options) {
+    return __awaiter(this, void 0, void 0, function* () {
+      const result = new _DefaultGlobber(options);
+      if (IS_WINDOWS5) {
+        patterns = patterns.replace(/\r\n/g, "\n");
+        patterns = patterns.replace(/\r/g, "\n");
+      }
+      const lines = patterns.split("\n").map((x) => x.trim());
+      for (const line of lines) {
+        if (!line || line.startsWith("#")) {
+          continue;
+        } else {
+          result.patterns.push(new Pattern(line));
+        }
+      }
+      result.searchPaths.push(...getSearchPaths(result.patterns));
+      return result;
+    });
+  }
+  static stat(item, options, traversalChain) {
+    return __awaiter(this, void 0, void 0, function* () {
+      let stats;
+      if (options.followSymbolicLinks) {
+        try {
+          stats = yield fs2.promises.stat(item.path);
+        } catch (err) {
+          if (err.code === "ENOENT") {
+            if (options.omitBrokenSymbolicLinks) {
+              core3.debug(`Broken symlink '${item.path}'`);
+              return void 0;
+            }
+            throw new Error(`No information found for the path '${item.path}'. This may indicate a broken symbolic link.`);
+          }
+          throw err;
+        }
+      } else {
+        stats = yield fs2.promises.lstat(item.path);
+      }
+      if (stats.isDirectory() && options.followSymbolicLinks) {
+        const realPath = yield fs2.promises.realpath(item.path);
+        while (traversalChain.length >= item.level) {
+          traversalChain.pop();
+        }
+        if (traversalChain.some((x) => x === realPath)) {
+          core3.debug(`Symlink cycle detected for path '${item.path}' and realpath '${realPath}'`);
+          return void 0;
+        }
+        traversalChain.push(realPath);
+      }
+      return stats;
+    });
+  }
+};
+
+// node_modules/@actions/glob/lib/internal-hash-files.js
+import * as core4 from "@actions/core";
+
+// node_modules/@actions/glob/lib/glob.js
+var __awaiter2 = function(thisArg, _arguments, P, generator) {
+  function adopt(value) {
+    return value instanceof P ? value : new P(function(resolve) {
+      resolve(value);
+    });
+  }
+  return new (P || (P = Promise))(function(resolve, reject) {
+    function fulfilled(value) {
+      try {
+        step(generator.next(value));
+      } catch (e) {
+        reject(e);
+      }
+    }
+    function rejected(value) {
+      try {
+        step(generator["throw"](value));
+      } catch (e) {
+        reject(e);
+      }
+    }
+    function step(result) {
+      result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
+    }
+    step((generator = generator.apply(thisArg, _arguments || [])).next());
+  });
+};
+function create(patterns, options) {
+  return __awaiter2(this, void 0, void 0, function* () {
+    return yield DefaultGlobber.create(patterns, options);
+  });
+}
+
+// packages/github-action/src/github-adapter.ts
+import * as io from "@actions/io";
+import * as tc from "@actions/tool-cache";
 import { promises as fs3 } from "fs";
 import * as os2 from "os";
 import path9 from "path";
 var GitHubAdapter = class {
   // ===== Input =====
   getInput(name, required) {
-    const value = core4.getInput(name, { required: required || false });
+    const value = core5.getInput(name, { required: required || false });
     return value || void 0;
   }
   getBoolInput(name, required) {
-    return core4.getBooleanInput(name, { required: required || false });
+    const value = core5.getInput(name, { required: required || false });
+    if (!value) {
+      return false;
+    }
+    return core5.getBooleanInput(name, { required: required || false });
   }
   getDelimitedInput(name, delimiter, required) {
-    const value = core4.getInput(name, { required: required || false });
+    const value = core5.getInput(name, { required: required || false });
     if (!value) return [];
     return value.split(delimiter).map((v) => v.trim()).filter((v) => v);
   }
   // ===== Output =====
   setOutput(name, value) {
-    core4.setOutput(name, value);
+    core5.setOutput(name, value);
   }
   setResult(result, message) {
     if (result === TaskResult.Succeeded) {
-      core4.info(`\u2705 ${message}`);
+      core5.info(`\u2705 ${message}`);
     } else if (result === TaskResult.Failed) {
-      core4.setFailed(message);
+      core5.setFailed(message);
     } else {
-      core4.warning(message);
+      core5.warning(message);
     }
   }
   setVariable(name, value, isSecret, isOutput) {
     if (isSecret) {
-      core4.setSecret(value);
+      core5.setSecret(value);
     }
     if (isOutput) {
-      core4.setOutput(name, value);
+      core5.setOutput(name, value);
     } else {
-      core4.exportVariable(name, value);
+      core5.exportVariable(name, value);
     }
   }
   setSecret(value) {
-    core4.setSecret(value);
+    core5.setSecret(value);
   }
   // ===== Logging =====
   debug(message) {
-    core4.debug(message);
+    core5.debug(message);
   }
   info(message) {
-    core4.info(message);
+    core5.info(message);
   }
   warning(message) {
-    core4.warning(message);
+    core5.warning(message);
   }
   error(message) {
-    core4.error(message);
+    core5.error(message);
   }
   // ===== Execution =====
   async which(tool, check) {
@@ -4519,7 +4635,7 @@ var GitHubAdapter = class {
         }
       }
     };
-    const exitCode = await exec.exec(toolCommand, args, {
+    const exitCode = await exec3.exec(toolCommand, args, {
       cwd: options?.cwd,
       env: options?.env,
       silent: options?.silent,
@@ -4586,118 +4702,6 @@ var GitHubAdapter = class {
     return tc.downloadTool(url);
   }
 };
-
-// packages/github-action/src/auth/pat-auth.ts
-async function getPatAuth(token, serviceUrl, platform) {
-  if (!token) {
-    throw new Error("PAT token is required");
-  }
-  platform.setSecret(token);
-  const finalServiceUrl = serviceUrl || "https://marketplace.visualstudio.com";
-  return {
-    authType: "pat",
-    serviceUrl: finalServiceUrl,
-    token
-  };
-}
-
-// packages/github-action/src/auth/basic-auth.ts
-async function getBasicAuth(username, password, serviceUrl, platform) {
-  if (!username) {
-    throw new Error("Username is required for basic authentication");
-  }
-  if (password === void 0 || password === null) {
-    throw new Error("Password is required for basic authentication");
-  }
-  platform.setSecret(password);
-  const finalServiceUrl = serviceUrl || "https://marketplace.visualstudio.com";
-  return {
-    authType: "basic",
-    serviceUrl: finalServiceUrl,
-    username,
-    password
-  };
-}
-
-// packages/github-action/src/auth/oidc-auth.ts
-import * as core5 from "@actions/core";
-import * as exec3 from "@actions/exec";
-async function getOidcAuth(serviceUrl, platform) {
-  const tokenResource = serviceUrl || "https://marketplace.visualstudio.com";
-  const finalServiceUrl = serviceUrl || "https://marketplace.visualstudio.com";
-  core5.info("Getting Azure AD token via Azure CLI (requires azure/login action)...");
-  try {
-    let output = "";
-    let errorOutput = "";
-    const exitCode = await exec3.exec(
-      "az",
-      ["account", "get-access-token", "--resource", tokenResource, "--output", "json"],
-      {
-        silent: true,
-        listeners: {
-          stdout: (data) => {
-            output += data.toString();
-          },
-          stderr: (data) => {
-            errorOutput += data.toString();
-          }
-        }
-      }
-    );
-    if (exitCode !== 0) {
-      throw new Error(`Azure CLI exited with code ${exitCode}: ${errorOutput}`);
-    }
-    const result = JSON.parse(output);
-    const token = result.accessToken;
-    if (!token) {
-      throw new Error("No accessToken in Azure CLI response");
-    }
-    core5.setSecret(token);
-    platform.setSecret(token);
-    core5.info("Successfully obtained Azure AD token via Azure CLI");
-    return {
-      authType: "pat",
-      // Use 'pat' type as the token format is similar
-      serviceUrl: finalServiceUrl,
-      token
-    };
-  } catch (error2) {
-    const message = error2 instanceof Error ? error2.message : String(error2);
-    throw new Error(
-      `Failed to get Azure AD token via Azure CLI: ${message}
-
-Make sure you have run the azure/login action before this action:
-  - uses: azure/login@v2
-    with:
-      client-id: \${{ secrets.AZURE_CLIENT_ID }}
-      tenant-id: \${{ secrets.AZURE_TENANT_ID }}
-      subscription-id: \${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-See: https://jessehouwing.net/authenticate-connect-mggraph-using-oidc-in-github-actions/`
-    );
-  }
-}
-
-// packages/github-action/src/auth/index.ts
-async function getAuth(authType, platform, options) {
-  const finalServiceUrl = options.serviceUrl;
-  switch (authType) {
-    case "pat":
-      if (!options.token) {
-        throw new Error("Token is required for PAT authentication");
-      }
-      return getPatAuth(options.token, finalServiceUrl, platform);
-    case "basic":
-      if (!options.username || !options.password) {
-        throw new Error("Username and password are required for basic authentication");
-      }
-      return getBasicAuth(options.username, options.password, finalServiceUrl, platform);
-    case "oidc":
-      return getOidcAuth(finalServiceUrl, platform);
-    default:
-      throw new Error(`Unsupported auth type: ${authType}`);
-  }
-}
 
 // packages/github-action/src/main.ts
 async function run() {

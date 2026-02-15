@@ -1,8 +1,8 @@
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
-import * as tc from '@actions/tool-cache';
-import * as io from '@actions/io';
 import * as glob from '@actions/glob';
+import * as io from '@actions/io';
+import * as tc from '@actions/tool-cache';
 import { TaskResult } from '@extension-tasks/core';
 import { promises as fs } from 'fs';
 import * as os from 'os';
@@ -18,6 +18,10 @@ export class GitHubAdapter {
         return value || undefined;
     }
     getBoolInput(name, required) {
+        const value = core.getInput(name, { required: required || false });
+        if (!value) {
+            return false;
+        }
         return core.getBooleanInput(name, { required: required || false });
     }
     getDelimitedInput(name, delimiter, required) {

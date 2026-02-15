@@ -1,8 +1,7 @@
 import * as core from '@actions/core';
-import { GitHubAdapter } from './github-adapter.js';
+import { installExtension, packageExtension, publishExtension, queryVersion, shareExtension, showExtension, TaskResult, TfxManager, unpublishExtension, unshareExtension, validateAccountUrl, validateAzureCliAvailable, validateExtensionId, validateNodeAvailable, validateNpmAvailable, validatePublisherId, validateTfxAvailable, validateVersion, waitForInstallation, waitForValidation, } from '@extension-tasks/core';
 import { getAuth } from './auth/index.js';
-import { TfxManager, TaskResult } from '@extension-tasks/core';
-import { packageExtension, publishExtension, unpublishExtension, shareExtension, unshareExtension, installExtension, showExtension, queryVersion, waitForValidation, waitForInstallation, validateExtensionId, validatePublisherId, validateVersion, validateAccountUrl, validateNodeAvailable, validateNpmAvailable, validateTfxAvailable, validateAzureCliAvailable, } from '@extension-tasks/core';
+import { GitHubAdapter } from './github-adapter.js';
 async function run() {
     try {
         const platform = new GitHubAdapter();

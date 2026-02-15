@@ -1,11 +1,10 @@
-import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
-import { jest } from '@jest/globals';
+import { TaskResult } from '@extension-tasks/core';
+import { afterEach, beforeEach, describe, expect, it } from '@jest/globals';
+import { promises as fs } from 'fs';
+import { tmpdir } from 'os';
+import { join } from 'path';
 import { Writable } from 'stream';
 import { GitHubAdapter } from '../github-adapter.js';
-import { TaskResult } from '@extension-tasks/core';
-import { promises as fs } from 'fs';
-import { join } from 'path';
-import { tmpdir } from 'os';
 
 describe('GitHubAdapter', () => {
   let adapter: GitHubAdapter;
@@ -35,6 +34,22 @@ describe('GitHubAdapter', () => {
     const result = adapter.getInput('name', true);
 
     expect(result).toBe('abc');
+  });
+
+  it('returns false for optional boolean input when not set', () => {
+    delete process.env.INPUT_BYPASS_VALIDATION;
+
+    const result = adapter.getBoolInput('bypass-validation', false);
+
+    expect(result).toBe(false);
+  });
+
+  it('throws for invalid boolean input values', () => {
+    process.env.INPUT_BYPASS_VALIDATION = 'not-a-bool';
+
+    expect(() => adapter.getBoolInput('bypass-validation', false)).toThrow(
+      /Core Schema|boolean input list/
+    );
   });
 
   it('parses delimited input values', () => {

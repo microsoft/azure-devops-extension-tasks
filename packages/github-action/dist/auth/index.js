@@ -1,6 +1,6 @@
-import { getPatAuth } from './pat-auth.js';
 import { getBasicAuth } from './basic-auth.js';
 import { getOidcAuth } from './oidc-auth.js';
+import { getPatAuth } from './pat-auth.js';
 /**
  * Get authentication credentials based on auth type
  */
@@ -23,5 +23,5 @@ export async function getAuth(authType, platform, options) {
             throw new Error(`Unsupported auth type: ${authType}`);
     }
 }
-export { getPatAuth, getBasicAuth, getOidcAuth };
+export { getBasicAuth, getOidcAuth, getPatAuth };
 //# sourceMappingURL=index.js.map
