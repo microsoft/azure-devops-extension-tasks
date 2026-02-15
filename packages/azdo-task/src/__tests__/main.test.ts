@@ -166,11 +166,7 @@ describe('Azure DevOps main entrypoint', () => {
 
     expect(validateTfxAvailableMock).toHaveBeenCalledWith(platform);
     expect(validateNpmAvailableMock).not.toHaveBeenCalled();
-    expect(getAuthMock).toHaveBeenCalledWith(
-      'connectedService:VsTeam',
-      'svc-connection',
-      platform
-    );
+    expect(getAuthMock).toHaveBeenCalledWith('connectedService:VsTeam', 'svc-connection', platform);
     expect(validateAccountUrlMock).toHaveBeenCalledWith('https://dev.azure.com/org');
     expect(publishExtensionMock).toHaveBeenCalled();
     expect(platform.setResult).toHaveBeenCalledWith('Succeeded', 'publish completed successfully');
@@ -277,9 +273,6 @@ describe('Azure DevOps main entrypoint', () => {
     await importMainAndFlush();
 
     expect(waitForValidationMock).toHaveBeenCalled();
-    expect(tlSetResultMock).toHaveBeenCalledWith(
-      'Failed',
-      'Validation failed with status: failed'
-    );
+    expect(tlSetResultMock).toHaveBeenCalledWith('Failed', 'Validation failed with status: failed');
   });
 });

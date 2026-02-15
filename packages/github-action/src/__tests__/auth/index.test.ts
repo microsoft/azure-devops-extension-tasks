@@ -43,7 +43,11 @@ describe('GitHub Action getAuth router', () => {
       marketplaceUrl: 'https://fallback.marketplace',
     });
 
-    expect(getPatAuthMock).toHaveBeenCalledWith('pat-token', 'https://custom.marketplace', platform);
+    expect(getPatAuthMock).toHaveBeenCalledWith(
+      'pat-token',
+      'https://custom.marketplace',
+      platform
+    );
     expect(result.serviceUrl).toBe('https://custom.marketplace');
   });
 

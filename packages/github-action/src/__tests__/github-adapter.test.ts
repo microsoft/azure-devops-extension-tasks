@@ -137,11 +137,10 @@ describe('GitHubAdapter', () => {
 
   it('exec throws when failOnStdErr is true and stderr is written', async () => {
     await expect(
-      adapter.exec(
-        process.execPath,
-        ['-e', "process.stderr.write('boom')"],
-        { failOnStdErr: true, ignoreReturnCode: true }
-      )
+      adapter.exec(process.execPath, ['-e', "process.stderr.write('boom')"], {
+        failOnStdErr: true,
+        ignoreReturnCode: true,
+      })
     ).rejects.toThrow('Command failed with stderr: boom');
   });
 });

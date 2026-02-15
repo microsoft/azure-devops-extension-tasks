@@ -205,4 +205,97 @@ describe('showExtension', () => {
       )
     ).rejects.toThrow('tfx did not return expected JSON output');
   });
+
+  it('should support basic auth and mark password as secret', async () => {
+    const basicAuth: AuthCredentials = {
+      authType: 'basic',
+      serviceUrl: 'https://marketplace.visualstudio.com',
+      username: 'user',
+      password: 'pass',
+    };
+
+    const mockExecute = jest.spyOn(tfxManager, 'execute');
+    mockExecute.mockResolvedValue({
+      exitCode: 0,
+      json: { id: 'ext', publisher: 'pub', version: '1.0.0' },
+      stdout: '',
+      stderr: '',
+    });
+
+    await showExtension(
+      {
+        publisherId: 'pub',
+        extensionId: 'ext',
+      },
+      basicAuth,
+      tfxManager,
+      platform
+    );
+
+    const callArgs = mockExecute.mock.calls[0][0];
+    expect(callArgs).toContain('--auth-type');
+    expect(callArgs).toContain('basic');
+    expect(callArgs).toContain('--username');
+    expect(callArgs).toContain('user');
+    expect(callArgs).toContain('--password');
+    expect(callArgs).toContain('pass');
+    expect(platform.isSecret('pass')).toBe(true);
+  });
+
+  it('should map metadata from fallback fields', async () => {
+    jest.spyOn(tfxManager, 'execute').mockResolvedValue({
+      exitCode: 0,
+      json: {
+        id: 'ext',
+        publisher: 'pub',
+        versions: [{ version: '2.3.4' }],
+        displayName: 'Display Name',
+        description: 'Long description',
+      },
+      stdout: '',
+      stderr: '',
+    });
+
+    const result = await showExtension(
+      {
+        publisherId: 'pub',
+        extensionId: 'ext',
+      },
+      auth,
+      tfxManager,
+      platform
+    );
+
+    expect(result.metadata.id).toBe('ext');
+    expect(result.metadata.version).toBe('2.3.4');
+    expect(result.metadata.name).toBe('Display Name');
+    expect(result.metadata.description).toBe('Long description');
+  });
+
+  it('should fall back to requested extension id when response id is missing', async () => {
+    jest.spyOn(tfxManager, 'execute').mockResolvedValue({
+      exitCode: 0,
+      json: {
+        publisher: 'pub',
+        version: '1.0.0',
+        name: 'FallbackName',
+      },
+      stdout: '',
+      stderr: '',
+    });
+
+    const result = await showExtension(
+      {
+        publisherId: 'pub',
+        extensionId: 'ext',
+        extensionTag: '-dev',
+      },
+      auth,
+      tfxManager,
+      platform
+    );
+
+    expect(result.metadata.id).toBe('ext-dev');
+    expect(result.metadata.name).toBe('FallbackName');
+  });
 });

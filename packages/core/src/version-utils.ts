@@ -82,11 +82,7 @@ export function updateTaskVersion(
  * Generate a deterministic task ID using UUID v5
  * Based on publisher, extension ID, and task name
  */
-export function generateTaskId(
-  publisher: string,
-  extensionId: string,
-  taskName: string
-): string {
+export function generateTaskId(publisher: string, extensionId: string, taskName: string): string {
   void publisher;
   void extensionId;
   void taskName;

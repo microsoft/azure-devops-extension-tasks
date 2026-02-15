@@ -2,6 +2,9 @@ import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { packageExtension } from '../commands/package.js';
 import { TfxManager } from '../tfx-manager.js';
 import { MockPlatformAdapter } from './helpers/mock-platform.js';
+import { promises as fs } from 'fs';
+import { join } from 'path';
+import { tmpdir } from 'os';
 
 describe('packageExtension', () => {
   let platform: MockPlatformAdapter;
@@ -257,5 +260,89 @@ describe('packageExtension', () => {
 
     expect(platform.infoMessages).toContain('Packaging extension...');
     expect(platform.infoMessages.some((m) => m.includes('Packaged extension'))).toBe(true);
+  });
+
+  it('should update task manifests and add generated overrides file', async () => {
+    const root = await fs.mkdtemp(join(tmpdir(), 'pkg-cmd-'));
+    const taskDir = join(root, 'task1');
+    await fs.mkdir(taskDir, { recursive: true });
+
+    await fs.writeFile(
+      join(root, 'vss-extension.json'),
+      JSON.stringify({
+        id: 'ext',
+        publisher: 'pub',
+        version: '1.0.0',
+        files: [{ path: 'task1' }],
+        contributions: [
+          {
+            id: 'task1',
+            type: 'ms.vss-distributed-task.task',
+            properties: { name: 'task1' },
+          },
+        ],
+      }),
+      'utf-8'
+    );
+
+    await fs.writeFile(
+      join(taskDir, 'task.json'),
+      JSON.stringify({
+        id: '11111111-1111-1111-1111-111111111111',
+        name: 'task1',
+        friendlyName: 'Task 1',
+        description: 'desc',
+        version: { Major: 1, Minor: 0, Patch: 0 },
+        instanceNameFormat: 'Task 1',
+      }),
+      'utf-8'
+    );
+
+    const mockExecute = jest.spyOn(tfxManager, 'execute');
+    mockExecute.mockResolvedValue({
+      exitCode: 0,
+      json: { path: '/output/extension.vsix' },
+      stdout: '',
+      stderr: '',
+    });
+
+    await packageExtension(
+      {
+        rootFolder: root,
+        manifestGlobs: ['vss-extension.json'],
+        extensionVersion: '2.0.0',
+        updateTasksVersion: true,
+        updateTasksVersionType: 'major',
+      },
+      tfxManager,
+      platform
+    );
+
+    const callArgs = mockExecute.mock.calls[0][0];
+    expect(callArgs).toContain('--overrides-file');
+    expect(platform.infoMessages).toContain('Updating task manifests before packaging...');
+    expect(platform.infoMessages).toContain('Task manifests updated successfully');
+  });
+
+  it('should log and throw when task manifest update fails', async () => {
+    const mockExecute = jest.spyOn(tfxManager, 'execute');
+
+    await expect(
+      packageExtension(
+        {
+          rootFolder: join(tmpdir(), 'missing-manifest-folder'),
+          manifestGlobs: ['vss-extension.json'],
+          extensionVersion: '2.0.0',
+          updateTasksVersion: true,
+        },
+        tfxManager,
+        platform
+      )
+    ).rejects.toThrow();
+
+    expect(mockExecute).not.toHaveBeenCalled();
+    expect(platform.errorMessages.some((m) => m.includes('Failed to update task manifests'))).toBe(
+      true
+    );
   });
 });

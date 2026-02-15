@@ -257,4 +257,63 @@ describe('installExtension', () => {
     expect(call1Args).toContain('https://dev.azure.com/org1');
     expect(call2Args).toContain('https://dev.azure.com/org2');
   });
+
+  it('should use basic authentication credentials when auth type is basic', async () => {
+    const basicAuth: AuthCredentials = {
+      authType: 'basic',
+      serviceUrl: 'https://marketplace.visualstudio.com',
+      username: 'user',
+      password: 'pass',
+    };
+
+    const mockExecute = jest.spyOn(tfxManager, 'execute');
+    mockExecute.mockResolvedValue({
+      exitCode: 0,
+      json: {},
+      stdout: '',
+      stderr: '',
+    });
+
+    await installExtension(
+      {
+        publisherId: 'pub',
+        extensionId: 'ext',
+        accounts: ['https://dev.azure.com/org1'],
+      },
+      basicAuth,
+      tfxManager,
+      platform
+    );
+
+    const callArgs = mockExecute.mock.calls[0][0];
+    expect(callArgs).toContain('--auth-type');
+    expect(callArgs).toContain('basic');
+    expect(callArgs).toContain('--username');
+    expect(callArgs).toContain('user');
+    expect(callArgs).toContain('--password');
+    expect(callArgs).toContain('pass');
+    expect(platform.isSecret('pass')).toBe(true);
+  });
+
+  it('should handle execution exception and continue with failed account result', async () => {
+    const mockExecute = jest.spyOn(tfxManager, 'execute');
+    mockExecute.mockRejectedValueOnce(new Error('network failure'));
+
+    const result = await installExtension(
+      {
+        publisherId: 'pub',
+        extensionId: 'ext',
+        accounts: ['https://dev.azure.com/org1'],
+      },
+      auth,
+      tfxManager,
+      platform
+    );
+
+    expect(result.allSuccess).toBe(false);
+    expect(result.exitCode).toBe(1);
+    expect(result.accountResults[0].success).toBe(false);
+    expect(result.accountResults[0].error).toContain('network failure');
+    expect(platform.errorMessages.some((m) => m.includes('Failed to install'))).toBe(true);
+  });
 });

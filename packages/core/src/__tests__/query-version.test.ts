@@ -128,4 +128,90 @@ describe('queryVersion', () => {
     expect(result.source).toBe('override');
     expect(executeSpy).not.toHaveBeenCalled();
   });
+
+  it('sets output variable when override variable is used', async () => {
+    platform.setVariableValue('OVERRIDE_VERSION', '9.9.9');
+
+    await queryVersion(
+      {
+        publisherId: 'pub',
+        extensionId: 'ext',
+        extensionVersionOverrideVariable: 'OVERRIDE_VERSION',
+        outputVariable: 'VERSION_OUT',
+      },
+      auth,
+      tfxManager,
+      platform
+    );
+
+    const outputs = platform.getOutputs();
+    expect(outputs.get('VERSION_OUT')).toBe('9.9.9');
+  });
+
+  it('sets output variable when marketplace version is used', async () => {
+    jest.spyOn(tfxManager, 'execute').mockResolvedValue({
+      exitCode: 0,
+      json: { extensionId: 'ext', publisher: 'pub', version: '1.2.3' },
+      stdout: '',
+      stderr: '',
+    });
+
+    await queryVersion(
+      {
+        publisherId: 'pub',
+        extensionId: 'ext',
+        versionAction: 'Patch',
+        outputVariable: 'VERSION_OUT',
+      },
+      auth,
+      tfxManager,
+      platform
+    );
+
+    const outputs = platform.getOutputs();
+    expect(outputs.get('VERSION_OUT')).toBe('1.2.4');
+  });
+
+  it('throws for invalid marketplace semantic version when action increments', async () => {
+    jest.spyOn(tfxManager, 'execute').mockResolvedValue({
+      exitCode: 0,
+      json: { extensionId: 'ext', publisher: 'pub', version: 'invalid' },
+      stdout: '',
+      stderr: '',
+    });
+
+    await expect(
+      queryVersion(
+        {
+          publisherId: 'pub',
+          extensionId: 'ext',
+          versionAction: 'Major',
+        },
+        auth,
+        tfxManager,
+        platform
+      )
+    ).rejects.toThrow("Version 'invalid' is not a valid semantic version");
+  });
+
+  it('throws when marketplace response does not contain version', async () => {
+    jest.spyOn(tfxManager, 'execute').mockResolvedValue({
+      exitCode: 0,
+      json: { extensionId: 'ext', publisher: 'pub' },
+      stdout: '',
+      stderr: '',
+    });
+
+    await expect(
+      queryVersion(
+        {
+          publisherId: 'pub',
+          extensionId: 'ext',
+        },
+        auth,
+        tfxManager,
+        platform
+      )
+    ).rejects.toThrow('Could not determine extension version from marketplace response');
+  });
 });

@@ -3,6 +3,11 @@ import { publishExtension } from '../commands/publish.js';
 import { TfxManager } from '../tfx-manager.js';
 import { MockPlatformAdapter } from './helpers/mock-platform.js';
 import type { AuthCredentials } from '../auth.js';
+import { promises as fs } from 'fs';
+import { join } from 'path';
+import { tmpdir } from 'os';
+import { VsixReader } from '../vsix-reader.js';
+import { ManifestEditor } from '../manifest-editor.js';
 
 describe('publishExtension', () => {
   let platform: MockPlatformAdapter;
@@ -357,5 +362,125 @@ describe('publishExtension', () => {
 
     const outputs = platform.getOutputs();
     expect(outputs.get('PUBLISHED_VSIX')).toBe('/out/ext.vsix');
+  });
+
+  it('should update manifest tasks before publishing when requested', async () => {
+    const root = await fs.mkdtemp(join(tmpdir(), 'publish-cmd-'));
+    const taskDir = join(root, 'task1');
+    await fs.mkdir(taskDir, { recursive: true });
+
+    await fs.writeFile(
+      join(root, 'vss-extension.json'),
+      JSON.stringify({
+        id: 'ext',
+        publisher: 'pub',
+        version: '1.0.0',
+        files: [{ path: 'task1' }],
+        contributions: [
+          {
+            id: 'task1',
+            type: 'ms.vss-distributed-task.task',
+            properties: { name: 'task1' },
+          },
+        ],
+      }),
+      'utf-8'
+    );
+
+    await fs.writeFile(
+      join(taskDir, 'task.json'),
+      JSON.stringify({
+        id: '11111111-1111-1111-1111-111111111111',
+        name: 'task1',
+        friendlyName: 'Task 1',
+        description: 'desc',
+        version: { Major: 1, Minor: 0, Patch: 0 },
+        instanceNameFormat: 'Task 1',
+      }),
+      'utf-8'
+    );
+
+    const mockExecute = jest.spyOn(tfxManager, 'execute');
+    mockExecute.mockResolvedValue({
+      exitCode: 0,
+      json: { published: true, packaged: '/out/ext.vsix' },
+      stdout: '',
+      stderr: '',
+    });
+
+    await publishExtension(
+      {
+        publishSource: 'manifest',
+        rootFolder: root,
+        manifestGlobs: ['vss-extension.json'],
+        extensionVersion: '2.0.0',
+        updateTasksVersion: true,
+      },
+      auth,
+      tfxManager,
+      platform
+    );
+
+    const callArgs = mockExecute.mock.calls[0][0];
+    expect(callArgs).toContain('--overrides-file');
+    expect(platform.infoMessages).toContain('Updating task manifests before publishing...');
+    expect(platform.infoMessages).toContain('Task manifests updated successfully');
+  });
+
+  it('should modify vsix before publishing when overrides are provided', async () => {
+    const tempDir = await fs.mkdtemp(join(tmpdir(), 'publish-vsix-'));
+    const originalGetTempDir = platform.getTempDir.bind(platform);
+    platform.getTempDir = () => tempDir;
+
+    platform.setFileContent('/path/to/extension.vsix', 'mock vsix content');
+
+    const writeToFileMock = jest.fn(async () => undefined);
+    const writerCloseMock = jest.fn(async () => undefined);
+    const readerCloseMock = jest.fn(async () => undefined);
+    const applyOptionsMock = jest.fn(async () => undefined);
+    const toWriterMock = jest.fn(async () => ({
+      writeToFile: writeToFileMock,
+      close: writerCloseMock,
+    }));
+
+    const vsixOpenSpy = jest.spyOn(VsixReader, 'open').mockResolvedValue({
+      close: readerCloseMock,
+    } as any);
+
+    const fromReaderSpy = jest.spyOn(ManifestEditor, 'fromReader').mockReturnValue({
+      applyOptions: applyOptionsMock,
+      toWriter: toWriterMock,
+    } as any);
+
+    const mockExecute = jest.spyOn(tfxManager, 'execute');
+    mockExecute.mockResolvedValue({
+      exitCode: 0,
+      json: { published: true, id: 'my-extension', version: '1.0.0', publisher: 'my-publisher' },
+      stdout: '',
+      stderr: '',
+    });
+
+    await publishExtension(
+      {
+        publishSource: 'vsix',
+        vsixFile: '/path/to/extension.vsix',
+        extensionVersion: '2.0.0',
+      },
+      auth,
+      tfxManager,
+      platform
+    );
+
+    const callArgs = mockExecute.mock.calls[0][0];
+    const vsixArgIndex = callArgs.indexOf('--vsix');
+    expect(vsixArgIndex).toBeGreaterThan(-1);
+    expect(callArgs[vsixArgIndex + 1]).toContain('temp-');
+    expect(writeToFileMock).toHaveBeenCalled();
+    expect(writerCloseMock).toHaveBeenCalled();
+    expect(readerCloseMock).toHaveBeenCalled();
+
+    vsixOpenSpy.mockRestore();
+    fromReaderSpy.mockRestore();
+    platform.getTempDir = originalGetTempDir;
   });
 });

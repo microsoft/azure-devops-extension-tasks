@@ -15,7 +15,8 @@ const readManifestMock = jest.fn<() => Promise<any>>();
 const resolveTaskManifestPathsMock = jest.fn<() => string[]>();
 
 const vsixReaderCloseMock = jest.fn<() => Promise<void>>();
-const vsixReaderGetTasksInfoMock = jest.fn<() => Promise<Array<{ name: string; version: string }>>>();
+const vsixReaderGetTasksInfoMock =
+  jest.fn<() => Promise<Array<{ name: string; version: string }>>>();
 const vsixReaderOpenMock = jest.fn<() => Promise<any>>();
 
 jest.unstable_mockModule('azure-devops-node-api', () => ({
@@ -96,7 +97,9 @@ describe('waitForInstallation', () => {
 
   it('resolves expected tasks from manifestPath and verifies versions', async () => {
     readManifestMock
-      .mockResolvedValueOnce({ contributes: [{ type: 'ms.vss-distributed-task.task', properties: { name: 'Task1' } }] })
+      .mockResolvedValueOnce({
+        contributes: [{ type: 'ms.vss-distributed-task.task', properties: { name: 'Task1' } }],
+      })
       .mockResolvedValueOnce({
         name: 'Task1',
         version: { Major: 1, Minor: 2, Patch: 3 },
@@ -209,5 +212,97 @@ describe('waitForInstallation', () => {
     expect(result.accountResults[0].missingVersions).toContain('Task1@1.2.0');
 
     nowSpy.mockRestore();
+  });
+
+  it('returns success with discovered tasks when no expected tasks are provided', async () => {
+    getTaskDefinitionsMock.mockResolvedValue([
+      {
+        name: 'DiscoveredTask',
+        id: 'task-id-discovered',
+        version: { major: 3, minor: 4, patch: 5 },
+        friendlyName: 'Discovered Task',
+      },
+    ]);
+
+    const result = await waitForInstallation(
+      {
+        publisherId: 'pub',
+        extensionId: 'ext',
+        accounts: ['https://dev.azure.com/org1'],
+      },
+      auth,
+      platform
+    );
+
+    expect(result.success).toBe(true);
+    expect(result.accountResults[0].available).toBe(true);
+    expect(result.accountResults[0].installedTasks).toHaveLength(1);
+    expect(result.accountResults[0].installedTasks[0].matchesExpected).toBe(true);
+    expect(result.accountResults[0].missingTasks).toEqual([]);
+    expect(result.accountResults[0].missingVersions).toEqual([]);
+  });
+
+  it('includes last polling error in timeout message', async () => {
+    let now = 0;
+    const nowSpy = jest.spyOn(Date, 'now').mockImplementation(() => now);
+
+    getTaskDefinitionsMock.mockImplementation(async () => {
+      now = 120_000;
+      throw new Error('Task API temporarily unavailable');
+    });
+
+    const result = await waitForInstallation(
+      {
+        publisherId: 'pub',
+        extensionId: 'ext',
+        accounts: ['https://dev.azure.com/org1'],
+        expectedTasks: [{ name: 'Task1', versions: ['1.0.0'] }],
+        timeoutMinutes: 1,
+        pollingIntervalSeconds: 0,
+      },
+      auth,
+      platform
+    );
+
+    expect(result.success).toBe(false);
+    expect(result.accountResults[0].available).toBe(false);
+    expect(result.accountResults[0].error).toContain(
+      'Last error: Task API temporarily unavailable'
+    );
+
+    nowSpy.mockRestore();
+  });
+
+  it('falls back when individual task manifest read fails', async () => {
+    readManifestMock
+      .mockResolvedValueOnce({
+        contributes: [{ type: 'ms.vss-distributed-task.task', properties: { name: 'Task1' } }],
+      })
+      .mockRejectedValueOnce(new Error('task manifest unreadable'));
+    resolveTaskManifestPathsMock.mockReturnValue(['tasks/task1/task.json']);
+
+    getTaskDefinitionsMock.mockResolvedValue([
+      {
+        name: 'TaskFromServer',
+        id: 'task-server',
+        version: { major: 1, minor: 0, patch: 0 },
+      },
+    ]);
+
+    const result = await waitForInstallation(
+      {
+        publisherId: 'pub',
+        extensionId: 'ext',
+        accounts: ['https://dev.azure.com/org1'],
+        manifestPath: 'vss-extension.json',
+      },
+      auth,
+      platform
+    );
+
+    expect(result.success).toBe(true);
+    expect(platform.warningMessages.some((m) => m.includes('Failed to read task manifest'))).toBe(
+      true
+    );
   });
 });

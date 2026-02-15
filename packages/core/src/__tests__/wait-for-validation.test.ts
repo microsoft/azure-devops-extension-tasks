@@ -245,4 +245,111 @@ describe('waitForValidation', () => {
     expect(callArgs).toContain('pat');
     expect(platform.isSecret('test-token')).toBe(true);
   });
+
+  it('should use basic auth credentials when auth type is basic', async () => {
+    const basicAuth: AuthCredentials = {
+      authType: 'basic',
+      serviceUrl: 'https://marketplace.visualstudio.com',
+      username: 'user',
+      password: 'pass',
+    };
+
+    const mockExecute = jest.spyOn(tfxManager, 'execute');
+    mockExecute.mockResolvedValue({
+      exitCode: 0,
+      json: { status: 'success' },
+      stdout: '',
+      stderr: '',
+    });
+
+    await waitForValidation(
+      {
+        publisherId: 'pub',
+        extensionId: 'ext',
+      },
+      basicAuth,
+      tfxManager,
+      platform
+    );
+
+    const callArgs = mockExecute.mock.calls[0][0];
+    expect(callArgs).toContain('--auth-type');
+    expect(callArgs).toContain('basic');
+    expect(callArgs).toContain('--username');
+    expect(callArgs).toContain('user');
+    expect(callArgs).toContain('--password');
+    expect(callArgs).toContain('pass');
+    expect(platform.isSecret('pass')).toBe(true);
+  });
+
+  it('should warn when response has unknown status', async () => {
+    const mockExecute = jest.spyOn(tfxManager, 'execute');
+    mockExecute.mockResolvedValue({
+      exitCode: 0,
+      json: { status: 'mystery' },
+      stdout: '',
+      stderr: '',
+    });
+
+    const result = await waitForValidation(
+      {
+        publisherId: 'pub',
+        extensionId: 'ext',
+        maxRetries: 1,
+      },
+      auth,
+      tfxManager,
+      platform
+    );
+
+    expect(result.isValid).toBe(false);
+    expect(result.status).toBe('mystery' as any);
+    expect(platform.warningMessages.some((m) => m.includes('Unknown validation status'))).toBe(
+      true
+    );
+  });
+
+  it('should warn when validation response has no status', async () => {
+    const mockExecute = jest.spyOn(tfxManager, 'execute');
+    mockExecute.mockResolvedValue({
+      exitCode: 0,
+      json: { unexpected: true },
+      stdout: '',
+      stderr: '',
+    });
+
+    const result = await waitForValidation(
+      {
+        publisherId: 'pub',
+        extensionId: 'ext',
+        maxRetries: 1,
+      },
+      auth,
+      tfxManager,
+      platform
+    );
+
+    expect(result.isValid).toBe(false);
+    expect(result.status).toBe('pending');
+    expect(platform.warningMessages).toContain('No status in validation response');
+  });
+
+  it('should throw after repeated execution exceptions at max retries', async () => {
+    const mockExecute = jest.spyOn(tfxManager, 'execute');
+    mockExecute.mockRejectedValue(new Error('transient failure'));
+
+    await expect(
+      waitForValidation(
+        {
+          publisherId: 'pub',
+          extensionId: 'ext',
+          maxRetries: 1,
+          minTimeout: 0,
+        },
+        auth,
+        tfxManager,
+        platform
+      )
+    ).rejects.toThrow('transient failure');
+  });
 });
