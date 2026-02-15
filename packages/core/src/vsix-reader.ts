@@ -7,9 +7,9 @@
  * Security: Protected against zip slip attacks with path validation.
  */
 
-import yauzl from 'yauzl';
 import { Buffer } from 'buffer';
-import { normalize, isAbsolute } from 'path';
+import { isAbsolute, normalize } from 'path';
+import yauzl from 'yauzl';
 import { ManifestReader, type ExtensionManifest, type TaskManifest } from './manifest-reader.js';
 
 /**
@@ -389,7 +389,7 @@ export class VsixReader extends ManifestReader {
 // Re-export types from manifest-reader for backwards compatibility
 export type {
   ExtensionManifest,
-  TaskManifest,
   ManifestMetadata,
   TaskInfo,
+  TaskManifest,
 } from './manifest-reader.js';
