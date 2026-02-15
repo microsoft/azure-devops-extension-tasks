@@ -31,3 +31,4 @@ vsixsigntool.exe
 coverage/
 
 !packages/github-action/dist/
+!packages/github-action/dist/node_modules/

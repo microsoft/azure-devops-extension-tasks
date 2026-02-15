@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc -b",
     "clean": "rm -rf dist",
-    "test": "jest --passWithNoTests"
+    "test": "jest"
   },
   "dependencies": {
     "@extension-tasks/core": "*",
@@ -16,6 +16,6 @@
     "azure-pipelines-tasks-azure-arm-rest": "^3.267.0"
   },
   "devDependencies": {
-    "@types/node": "^20.19.24"
+    "@types/node": "^24"
   }
 }

@@ -1,0 +1,16 @@
+{
+  "external": [
+    "@actions/core",
+    "@actions/exec",
+    "@actions/tool-cache",
+    "@actions/io",
+    "tfx-cli"
+  ],
+  "dependencies": {
+    "@actions/core": "^3.0.0",
+    "@actions/exec": "^3.0.0",
+    "@actions/tool-cache": "^4.0.0",
+    "@actions/io": "^3.0.2",
+    "tfx-cli": "^0.23.1"
+  }
+}

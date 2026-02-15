@@ -18,12 +18,12 @@
     "test:coverage": "NODE_OPTIONS=\"--experimental-vm-modules\" jest --coverage"
   },
   "dependencies": {
-    "@types/uuid": "^3.4.13",
-    "azure-devops-node-api": "^14.1.0",
-    "tfx-cli": "^0.17.0",
+    "@types/uuid": "^10.0.0",
+    "azure-devops-node-api": "^15.1.2",
+    "tfx-cli": "^0.23.1",
     "uuid": "^13.0.0"
   },
   "devDependencies": {
-    "@types/node": "^20.19.24"
+    "@types/node": "^24"
   }
 }

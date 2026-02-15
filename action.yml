@@ -501,5 +501,5 @@ outputs:
       **Current marketplace version** before applying version action (query-version operation only).
 
 runs:
-  using: 'node20'
+  using: 'node24'
   main: 'packages/github-action/dist/main.js'

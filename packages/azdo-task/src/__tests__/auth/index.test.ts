@@ -1,9 +1,15 @@
 import { describe, it, expect, jest, beforeAll, beforeEach } from '@jest/globals';
 import type { IPlatformAdapter, AuthCredentials } from '@extension-tasks/core';
 
-const getPatAuthMock = jest.fn<() => Promise<AuthCredentials>>();
-const getAzureRmAuthMock = jest.fn<() => Promise<AuthCredentials>>();
-const getBasicAuthMock = jest.fn<() => Promise<AuthCredentials>>();
+const getPatAuthMock = jest.fn<
+  (connectionName: string, platform: IPlatformAdapter) => Promise<AuthCredentials>
+>();
+const getAzureRmAuthMock = jest.fn<
+  (connectionName: string, platform: IPlatformAdapter) => Promise<AuthCredentials>
+>();
+const getBasicAuthMock = jest.fn<
+  (connectionName: string, platform: IPlatformAdapter) => Promise<AuthCredentials>
+>();
 
 jest.unstable_mockModule('../../auth/pat-auth.js', () => ({
   getPatAuth: getPatAuthMock,

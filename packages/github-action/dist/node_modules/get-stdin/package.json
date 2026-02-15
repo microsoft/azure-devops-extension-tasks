@@ -1,0 +1,44 @@
+{
+	"name": "get-stdin",
+	"version": "10.0.0",
+	"description": "Get stdin as a string or Uint8Array",
+	"license": "MIT",
+	"repository": "sindresorhus/get-stdin",
+	"funding": "https://github.com/sponsors/sindresorhus",
+	"author": {
+		"name": "Sindre Sorhus",
+		"email": "sindresorhus@gmail.com",
+		"url": "https://sindresorhus.com"
+	},
+	"type": "module",
+	"exports": {
+		"types": "./index.d.ts",
+		"default": "./index.js"
+	},
+	"sideEffects": false,
+	"engines": {
+		"node": ">=20"
+	},
+	"scripts": {
+		"test": "xo && node --test"
+	},
+	"files": [
+		"index.js",
+		"index.d.ts"
+	],
+	"keywords": [
+		"std",
+		"stdin",
+		"stdio",
+		"concat",
+		"buffer",
+		"stream",
+		"process",
+		"read"
+	],
+	"devDependencies": {
+		"@types/node": "^25.2.0",
+		"delay": "^7.0.0",
+		"xo": "^1.2.3"
+	}
+}

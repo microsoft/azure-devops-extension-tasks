@@ -27,6 +27,11 @@ jobs:
           npm run build
           npm run bundle
 
+      - name: Verify runtime dependency manifests
+        run: |
+          test -f packages/azdo-task/dist/runtime-dependencies.json
+          test -f packages/github-action/dist/runtime-dependencies.json
+
       - name: Compare the expected and actual dist/ directories
         run: |
           if [ "$(git diff --ignore-space-at-eol packages/*/dist/ | wc -l)" -gt "0" ]; then

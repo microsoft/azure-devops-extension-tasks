@@ -1,0 +1,13 @@
+{
+  "name": "@extension-tasks/github-action-runtime",
+  "private": true,
+  "license": "MIT",
+  "type": "commonjs",
+  "dependencies": {
+    "@actions/core": "^3.0.0",
+    "@actions/exec": "^3.0.0",
+    "@actions/tool-cache": "^4.0.0",
+    "@actions/io": "^3.0.2",
+    "tfx-cli": "^0.23.1"
+  }
+}

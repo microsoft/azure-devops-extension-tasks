@@ -486,6 +486,9 @@
   "execution": {
     "Node20_1": {
       "target": "dist/main.js"
+    },
+    "Node24_1": {
+      "target": "dist/main.js"
     }
   }
 }

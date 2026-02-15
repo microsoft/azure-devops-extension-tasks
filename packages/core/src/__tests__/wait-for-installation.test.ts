@@ -9,7 +9,10 @@ const getTaskAgentApiMock = jest.fn(async () => ({
 const webApiCtorMock = jest.fn().mockImplementation(() => ({
   getTaskAgentApi: getTaskAgentApiMock,
 }));
-const getPersonalAccessTokenHandlerMock = jest.fn(() => ({ kind: 'pat-handler' }));
+const getPersonalAccessTokenHandlerMock = jest.fn((token: string) => {
+  void token;
+  return { kind: 'pat-handler' };
+});
 
 const readManifestMock = jest.fn<() => Promise<any>>();
 const resolveTaskManifestPathsMock = jest.fn<() => string[]>();
@@ -17,7 +20,7 @@ const resolveTaskManifestPathsMock = jest.fn<() => string[]>();
 const vsixReaderCloseMock = jest.fn<() => Promise<void>>();
 const vsixReaderGetTasksInfoMock =
   jest.fn<() => Promise<Array<{ name: string; version: string }>>>();
-const vsixReaderOpenMock = jest.fn<() => Promise<any>>();
+const vsixReaderOpenMock = jest.fn<(path: string) => Promise<any>>();
 
 jest.unstable_mockModule('azure-devops-node-api', () => ({
   WebApi: webApiCtorMock,
