@@ -2,7 +2,7 @@
   "name": "@extension-tasks/github-action-runtime",
   "private": true,
   "license": "MIT",
-  "type": "commonjs",
+  "type": "module",
   "dependencies": {
     "@actions/core": "^3.0.0",
     "@actions/exec": "^3.0.0",

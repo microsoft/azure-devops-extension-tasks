@@ -2360,6 +2360,7 @@ var init_filesystem_manifest_writer = __esm({
           overrides.galleryFlags = manifestMods.galleryFlags;
         }
         const tempDir = this.platform.getTempDir();
+        await (0, import_promises2.mkdir)(tempDir, { recursive: true });
         this.overridesPath = import_path3.default.join(tempDir, `overrides-${Date.now()}.json`);
         this.platform.debug(`Writing overrides file: ${this.overridesPath}`);
         const overridesJson = JSON.stringify(overrides, null, 2) + "\n";
@@ -73572,15 +73573,25 @@ var JsonOutputStream = class extends import_stream.Writable {
    */
   _write(chunk2, _encoding, callback) {
     const chunkStr = chunk2.toString();
+    const trimmed = chunkStr.trimStart();
     if (chunkStr.startsWith("[command]")) {
       this.writeOutput(chunkStr, this.lineWriter);
-    } else if (!this.jsonString && chunkStr[0] !== "{" && chunkStr[0] !== "[") {
+    } else if (!this.jsonString && !this.looksLikeJsonStart(trimmed)) {
       this.messages.push(chunkStr);
       this.writeOutput(chunkStr, this.lineWriter);
     } else {
       this.jsonString += chunkStr;
     }
     callback();
+  }
+  /**
+   * Detect whether a chunk can be the start of a valid JSON value.
+   */
+  looksLikeJsonStart(input) {
+    if (!input) {
+      return false;
+    }
+    return /^(\{|\[|"|-?\d|true\b|false\b|null\b)/.test(input);
   }
   /**
    * Write output line by line (splits on newlines)
@@ -73692,9 +73703,26 @@ var TfxManager = class {
    */
   async resolveBuiltIn() {
     this.platform.info("Using built-in tfx-cli from core package dependencies");
-    const tfxPath = await this.platform.which("tfx", true);
-    this.platform.debug(`Resolved built-in tfx at: ${tfxPath}`);
-    return tfxPath;
+    const entrypoint = process.argv[1];
+    if (!entrypoint) {
+      throw new Error("Built-in tfx-cli resolution failed: process.argv[1] is not set.");
+    }
+    const entryDir = import_path2.default.dirname(import_path2.default.resolve(entrypoint));
+    const tfxExecutable = process.platform === "win32" ? "tfx.cmd" : "tfx";
+    const builtInPath = import_path2.default.join(entryDir, "node_modules", ".bin", tfxExecutable);
+    if (!await this.pathExists(builtInPath)) {
+      throw new Error(`Built-in tfx-cli not found at expected path: ${builtInPath}. Install runtime dependencies and ensure node_modules/.bin is present next to the entrypoint.`);
+    }
+    this.platform.debug(`Resolved built-in tfx at: ${builtInPath}`);
+    return builtInPath;
+  }
+  async pathExists(filePath) {
+    try {
+      await import_promises.default.access(filePath);
+      return true;
+    } catch {
+      return false;
+    }
   }
   /**
    * Resolve tfx from system PATH

@@ -84,7 +84,7 @@ async function writeRuntimeDependencyManifest(target) {
     name: `${packageManifest.name}-runtime`,
     private: true,
     license: packageManifest.license || 'MIT',
-    type: 'commonjs',
+    type: packageManifest.type || 'commonjs',
     dependencies,
   };
 
