@@ -125,7 +125,7 @@ export class MockPlatformAdapter implements IPlatformAdapter {
   }
 
   // ===== Filesystem =====
-  findMatch(_root: string, patterns: string[]): string[] {
+  async findMatch(_root: string, patterns: string[]): Promise<string[]> {
     // In-memory matches
     const matches: string[] = [];
     for (const [filePath] of this.files) {
@@ -229,7 +229,9 @@ export class MockPlatformAdapter implements IPlatformAdapter {
     const normalizedPath = targetPath.replace(/\\/g, '/');
     const normalizedTmpDir = tmpdir().replace(/\\/g, '/').replace(/\/+$/, '');
 
-    return !normalizedPath.startsWith(`${normalizedTmpDir}/`) && normalizedPath !== normalizedTmpDir;
+    return (
+      !normalizedPath.startsWith(`${normalizedTmpDir}/`) && normalizedPath !== normalizedTmpDir
+    );
   }
 
   // ===== Environment =====

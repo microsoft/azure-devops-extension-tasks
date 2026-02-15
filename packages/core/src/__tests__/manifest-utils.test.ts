@@ -20,29 +20,29 @@ describe('manifest-utils', () => {
   });
 
   describe('resolveManifestPaths', () => {
-    it('should find manifests matching patterns', () => {
+    it('should find manifests matching patterns', async () => {
       platform.setFiles({
         '/root/vss-extension.json': '{}',
         '/root/extension.json': '{}',
         '/root/package.json': '{}',
       });
 
-      const paths = resolveManifestPaths('/root', ['vss-extension.json'], platform);
+      const paths = await resolveManifestPaths('/root', ['vss-extension.json'], platform);
       expect(paths).toEqual(['/root/vss-extension.json']);
     });
 
-    it('should return empty array for no patterns', () => {
-      const paths = resolveManifestPaths('/root', [], platform);
+    it('should return empty array for no patterns', async () => {
+      const paths = await resolveManifestPaths('/root', [], platform);
       expect(paths).toEqual([]);
     });
 
-    it('should handle wildcard patterns', () => {
+    it('should handle wildcard patterns', async () => {
       platform.setFiles({
         '/root/vss-extension.json': '{}',
         '/root/extension.json': '{}',
       });
 
-      const paths = resolveManifestPaths('/root', ['*.json'], platform);
+      const paths = await resolveManifestPaths('/root', ['*.json'], platform);
       expect(paths.length).toBeGreaterThan(0);
     });
   });

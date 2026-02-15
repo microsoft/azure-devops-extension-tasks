@@ -10,6 +10,7 @@
     "test": "jest --passWithNoTests"
   },
   "dependencies": {
+    "@actions/glob": "^0.6.1",
     "@extension-tasks/core": "*",
     "@actions/core": "^1.11.1",
     "@actions/exec": "^1.1.1",

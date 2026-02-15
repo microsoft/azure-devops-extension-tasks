@@ -2,9 +2,11 @@ import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import * as tc from '@actions/tool-cache';
 import * as io from '@actions/io';
+import * as glob from '@actions/glob';
 import { TaskResult } from '@extension-tasks/core';
 import { promises as fs } from 'fs';
 import * as os from 'os';
+import path from 'path';
 /**
  * GitHub Actions platform adapter
  * Implements IPlatformAdapter using @actions/* packages
@@ -104,14 +106,23 @@ export class GitHubAdapter {
         return exitCode;
     }
     // ===== Filesystem =====
-    findMatch(_root, _patterns) {
-        void _root;
-        void _patterns;
-        // GitHub Actions doesn't have a built-in glob matcher
-        // We'd need to implement this or use a library
-        // For now, return empty array (will be enhanced later)
-        core.warning('findMatch not yet implemented in GitHub Actions adapter');
-        return [];
+    async findMatch(root, patterns) {
+        const normalizedPatterns = patterns
+            .map((pattern) => pattern.trim())
+            .filter((pattern) => pattern.length > 0)
+            .map((pattern) => {
+            const isExclude = pattern.startsWith('!');
+            const value = isExclude ? pattern.slice(1) : pattern;
+            const rootedPattern = path.isAbsolute(value) ? value : path.join(root, value);
+            const normalized = rootedPattern.replace(/\\/g, '/');
+            return isExclude ? `!${normalized}` : normalized;
+        });
+        if (normalizedPatterns.length === 0) {
+            return [];
+        }
+        const globber = await glob.create(normalizedPatterns.join('\n'));
+        const matches = await globber.glob();
+        return Array.from(new Set(matches.map((match) => path.resolve(match))));
     }
     async fileExists(filePath) {
         try {

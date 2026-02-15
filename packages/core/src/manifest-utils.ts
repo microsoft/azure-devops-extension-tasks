@@ -12,16 +12,16 @@ import type { IPlatformAdapter } from './platform.js';
  * @param platform Platform adapter for filesystem operations
  * @returns Array of resolved manifest file paths
  */
-export function resolveManifestPaths(
+export async function resolveManifestPaths(
   rootFolder: string,
   patterns: string[],
   platform: IPlatformAdapter
-): string[] {
+): Promise<string[]> {
   if (!patterns || patterns.length === 0) {
     return [];
   }
 
-  const matches = platform.findMatch(rootFolder, patterns);
+  const matches = await platform.findMatch(rootFolder, patterns);
   return matches;
 }
 

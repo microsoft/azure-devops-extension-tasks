@@ -52,7 +52,7 @@ export interface IPlatformAdapter {
   exec(tool: string, args: string[], options?: ExecOptions): Promise<number>;
 
   // ===== Filesystem =====
-  findMatch(root: string, patterns: string[]): string[];
+  findMatch(root: string, patterns: string[]): Promise<string[]>;
   fileExists(path: string): Promise<boolean>;
   readFile(path: string): Promise<string>;
   writeFile(path: string, content: string): Promise<void>;

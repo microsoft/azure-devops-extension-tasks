@@ -56,7 +56,7 @@ export class FilesystemManifestReader extends ManifestReader {
     }
 
     // Try to find manifest using globs
-    const matches = this.platform.findMatch(this.rootFolder, this.manifestGlobs);
+    const matches = await this.platform.findMatch(this.rootFolder, this.manifestGlobs);
 
     if (matches.length === 0) {
       // Fallback: check for common manifest names

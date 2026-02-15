@@ -17,7 +17,7 @@ export declare class GitHubAdapter implements IPlatformAdapter {
     error(message: string): void;
     which(tool: string, check?: boolean): Promise<string>;
     exec(tool: string, args: string[], options?: ExecOptions): Promise<number>;
-    findMatch(_root: string, _patterns: string[]): string[];
+    findMatch(root: string, patterns: string[]): Promise<string[]>;
     fileExists(filePath: string): Promise<boolean>;
     readFile(filePath: string): Promise<string>;
     writeFile(filePath: string, content: string): Promise<void>;

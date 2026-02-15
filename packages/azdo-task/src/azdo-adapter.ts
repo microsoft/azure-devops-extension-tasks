@@ -95,7 +95,7 @@ export class AzdoAdapter implements IPlatformAdapter {
 
   // ===== Filesystem =====
 
-  findMatch(root: string, patterns: string[]): string[] {
+  async findMatch(root: string, patterns: string[]): Promise<string[]> {
     return tl.findMatch(root, patterns);
   }
 

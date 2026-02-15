@@ -74,9 +74,22 @@ describe('GitHubAdapter', () => {
     expect(process.env.SECRET_VAR).toBe('secret');
   });
 
-  it('logs warning and returns empty array for findMatch', () => {
-    const result = adapter.findMatch(process.cwd(), ['**/*.ts']);
-    expect(result).toEqual([]);
+  it('findMatch returns matching files for glob patterns', async () => {
+    const baseDir = await fs.mkdtemp(join(tmpdir(), 'github-adapter-findmatch-'));
+    const nestedDir = join(baseDir, 'nested');
+    const tsFile = join(nestedDir, 'sample.ts');
+    const txtFile = join(nestedDir, 'sample.txt');
+
+    await fs.mkdir(nestedDir, { recursive: true });
+    await fs.writeFile(tsFile, 'export const sample = 1;', 'utf-8');
+    await fs.writeFile(txtFile, 'sample', 'utf-8');
+
+    const result = await adapter.findMatch(baseDir, ['**/*.ts']);
+
+    expect(result).toContain(tsFile);
+    expect(result).not.toContain(txtFile);
+
+    await fs.rm(baseDir, { recursive: true, force: true });
   });
 
   it('handles filesystem read/write/mkdir/rm and existence', async () => {
