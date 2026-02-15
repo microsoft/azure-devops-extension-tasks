@@ -10,6 +10,7 @@ describe('GitHubAdapter', () => {
   let adapter: GitHubAdapter;
   let originalInputName: string | undefined;
   let originalInputItems: string | undefined;
+  let originalInputBypassValidation: string | undefined;
   let originalToken: string | undefined;
   let originalExitCode: string | number | undefined;
 
@@ -17,6 +18,7 @@ describe('GitHubAdapter', () => {
     adapter = new GitHubAdapter();
     originalInputName = process.env.INPUT_NAME;
     originalInputItems = process.env.INPUT_ITEMS;
+    originalInputBypassValidation = process.env['INPUT_BYPASS-VALIDATION'];
     originalToken = process.env.TOKEN;
     originalExitCode = process.exitCode;
   });
@@ -24,6 +26,7 @@ describe('GitHubAdapter', () => {
   afterEach(() => {
     process.env.INPUT_NAME = originalInputName;
     process.env.INPUT_ITEMS = originalInputItems;
+    process.env['INPUT_BYPASS-VALIDATION'] = originalInputBypassValidation;
     process.env.TOKEN = originalToken;
     process.exitCode = originalExitCode;
   });
@@ -37,7 +40,15 @@ describe('GitHubAdapter', () => {
   });
 
   it('returns false for optional boolean input when not set', () => {
-    delete process.env.INPUT_BYPASS_VALIDATION;
+    delete process.env['INPUT_BYPASS-VALIDATION'];
+
+    const result = adapter.getBoolInput('bypass-validation', false);
+
+    expect(result).toBe(false);
+  });
+
+  it('returns false for optional boolean input when empty string is provided', () => {
+    process.env['INPUT_BYPASS-VALIDATION'] = '';
 
     const result = adapter.getBoolInput('bypass-validation', false);
 
@@ -45,10 +56,26 @@ describe('GitHubAdapter', () => {
   });
 
   it('throws for invalid boolean input values', () => {
-    process.env.INPUT_BYPASS_VALIDATION = 'not-a-bool';
+    process.env['INPUT_BYPASS-VALIDATION'] = 'not-a-bool';
 
     expect(() => adapter.getBoolInput('bypass-validation', false)).toThrow(
       /Core Schema|boolean input list/
+    );
+  });
+
+  it('throws when required boolean input is undefined', () => {
+    delete process.env['INPUT_BYPASS-VALIDATION'];
+
+    expect(() => adapter.getBoolInput('bypass-validation', true)).toThrow(
+      /Input required and not supplied/
+    );
+  });
+
+  it('throws when required boolean input is empty', () => {
+    process.env['INPUT_BYPASS-VALIDATION'] = '';
+
+    expect(() => adapter.getBoolInput('bypass-validation', true)).toThrow(
+      /Input required and not supplied/
     );
   });
 
