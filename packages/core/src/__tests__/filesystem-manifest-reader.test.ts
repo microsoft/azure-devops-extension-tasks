@@ -344,4 +344,204 @@ describe('FilesystemManifestReader', () => {
       await reader.close();
     });
   });
+
+  describe('packagePath support', () => {
+    it('should handle packagePath mapping from files array', async () => {
+      // Create extension manifest with files array including packagePath
+      const manifest = {
+        id: 'test-ext',
+        publisher: 'test-pub',
+        version: '1.0.0',
+        files: [
+          { path: 'tasks/terraform-cli/.dist', packagePath: 'TerraformCLI' },
+          { path: 'tasks/terraform-installer/.dist', packagePath: 'TerraformInstaller' }
+        ],
+        contributions: [
+          {
+            id: 'task1',
+            type: 'ms.vss-distributed-task.task',
+            properties: { name: 'TerraformCLI' }
+          },
+          {
+            id: 'task2',
+            type: 'ms.vss-distributed-task.task',
+            properties: { name: 'TerraformInstaller' }
+          }
+        ]
+      };
+      
+      writeFileSync(
+        join(testDir, 'vss-extension.json'),
+        JSON.stringify(manifest)
+      );
+      
+      // Create task in actual source directory (not packagePath)
+      mkdirSync(join(testDir, 'tasks', 'terraform-cli', '.dist'), { recursive: true });
+      const taskManifest = {
+        id: 'task-id-123',
+        name: 'TerraformCLI',
+        friendlyName: 'Terraform CLI',
+        version: { Major: 1, Minor: 0, Patch: 0 }
+      };
+      
+      writeFileSync(
+        join(testDir, 'tasks', 'terraform-cli', '.dist', 'task.json'),
+        JSON.stringify(taskManifest)
+      );
+      
+      const reader = new FilesystemManifestReader({
+        rootFolder: testDir,
+        platform: mockPlatform
+      });
+      
+      // Should read from actual source path (tasks/terraform-cli/.dist), not packagePath (TerraformCLI)
+      const result = await reader.readTaskManifest('TerraformCLI');
+      
+      expect(result.id).toBe('task-id-123');
+      expect(result.name).toBe('TerraformCLI');
+      
+      await reader.close();
+    });
+
+    it('should fall back to direct path if no packagePath mapping exists', async () => {
+      const manifest = {
+        id: 'test-ext',
+        publisher: 'test-pub',
+        version: '1.0.0',
+        contributions: [
+          {
+            id: 'task1',
+            type: 'ms.vss-distributed-task.task',
+            properties: { name: 'Task1' }
+          }
+        ]
+      };
+      
+      writeFileSync(
+        join(testDir, 'vss-extension.json'),
+        JSON.stringify(manifest)
+      );
+      
+      // Create task without packagePath (direct path matches contribution name)
+      mkdirSync(join(testDir, 'Task1'), { recursive: true });
+      writeFileSync(
+        join(testDir, 'Task1', 'task.json'),
+        JSON.stringify({
+          id: 'id1',
+          name: 'Task1',
+          version: { Major: 1, Minor: 0, Patch: 0 }
+        })
+      );
+      
+      const reader = new FilesystemManifestReader({
+        rootFolder: testDir,
+        platform: mockPlatform
+      });
+      
+      const result = await reader.readTaskManifest('Task1');
+      
+      expect(result.name).toBe('Task1');
+      
+      await reader.close();
+    });
+
+    it('should handle mixed packagePath and direct paths', async () => {
+      const manifest = {
+        id: 'test-ext',
+        publisher: 'test-pub',
+        version: '1.0.0',
+        files: [
+          { path: 'compiled/task1', packagePath: 'Task1' }
+          // Task2 has no packagePath, uses direct path
+        ],
+        contributions: [
+          {
+            id: 'task1',
+            type: 'ms.vss-distributed-task.task',
+            properties: { name: 'Task1' }
+          },
+          {
+            id: 'task2',
+            type: 'ms.vss-distributed-task.task',
+            properties: { name: 'Task2' }
+          }
+        ]
+      };
+      
+      writeFileSync(
+        join(testDir, 'vss-extension.json'),
+        JSON.stringify(manifest)
+      );
+      
+      // Task1 with packagePath - source is in 'compiled/task1', not 'Task1'
+      mkdirSync(join(testDir, 'compiled', 'task1'), { recursive: true });
+      writeFileSync(
+        join(testDir, 'compiled', 'task1', 'task.json'),
+        JSON.stringify({
+          id: 'id1',
+          name: 'Task1',
+          version: { Major: 1, Minor: 0, Patch: 0 }
+        })
+      );
+      
+      // Task2 without packagePath - source is directly in 'Task2'
+      mkdirSync(join(testDir, 'Task2'), { recursive: true });
+      writeFileSync(
+        join(testDir, 'Task2', 'task.json'),
+        JSON.stringify({
+          id: 'id2',
+          name: 'Task2',
+          version: { Major: 2, Minor: 0, Patch: 0 }
+        })
+      );
+      
+      const reader = new FilesystemManifestReader({
+        rootFolder: testDir,
+        platform: mockPlatform
+      });
+      
+      // Task1 should resolve through packagePath to 'compiled/task1'
+      const task1 = await reader.readTaskManifest('Task1');
+      // Task2 should use direct path 'Task2'
+      const task2 = await reader.readTaskManifest('Task2');
+      
+      expect(task1.name).toBe('Task1');
+      expect(task2.name).toBe('Task2');
+      
+      await reader.close();
+    });
+
+    it('should throw error if packagePath mapped file does not exist', async () => {
+      const manifest = {
+        id: 'test-ext',
+        publisher: 'test-pub',
+        version: '1.0.0',
+        files: [
+          { path: 'nonexistent/path', packagePath: 'Task1' }
+        ],
+        contributions: [
+          {
+            id: 'task1',
+            type: 'ms.vss-distributed-task.task',
+            properties: { name: 'Task1' }
+          }
+        ]
+      };
+      
+      writeFileSync(
+        join(testDir, 'vss-extension.json'),
+        JSON.stringify(manifest)
+      );
+      
+      const reader = new FilesystemManifestReader({
+        rootFolder: testDir,
+        platform: mockPlatform
+      });
+      
+      // Should try to read from 'nonexistent/path' and fail
+      await expect(reader.readTaskManifest('Task1')).rejects.toThrow(/not found/);
+      
+      await reader.close();
+    });
+  });
 });

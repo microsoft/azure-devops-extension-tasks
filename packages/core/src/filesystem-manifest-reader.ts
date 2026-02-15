@@ -37,6 +37,8 @@ export class FilesystemManifestReader extends ManifestReader {
   private readonly platform: IPlatformAdapter;
   private manifestPath: string | null = null;
   private extensionManifest: ExtensionManifest | null = null;
+  // Map of packagePath (task name) to actual source path
+  private packagePathMap: Map<string, string> | null = null;
 
   constructor(options: {
     rootFolder: string;
@@ -102,6 +104,35 @@ export class FilesystemManifestReader extends ManifestReader {
   }
 
   /**
+   * Build a map of packagePath to actual source path from files array
+   * This handles cases where task.json is in a different directory than the final package path
+   * @returns Map of packagePath to source path
+   */
+  private async buildPackagePathMap(): Promise<Map<string, string>> {
+    if (this.packagePathMap) {
+      return this.packagePathMap;
+    }
+
+    this.packagePathMap = new Map<string, string>();
+    const manifest = await this.readExtensionManifest();
+
+    // Check if files array exists with packagePath mappings
+    if (manifest.files) {
+      for (const file of manifest.files) {
+        // If packagePath is specified, map it to the source path
+        if (file.packagePath) {
+          this.packagePathMap.set(file.packagePath, file.path);
+          this.platform.debug(
+            `Mapped packagePath '${file.packagePath}' to source path '${file.path}'`
+          );
+        }
+      }
+    }
+
+    return this.packagePathMap;
+  }
+
+  /**
    * Find task paths from the extension manifest
    * @returns Array of task directory paths (relative to rootFolder)
    */
@@ -136,14 +167,24 @@ export class FilesystemManifestReader extends ManifestReader {
 
   /**
    * Read a task manifest from filesystem
-   * @param taskPath Path to the task directory (relative to rootFolder)
+   * @param taskPath Path to the task directory (relative to rootFolder) or packagePath
    * @returns Parsed task manifest
    */
   async readTaskManifest(taskPath: string): Promise<TaskManifest> {
+    // Build packagePath map to handle files with packagePath
+    const packagePathMap = await this.buildPackagePathMap();
+    
+    // Check if this is a packagePath that maps to a different source path
+    const actualPath = packagePathMap.get(taskPath) || taskPath;
+    
+    this.platform.debug(
+      `Reading task manifest: taskPath='${taskPath}', actualPath='${actualPath}'`
+    );
+    
     // Resolve relative path from rootFolder
-    const absoluteTaskPath = path.isAbsolute(taskPath) 
-      ? taskPath 
-      : path.join(this.rootFolder, taskPath);
+    const absoluteTaskPath = path.isAbsolute(actualPath) 
+      ? actualPath 
+      : path.join(this.rootFolder, actualPath);
     
     const taskJsonPath = path.join(absoluteTaskPath, 'task.json');
     
@@ -163,6 +204,7 @@ export class FilesystemManifestReader extends ManifestReader {
     // No resources to clean up
     this.extensionManifest = null;
     this.manifestPath = null;
+    this.packagePathMap = null;
   }
 
   /**

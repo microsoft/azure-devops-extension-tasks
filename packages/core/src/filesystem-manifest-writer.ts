@@ -125,20 +125,30 @@ export class FilesystemManifestWriter {
   ): Promise<void> {
     const tasks = await reader.readTaskManifests();
     
+    // Get packagePath map to resolve actual source paths
+    const packagePathMap = await (reader as any).buildPackagePathMap() as Map<string, string>;
+    
     for (const { path: taskPath, manifest } of tasks) {
       const mods = taskManifestMods.get(manifest.name);
       if (mods) {
         // Apply modifications
         Object.assign(manifest, mods);
         
+        // Resolve actual source path (taskPath might be a packagePath)
+        const actualPath = packagePathMap.get(taskPath) || taskPath;
+        
+        this.platform.debug(
+          `Writing task manifest: taskPath='${taskPath}', actualPath='${actualPath}'`
+        );
+        
         // Resolve absolute path
-        const absoluteTaskPath = path.isAbsolute(taskPath)
-          ? taskPath
-          : path.join(rootFolder, taskPath);
+        const absoluteTaskPath = path.isAbsolute(actualPath)
+          ? actualPath
+          : path.join(rootFolder, actualPath);
         
         const taskJsonPath = path.join(absoluteTaskPath, 'task.json');
         
-        this.platform.debug(`Writing task manifest: ${taskJsonPath}`);
+        this.platform.debug(`Writing to file: ${taskJsonPath}`);
         const manifestJson = JSON.stringify(manifest, null, 2) + '\n';
         await writeFile(taskJsonPath, manifestJson, 'utf-8');
       }

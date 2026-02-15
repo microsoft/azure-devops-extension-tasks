@@ -383,4 +383,222 @@ describe('FilesystemManifestWriter', () => {
       await reader.close();
     });
   });
+
+  describe('packagePath support', () => {
+    it('should write task manifests to actual source paths when packagePath is used', async () => {
+      // Create extension manifest with packagePath
+      const extManifest = {
+        id: 'test-ext',
+        publisher: 'test-pub',
+        version: '1.0.0',
+        files: [
+          { path: 'tasks/terraform-cli/.dist', packagePath: 'TerraformCLI' }
+        ],
+        contributions: [
+          {
+            id: 'task1',
+            type: 'ms.vss-distributed-task.task',
+            properties: { name: 'TerraformCLI' }
+          }
+        ]
+      };
+      
+      writeFileSync(
+        join(testDir, 'vss-extension.json'),
+        JSON.stringify(extManifest)
+      );
+      
+      // Create task in actual source directory
+      mkdirSync(join(testDir, 'tasks', 'terraform-cli', '.dist'), { recursive: true });
+      writeFileSync(
+        join(testDir, 'tasks', 'terraform-cli', '.dist', 'task.json'),
+        JSON.stringify({
+          id: 'old-id',
+          name: 'TerraformCLI',
+          version: { Major: 1, Minor: 0, Patch: 0 }
+        })
+      );
+      
+      // Create reader and editor
+      const reader = new FilesystemManifestReader({
+        rootFolder: testDir,
+        platform: mockPlatform
+      });
+      
+      const editor = ManifestEditor.fromReader(reader);
+      await editor.applyOptions({
+        extensionVersion: '2.5.0',
+        updateTasksVersion: true,
+        updateTasksVersionType: 'major'
+      });
+      
+      // Write changes
+      const writer = await editor.toWriter();
+      await writer.writeToFilesystem();
+      
+      // Verify task.json was written to actual source path, not packagePath
+      const updatedTaskJson = JSON.parse(
+        readFileSync(join(testDir, 'tasks', 'terraform-cli', '.dist', 'task.json'), 'utf-8')
+      );
+      
+      expect(updatedTaskJson.version.Major).toBe(2);
+      expect(updatedTaskJson.version.Minor).toBe(5);
+      expect(updatedTaskJson.version.Patch).toBe(0);
+      
+      // Verify it did NOT write to packagePath location
+      expect(existsSync(join(testDir, 'TerraformCLI', 'task.json'))).toBe(false);
+      
+      await writer.close();
+      await reader.close();
+    });
+
+    it('should write to direct path when no packagePath is specified', async () => {
+      // Create extension manifest without packagePath
+      const extManifest = {
+        id: 'test-ext',
+        publisher: 'test-pub',
+        version: '1.0.0',
+        contributions: [
+          {
+            id: 'task1',
+            type: 'ms.vss-distributed-task.task',
+            properties: { name: 'Task1' }
+          }
+        ]
+      };
+      
+      writeFileSync(
+        join(testDir, 'vss-extension.json'),
+        JSON.stringify(extManifest)
+      );
+      
+      // Create task in direct path
+      mkdirSync(join(testDir, 'Task1'), { recursive: true });
+      writeFileSync(
+        join(testDir, 'Task1', 'task.json'),
+        JSON.stringify({
+          id: 'id1',
+          name: 'Task1',
+          version: { Major: 1, Minor: 0, Patch: 0 }
+        })
+      );
+      
+      // Create reader and editor
+      const reader = new FilesystemManifestReader({
+        rootFolder: testDir,
+        platform: mockPlatform
+      });
+      
+      const editor = ManifestEditor.fromReader(reader);
+      await editor.applyOptions({
+        extensionVersion: '3.0.0',
+        updateTasksVersion: true,
+        updateTasksVersionType: 'major'
+      });
+      
+      // Write changes
+      const writer = await editor.toWriter();
+      await writer.writeToFilesystem();
+      
+      // Verify task.json was written to direct path
+      const updatedTaskJson = JSON.parse(
+        readFileSync(join(testDir, 'Task1', 'task.json'), 'utf-8')
+      );
+      
+      expect(updatedTaskJson.version.Major).toBe(3);
+      expect(updatedTaskJson.version.Minor).toBe(0);
+      expect(updatedTaskJson.version.Patch).toBe(0);
+      
+      await writer.close();
+      await reader.close();
+    });
+
+    it('should handle mixed packagePath and direct paths correctly', async () => {
+      // Create extension manifest with mixed paths
+      const extManifest = {
+        id: 'test-ext',
+        publisher: 'test-pub',
+        version: '1.0.0',
+        files: [
+          { path: 'compiled/task1', packagePath: 'Task1' }
+          // Task2 has no packagePath
+        ],
+        contributions: [
+          {
+            id: 'task1',
+            type: 'ms.vss-distributed-task.task',
+            properties: { name: 'Task1' }
+          },
+          {
+            id: 'task2',
+            type: 'ms.vss-distributed-task.task',
+            properties: { name: 'Task2' }
+          }
+        ]
+      };
+      
+      writeFileSync(
+        join(testDir, 'vss-extension.json'),
+        JSON.stringify(extManifest)
+      );
+      
+      // Task1 with packagePath
+      mkdirSync(join(testDir, 'compiled', 'task1'), { recursive: true });
+      writeFileSync(
+        join(testDir, 'compiled', 'task1', 'task.json'),
+        JSON.stringify({
+          id: 'id1',
+          name: 'Task1',
+          version: { Major: 1, Minor: 0, Patch: 0 }
+        })
+      );
+      
+      // Task2 without packagePath
+      mkdirSync(join(testDir, 'Task2'), { recursive: true });
+      writeFileSync(
+        join(testDir, 'Task2', 'task.json'),
+        JSON.stringify({
+          id: 'id2',
+          name: 'Task2',
+          version: { Major: 1, Minor: 0, Patch: 0 }
+        })
+      );
+      
+      // Create reader and editor
+      const reader = new FilesystemManifestReader({
+        rootFolder: testDir,
+        platform: mockPlatform
+      });
+      
+      const editor = ManifestEditor.fromReader(reader);
+      await editor.applyOptions({
+        extensionVersion: '4.2.1',
+        updateTasksVersion: true,
+        updateTasksVersionType: 'major'
+      });
+      
+      // Write changes
+      const writer = await editor.toWriter();
+      await writer.writeToFilesystem();
+      
+      // Verify Task1 was written to compiled/task1
+      const task1Json = JSON.parse(
+        readFileSync(join(testDir, 'compiled', 'task1', 'task.json'), 'utf-8')
+      );
+      expect(task1Json.version.Major).toBe(4);
+      expect(task1Json.version.Minor).toBe(2);
+      expect(task1Json.version.Patch).toBe(1);
+      
+      // Verify Task2 was written to Task2
+      const task2Json = JSON.parse(
+        readFileSync(join(testDir, 'Task2', 'task.json'), 'utf-8')
+      );
+      expect(task2Json.version.Major).toBe(4);
+      expect(task2Json.version.Minor).toBe(2);
+      expect(task2Json.version.Patch).toBe(1);
+      
+      await writer.close();
+      await reader.close();
+    });
+  });
 });
