@@ -69,7 +69,7 @@
       "label": "Operation",
       "defaultValue": "package",
       "required": true,
-      "helpMarkDown": "Operation to perform on the extension",
+      "helpMarkDown": "**Operation to perform:**\n\n- **Package**: Create a .vsix package file from manifest\n- **Publish**: Publish extension to Visual Studio Marketplace\n- **Unpublish**: Remove extension from marketplace\n- **Share**: Share private extension with specific organizations\n- **Unshare**: Unshare extension from organizations\n- **Install**: Install extension to Azure DevOps organizations\n- **Show**: Query and display extension metadata\n- **Is Valid**: Validate extension is properly configured\n- **Verify Install**: Verify tasks are available after installation",
       "options": {
         "package": "Package - Create .vsix file",
         "publish": "Publish - Publish to marketplace",
@@ -87,7 +87,7 @@
       "type": "pickList",
       "label": "Connection Type",
       "required": true,
-      "helpMarkDown": "Type of service connection to use for authentication",
+      "helpMarkDown": "**Authentication method** for marketplace operations:\n\n- **Visual Studio Team Services (PAT)**: Use Personal Access Token (recommended for most users)\n- **Azure Resource Manager (OIDC)**: Use workload identity federation with Azure CLI (no secrets needed, requires Azure RM service connection)\n- **Generic (Basic Auth)**: Use username/password authentication (for on-premises TFS/Azure DevOps Server)\n\n**Note**: Package operation does not require authentication.",
       "visibleRule": "operation != package",
       "groupName": "authentication",
       "options": {
@@ -102,7 +102,7 @@
       "type": "connectedService:VsTeam",
       "label": "Service Connection",
       "required": true,
-      "helpMarkDown": "Service connection for marketplace authentication",
+      "helpMarkDown": "**Visual Studio Team Services service connection** configured with a Personal Access Token (PAT).\n\n**Required scopes**: Marketplace (Publish)\n\nCreate a PAT at: https://dev.azure.com/_usersSettings/tokens",
       "visibleRule": "operation != package && connectionType = connectedService:VsTeam",
       "groupName": "authentication"
     },
@@ -111,7 +111,7 @@
       "type": "connectedService:AzureRM",
       "label": "Azure RM Connection",
       "required": true,
-      "helpMarkDown": "Azure Resource Manager service connection with workload identity",
+      "helpMarkDown": "**Azure Resource Manager service connection** using workload identity federation (OIDC).\n\n**Benefits**: No secrets or PAT tokens needed - uses federated Azure credentials\n\n**Required**: Connection must have access to Visual Studio Marketplace scope (`499b84ac-1321-427f-aa17-267ca6975798`)",
       "visibleRule": "operation != package && connectionType = connectedService:AzureRM",
       "groupName": "authentication"
     },
@@ -120,7 +120,7 @@
       "type": "connectedService:Generic",
       "label": "Generic Connection",
       "required": true,
-      "helpMarkDown": "Generic service connection with username/password",
+      "helpMarkDown": "**Generic service connection** for basic authentication (username/password).\n\n**Use case**: On-premises TFS or Azure DevOps Server deployments\n\n**Note**: Not recommended for cloud-hosted Azure DevOps - use PAT authentication instead",
       "visibleRule": "operation != package && connectionType = connectedService:Generic",
       "groupName": "authentication"
     },
@@ -130,7 +130,7 @@
       "label": "tfx-cli Version",
       "defaultValue": "built-in",
       "required": false,
-      "helpMarkDown": "Version of tfx-cli to use: 'built-in' (bundled with task), 'path' (from system PATH), or a version spec (e.g., '^0.17', 'latest')",
+      "helpMarkDown": "**Version of tfx-cli to use**:\n\n- **`built-in`** (default): Use tfx-cli bundled with this task\n- **`path`**: Use tfx-cli from system PATH\n- **Version spec**: Download specific version from npm (e.g., `^0.17`, `0.17.0`, `latest`)\n\n**Examples**: `built-in`, `path`, `^0.17`, `latest`",
       "groupName": "advanced"
     },
     {
@@ -138,7 +138,7 @@
       "type": "string",
       "label": "Publisher ID",
       "required": false,
-      "helpMarkDown": "Publisher ID for the extension",
+      "helpMarkDown": "**Publisher ID** that owns the extension.\n\n- Must match publisher in manifest (or override it)\n- Required for all operations except package (if not in manifest)\n- Alphanumeric with hyphens, dots, underscores only\n\n**Example**: `mycompany` or `my-publisher-id`",
       "visibleRule": "operation = package || operation = publish || operation = unpublish || operation = share || operation = unshare || operation = install || operation = show || operation = isValid || operation = verifyInstall",
       "groupName": "extensionIdentity"
     },
@@ -147,7 +147,7 @@
       "type": "string",
       "label": "Extension ID",
       "required": false,
-      "helpMarkDown": "Extension ID (unique within publisher)",
+      "helpMarkDown": "**Extension ID** - unique identifier within the publisher namespace.\n\n- Must match ID in manifest (or override it)\n- Combined with Publisher ID forms full extension identifier: `publisherId.extensionId`\n- Required for all operations except package (if not in manifest)\n- Alphanumeric with hyphens, dots, underscores only\n\n**Example**: `my-extension` or `azure-devops-tasks`",
       "visibleRule": "operation = package || operation = publish || operation = unpublish || operation = share || operation = unshare || operation = install || operation = show || operation = isValid || operation = verifyInstall",
       "groupName": "extensionIdentity"
     },
@@ -156,7 +156,7 @@
       "type": "string",
       "label": "Extension Tag",
       "required": false,
-      "helpMarkDown": "Tag to append to extension ID (e.g., -dev, -preview)",
+      "helpMarkDown": "**Tag suffix** appended to extension ID for creating variants.\n\n**Use cases**:\n- Create dev/test versions: `-dev`, `-test`\n- Preview releases: `-preview`, `-beta`\n- Branch-specific builds: `-$(Build.SourceBranchName)`\n\n**Example**: If Extension ID is `my-extension` and tag is `-dev`, the actual ID becomes `my-extension-dev`",
       "visibleRule": "operation = package || operation = publish",
       "groupName": "extensionIdentity"
     },
@@ -166,7 +166,7 @@
       "label": "Publish Source",
       "required": true,
       "defaultValue": "manifest",
-      "helpMarkDown": "Source for publishing: manifest files or pre-built .vsix file",
+      "helpMarkDown": "**Source for publishing**:\n\n- **Manifest files**: Build extension from manifest and source files (typical workflow)\n- **VSIX file**: Publish a pre-built .vsix package\n\n**Use VSIX** when: You've already packaged the extension separately or want to publish an existing .vsix file",
       "visibleRule": "operation = publish",
       "groupName": "publish",
       "options": {
@@ -179,7 +179,7 @@
       "type": "filePath",
       "label": "Root Folder",
       "required": false,
-      "helpMarkDown": "Root folder containing extension files",
+      "helpMarkDown": "**Root folder** containing extension manifest and source files.\n\n- Defaults to repository root if not specified\n- All file paths in manifest are relative to this folder\n- Must contain `vss-extension.json` (or other manifest specified in Manifest Patterns)\n\n**Example**: `$(Build.SourcesDirectory)/src`",
       "visibleRule": "operation = package || (operation = publish && publishSource = manifest) || operation = isValid",
       "groupName": "manifest"
     },
@@ -188,7 +188,7 @@
       "type": "filePath",
       "label": "Localization Root Folder",
       "required": false,
-      "helpMarkDown": "Folder where localization files exist",
+      "helpMarkDown": "**Folder containing localization files** for multi-language support.\n\n- Should contain language-specific resource files\n- Typically structured as: `localization/{locale}/resources.resjson`\n- If not specified, no localization is included\n\n**Example**: `$(Build.SourcesDirectory)/localization`",
       "visibleRule": "operation = package || (operation = publish && publishSource = manifest)",
       "groupName": "manifest"
     },
@@ -197,7 +197,7 @@
       "type": "multiLine",
       "label": "Manifest Patterns",
       "required": false,
-      "helpMarkDown": "Glob patterns for manifest files (one per line). Example: vss-extension.json",
+      "helpMarkDown": "**Glob patterns for manifest files** (one per line).\n\n- Defaults to `vss-extension.json` if not specified\n- Can specify multiple patterns for multi-manifest scenarios\n- Patterns are relative to Root Folder\n\n**Examples**:\n- `vss-extension.json` (default)\n- `*.json`\n- `manifests/**/*.json`",
       "visibleRule": "operation = package || (operation = publish && publishSource = manifest) || operation = isValid",
       "groupName": "manifest"
     },
@@ -206,7 +206,7 @@
       "type": "filePath",
       "label": "VSIX File",
       "required": true,
-      "helpMarkDown": "Path to the .vsix file to publish",
+      "helpMarkDown": "**Path to pre-built .vsix file** to publish.\n\n- Use when publishing source is 'VSIX file'\n- File must be a valid extension package\n- Supports pipeline variables\n\n**Example**: `$(Build.ArtifactStagingDirectory)/my-extension.vsix`",
       "visibleRule": "operation = publish && publishSource = vsix",
       "groupName": "vsix"
     },
@@ -215,7 +215,7 @@
       "type": "string",
       "label": "Extension Version",
       "required": false,
-      "helpMarkDown": "Override extension version (e.g., 1.2.3 or $(Build.BuildNumber))",
+      "helpMarkDown": "**Override extension version** specified in manifest.\n\n- Must follow semantic versioning: `major.minor.patch`\n- Useful for CI/CD pipelines to inject build numbers\n- Supports pipeline variables\n\n**Examples**:\n- `1.2.3`\n- `$(Build.BuildNumber)`\n- `1.0.$(Build.BuildId)`",
       "visibleRule": "operation = package || operation = publish || operation = install",
       "groupName": "overrides"
     },
@@ -224,7 +224,7 @@
       "type": "string",
       "label": "Extension Name",
       "required": false,
-      "helpMarkDown": "Override extension display name",
+      "helpMarkDown": "**Override extension display name** shown in marketplace.\n\n- Overrides the name specified in manifest\n- Useful for creating branded variants (e.g., \"My Extension (Dev)\")\n- Does not affect the extension ID\n\n**Example**: `My Extension - Development`",
       "visibleRule": "operation = package || operation = publish",
       "groupName": "overrides"
     },
@@ -233,7 +233,7 @@
       "type": "pickList",
       "label": "Extension Visibility",
       "required": false,
-      "helpMarkDown": "Override extension visibility",
+      "helpMarkDown": "**Override extension visibility** in marketplace.\n\n- **Private**: Only visible to organizations you share it with\n- **Public**: Visible to everyone in the marketplace\n- **Private Preview**: Private extension in preview mode\n- **Public Preview**: Public extension in preview mode\n\n**Note**: Private extensions must be explicitly shared with organizations",
       "visibleRule": "operation = package || operation = publish",
       "groupName": "overrides",
       "options": {
@@ -249,7 +249,7 @@
       "label": "Extension Pricing",
       "required": false,
       "defaultValue": "default",
-      "helpMarkDown": "Override extension pricing (Free vs Paid). If not specified, pricing from manifest will be used",
+      "helpMarkDown": "**Override extension pricing model**.\n\n- **Not set**: Use pricing from manifest\n- **Free**: Extension is free to use\n- **Paid**: Extension requires payment\n\n**Note**: Paid extensions require additional marketplace publisher verification",
       "visibleRule": "operation = package || operation = publish",
       "groupName": "overrides",
       "options": {
@@ -263,7 +263,7 @@
       "type": "filePath",
       "label": "Output Path",
       "required": false,
-      "helpMarkDown": "Output path for generated .vsix file",
+      "helpMarkDown": "**Output directory** for generated .vsix file.\n\n- Defaults to current directory if not specified\n- Directory will be created if it doesn't exist\n- The actual filename is based on publisher.extensionId-version.vsix\n\n**Example**: `$(Build.ArtifactStagingDirectory)`\n\n**Output**: Full path is stored in `Extension.OutputPath` variable",
       "visibleRule": "operation = package",
       "groupName": "advanced"
     },
@@ -272,7 +272,7 @@
       "type": "string",
       "label": "Output Variable",
       "required": false,
-      "helpMarkDown": "Variable name to store output (VSIX path for package, metadata for show)",
+      "helpMarkDown": "**Name of pipeline variable** to store operation result.\n\n**Package operation**: Stores path to generated .vsix file\n**Show operation**: Stores JSON metadata about the extension\n\n**Usage example**:\n```yaml\n- task: ExtensionTasks@6\n  name: PackageStep\n  inputs:\n    operation: package\n    outputVariable: VsixPath\n\n- script: echo $(VsixPath)\n```",
       "visibleRule": "operation = package || operation = show",
       "groupName": "advanced"
     },
@@ -282,7 +282,7 @@
       "label": "Bypass Validation",
       "required": false,
       "defaultValue": "false",
-      "helpMarkDown": "Skip extension validation checks",
+      "helpMarkDown": "**Skip extension validation checks** during package/publish.\n\n- Not recommended for production use\n- Use only when validation incorrectly fails\n- May result in extension rejection by marketplace\n\n**Default**: false (validation enabled)",
       "visibleRule": "operation = package || operation = publish",
       "groupName": "validation"
     },
@@ -292,7 +292,7 @@
       "label": "Auto-increment Version",
       "required": false,
       "defaultValue": "false",
-      "helpMarkDown": "Automatically increment patch version",
+      "helpMarkDown": "**Automatically increment the patch version** of the extension.\n\n- Increments the last digit: `1.2.3` → `1.2.4`\n- Applied before packaging\n- Useful for automated builds\n\n**Note**: Does not modify source manifest file, only the packaged version\n\n**Default**: false",
       "visibleRule": "operation = package",
       "groupName": "advanced"
     },
@@ -301,7 +301,7 @@
       "type": "multiLine",
       "label": "Share With",
       "required": false,
-      "helpMarkDown": "Organizations to share with (one per line). Example: myorg1\\nmyorg2",
+      "helpMarkDown": "**Organizations to share the extension with** (one per line).\n\n- Required for private extensions\n- Format: organization name only (not full URL)\n- Organizations must exist in Azure DevOps\n\n**Examples**:\n```\nmyorg1\nmyorg2\ncontoso\n```\n\n**Note**: Extension must be private to use sharing",
       "visibleRule": "(operation = publish && (extensionVisibility = private || extensionVisibility = private_preview || extensionVisibility = default)) || operation = share",
       "groupName": "sharing"
     },
@@ -310,7 +310,7 @@
       "type": "multiLine",
       "label": "Unshare With",
       "required": false,
-      "helpMarkDown": "Organizations to unshare from (one per line)",
+      "helpMarkDown": "**Organizations to unshare the extension from** (one per line).\n\n- Removes extension access from specified organizations\n- Format: organization name only (not full URL)\n- Organizations will no longer see or use the extension\n\n**Examples**:\n```\noldorg1\noldorg2\n```",
       "visibleRule": "operation = unshare",
       "groupName": "sharing"
     },
@@ -319,7 +319,7 @@
       "type": "multiLine",
       "label": "Accounts",
       "required": true,
-      "helpMarkDown": "Azure DevOps accounts/organizations (one per line). Example: https://dev.azure.com/myorg1",
+      "helpMarkDown": "**Azure DevOps accounts/organizations** to install extension to (one per line).\n\n- Format: Full organization URL or organization name\n- Organizations must have access to the extension (shared if private)\n- Requires organization administrator permissions\n\n**Examples**:\n```\nhttps://dev.azure.com/myorg1\nhttps://dev.azure.com/myorg2\n```\n\nOr just:\n```\nmyorg1\nmyorg2\n```",
       "visibleRule": "operation = install || operation = verifyInstall",
       "groupName": "sharing"
     },
@@ -329,7 +329,7 @@
       "label": "No Wait for Validation",
       "required": false,
       "defaultValue": "false",
-      "helpMarkDown": "Do not wait for marketplace validation to complete",
+      "helpMarkDown": "**Do not wait for marketplace validation** to complete after publishing.\n\n- By default, task waits for validation (can take several minutes)\n- Enable this to publish and continue immediately\n- Extension may not be immediately available in marketplace\n\n**Use case**: When you want faster pipeline execution and don't need immediate marketplace availability\n\n**Default**: false (waits for validation)",
       "visibleRule": "operation = publish",
       "groupName": "validation"
     },
@@ -339,7 +339,7 @@
       "label": "Update Task Versions",
       "required": false,
       "defaultValue": "false",
-      "helpMarkDown": "Update all task versions to match extension version",
+      "helpMarkDown": "**Automatically update task versions** within the extension to match the extension version.\n\n- Updates all task.json files in the extension\n- Controlled by 'Update Tasks Version Type' setting\n- Useful for keeping task and extension versions in sync\n\n**Example**: If extension version is `2.5.8` and version type is 'major':\n- Task version `1.0.0` becomes `2.5.8`\n- Task version `3.1.4` becomes `2.5.8`\n\n**Default**: false",
       "visibleRule": "operation = package || operation = publish",
       "groupName": "advanced"
     },
@@ -349,7 +349,7 @@
       "label": "Update Tasks Version Type",
       "required": false,
       "defaultValue": "major",
-      "helpMarkDown": "Specify which part(s) of version to update: Major (x.y.r), Minor (1.y.r), or Patch (1.0.r)",
+      "helpMarkDown": "**Specify which parts of task versions to update**:\n\n- **Replace Major, Minor, Patch (x.y.r)**: Replace all three parts with extension version\n- **Replace Minor, Patch (1.y.r)**: Keep major version, replace minor and patch\n- **Replace Only Patch (1.0.r)**: Keep major and minor, replace only patch\n\n**Example with extension version `2.5.8`**:\n- Task `1.3.7` with **Major** → `2.5.8`\n- Task `1.3.7` with **Minor** → `1.5.8`\n- Task `1.3.7` with **Patch** → `1.3.8`\n\n**Default**: Replace Major, Minor, Patch",
       "visibleRule": "updateTasksVersion = true && (operation = package || operation = publish)",
       "groupName": "advanced",
       "options": {
@@ -364,7 +364,7 @@
       "label": "Update Task IDs",
       "required": false,
       "defaultValue": "false",
-      "helpMarkDown": "Generate new deterministic task IDs",
+      "helpMarkDown": "**Generate new deterministic task IDs** for all tasks in the extension.\n\n- Creates UUID v5 IDs based on publisher + extension + task name\n- Ensures consistent IDs across builds\n- Use when creating extension variants (e.g., dev, test versions)\n\n**Warning**: Changing task IDs creates new tasks in Azure DevOps. Existing pipelines won't automatically update.\n\n**Use case**: Creating parallel development/production versions of the same extension\n\n**Default**: false",
       "visibleRule": "operation = package || operation = publish",
       "groupName": "advanced"
     },
@@ -374,7 +374,7 @@
       "label": "Max Retries",
       "required": false,
       "defaultValue": "10",
-      "helpMarkDown": "Maximum retry attempts",
+      "helpMarkDown": "**Maximum number of retry attempts** for extension validation.\n\n- Validation can take time as marketplace processes the extension\n- Task will retry with exponential backoff between min and max timeout\n- Set higher for complex extensions that take longer to validate\n\n**Default**: 10 attempts",
       "visibleRule": "operation = isValid",
       "groupName": "validation"
     },
@@ -384,7 +384,7 @@
       "label": "Min Timeout (minutes)",
       "required": false,
       "defaultValue": "1",
-      "helpMarkDown": "Minimum timeout between retries",
+      "helpMarkDown": "**Minimum timeout between validation retry attempts** (in minutes).\n\n- Initial wait time before first retry\n- Increases exponentially up to max timeout\n- Lower values check validation status more frequently\n\n**Default**: 1 minute",
       "visibleRule": "operation = isValid",
       "groupName": "validation"
     },
@@ -394,7 +394,7 @@
       "label": "Max Timeout (minutes)",
       "required": false,
       "defaultValue": "15",
-      "helpMarkDown": "Maximum timeout between retries",
+      "helpMarkDown": "**Maximum timeout between validation retry attempts** (in minutes).\n\n- Maximum wait time between retry attempts\n- Timeout increases exponentially from min timeout\n- Higher values give extension more time to validate\n\n**Default**: 15 minutes",
       "visibleRule": "operation = isValid",
       "groupName": "validation"
     },
@@ -403,7 +403,7 @@
       "type": "multiLine",
       "label": "Expected Tasks (JSON)",
       "required": false,
-      "helpMarkDown": "Expected tasks as JSON array: [{\"name\": \"TaskName\", \"versions\": [\"1.0.0\"]}]",
+      "helpMarkDown": "**Expected tasks as JSON array** - manually specify tasks to verify.\n\n**Format**: Array of objects with `name` and `versions` properties\n\n**Example**:\n```json\n[\n  {\"name\": \"MyTask\", \"versions\": [\"1.0.0\", \"1.0.1\"]},\n  {\"name\": \"AnotherTask\", \"versions\": [\"2.0.0\"]}\n]\n```\n\n**Note**: Use this OR auto-discovery options (manifest-path/vsix-path), not both",
       "visibleRule": "operation = verifyInstall",
       "groupName": "validation"
     },
@@ -412,7 +412,7 @@
       "type": "filePath",
       "label": "Manifest Path",
       "required": false,
-      "helpMarkDown": "Path to extension manifest (auto-discovers task versions)",
+      "helpMarkDown": "**Path to extension manifest** for auto-discovering task versions.\n\n- Reads manifest to find all tasks and their versions\n- More convenient than manually specifying expected tasks\n- File must be a valid vss-extension.json\n\n**Example**: `$(Build.SourcesDirectory)/vss-extension.json`\n\n**Note**: Use this OR expected-tasks/vsix-path, not multiple options",
       "visibleRule": "operation = verifyInstall",
       "groupName": "validation"
     },
@@ -421,7 +421,7 @@
       "type": "filePath",
       "label": "VSIX Path",
       "required": false,
-      "helpMarkDown": "Path to .vsix file (extracts task versions)",
+      "helpMarkDown": "**Path to .vsix file** for auto-extracting and discovering task versions.\n\n- Extracts task.json files from VSIX package\n- Automatically determines which tasks and versions to verify\n- Most convenient when verifying immediately after packaging\n\n**Example**: `$(Build.ArtifactStagingDirectory)/my-extension.vsix`\n\n**Note**: Use this OR expected-tasks/manifest-path, not multiple options",
       "visibleRule": "operation = verifyInstall",
       "groupName": "validation"
     },
@@ -431,7 +431,7 @@
       "label": "Timeout (minutes)",
       "required": false,
       "defaultValue": "10",
-      "helpMarkDown": "Maximum time to wait for tasks to become available",
+      "helpMarkDown": "**Maximum time to wait** for tasks to become available after installation (in minutes).\n\n- Task polls Azure DevOps at regular intervals\n- If tasks don't appear within timeout, verification fails\n- Increase for slower marketplace propagation\n\n**Default**: 10 minutes",
       "visibleRule": "operation = verifyInstall",
       "groupName": "validation"
     },
@@ -441,18 +441,43 @@
       "label": "Polling Interval (seconds)",
       "required": false,
       "defaultValue": "30",
-      "helpMarkDown": "Interval between availability checks",
+      "helpMarkDown": "**Interval between task availability checks** (in seconds).\n\n- How often to check if tasks are available\n- Lower values detect availability faster but create more API calls\n- Higher values reduce API load but delay detection\n\n**Recommendation**: 30-60 seconds is usually sufficient\n\n**Default**: 30 seconds",
       "visibleRule": "operation = verifyInstall",
       "groupName": "validation"
+    }
+  ],
+  "outputVariables": [
+    {
+      "name": "Extension.OutputPath",
+      "description": "Path to the generated .vsix file (package operation only)"
     },
     {
-      "name": "tfxVersion",
-      "type": "string",
-      "label": "TFX Version",
-      "required": false,
-      "defaultValue": "embedded",
-      "helpMarkDown": "Version of tfx-cli to use (embedded, latest, or specific like 0.17.x)",
-      "groupName": "advanced"
+      "name": "Extension.Metadata",
+      "description": "JSON metadata about the extension (show operation only)"
+    },
+    {
+      "name": "Extension.Published",
+      "description": "Whether the extension was published (true/false, publish operation only)"
+    },
+    {
+      "name": "Extension.Shared",
+      "description": "Whether the extension was shared (true/false, share operation only)"
+    },
+    {
+      "name": "Extension.Unshared",
+      "description": "Whether the extension was unshared (true/false, unshare operation only)"
+    },
+    {
+      "name": "Extension.Installed",
+      "description": "Whether the extension was installed (true/false, install operation only)"
+    },
+    {
+      "name": "Extension.IsValid",
+      "description": "Whether the extension passed validation (true/false, is-valid operation only)"
+    },
+    {
+      "name": "Extension.VerifyInstall",
+      "description": "Whether installation verification succeeded (true/false, verify-install operation only)"
     }
   ],
   "execution": {
