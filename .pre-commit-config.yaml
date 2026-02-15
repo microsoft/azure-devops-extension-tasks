@@ -1,0 +1,21 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-merge-conflict
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-yaml
+
+  - repo: local
+    hooks:
+      - id: prettier
+        name: prettier
+        entry: npx prettier --write
+        language: system
+        files: '\.(ts|js|mjs|cjs|json|md|yml|yaml)$'
+      - id: eslint
+        name: eslint
+        entry: npx eslint --fix
+        language: system
+        files: '\.(ts|js|mjs|cjs)$'

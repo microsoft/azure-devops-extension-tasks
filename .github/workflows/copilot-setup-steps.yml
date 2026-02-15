@@ -56,8 +56,17 @@ jobs:
           npm install --global jest
           jest --version
 
+      - name: Ensure pre-commit is installed
+        run: |
+          set -euo pipefail
+          python3 -m pip install --user pre-commit
+          python3 -m pre_commit --version
+
       - name: Install dependencies
         run: npm install
+
+      - name: Install pre-commit hooks
+        run: python3 -m pre_commit install --install-hooks
 
       - name: Build v6 packages
         run: npm run build
@@ -70,6 +79,8 @@ jobs:
             echo "- Azure CLI: $(az version --query '"azure-cli"' -o tsv)"
             echo "- tfx-cli: $(tfx --version)"
             echo "- jest: $(jest --version)"
+            echo "- pre-commit: $(python3 -m pre_commit --version)"
             echo "- Dependencies: ✅ Installed"
+            echo "- Git hooks: ✅ Installed"
             echo "- Build: ✅ Successful"
           } >> "$GITHUB_STEP_SUMMARY"

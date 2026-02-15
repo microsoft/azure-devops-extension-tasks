@@ -14,6 +14,16 @@ This repo is an npm workspace monorepo for v6 Azure DevOps extension automation.
 npm install
 npm run build
 npm run test
+python -m pip install --user pre-commit
+pre-commit install --install-hooks
+```
+
+## Pre-commit hooks
+
+Run hooks manually across the repository:
+
+```bash
+pre-commit run --all-files
 ```
 
 ## Workspace structure
