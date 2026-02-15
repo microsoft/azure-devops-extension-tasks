@@ -178,22 +178,22 @@ outputs:
 runs:
   using: composite
   steps:
-    - id: package
-      uses: jessehouwing/azure-devops-extension-tasks@v6
-      with:
-        operation: package
-        tfx-version: ${{ inputs.tfx-version }}
-        publisher-id: ${{ inputs.publisher-id }}
-        extension-id: ${{ inputs.extension-id }}
-        extension-tag: ${{ inputs.extension-tag }}
-        root-folder: ${{ inputs.root-folder }}
-        manifest-globs: ${{ inputs.manifest-globs }}
-        extension-version: ${{ inputs.extension-version }}
-        extension-name: ${{ inputs.extension-name }}
-        extension-visibility: ${{ inputs.extension-visibility }}
-        output-path: ${{ inputs.output-path }}
-        output-variable: ${{ inputs.output-variable }}
-        bypass-validation: ${{ inputs.bypass-validation }}
-        rev-version: ${{ inputs.rev-version }}
-        update-tasks-version: ${{ inputs.update-tasks-version }}
-        update-tasks-id: ${{ inputs.update-tasks-id }}
+  - id: package
+    uses: jessehouwing/azure-devops-extension-tasks@v6
+    with:
+      operation: package
+      tfx-version: ${{ inputs.tfx-version }}
+      publisher-id: ${{ inputs.publisher-id }}
+      extension-id: ${{ inputs.extension-id }}
+      extension-tag: ${{ inputs.extension-tag }}
+      root-folder: ${{ inputs.root-folder }}
+      manifest-globs: ${{ inputs.manifest-globs }}
+      extension-version: ${{ inputs.extension-version }}
+      extension-name: ${{ inputs.extension-name }}
+      extension-visibility: ${{ inputs.extension-visibility }}
+      output-path: ${{ inputs.output-path }}
+      output-variable: ${{ inputs.output-variable }}
+      bypass-validation: ${{ inputs.bypass-validation }}
+      rev-version: ${{ inputs.rev-version }}
+      update-tasks-version: ${{ inputs.update-tasks-version }}
+      update-tasks-id: ${{ inputs.update-tasks-id }}

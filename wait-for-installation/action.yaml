@@ -191,22 +191,22 @@ inputs:
 runs:
   using: composite
   steps:
-    - id: wait-for-installation
-      uses: jessehouwing/azure-devops-extension-tasks@v6
-      with:
-        operation: wait-for-installation
-        auth-type: ${{ inputs.auth-type }}
-        token: ${{ inputs.token }}
-        username: ${{ inputs.username }}
-        password: ${{ inputs.password }}
-        service-url: ${{ inputs.service-url }}
-        marketplace-url: ${{ inputs.marketplace-url }}
-        tfx-version: ${{ inputs.tfx-version }}
-        publisher-id: ${{ inputs.publisher-id }}
-        extension-id: ${{ inputs.extension-id }}
-        accounts: ${{ inputs.accounts }}
-        expected-tasks: ${{ inputs.expected-tasks }}
-        manifest-path: ${{ inputs.manifest-path }}
-        vsix-path: ${{ inputs.vsix-path }}
-        timeout-minutes: ${{ inputs.timeout-minutes }}
-        polling-interval-seconds: ${{ inputs.polling-interval-seconds }}
+  - id: wait-for-installation
+    uses: jessehouwing/azure-devops-extension-tasks@v6
+    with:
+      operation: wait-for-installation
+      auth-type: ${{ inputs.auth-type }}
+      token: ${{ inputs.token }}
+      username: ${{ inputs.username }}
+      password: ${{ inputs.password }}
+      service-url: ${{ inputs.service-url }}
+      marketplace-url: ${{ inputs.marketplace-url }}
+      tfx-version: ${{ inputs.tfx-version }}
+      publisher-id: ${{ inputs.publisher-id }}
+      extension-id: ${{ inputs.extension-id }}
+      accounts: ${{ inputs.accounts }}
+      expected-tasks: ${{ inputs.expected-tasks }}
+      manifest-path: ${{ inputs.manifest-path }}
+      vsix-path: ${{ inputs.vsix-path }}
+      timeout-minutes: ${{ inputs.timeout-minutes }}
+      polling-interval-seconds: ${{ inputs.polling-interval-seconds }}

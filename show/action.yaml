@@ -147,17 +147,17 @@ outputs:
 runs:
   using: composite
   steps:
-    - id: show
-      uses: jessehouwing/azure-devops-extension-tasks@v6
-      with:
-        operation: show
-        auth-type: ${{ inputs.auth-type }}
-        token: ${{ inputs.token }}
-        username: ${{ inputs.username }}
-        password: ${{ inputs.password }}
-        service-url: ${{ inputs.service-url }}
-        marketplace-url: ${{ inputs.marketplace-url }}
-        tfx-version: ${{ inputs.tfx-version }}
-        publisher-id: ${{ inputs.publisher-id }}
-        extension-id: ${{ inputs.extension-id }}
-        output-variable: ${{ inputs.output-variable }}
+  - id: show
+    uses: jessehouwing/azure-devops-extension-tasks@v6
+    with:
+      operation: show
+      auth-type: ${{ inputs.auth-type }}
+      token: ${{ inputs.token }}
+      username: ${{ inputs.username }}
+      password: ${{ inputs.password }}
+      service-url: ${{ inputs.service-url }}
+      marketplace-url: ${{ inputs.marketplace-url }}
+      tfx-version: ${{ inputs.tfx-version }}
+      publisher-id: ${{ inputs.publisher-id }}
+      extension-id: ${{ inputs.extension-id }}
+      output-variable: ${{ inputs.output-variable }}
