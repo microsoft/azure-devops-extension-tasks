@@ -33,6 +33,26 @@ export interface ManifestEditorOptions {
 }
 
 /**
+ * Options for applying changes to manifests
+ * Contains all possible modifications that can be made to an extension
+ */
+export interface ApplyManifestOptions {
+  // Extension manifest overrides
+  publisherId?: string;
+  extensionId?: string;
+  extensionTag?: string;
+  extensionVersion?: string;
+  extensionName?: string;
+  extensionVisibility?: 'public' | 'private' | 'public_preview' | 'private_preview';
+  extensionPricing?: 'free' | 'paid' | 'trial';
+  
+  // Task updates
+  updateTasksVersion?: boolean;
+  updateTasksVersionType?: 'major' | 'minor' | 'patch';
+  updateTasksId?: boolean;
+}
+
+/**
  * ManifestEditor - Unified editor for extension and task manifests
  * 
  * Works with any ManifestReader (VsixReader, FilesystemManifestReader, etc.)
@@ -83,6 +103,58 @@ export class ManifestEditor {
    */
   static fromReader(reader: ManifestReader): ManifestEditor {
     return new ManifestEditor({ reader });
+  }
+
+  /**
+   * Apply a set of options to the manifest
+   * This is the main entry point for batch modifications
+   * All conditional logic for applying changes is contained here
+   * 
+   * @param options Options to apply
+   * @returns Promise<this> for async chaining
+   */
+  async applyOptions(options: ApplyManifestOptions): Promise<this> {
+    // Apply extension manifest overrides
+    if (options.publisherId) {
+      this.setPublisher(options.publisherId);
+    }
+    
+    // Handle extension ID with optional tag
+    if (options.extensionId) {
+      let extensionId = options.extensionId;
+      if (options.extensionTag) {
+        extensionId = extensionId + options.extensionTag;
+      }
+      this.setExtensionId(extensionId);
+    }
+    
+    if (options.extensionVersion) {
+      this.setVersion(options.extensionVersion);
+    }
+    
+    if (options.extensionName) {
+      this.setName(options.extensionName);
+    }
+    
+    if (options.extensionVisibility) {
+      this.setVisibility(options.extensionVisibility);
+    }
+    
+    if (options.extensionPricing) {
+      this.setPricing(options.extensionPricing);
+    }
+    
+    // Apply task updates
+    if (options.updateTasksVersion && options.extensionVersion) {
+      const versionType = options.updateTasksVersionType || 'major';
+      await this.updateAllTaskVersions(options.extensionVersion, versionType);
+    }
+    
+    if (options.updateTasksId) {
+      await this.updateAllTaskIds();
+    }
+    
+    return this;
   }
 
   /**

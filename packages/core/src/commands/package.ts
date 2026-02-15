@@ -130,8 +130,7 @@ export async function packageExtension(
     args.flag('--rev-version');
   }
 
-  // Handle task version and ID updates using the new architecture
-  // This replicates v5 functionality using ManifestReader/ManifestEditor/ManifestWriter
+  // Handle manifest updates using the unified architecture
   let cleanupWriter: (() => Promise<void>) | null = null;
   
   if (options.updateTasksVersion || options.updateTasksId) {
@@ -148,23 +147,19 @@ export async function packageExtension(
         platform
       });
       
-      // Create editor and apply updates
+      // Create editor and apply all options at once
       const editor = ManifestEditor.fromReader(reader);
-      
-      // Update task versions if requested
-      if (options.updateTasksVersion && options.extensionVersion) {
-        platform.debug(`Updating task versions to ${options.extensionVersion} (${options.updateTasksVersionType || 'major'})`);
-        await editor.updateAllTaskVersions(
-          options.extensionVersion,
-          options.updateTasksVersionType || 'major'
-        );
-      }
-      
-      // Update task IDs if requested
-      if (options.updateTasksId) {
-        platform.debug('Updating task IDs...');
-        await editor.updateAllTaskIds();
-      }
+      await editor.applyOptions({
+        publisherId: options.publisherId,
+        extensionId: options.extensionId,
+        extensionTag: options.extensionTag,
+        extensionVersion: options.extensionVersion,
+        extensionName: options.extensionName,
+        extensionVisibility: options.extensionVisibility,
+        updateTasksVersion: options.updateTasksVersion,
+        updateTasksVersionType: options.updateTasksVersionType,
+        updateTasksId: options.updateTasksId,
+      });
       
       // Write modifications to filesystem
       const writer = await editor.toWriter();

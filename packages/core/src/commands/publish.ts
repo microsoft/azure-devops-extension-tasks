@@ -244,23 +244,19 @@ export async function publishExtension(
           platform
         });
         
-        // Create editor and apply updates
+        // Create editor and apply all options at once
         const editor = ManifestEditor.fromReader(reader);
-        
-        // Update task versions if requested
-        if (options.updateTasksVersion && options.extensionVersion) {
-          platform.debug(`Updating task versions to ${options.extensionVersion} (${options.updateTasksVersionType || 'major'})`);
-          await editor.updateAllTaskVersions(
-            options.extensionVersion,
-            options.updateTasksVersionType || 'major'
-          );
-        }
-        
-        // Update task IDs if requested
-        if (options.updateTasksId) {
-          platform.debug('Updating task IDs...');
-          await editor.updateAllTaskIds();
-        }
+        await editor.applyOptions({
+          publisherId: options.publisherId,
+          extensionId: options.extensionId,
+          extensionTag: options.extensionTag,
+          extensionVersion: options.extensionVersion,
+          extensionName: options.extensionName,
+          extensionVisibility: options.extensionVisibility,
+          updateTasksVersion: options.updateTasksVersion,
+          updateTasksVersionType: options.updateTasksVersionType,
+          updateTasksId: options.updateTasksId,
+        });
         
         // Write modifications to filesystem
         const writer = await editor.toWriter();
@@ -320,61 +316,22 @@ export async function publishExtension(
     if (needsModification) {
       platform.info('Modifying VSIX before publishing...');
       
-      // Open the VSIX and create an editor using the new unified architecture
+      // Open the VSIX and create an editor using the unified architecture
       const reader = await VsixReader.open(options.vsixFile);
       const editor = ManifestEditor.fromReader(reader);
       
-      // Apply manifest overrides
-      if (options.publisherId) {
-        platform.debug(`Setting publisher: ${options.publisherId}`);
-        editor.setPublisher(options.publisherId);
-      }
-      
-      let extensionId = options.extensionId;
-      if (extensionId && options.extensionTag) {
-        extensionId = extensionId + options.extensionTag;
-        platform.debug(`Extension ID with tag: ${extensionId}`);
-      }
-      
-      if (extensionId) {
-        platform.debug(`Setting extension ID: ${extensionId}`);
-        editor.setExtensionId(extensionId);
-      }
-      
-      if (options.extensionVersion) {
-        platform.debug(`Setting version: ${options.extensionVersion}`);
-        editor.setVersion(options.extensionVersion);
-      }
-      
-      if (options.extensionName) {
-        platform.debug(`Setting name: ${options.extensionName}`);
-        editor.setName(options.extensionName);
-      }
-      
-      if (options.extensionVisibility) {
-        platform.debug(`Setting visibility: ${options.extensionVisibility}`);
-        // Map extended visibility values to editor visibility type
-        const visibilityMap: Record<string, 'public' | 'private' | 'public_preview' | 'private_preview'> = {
-          'public': 'public',
-          'private': 'private',
-          'public_preview': 'public_preview',
-          'private_preview': 'private_preview',
-        };
-        const mappedVisibility = visibilityMap[options.extensionVisibility] || 'private';
-        editor.setVisibility(mappedVisibility);
-      }
-      
-      // Apply task modifications using the new unified approach
-      if (options.updateTasksVersion && options.extensionVersion) {
-        platform.info('Updating task versions...');
-        const versionType = options.updateTasksVersionType || 'major';
-        await editor.updateAllTaskVersions(options.extensionVersion, versionType);
-      }
-      
-      if (options.updateTasksId) {
-        platform.info('Updating task IDs...');
-        await editor.updateAllTaskIds();
-      }
+      // Apply all options at once
+      await editor.applyOptions({
+        publisherId: options.publisherId,
+        extensionId: options.extensionId,
+        extensionTag: options.extensionTag,
+        extensionVersion: options.extensionVersion,
+        extensionName: options.extensionName,
+        extensionVisibility: options.extensionVisibility,
+        updateTasksVersion: options.updateTasksVersion,
+        updateTasksVersionType: options.updateTasksVersionType,
+        updateTasksId: options.updateTasksId,
+      });
       
       // Write modified VSIX to a temporary file
       const writer = await editor.toWriter();
