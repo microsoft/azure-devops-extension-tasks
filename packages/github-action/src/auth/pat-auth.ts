@@ -5,6 +5,7 @@ import { AuthCredentials, IPlatformAdapter } from '@extension-tasks/core';
  */
 export async function getPatAuth(
   token: string,
+  serviceUrl: string | undefined,
   platform: IPlatformAdapter
 ): Promise<AuthCredentials> {
   if (!token) {
@@ -14,12 +15,12 @@ export async function getPatAuth(
   // Mask the secret immediately to prevent exposure in logs
   platform.setSecret(token);
 
-  // For marketplace operations, use the marketplace URL
-  const serviceUrl = 'https://marketplace.visualstudio.com';
+  // Use provided service URL or default to marketplace
+  const finalServiceUrl = serviceUrl || 'https://marketplace.visualstudio.com';
 
   return {
     authType: 'pat',
-    serviceUrl,
+    serviceUrl: finalServiceUrl,
     token,
   };
 }

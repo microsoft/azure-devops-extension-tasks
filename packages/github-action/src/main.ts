@@ -77,8 +77,21 @@ async function run(): Promise<void> {
         await validateAzureCliAvailable(platform);
       }
       
+      // Get authentication credentials with optional service/marketplace URLs
       const token = platform.getInput('token');
-      auth = await getAuth(authType, platform, token);
+      const username = platform.getInput('username');
+      const password = platform.getInput('password');
+      const serviceUrl = platform.getInput('service-url');
+      const marketplaceUrl = platform.getInput('marketplace-url');
+      
+      auth = await getAuth(authType, platform, {
+        token,
+        username,
+        password,
+        serviceUrl,
+        marketplaceUrl,
+      });
+      
       // Secret masking is now handled inside auth providers
       // But we keep this as defense in depth
       if (auth.token) {

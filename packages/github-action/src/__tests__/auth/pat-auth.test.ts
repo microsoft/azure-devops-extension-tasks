@@ -29,7 +29,7 @@ describe('GitHub Actions PAT Auth', () => {
   it('should return correct AuthCredentials structure', async () => {
     const expectedToken = 'github-pat-token-12345';
 
-    const result = await getPatAuth(expectedToken, mockPlatform);
+    const result = await getPatAuth(expectedToken, undefined, mockPlatform);
 
     expect(result).toEqual({
       authType: 'pat',
@@ -41,26 +41,33 @@ describe('GitHub Actions PAT Auth', () => {
   it('should mask token via platform.setSecret() immediately (security critical)', async () => {
     const secretToken = 'secret-github-pat-67890';
 
-    await getPatAuth(secretToken, mockPlatform);
+    await getPatAuth(secretToken, undefined, mockPlatform);
 
     expect(mockPlatform.setSecret).toHaveBeenCalledWith(secretToken);
     expect(mockPlatform.setSecret).toHaveBeenCalledTimes(1);
   });
 
   it('should throw error for missing token', async () => {
-    await expect(getPatAuth('', mockPlatform)).rejects.toThrow('PAT token is required');
+    await expect(getPatAuth('', undefined, mockPlatform)).rejects.toThrow('PAT token is required');
   });
 
   it('should use authType "pat"', async () => {
-    const result = await getPatAuth('test-token', mockPlatform);
+    const result = await getPatAuth('test-token', undefined, mockPlatform);
 
     expect(result.authType).toBe('pat');
   });
 
   it('should use marketplace URL as serviceUrl', async () => {
-    const result = await getPatAuth('test-token', mockPlatform);
+    const result = await getPatAuth('test-token', undefined, mockPlatform);
 
     expect(result.serviceUrl).toBe('https://marketplace.visualstudio.com');
+  });
+
+  it('should use custom serviceUrl when provided', async () => {
+    const customUrl = 'https://myserver.com/tfs';
+    const result = await getPatAuth('test-token', customUrl, mockPlatform);
+
+    expect(result.serviceUrl).toBe(customUrl);
   });
 
   it('should call setSecret before returning (timing security test)', async () => {
@@ -71,7 +78,7 @@ describe('GitHub Actions PAT Auth', () => {
       setSecretCalled = true;
     });
 
-    const result = await getPatAuth(token, mockPlatform);
+    const result = await getPatAuth(token, undefined, mockPlatform);
 
     // setSecret should have been called before we got the result
     expect(setSecretCalled).toBe(true);

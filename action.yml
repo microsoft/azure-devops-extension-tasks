@@ -25,9 +25,16 @@ inputs:
   # Authentication
   auth-type:
     description: |
-      Authentication type: 'pat' or 'oidc'
-      - pat: Use Personal Access Token (recommended for simplicity)
+      Authentication type: 'pat', 'basic', or 'oidc'
+      - pat: Use Personal Access Token (recommended for most users)
+      - basic: Use username/password authentication (for on-premises Azure DevOps Server)
       - oidc: Use Azure OIDC via azure/login action (requires setup, see below)
+      
+      PAT Setup:
+      Provide a Personal Access Token via the 'token' input
+      
+      Basic Auth Setup:
+      Provide username and password via 'username' and 'password' inputs
       
       OIDC Setup:
       Run azure/login action BEFORE this action:
@@ -49,7 +56,49 @@ inputs:
     description: |
       Personal Access Token for marketplace authentication
       Required when auth-type is 'pat'
-      Not needed when auth-type is 'oidc' (token obtained via Azure CLI)
+      Not needed for other auth types
+      
+      Required scopes: Marketplace (Publish)
+      Create a PAT at: https://dev.azure.com/_usersSettings/tokens
+    required: false
+  username:
+    description: |
+      Username for basic authentication
+      Required when auth-type is 'basic'
+      Not needed for other auth types
+      
+      Use for on-premises TFS or Azure DevOps Server deployments
+    required: false
+  password:
+    description: |
+      Password for basic authentication
+      Required when auth-type is 'basic'
+      Not needed for other auth types
+      
+      Use for on-premises TFS or Azure DevOps Server deployments
+    required: false
+  service-url:
+    description: |
+      Azure DevOps service URL (optional)
+      
+      - Defaults to marketplace URL for cloud operations
+      - Specify custom URL for on-premises Azure DevOps Server
+      - Must be HTTPS and valid Azure DevOps domain
+      
+      Examples:
+      - https://marketplace.visualstudio.com (default)
+      - https://dev.azure.com/myorg
+      - https://myserver.com/tfs
+    required: false
+  marketplace-url:
+    description: |
+      Visual Studio Marketplace URL (optional)
+      
+      - Defaults to: https://marketplace.visualstudio.com
+      - Only needed for custom marketplace endpoints
+      - Must be HTTPS URL
+      
+      Example: https://marketplace.visualstudio.com
     required: false
   
   # TFX Configuration
