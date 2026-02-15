@@ -5,12 +5,12 @@
  * an overrides.json file for tfx to use during packaging.
  */
 
-import { writeFile, readFile, readdir, mkdir } from 'fs/promises';
+import { mkdir, readFile, readdir, writeFile } from 'fs/promises';
 import path from 'path';
+import type { FilesystemManifestReader } from './filesystem-manifest-reader.js';
 import type { ManifestEditor } from './manifest-editor.js';
 import type { ExtensionManifest, TaskManifest } from './manifest-reader.js';
 import type { IPlatformAdapter } from './platform.js';
-import type { FilesystemManifestReader } from './filesystem-manifest-reader.js';
 
 /**
  * FilesystemManifestWriter - Write manifests to filesystem
