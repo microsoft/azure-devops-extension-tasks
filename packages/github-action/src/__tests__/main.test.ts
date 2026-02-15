@@ -143,6 +143,50 @@ describe('GitHub Action main entrypoint', () => {
     expect(platform.setResult).toHaveBeenCalledWith('Succeeded', 'package completed successfully');
   });
 
+  it('forwards package task update flags and overrides', async () => {
+    const platform = createPlatformMock({
+      inputs: {
+        operation: 'package',
+        'tfx-version': 'built-in',
+        'root-folder': '/repo',
+        'publisher-id': 'publisher',
+        'extension-id': 'extension',
+        'extension-version': '1.2.3',
+        'extension-name': 'Name',
+        'extension-visibility': 'private',
+        'output-path': '/out',
+      },
+      boolInputs: {
+        'update-tasks-version': true,
+        'update-tasks-id': true,
+        'bypass-validation': false,
+        'rev-version': false,
+      },
+      delimitedInputs: {
+        'manifest-globs|\n': ['vss-extension.json'],
+      },
+    });
+    githubAdapterCtorMock.mockReturnValue(platform);
+
+    await importMainAndFlush();
+
+    expect(packageExtensionMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        rootFolder: '/repo',
+        publisherId: 'publisher',
+        extensionId: 'extension',
+        extensionVersion: '1.2.3',
+        extensionName: 'Name',
+        extensionVisibility: 'private',
+        updateTasksVersion: true,
+        updateTasksId: true,
+        outputPath: '/out',
+      }),
+      expect.anything(),
+      platform
+    );
+  });
+
   it('executes publish operation with oidc auth and version-spec tfx', async () => {
     const platform = createPlatformMock({
       inputs: {

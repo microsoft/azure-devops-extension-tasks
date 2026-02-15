@@ -2,12 +2,12 @@
  * Publish command - Publishes an extension to the marketplace
  */
 
+import { ArgBuilder } from '../arg-builder.js';
+import type { AuthCredentials } from '../auth.js';
+import { ManifestEditor } from '../manifest-editor.js';
 import type { IPlatformAdapter } from '../platform.js';
 import type { TfxManager } from '../tfx-manager.js';
-import type { AuthCredentials } from '../auth.js';
-import { ArgBuilder } from '../arg-builder.js';
 import { VsixReader } from '../vsix-reader.js';
-import { ManifestEditor } from '../manifest-editor.js';
 
 /**
  * Source for publishing
@@ -284,7 +284,6 @@ export async function publishExtension(
       }
     }
   } else {
-    // Publishing from VSIX file
     // Publishing from VSIX file
     if (!options.vsixFile) {
       throw new Error('vsixFile is required when publishSource is "vsix"');

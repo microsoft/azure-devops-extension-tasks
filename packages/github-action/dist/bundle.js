@@ -2829,15 +2829,6 @@ async function packageExtension(options, tfx, platform) {
   if (extensionId) {
     args.option("--extension-id", extensionId);
   }
-  if (options.extensionName) {
-    args.option("--extension-name", options.extensionName);
-  }
-  if (options.extensionVersion) {
-    args.option("--extension-version", options.extensionVersion);
-  }
-  if (options.extensionVisibility) {
-    args.option("--extension-visibility", options.extensionVisibility);
-  }
   if (options.outputPath) {
     args.option("--output-path", options.outputPath);
   }
@@ -2848,7 +2839,8 @@ async function packageExtension(options, tfx, platform) {
     args.flag("--rev-version");
   }
   let cleanupWriter = null;
-  if (options.updateTasksVersion || options.updateTasksId) {
+  const shouldApplyManifestOptions = options.updateTasksVersion || options.updateTasksId || options.extensionVersion || options.extensionName || options.extensionVisibility;
+  if (shouldApplyManifestOptions) {
     platform.info("Updating task manifests before packaging...");
     try {
       const rootFolder = options.rootFolder || ".";
@@ -4815,6 +4807,9 @@ async function runPackage(platform, tfxManager) {
     extensionId: platform.getInput("extension-id"),
     extensionVersion: platform.getInput("extension-version"),
     extensionName: platform.getInput("extension-name"),
+    extensionVisibility: platform.getInput("extension-visibility"),
+    updateTasksVersion: platform.getBoolInput("update-tasks-version"),
+    updateTasksId: platform.getBoolInput("update-tasks-id"),
     outputPath: platform.getInput("output-path"),
     outputVariable: platform.getInput("output-variable"),
     bypassValidation: platform.getBoolInput("bypass-validation"),

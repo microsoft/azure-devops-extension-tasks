@@ -2,11 +2,11 @@
  * Package command - Creates a .vsix file from extension manifest
  */
 
-import type { IPlatformAdapter } from '../platform.js';
-import type { TfxManager } from '../tfx-manager.js';
 import { ArgBuilder } from '../arg-builder.js';
 import { FilesystemManifestReader } from '../filesystem-manifest-reader.js';
 import { ManifestEditor } from '../manifest-editor.js';
+import type { IPlatformAdapter } from '../platform.js';
+import type { TfxManager } from '../tfx-manager.js';
 
 /**
  * Options for package command
@@ -96,18 +96,6 @@ export async function packageExtension(
     args.option('--extension-id', extensionId);
   }
 
-  if (options.extensionName) {
-    args.option('--extension-name', options.extensionName);
-  }
-
-  if (options.extensionVersion) {
-    args.option('--extension-version', options.extensionVersion);
-  }
-
-  if (options.extensionVisibility) {
-    args.option('--extension-visibility', options.extensionVisibility);
-  }
-
   // Output path
   if (options.outputPath) {
     args.option('--output-path', options.outputPath);
@@ -125,7 +113,14 @@ export async function packageExtension(
   // Handle manifest updates using the unified architecture
   let cleanupWriter: (() => Promise<void>) | null = null;
 
-  if (options.updateTasksVersion || options.updateTasksId) {
+  const shouldApplyManifestOptions =
+    options.updateTasksVersion ||
+    options.updateTasksId ||
+    options.extensionVersion ||
+    options.extensionName ||
+    options.extensionVisibility;
+
+  if (shouldApplyManifestOptions) {
     platform.info('Updating task manifests before packaging...');
 
     try {
