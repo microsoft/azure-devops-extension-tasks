@@ -14,7 +14,7 @@ Query an extension version from Visual Studio Marketplace and optionally increme
     version-action: 'Patch'
 
 - run: |
-  echo "Current version:  ${{ steps.query.outputs.current-version }}"
+  echo "Current version: ${{ steps.query.outputs.current-version }}"
   echo "Proposed version: ${{ steps.query.outputs.proposed-version }}"
 ```
 

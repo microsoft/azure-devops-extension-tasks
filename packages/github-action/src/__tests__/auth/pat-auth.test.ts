@@ -73,7 +73,7 @@ describe('GitHub Actions PAT Auth', () => {
   it('should call setSecret before returning (timing security test)', async () => {
     let setSecretCalled = false;
     const token = 'timing-test-token';
-    
+
     mockPlatform.setSecret.mockImplementation(() => {
       setSecretCalled = true;
     });

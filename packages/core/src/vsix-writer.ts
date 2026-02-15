@@ -1,9 +1,9 @@
 /**
  * VSIX Writer - Write modified VSIX files efficiently
- * 
+ *
  * Optimizes ZIP file updates by copying unchanged entries directly
  * without recompression. Only modified/new files are recompressed.
- * 
+ *
  * Chain: Reader → ManifestEditor → Writer
  */
 
@@ -22,17 +22,17 @@ import type { ExtensionManifest, TaskManifest } from './manifest-reader.js';
 function validateZipPath(filePath: string): void {
   // Same validation as in VsixReader
   const normalizedPath = filePath.replace(/\\/g, '/');
-  
+
   // Check for absolute paths
   if (normalizedPath.startsWith('/') || /^[A-Z]:/i.test(normalizedPath)) {
     throw new Error(`Security: Absolute paths are not allowed: ${filePath}`);
   }
-  
+
   // Check for parent directory traversal
   if (normalizedPath.includes('../') || normalizedPath.startsWith('..')) {
     throw new Error(`Security: Path traversal detected: ${filePath}`);
   }
-  
+
   // Check for null bytes
   if (normalizedPath.includes('\0')) {
     throw new Error(`Security: Null byte detected in path: ${filePath}`);
@@ -41,7 +41,7 @@ function validateZipPath(filePath: string): void {
 
 /**
  * VsixWriter - Efficient VSIX file writing
- * 
+ *
  * Example usage:
  * ```typescript
  * const reader = await VsixReader.open('input.vsix');
@@ -71,10 +71,10 @@ export class VsixWriter {
 
   /**
    * Write the modified VSIX to a file
-   * 
+   *
    * This method efficiently copies unchanged entries from the source VSIX
    * without recompression, significantly improving performance for large files.
-   * 
+   *
    * @param outputPath Path where the new VSIX should be written
    * @returns Promise that resolves when writing is complete
    */
@@ -105,7 +105,7 @@ export class VsixWriter {
     // Step 2: Apply file modifications (add/modify/remove)
     for (const [path, mod] of modifications) {
       validateZipPath(path);
-      
+
       if (mod.type === 'remove') {
         // Mark as added so we skip it when copying from source
         addedFiles.add(path);
@@ -151,7 +151,7 @@ export class VsixWriter {
 
     for (const [path, mod] of modifications) {
       validateZipPath(path);
-      
+
       if (mod.type === 'remove') {
         addedFiles.add(path);
       } else if (mod.type === 'modify' && mod.content) {
@@ -191,15 +191,15 @@ export class VsixWriter {
     // Read and modify extension manifest
     const manifest = await reader.readExtensionManifest();
     Object.assign(manifest, manifestMods);
-    
+
     const manifestJson = JSON.stringify(manifest, null, 2);
-    this.zipFile!.addBuffer(Buffer.from(manifestJson, 'utf-8'), manifestPath);
+    this.zipFile.addBuffer(Buffer.from(manifestJson, 'utf-8'), manifestPath);
     addedFiles.add(manifestPath);
 
     // Modify task manifests if needed
     if (taskManifestMods.size > 0) {
       const taskManifests = await reader.readTaskManifests();
-      
+
       for (const taskManifest of taskManifests) {
         const mods = taskManifestMods.get(taskManifest.manifest.name);
         if (mods) {
@@ -207,7 +207,7 @@ export class VsixWriter {
           Object.assign(taskManifest.manifest, mods);
           const taskJson = JSON.stringify(taskManifest.manifest, null, 2);
           const taskPath = `${taskManifest.path}/task.json`;
-          this.zipFile!.addBuffer(Buffer.from(taskJson, 'utf-8'), taskPath);
+          this.zipFile.addBuffer(Buffer.from(taskJson, 'utf-8'), taskPath);
           addedFiles.add(taskPath);
         }
       }
@@ -216,23 +216,20 @@ export class VsixWriter {
 
   /**
    * Copy unchanged files from source VSIX
-   * 
+   *
    * This is the key optimization: files are copied directly from the source
    * ZIP without decompression/recompression, preserving original compression.
    */
-  private async copyUnchangedFiles(
-    reader: any,
-    addedFiles: Set<string>
-  ): Promise<void> {
+  private async copyUnchangedFiles(reader: any, addedFiles: Set<string>): Promise<void> {
     const allFiles = await reader.listFiles();
-    
+
     for (const file of allFiles) {
       if (!addedFiles.has(file.path)) {
         // File hasn't been modified - copy it efficiently
         // Note: yazl will copy the compressed data directly if we use the right method
         try {
           const content = await reader.readFile(file.path);
-          this.zipFile!.addBuffer(content, file.path);
+          this.zipFile.addBuffer(content, file.path);
         } catch (err) {
           // If we can't read it, skip it (might be a directory or corrupt entry)
           console.warn(`Warning: Could not copy file ${file.path}: ${(err as Error).message}`);
@@ -251,7 +248,7 @@ export class VsixWriter {
 
     return new Promise((resolve, reject) => {
       const outputStream = createWriteStream(outputPath);
-      
+
       outputStream.on('error', (err) => {
         reject(new Error(`Failed to write VSIX file: ${err.message}`));
       });
@@ -260,13 +257,11 @@ export class VsixWriter {
         resolve();
       });
 
-      this.zipFile!.outputStream
-        .pipe(outputStream)
-        .on('error', (err: Error) => {
-          reject(new Error(`Failed to write VSIX stream: ${err.message}`));
-        });
+      this.zipFile.outputStream.pipe(outputStream).on('error', (err: Error) => {
+        reject(new Error(`Failed to write VSIX stream: ${err.message}`));
+      });
 
-      this.zipFile!.end();
+      this.zipFile.end();
     });
   }
 
@@ -280,20 +275,20 @@ export class VsixWriter {
 
     return new Promise((resolve, reject) => {
       const chunks: Buffer[] = [];
-      
-      this.zipFile!.outputStream.on('data', (chunk: Buffer) => {
+
+      this.zipFile.outputStream.on('data', (chunk: Buffer) => {
         chunks.push(chunk);
       });
 
-      this.zipFile!.outputStream.on('end', () => {
+      this.zipFile.outputStream.on('end', () => {
         resolve(Buffer.concat(chunks));
       });
 
-      this.zipFile!.outputStream.on('error', (err: Error) => {
+      this.zipFile.outputStream.on('error', (err: Error) => {
         reject(new Error(`Failed to create VSIX buffer: ${err.message}`));
       });
 
-      this.zipFile!.end();
+      this.zipFile.end();
     });
   }
 

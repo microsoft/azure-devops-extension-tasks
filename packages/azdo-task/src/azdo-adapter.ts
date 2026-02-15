@@ -1,11 +1,7 @@
 import * as tl from 'azure-pipelines-task-lib/task.js';
 import * as tr from 'azure-pipelines-task-lib/toolrunner.js';
 import * as ttl from 'azure-pipelines-tool-lib/tool.js';
-import {
-  IPlatformAdapter,
-  TaskResult,
-  ExecOptions,
-} from '@extension-tasks/core';
+import { IPlatformAdapter, TaskResult, ExecOptions } from '@extension-tasks/core';
 import { promises as fs } from 'fs';
 
 /**
@@ -14,7 +10,7 @@ import { promises as fs } from 'fs';
  */
 export class AzdoAdapter implements IPlatformAdapter {
   // ===== Input =====
-  
+
   getInput(name: string, required?: boolean): string | undefined {
     return tl.getInput(name, required) || undefined;
   }
@@ -23,11 +19,7 @@ export class AzdoAdapter implements IPlatformAdapter {
     return tl.getBoolInput(name, required);
   }
 
-  getDelimitedInput(
-    name: string,
-    delimiter: string,
-    required?: boolean
-  ): string[] {
+  getDelimitedInput(name: string, delimiter: string, required?: boolean): string[] {
     return tl.getDelimitedInput(name, delimiter, required);
   }
 
@@ -38,20 +30,16 @@ export class AzdoAdapter implements IPlatformAdapter {
   }
 
   setResult(result: TaskResult, message: string): void {
-    const tlResult = result === TaskResult.Succeeded 
-      ? tl.TaskResult.Succeeded 
-      : result === TaskResult.Failed
-      ? tl.TaskResult.Failed
-      : tl.TaskResult.SucceededWithIssues;
+    const tlResult =
+      result === TaskResult.Succeeded
+        ? tl.TaskResult.Succeeded
+        : result === TaskResult.Failed
+          ? tl.TaskResult.Failed
+          : tl.TaskResult.SucceededWithIssues;
     tl.setResult(tlResult, message);
   }
 
-  setVariable(
-    name: string,
-    value: string,
-    isSecret?: boolean,
-    isOutput?: boolean
-  ): void {
+  setVariable(name: string, value: string, isSecret?: boolean, isOutput?: boolean): void {
     tl.setVariable(name, value, isSecret, isOutput);
   }
 
@@ -83,11 +71,7 @@ export class AzdoAdapter implements IPlatformAdapter {
     return tl.which(tool, check);
   }
 
-  async exec(
-    tool: string,
-    args: string[],
-    options?: ExecOptions
-  ): Promise<number> {
+  async exec(tool: string, args: string[], options?: ExecOptions): Promise<number> {
     const toolRunner = tl.tool(tool);
     toolRunner.arg(args);
 
@@ -153,11 +137,7 @@ export class AzdoAdapter implements IPlatformAdapter {
 
   // ===== Tool Management =====
 
-  async cacheDir(
-    sourceDir: string,
-    tool: string,
-    version: string
-  ): Promise<string> {
+  async cacheDir(sourceDir: string, tool: string, version: string): Promise<string> {
     return ttl.cacheDir(sourceDir, tool, version);
   }
 

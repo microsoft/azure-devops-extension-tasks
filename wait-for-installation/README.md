@@ -101,6 +101,7 @@ Verify that an Azure DevOps extension has been installed correctly and that all 
 - `token`: Personal Access Token (required when auth-type is `pat`)
 
 **Plus one of:**
+
 - `expected-tasks`: JSON array of expected tasks
 - `manifest-path`: Path to extension manifest
 - `vsix-path`: Path to .vsix file
@@ -112,13 +113,16 @@ OR
 ### Optional Inputs
 
 #### Authentication
+
 - `auth-type`: Authentication type (`pat` or `oidc`, default: `pat`)
 - `token`: Personal Access Token (required when auth-type is `pat`)
 
 #### TFX Configuration
+
 - `tfx-version`: Version of tfx-cli to use (default: `built-in`)
 
 #### Verification Options
+
 - `timeout-minutes`: Timeout for verification in minutes (default: `10`)
 - `polling-interval-seconds`: Polling interval in seconds (default: `30`)
 
@@ -140,7 +144,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Package Extension
         uses: jessehouwing/azure-devops-extension-tasks/package@v6
         id: package
@@ -148,14 +152,14 @@ jobs:
           root-folder: './extension'
           extension-version: ${{ github.ref_name }}
           update-tasks-version: 'true'
-      
+
       - name: Publish Extension
         uses: jessehouwing/azure-devops-extension-tasks/publish@v6
         with:
           token: ${{ secrets.MARKETPLACE_TOKEN }}
           publish-source: 'vsix'
           vsix-file: ${{ steps.package.outputs.vsix-path }}
-      
+
       - name: Install to Production Org
         uses: jessehouwing/azure-devops-extension-tasks/install@v6
         with:
@@ -163,7 +167,7 @@ jobs:
           publisher-id: 'my-publisher'
           extension-id: 'my-extension'
           accounts: 'production-org'
-      
+
       - name: Verify Installation
         uses: jessehouwing/azure-devops-extension-tasks/wait-for-installation@v6
         with:
@@ -178,6 +182,7 @@ jobs:
 ## How It Works
 
 This action polls the Azure DevOps API to verify that:
+
 1. The extension is installed in the specified account(s)
 2. All expected tasks are available
 3. Task versions match expectations

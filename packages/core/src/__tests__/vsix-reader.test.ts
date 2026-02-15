@@ -48,25 +48,25 @@ describe('VsixReader', () => {
     it('should list all files in the VSIX', async () => {
       const reader = await VsixReader.open(testVsixPath);
       const files = await reader.listFiles();
-      
+
       expect(files.length).toBeGreaterThan(0);
       expect(files).toContainEqual(
         expect.objectContaining({
           path: 'extension.vsomanifest',
           size: expect.any(Number),
-          compressedSize: expect.any(Number)
+          compressedSize: expect.any(Number),
         })
       );
-      
+
       await reader.close();
     });
 
     it('should not include directories', async () => {
       const reader = await VsixReader.open(testVsixPath);
       const files = await reader.listFiles();
-      
-      expect(files.every(f => !f.path.endsWith('/'))).toBe(true);
-      
+
+      expect(files.every((f) => !f.path.endsWith('/'))).toBe(true);
+
       await reader.close();
     });
   });
@@ -74,26 +74,26 @@ describe('VsixReader', () => {
   describe('fileExists', () => {
     it('should return true for existing files', async () => {
       const reader = await VsixReader.open(testVsixPath);
-      
+
       expect(await reader.fileExists('extension.vsomanifest')).toBe(true);
       expect(await reader.fileExists('PublishTask/task.json')).toBe(true);
-      
+
       await reader.close();
     });
 
     it('should return false for non-existent files', async () => {
       const reader = await VsixReader.open(testVsixPath);
-      
+
       expect(await reader.fileExists('nonexistent.txt')).toBe(false);
-      
+
       await reader.close();
     });
 
     it('should handle backslash paths', async () => {
       const reader = await VsixReader.open(testVsixPath);
-      
+
       expect(await reader.fileExists('PublishTask\\task.json')).toBe(true);
-      
+
       await reader.close();
     });
   });
@@ -101,33 +101,33 @@ describe('VsixReader', () => {
   describe('readFile', () => {
     it('should read file contents', async () => {
       const reader = await VsixReader.open(testVsixPath);
-      
+
       const buffer = await reader.readFile('extension.vsomanifest');
       expect(buffer).toBeInstanceOf(Buffer);
       expect(buffer.length).toBeGreaterThan(0);
-      
+
       const content = JSON.parse(buffer.toString('utf-8'));
       expect(content.id).toBe('test-extension');
-      
+
       await reader.close();
     });
 
     it('should cache file contents', async () => {
       const reader = await VsixReader.open(testVsixPath);
-      
+
       const buffer1 = await reader.readFile('extension.vsomanifest');
       const buffer2 = await reader.readFile('extension.vsomanifest');
-      
+
       expect(buffer1).toBe(buffer2); // Same instance
-      
+
       await reader.close();
     });
 
     it('should throw error for non-existent file', async () => {
       const reader = await VsixReader.open(testVsixPath);
-      
+
       await expect(reader.readFile('nonexistent.txt')).rejects.toThrow('File not found');
-      
+
       await reader.close();
     });
   });
@@ -135,24 +135,24 @@ describe('VsixReader', () => {
   describe('readExtensionManifest', () => {
     it('should read extension manifest', async () => {
       const reader = await VsixReader.open(testVsixPath);
-      
+
       const manifest = await reader.readExtensionManifest();
       expect(manifest.id).toBe('test-extension');
       expect(manifest.publisher).toBe('test-publisher');
       expect(manifest.version).toBe('1.0.0');
       expect(manifest.name).toBe('Test Extension');
-      
+
       await reader.close();
     });
 
     it('should parse contributions', async () => {
       const reader = await VsixReader.open(testVsixPath);
-      
+
       const manifest = await reader.readExtensionManifest();
       expect(manifest.contributions).toBeDefined();
       expect(manifest.contributions!.length).toBeGreaterThan(0);
       expect(manifest.contributions![0].type).toBe('ms.vss-distributed-task.task');
-      
+
       await reader.close();
     });
   });
@@ -160,11 +160,11 @@ describe('VsixReader', () => {
   describe('findTaskPaths', () => {
     it('should find task directories', async () => {
       const reader = await VsixReader.open(testVsixPath);
-      
+
       const paths = await reader.findTaskPaths();
       expect(paths).toContain('PublishTask');
       expect(paths).toContain('PackageTask');
-      
+
       await reader.close();
     });
   });
@@ -172,7 +172,7 @@ describe('VsixReader', () => {
   describe('readTaskManifest', () => {
     it('should read task manifest', async () => {
       const reader = await VsixReader.open(testVsixPath);
-      
+
       const manifest = await reader.readTaskManifest('PublishTask');
       expect(manifest.id).toBeDefined();
       expect(manifest.name).toBe('PublishExtension');
@@ -180,17 +180,17 @@ describe('VsixReader', () => {
       expect(manifest.version).toEqual({
         Major: 6,
         Minor: 0,
-        Patch: 0
+        Patch: 0,
       });
-      
+
       await reader.close();
     });
 
     it('should throw error for invalid task path', async () => {
       const reader = await VsixReader.open(testVsixPath);
-      
+
       await expect(reader.readTaskManifest('NonExistentTask')).rejects.toThrow();
-      
+
       await reader.close();
     });
   });
@@ -198,12 +198,12 @@ describe('VsixReader', () => {
   describe('readTaskManifests', () => {
     it('should read all task manifests', async () => {
       const reader = await VsixReader.open(testVsixPath);
-      
+
       const tasks = await reader.readTaskManifests();
       expect(tasks.length).toBe(2);
-      expect(tasks.map(t => t.manifest.name)).toContain('PublishExtension');
-      expect(tasks.map(t => t.manifest.name)).toContain('PackageExtension');
-      
+      expect(tasks.map((t) => t.manifest.name)).toContain('PublishExtension');
+      expect(tasks.map((t) => t.manifest.name)).toContain('PackageExtension');
+
       await reader.close();
     });
   });
@@ -211,16 +211,16 @@ describe('VsixReader', () => {
   describe('getMetadata', () => {
     it('should get quick metadata', async () => {
       const reader = await VsixReader.open(testVsixPath);
-      
+
       const metadata = await reader.getMetadata();
       expect(metadata).toEqual({
         publisher: 'test-publisher',
         extensionId: 'test-extension',
         version: '1.0.0',
         name: 'Test Extension',
-        description: 'A test extension for unit tests'
+        description: 'A test extension for unit tests',
       });
-      
+
       await reader.close();
     });
   });
@@ -228,22 +228,22 @@ describe('VsixReader', () => {
   describe('getTasksInfo', () => {
     it('should get tasks information', async () => {
       const reader = await VsixReader.open(testVsixPath);
-      
+
       const tasks = await reader.getTasksInfo();
       expect(tasks.length).toBe(2);
       expect(tasks).toContainEqual({
         name: 'PublishExtension',
         friendlyName: 'Publish Extension',
         version: '6.0.0',
-        path: 'PublishTask'
+        path: 'PublishTask',
       });
       expect(tasks).toContainEqual({
         name: 'PackageExtension',
         friendlyName: 'Package Extension',
         version: '6.0.0',
-        path: 'PackageTask'
+        path: 'PackageTask',
       });
-      
+
       await reader.close();
     });
   });
@@ -251,13 +251,13 @@ describe('VsixReader', () => {
   describe('chainable API', () => {
     it('should cache file reads for repeated calls', async () => {
       const reader = await VsixReader.open(testVsixPath);
-      
+
       // Call twice - should use cached buffer
       const buffer1 = await reader.readFile('extension.vsomanifest');
       const buffer2 = await reader.readFile('extension.vsomanifest');
-      
+
       expect(buffer1).toBe(buffer2); // Same buffer instance due to caching
-      
+
       await reader.close();
     });
   });
@@ -285,22 +285,19 @@ async function createTestVsix(outputPath: string): Promise<void> {
         type: 'ms.vss-distributed-task.task',
         targets: ['ms.vss-distributed-task.tasks'],
         properties: {
-          name: 'PublishTask'
-        }
+          name: 'PublishTask',
+        },
       },
       {
         id: 'package-task',
         type: 'ms.vss-distributed-task.task',
         targets: ['ms.vss-distributed-task.tasks'],
         properties: {
-          name: 'PackageTask'
-        }
-      }
+          name: 'PackageTask',
+        },
+      },
     ],
-    files: [
-      { path: 'PublishTask' },
-      { path: 'PackageTask' }
-    ]
+    files: [{ path: 'PublishTask' }, { path: 'PackageTask' }],
   };
 
   // Task manifests
@@ -316,9 +313,9 @@ async function createTestVsix(outputPath: string): Promise<void> {
         name: 'extensionId',
         type: 'string',
         label: 'Extension ID',
-        required: true
-      }
-    ]
+        required: true,
+      },
+    ],
   };
 
   const packageTask = {
@@ -333,26 +330,26 @@ async function createTestVsix(outputPath: string): Promise<void> {
         name: 'manifestPath',
         type: 'filePath',
         label: 'Manifest Path',
-        required: true
-      }
-    ]
+        required: true,
+      },
+    ],
   };
 
   // Add files to ZIP with no extra metadata
   const options = { compress: true };
-  
+
   zip.addBuffer(
     Buffer.from(JSON.stringify(extensionManifest, null, 2)),
     'extension.vsomanifest',
     options
   );
-  
+
   zip.addBuffer(
     Buffer.from(JSON.stringify(publishTask, null, 2)),
     'PublishTask/task.json',
     options
   );
-  
+
   zip.addBuffer(
     Buffer.from(JSON.stringify(packageTask, null, 2)),
     'PackageTask/task.json',
@@ -362,8 +359,5 @@ async function createTestVsix(outputPath: string): Promise<void> {
   zip.end();
 
   // Write to file
-  await pipelineAsync(
-    zip.outputStream,
-    createWriteStream(outputPath)
-  );
+  await pipelineAsync(zip.outputStream, createWriteStream(outputPath));
 }

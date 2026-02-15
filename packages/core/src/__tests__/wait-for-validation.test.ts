@@ -47,7 +47,7 @@ describe('waitForValidation', () => {
 
   it('should retry on pending status', async () => {
     const mockExecute = jest.spyOn(tfxManager, 'execute');
-    
+
     // First two attempts return pending
     mockExecute.mockResolvedValueOnce({
       exitCode: 0,

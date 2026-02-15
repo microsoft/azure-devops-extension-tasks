@@ -3,11 +3,10 @@
  * Provides in-memory implementation of IPlatformAdapter
  */
 
-import type {
-  IPlatformAdapter,
-  TaskResult,
-  ExecOptions,
-} from '../../platform.js';
+import type { IPlatformAdapter, TaskResult, ExecOptions } from '../../platform.js';
+import fs from 'fs/promises';
+import path, { dirname } from 'path';
+import { statSync } from 'fs';
 
 /**
  * Mock platform adapter for testing
@@ -124,7 +123,7 @@ export class MockPlatformAdapter implements IPlatformAdapter {
 
   // ===== Filesystem =====
   findMatch(_root: string, patterns: string[]): string[] {
-    // Simple mock: return files that match any pattern (basic glob support)
+    // In-memory matches
     const matches: string[] = [];
     for (const [filePath] of this.files) {
       for (const pattern of patterns) {
@@ -134,6 +133,23 @@ export class MockPlatformAdapter implements IPlatformAdapter {
         }
       }
     }
+
+    // Real filesystem exact-path fallback used by tests that write to disk
+    for (const pattern of patterns) {
+      if (pattern.includes('*') || pattern.includes('?')) {
+        continue;
+      }
+      const candidate = path.join(_root, pattern);
+      try {
+        const stat = statSync(candidate);
+        if (stat.isFile()) {
+          matches.push(candidate);
+        }
+      } catch {
+        // ignore missing paths
+      }
+    }
+
     return matches;
   }
 
@@ -152,27 +168,40 @@ export class MockPlatformAdapter implements IPlatformAdapter {
   }
 
   async fileExists(path: string): Promise<boolean> {
-    return this.files.has(path);
+    if (this.files.has(path)) {
+      return true;
+    }
+
+    try {
+      await fs.access(path);
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   async readFile(path: string): Promise<string> {
     const content = this.files.get(path);
-    if (content === undefined) {
-      throw new Error(`File not found: ${path}`);
+    if (content !== undefined) {
+      return content;
     }
-    return content;
+
+    return fs.readFile(path, 'utf-8');
   }
 
   async writeFile(path: string, content: string): Promise<void> {
     this.files.set(path, content);
+    await fs.mkdir(dirname(path), { recursive: true });
+    await fs.writeFile(path, content, 'utf-8');
   }
 
-  async mkdirP(_path: string): Promise<void> {
-    // Mock: no-op for testing
+  async mkdirP(path: string): Promise<void> {
+    await fs.mkdir(path, { recursive: true });
   }
 
   async rmRF(path: string): Promise<void> {
     this.files.delete(path);
+    await fs.rm(path, { recursive: true, force: true });
   }
 
   // ===== Environment =====
@@ -190,7 +219,7 @@ export class MockPlatformAdapter implements IPlatformAdapter {
       this.cachedTools.set(tool, new Map());
     }
     const cachedPath = `/cache/${tool}/${version}`;
-    this.cachedTools.get(tool)!.set(version, cachedPath);
+    this.cachedTools.get(tool).set(version, cachedPath);
     return cachedPath;
   }
 

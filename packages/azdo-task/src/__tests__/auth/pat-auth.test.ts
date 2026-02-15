@@ -1,17 +1,23 @@
-import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-import { getPatAuth } from '../../auth/pat-auth.js';
-import * as tl from 'azure-pipelines-task-lib/task.js';
+import { describe, it, expect, jest, beforeEach, beforeAll } from '@jest/globals';
 import type { IPlatformAdapter } from '@extension-tasks/core';
 
-// Mock azure-pipelines-task-lib
-jest.mock('azure-pipelines-task-lib/task.js');
+const taskLibMock = {
+  getEndpointAuthorization: jest.fn(),
+};
+
+jest.unstable_mockModule('azure-pipelines-task-lib/task.js', () => taskLibMock);
+
+let getPatAuth: (
+  connectionName: string,
+  platform: IPlatformAdapter
+) => Promise<{ authType: string; serviceUrl: string; token?: string }>;
 
 describe('Azure Pipelines PAT Auth', () => {
   let mockPlatform: jest.Mocked<IPlatformAdapter>;
-  let mockGetEndpointUrl: jest.MockedFunction<typeof tl.getEndpointUrl>;
-  let mockGetEndpointAuthorizationParameter: jest.MockedFunction<
-    typeof tl.getEndpointAuthorizationParameter
-  >;
+
+  beforeAll(async () => {
+    ({ getPatAuth } = await import('../../auth/pat-auth.js'));
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -19,7 +25,6 @@ describe('Azure Pipelines PAT Auth', () => {
     mockPlatform = {
       getInput: jest.fn(),
       getBoolInput: jest.fn(),
-      getPathInput: jest.fn(),
       getDelimitedInput: jest.fn(),
       setSecret: jest.fn(),
       setVariable: jest.fn(),
@@ -31,85 +36,56 @@ describe('Azure Pipelines PAT Auth', () => {
       which: jest.fn(),
       getVariable: jest.fn(),
       setOutput: jest.fn(),
+      findMatch: jest.fn(),
+      fileExists: jest.fn(),
+      readFile: jest.fn(),
+      writeFile: jest.fn(),
+      mkdirP: jest.fn(),
+      rmRF: jest.fn(),
+      getTempDir: jest.fn(),
+      cacheDir: jest.fn(),
+      findCachedTool: jest.fn(),
+      downloadTool: jest.fn(),
+      setResult: jest.fn(),
     } as unknown as jest.Mocked<IPlatformAdapter>;
-
-    mockGetEndpointUrl = tl.getEndpointUrl as jest.MockedFunction<typeof tl.getEndpointUrl>;
-    mockGetEndpointAuthorizationParameter = tl.getEndpointAuthorizationParameter as jest.MockedFunction<
-      typeof tl.getEndpointAuthorizationParameter
-    >;
   });
 
-  it('should return correct AuthCredentials structure', async () => {
-    const connectionName = 'TestConnection';
-    const expectedUrl = 'https://marketplace.visualstudio.com';
-    const expectedToken = 'test-pat-token-12345';
+  it('returns PAT credentials and masks token', async () => {
+    taskLibMock.getEndpointAuthorization.mockReturnValue({ parameters: { apitoken: 'token' } });
 
-    mockGetEndpointUrl.mockReturnValue(expectedUrl);
-    mockGetEndpointAuthorizationParameter.mockReturnValue(expectedToken);
+    const result = await getPatAuth('MyConnection', mockPlatform);
 
-    const result = await getPatAuth(connectionName, mockPlatform);
-
+    expect(taskLibMock.getEndpointAuthorization).toHaveBeenCalledWith('MyConnection', false);
     expect(result).toEqual({
       authType: 'pat',
-      serviceUrl: expectedUrl,
-      token: expectedToken,
+      serviceUrl: 'https://marketplace.visualstudio.com',
+      token: 'token',
     });
+    expect(mockPlatform.setSecret).toHaveBeenCalledWith('token');
   });
 
-  it('should mask PAT via platform.setSecret() immediately (security critical)', async () => {
-    const connectionName = 'TestConnection';
-    const secretToken = 'secret-pat-token-67890';
+  it('falls back to password parameter when apitoken is missing', async () => {
+    taskLibMock.getEndpointAuthorization.mockReturnValue({ parameters: { password: 'pwd-token' } });
 
-    mockGetEndpointUrl.mockReturnValue('https://marketplace.visualstudio.com');
-    mockGetEndpointAuthorizationParameter.mockReturnValue(secretToken);
+    const result = await getPatAuth('MyConnection', mockPlatform);
 
-    await getPatAuth(connectionName, mockPlatform);
-
-    expect(mockPlatform.setSecret).toHaveBeenCalledWith(secretToken);
-    expect(mockPlatform.setSecret).toHaveBeenCalledTimes(1);
+    expect(result.token).toBe('pwd-token');
+    expect(mockPlatform.setSecret).toHaveBeenCalledWith('pwd-token');
   });
 
-  it('should call getEndpointUrl with correct connection name', async () => {
-    const connectionName = 'MyConnection';
-    mockGetEndpointUrl.mockReturnValue('https://marketplace.visualstudio.com');
-    mockGetEndpointAuthorizationParameter.mockReturnValue('token');
+  it('throws when service connection is not found', async () => {
+    taskLibMock.getEndpointAuthorization.mockReturnValue(undefined);
 
-    await getPatAuth(connectionName, mockPlatform);
-
-    expect(mockGetEndpointUrl).toHaveBeenCalledWith(connectionName, false);
-  });
-
-  it('should call getEndpointAuthorizationParameter with correct parameters', async () => {
-    const connectionName = 'TestConnection';
-    mockGetEndpointUrl.mockReturnValue('https://marketplace.visualstudio.com');
-    mockGetEndpointAuthorizationParameter.mockReturnValue('token');
-
-    await getPatAuth(connectionName, mockPlatform);
-
-    expect(mockGetEndpointAuthorizationParameter).toHaveBeenCalledWith(
-      connectionName,
-      'apitoken',
-      false
+    await expect(getPatAuth('MissingConnection', mockPlatform)).rejects.toThrow(
+      "Service connection 'MissingConnection' not found"
     );
   });
 
-  it('should handle empty token and still mask it', async () => {
-    const connectionName = 'TestConnection';
-    mockGetEndpointUrl.mockReturnValue('https://marketplace.visualstudio.com');
-    mockGetEndpointAuthorizationParameter.mockReturnValue('');
+  it('throws when PAT is missing', async () => {
+    taskLibMock.getEndpointAuthorization.mockReturnValue({ parameters: {} });
 
-    const result = await getPatAuth(connectionName, mockPlatform);
-
-    expect(result.token).toBe('');
-    expect(mockPlatform.setSecret).toHaveBeenCalledWith('');
-  });
-
-  it('should use authType "pat"', async () => {
-    mockGetEndpointUrl.mockReturnValue('https://marketplace.visualstudio.com');
-    mockGetEndpointAuthorizationParameter.mockReturnValue('token');
-
-    const result = await getPatAuth('TestConnection', mockPlatform);
-
-    expect(result.authType).toBe('pat');
+    await expect(getPatAuth('MyConnection', mockPlatform)).rejects.toThrow(
+      "PAT not found in service connection 'MyConnection'"
+    );
   });
 });

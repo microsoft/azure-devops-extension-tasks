@@ -62,7 +62,9 @@ function setToSortedArray(values: Set<string>): string[] {
 }
 
 function expressionForInput(inputName: string): RegExp {
-  return new RegExp(`^\\$\\{\\{\\s*inputs\\.${inputName.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&')}\\s*\\}\\}$`);
+  return new RegExp(
+    `^\\$\\{\\{\\s*inputs\\.${inputName.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&')}\\s*\\}\\}$`
+  );
 }
 
 describe('Composite action wrapper contract', () => {
@@ -70,69 +72,88 @@ describe('Composite action wrapper contract', () => {
   const mainInputs = mainAction.inputs ?? {};
   const mainOutputs = mainAction.outputs ?? {};
 
-  describe.each(compositeActionTable)('$operation composite action ($relativePath)', ({ operation, relativePath, absolutePath }) => {
-    it('declares a one-to-one contract between inputs and forwarded with-values', () => {
-      const compositeAction = loadActionDefinition(absolutePath);
-      const compositeInputs = compositeAction.inputs ?? {};
-      const stepWith = compositeAction.runs?.steps?.[0]?.with ?? {};
+  describe.each(compositeActionTable)(
+    '$operation composite action ($relativePath)',
+    ({ operation, relativePath, absolutePath }) => {
+      it('declares a one-to-one contract between inputs and forwarded with-values', () => {
+        const compositeAction = loadActionDefinition(absolutePath);
+        const compositeInputs = compositeAction.inputs ?? {};
+        const stepWith = compositeAction.runs?.steps?.[0]?.with ?? {};
 
-      const mismatches: string[] = [];
-      const withOperation = stepWith.operation;
-      if (withOperation !== operation) {
-        mismatches.push(`${relativePath}: expected step with.operation to be '${operation}' but got ${JSON.stringify(withOperation)}`);
-      }
-
-      const compositeInputNames = new Set(Object.keys(compositeInputs));
-      const mappedInputNames = new Set(Object.keys(stepWith).filter((name) => name !== 'operation'));
-
-      const missingInWith = setToSortedArray(new Set([...compositeInputNames].filter((name) => !mappedInputNames.has(name))));
-      const extraInWith = setToSortedArray(new Set([...mappedInputNames].filter((name) => !compositeInputNames.has(name))));
-
-      if (missingInWith.length > 0) {
-        mismatches.push(`${relativePath}: inputs missing from step.with: [${missingInWith.join(', ')}]`);
-      }
-      if (extraInWith.length > 0) {
-        mismatches.push(`${relativePath}: step.with contains undeclared inputs: [${extraInWith.join(', ')}]`);
-      }
-
-      for (const inputName of compositeInputNames) {
-        if (!mainInputs[inputName]) {
-          mismatches.push(`${relativePath}: input '${inputName}' is not defined in root action.yml`);
-          continue;
-        }
-
-        const mainDefault = mainInputs[inputName]?.default;
-        const compositeDefault = compositeInputs[inputName]?.default;
-        if (mainDefault !== compositeDefault) {
+        const mismatches: string[] = [];
+        const withOperation = stepWith.operation;
+        if (withOperation !== operation) {
           mismatches.push(
-            `${relativePath}: input '${inputName}' default mismatch\n  composite: ${JSON.stringify(compositeDefault)}\n  root:      ${JSON.stringify(mainDefault)}`
+            `${relativePath}: expected step with.operation to be '${operation}' but got ${JSON.stringify(withOperation)}`
           );
         }
 
-        const mappedValue = stepWith[inputName];
-        const mappedValueText = typeof mappedValue === 'string' ? mappedValue.trim() : '';
-        if (!expressionForInput(inputName).test(mappedValueText)) {
+        const compositeInputNames = new Set(Object.keys(compositeInputs));
+        const mappedInputNames = new Set(
+          Object.keys(stepWith).filter((name) => name !== 'operation')
+        );
+
+        const missingInWith = setToSortedArray(
+          new Set([...compositeInputNames].filter((name) => !mappedInputNames.has(name)))
+        );
+        const extraInWith = setToSortedArray(
+          new Set([...mappedInputNames].filter((name) => !compositeInputNames.has(name)))
+        );
+
+        if (missingInWith.length > 0) {
           mismatches.push(
-            `${relativePath}: input '${inputName}' must be forwarded as \${{ inputs.${inputName} }} but got ${JSON.stringify(mappedValue)}`
+            `${relativePath}: inputs missing from step.with: [${missingInWith.join(', ')}]`
           );
         }
-      }
-
-      expect(mismatches).toEqual([]);
-    });
-
-    it('only exposes outputs that exist in root action.yml', () => {
-      const compositeAction = loadActionDefinition(absolutePath);
-      const compositeOutputs = compositeAction.outputs ?? {};
-
-      const mismatches: string[] = [];
-      for (const outputName of Object.keys(compositeOutputs)) {
-        if (!mainOutputs[outputName]) {
-          mismatches.push(`${relativePath}: output '${outputName}' is not defined in root action.yml`);
+        if (extraInWith.length > 0) {
+          mismatches.push(
+            `${relativePath}: step.with contains undeclared inputs: [${extraInWith.join(', ')}]`
+          );
         }
-      }
 
-      expect(mismatches).toEqual([]);
-    });
-  });
+        for (const inputName of compositeInputNames) {
+          if (!mainInputs[inputName]) {
+            mismatches.push(
+              `${relativePath}: input '${inputName}' is not defined in root action.yml`
+            );
+            continue;
+          }
+
+          const mainDefault = mainInputs[inputName]?.default;
+          const compositeDefault = compositeInputs[inputName]?.default;
+          if (mainDefault !== compositeDefault) {
+            mismatches.push(
+              `${relativePath}: input '${inputName}' default mismatch\n  composite: ${JSON.stringify(compositeDefault)}\n  root:      ${JSON.stringify(mainDefault)}`
+            );
+          }
+
+          const mappedValue = stepWith[inputName];
+          const mappedValueText = typeof mappedValue === 'string' ? mappedValue.trim() : '';
+          if (!expressionForInput(inputName).test(mappedValueText)) {
+            mismatches.push(
+              `${relativePath}: input '${inputName}' must be forwarded as \${{ inputs.${inputName} }} but got ${JSON.stringify(mappedValue)}`
+            );
+          }
+        }
+
+        expect(mismatches).toEqual([]);
+      });
+
+      it('only exposes outputs that exist in root action.yml', () => {
+        const compositeAction = loadActionDefinition(absolutePath);
+        const compositeOutputs = compositeAction.outputs ?? {};
+
+        const mismatches: string[] = [];
+        for (const outputName of Object.keys(compositeOutputs)) {
+          if (!mainOutputs[outputName]) {
+            mismatches.push(
+              `${relativePath}: output '${outputName}' is not defined in root action.yml`
+            );
+          }
+        }
+
+        expect(mismatches).toEqual([]);
+      });
+    }
+  );
 });

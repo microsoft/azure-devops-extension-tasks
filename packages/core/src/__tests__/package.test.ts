@@ -10,7 +10,7 @@ describe('packageExtension', () => {
   beforeEach(() => {
     platform = new MockPlatformAdapter();
     platform.registerTool('tfx', '/usr/bin/tfx');
-    tfxManager = new TfxManager({ version: 'built-in', platform });
+    tfxManager = new TfxManager({ tfxVersion: 'built-in', platform });
   });
 
   it('should package extension with minimal options', async () => {

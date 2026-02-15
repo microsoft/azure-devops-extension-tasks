@@ -11,14 +11,8 @@
     "Minor": 0,
     "Patch": 0
   },
-  "visibility": [
-    "Build",
-    "Release"
-  ],
-  "runsOn": [
-    "Server",
-    "ServerGate"
-  ],
+  "visibility": ["Build", "Release"],
+  "runsOn": ["Server", "ServerGate"],
   "groups": [
     {
       "name": "extension",

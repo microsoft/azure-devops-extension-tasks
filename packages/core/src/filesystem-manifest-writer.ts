@@ -1,11 +1,11 @@
 /**
  * Filesystem Manifest Writer - Write modified manifests to filesystem
- * 
+ *
  * Writes extension and task manifests back to the filesystem and generates
  * an overrides.json file for tfx to use during packaging.
  */
 
-import { writeFile } from 'fs/promises';
+import { writeFile, readFile, readdir } from 'fs/promises';
 import path from 'path';
 import type { ManifestEditor } from './manifest-editor.js';
 import type { ExtensionManifest, TaskManifest } from './manifest-reader.js';
@@ -14,22 +14,22 @@ import type { FilesystemManifestReader } from './filesystem-manifest-reader.js';
 
 /**
  * FilesystemManifestWriter - Write manifests to filesystem
- * 
+ *
  * Writes modified extension and task manifests directly to filesystem files.
  * Also generates an overrides.json file in the temp directory that tfx can
  * use to override values during packaging without modifying source files.
- * 
+ *
  * Example usage:
  * ```typescript
  * const reader = new FilesystemManifestReader({ rootFolder: './src', platform });
  * const editor = ManifestEditor.fromReader(reader);
  * editor.setVersion('2.0.0');
  * await editor.updateAllTaskVersions('2.0.0', 'major');
- * 
+ *
  * const writer = await editor.toWriter();
  * await writer.writeToFilesystem();
  * await writer.close();
- * 
+ *
  * // Use writer.getOverridesPath() with tfx --overrides-file
  * ```
  */
@@ -50,34 +50,32 @@ export class FilesystemManifestWriter {
    */
   static fromEditor(editor: ManifestEditor): FilesystemManifestWriter {
     const reader = editor.getReader();
-    
+
     // Ensure reader is a FilesystemManifestReader
     if (reader.constructor.name !== 'FilesystemManifestReader') {
-      throw new Error(
-        'FilesystemManifestWriter can only be used with FilesystemManifestReader'
-      );
+      throw new Error('FilesystemManifestWriter can only be used with FilesystemManifestReader');
     }
-    
+
     // Get platform from reader (we need it for file operations)
     const fsReader = reader as FilesystemManifestReader;
     const platform = (fsReader as any).platform as IPlatformAdapter;
-    
+
     return new FilesystemManifestWriter(editor, platform);
   }
 
   /**
    * Write modified manifests to the filesystem
-   * 
+   *
    * This updates task.json files directly and writes extension manifest changes.
    * It also generates an overrides.json in the temp directory that can be passed
    * to tfx with --overrides-file.
-   * 
+   *
    * @returns Promise that resolves when writing is complete
    */
   async writeToFilesystem(): Promise<void> {
     const reader = this.editor.getReader() as FilesystemManifestReader;
     const rootFolder = (reader as any).getRootFolder() as string;
-    
+
     const manifestMods = this.editor.getManifestModifications();
     const taskManifestMods = this.editor.getTaskManifestModifications();
     const fileMods = this.editor.getModifications();
@@ -99,10 +97,8 @@ export class FilesystemManifestWriter {
     // Step 3: Write any additional file modifications
     for (const [filePath, mod] of fileMods) {
       if (mod.type === 'modify' && mod.content) {
-        const absolutePath = path.isAbsolute(filePath)
-          ? filePath
-          : path.join(rootFolder, filePath);
-        
+        const absolutePath = path.isAbsolute(filePath) ? filePath : path.join(rootFolder, filePath);
+
         this.platform.debug(`Writing file: ${absolutePath}`);
         await writeFile(absolutePath, mod.content);
       }
@@ -124,24 +120,26 @@ export class FilesystemManifestWriter {
     taskManifestMods: Map<string, Partial<TaskManifest>>
   ): Promise<void> {
     const tasks = await reader.readTaskManifests();
-    
+    const appliedTaskNames = new Set<string>();
+
     // Get packagePath map to resolve actual source paths
-    const packagePathMap = await (reader as any).buildPackagePathMap() as Map<string, string>;
-    
+    const packagePathMap = (await (reader as any).buildPackagePathMap()) as Map<string, string>;
+
     for (const { path: taskPath, manifest } of tasks) {
       const mods = taskManifestMods.get(manifest.name);
       if (mods) {
+        appliedTaskNames.add(manifest.name);
         // Apply modifications
         Object.assign(manifest, mods);
-        
+
         // Resolve actual source path using prefix matching (same logic as reader)
         let actualPath = taskPath;
         const normalizedTaskPath = taskPath.replace(/\\/g, '/');
-        
+
         // Try to find a matching packagePath prefix
         for (const [pkgPath, sourcePath] of packagePathMap.entries()) {
           const normalizedPkgPath = pkgPath.replace(/\\/g, '/');
-          
+
           // Check for exact match or prefix match (packagePath/subdir)
           if (normalizedTaskPath === normalizedPkgPath) {
             // Exact match: TaskName → sourcePath
@@ -154,23 +152,90 @@ export class FilesystemManifestWriter {
             break;
           }
         }
-        
+
         this.platform.debug(
           `Writing task manifest: taskPath='${taskPath}', actualPath='${actualPath}'`
         );
-        
+
         // Resolve absolute path
         const absoluteTaskPath = path.isAbsolute(actualPath)
           ? actualPath
           : path.join(rootFolder, actualPath);
-        
+
         const taskJsonPath = path.join(absoluteTaskPath, 'task.json');
-        
+
         this.platform.debug(`Writing to file: ${taskJsonPath}`);
         const manifestJson = JSON.stringify(manifest, null, 2) + '\n';
         await writeFile(taskJsonPath, manifestJson, 'utf-8');
       }
     }
+
+    // Fallback: apply modifications for tasks not discoverable via contribution paths
+    for (const [taskName, mods] of taskManifestMods.entries()) {
+      if (appliedTaskNames.has(taskName)) {
+        continue;
+      }
+
+      const fallbackTaskDir = await this.findTaskDirectoryByName(rootFolder, taskName);
+      if (!fallbackTaskDir) {
+        this.platform.debug(`No task.json found for task '${taskName}' during fallback write`);
+        continue;
+      }
+
+      const taskJsonPath = path.join(fallbackTaskDir, 'task.json');
+      const content = await readFile(taskJsonPath, 'utf-8');
+      const manifest = JSON.parse(content) as TaskManifest;
+      Object.assign(manifest, mods);
+
+      this.platform.debug(`Fallback writing task manifest: ${taskJsonPath}`);
+      await writeFile(taskJsonPath, JSON.stringify(manifest, null, 2) + '\n', 'utf-8');
+    }
+  }
+
+  /**
+   * Recursively find a task directory by task manifest name
+   */
+  private async findTaskDirectoryByName(
+    rootFolder: string,
+    taskName: string
+  ): Promise<string | null> {
+    const stack: string[] = [rootFolder];
+
+    while (stack.length > 0) {
+      const current = stack.pop();
+      let entries;
+
+      try {
+        entries = await readdir(current, { withFileTypes: true });
+      } catch {
+        continue;
+      }
+
+      for (const entry of entries) {
+        const absolutePath = path.join(current, entry.name);
+
+        if (entry.isDirectory()) {
+          stack.push(absolutePath);
+          continue;
+        }
+
+        if (!entry.isFile() || entry.name !== 'task.json') {
+          continue;
+        }
+
+        try {
+          const content = await readFile(absolutePath, 'utf-8');
+          const manifest = JSON.parse(content) as TaskManifest;
+          if (manifest.name === taskName) {
+            return path.dirname(absolutePath);
+          }
+        } catch {
+          // ignore unreadable/invalid task manifests during search
+        }
+      }
+    }
+
+    return null;
   }
 
   /**
@@ -182,13 +247,13 @@ export class FilesystemManifestWriter {
   ): Promise<void> {
     const manifest = await reader.readExtensionManifest();
     Object.assign(manifest, manifestMods);
-    
+
     // Get manifest path from reader
     const manifestPath = (reader as any).getManifestPath() as string;
     if (!manifestPath) {
       throw new Error('Extension manifest path not resolved');
     }
-    
+
     this.platform.debug(`Writing extension manifest: ${manifestPath}`);
     const manifestJson = JSON.stringify(manifest, null, 2) + '\n';
     await writeFile(manifestPath, manifestJson, 'utf-8');
@@ -196,13 +261,11 @@ export class FilesystemManifestWriter {
 
   /**
    * Generate overrides.json file in temp directory
-   * 
+   *
    * This file can be passed to tfx with --overrides-file to override
    * extension manifest values during packaging without modifying source files.
    */
-  private async generateOverridesFile(
-    manifestMods: Partial<ExtensionManifest>
-  ): Promise<void> {
+  private async generateOverridesFile(manifestMods: Partial<ExtensionManifest>): Promise<void> {
     if (Object.keys(manifestMods).length === 0) {
       this.platform.debug('No manifest modifications, skipping overrides.json generation');
       return;
@@ -210,27 +273,27 @@ export class FilesystemManifestWriter {
 
     // Create overrides object with only the fields that should be overridden
     const overrides: any = {};
-    
+
     if (manifestMods.publisher) {
       overrides.publisher = manifestMods.publisher;
     }
-    
+
     if (manifestMods.id) {
       overrides.id = manifestMods.id;
     }
-    
+
     if (manifestMods.version) {
       overrides.version = manifestMods.version;
     }
-    
+
     if (manifestMods.name) {
       overrides.name = manifestMods.name;
     }
-    
+
     if (manifestMods.description) {
       overrides.description = manifestMods.description;
     }
-    
+
     if (manifestMods.galleryFlags) {
       overrides.galleryFlags = manifestMods.galleryFlags;
     }
@@ -238,11 +301,11 @@ export class FilesystemManifestWriter {
     // Write to temp directory
     const tempDir = this.platform.getTempDir();
     this.overridesPath = path.join(tempDir, `overrides-${Date.now()}.json`);
-    
+
     this.platform.debug(`Writing overrides file: ${this.overridesPath}`);
     const overridesJson = JSON.stringify(overrides, null, 2) + '\n';
     await writeFile(this.overridesPath, overridesJson, 'utf-8');
-    
+
     this.platform.info(`Generated overrides file: ${this.overridesPath}`);
   }
 

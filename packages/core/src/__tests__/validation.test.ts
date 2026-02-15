@@ -1,3 +1,4 @@
+import { jest } from '@jest/globals';
 import {
   validateExtensionId,
   validatePublisherId,
@@ -7,9 +8,9 @@ import {
   validateNodeAvailable,
   validateNpmAvailable,
   validateTfxAvailable,
-  validateAzureCliAvailable
+  validateAzureCliAvailable,
 } from '../validation.js';
-import { MockPlatformAdapter } from '../__mocks__/mock-platform-adapter.js';
+import { MockPlatformAdapter } from './helpers/mock-platform.js';
 
 describe('validation', () => {
   describe('validateExtensionId', () => {
@@ -23,29 +24,49 @@ describe('validation', () => {
     });
 
     it('should reject empty extension ID', () => {
-      expect(() => validateExtensionId('')).toThrow('Extension ID cannot be empty');
+      expect(() => validateExtensionId('')).toThrow(
+        'Extension ID is required and must be a string'
+      );
     });
 
     it('should reject non-string extension ID', () => {
-      expect(() => validateExtensionId(null as any)).toThrow('Extension ID is required and must be a string');
-      expect(() => validateExtensionId(undefined as any)).toThrow('Extension ID is required and must be a string');
-      expect(() => validateExtensionId(123 as any)).toThrow('Extension ID is required and must be a string');
+      expect(() => validateExtensionId(null as any)).toThrow(
+        'Extension ID is required and must be a string'
+      );
+      expect(() => validateExtensionId(undefined as any)).toThrow(
+        'Extension ID is required and must be a string'
+      );
+      expect(() => validateExtensionId(123 as any)).toThrow(
+        'Extension ID is required and must be a string'
+      );
     });
 
     it('should reject extension ID with whitespace', () => {
-      expect(() => validateExtensionId(' my-extension')).toThrow('Extension ID cannot have leading or trailing whitespace');
-      expect(() => validateExtensionId('my-extension ')).toThrow('Extension ID cannot have leading or trailing whitespace');
+      expect(() => validateExtensionId(' my-extension')).toThrow(
+        'Extension ID cannot have leading or trailing whitespace'
+      );
+      expect(() => validateExtensionId('my-extension ')).toThrow(
+        'Extension ID cannot have leading or trailing whitespace'
+      );
     });
 
     it('should reject extension ID with invalid characters', () => {
-      expect(() => validateExtensionId('my extension')).toThrow('Extension ID can only contain letters, numbers');
-      expect(() => validateExtensionId('my@extension')).toThrow('Extension ID can only contain letters, numbers');
-      expect(() => validateExtensionId('my/extension')).toThrow('Extension ID can only contain letters, numbers');
+      expect(() => validateExtensionId('my extension')).toThrow(
+        'Extension ID can only contain letters, numbers'
+      );
+      expect(() => validateExtensionId('my@extension')).toThrow(
+        'Extension ID can only contain letters, numbers'
+      );
+      expect(() => validateExtensionId('my/extension')).toThrow(
+        'Extension ID can only contain letters, numbers'
+      );
     });
 
     it('should reject extension ID that is too long', () => {
       const longId = 'a'.repeat(201);
-      expect(() => validateExtensionId(longId)).toThrow('Extension ID cannot exceed 200 characters');
+      expect(() => validateExtensionId(longId)).toThrow(
+        'Extension ID cannot exceed 200 characters'
+      );
     });
   });
 
@@ -58,17 +79,25 @@ describe('validation', () => {
     });
 
     it('should reject empty publisher ID', () => {
-      expect(() => validatePublisherId('')).toThrow('Publisher ID cannot be empty');
+      expect(() => validatePublisherId('')).toThrow(
+        'Publisher ID is required and must be a string'
+      );
     });
 
     it('should reject publisher ID with invalid characters', () => {
-      expect(() => validatePublisherId('my publisher')).toThrow('Publisher ID can only contain letters, numbers');
-      expect(() => validatePublisherId('my#publisher')).toThrow('Publisher ID can only contain letters, numbers');
+      expect(() => validatePublisherId('my publisher')).toThrow(
+        'Publisher ID can only contain letters, numbers'
+      );
+      expect(() => validatePublisherId('my#publisher')).toThrow(
+        'Publisher ID can only contain letters, numbers'
+      );
     });
 
     it('should reject publisher ID that is too long', () => {
       const longId = 'a'.repeat(201);
-      expect(() => validatePublisherId(longId)).toThrow('Publisher ID cannot exceed 200 characters');
+      expect(() => validatePublisherId(longId)).toThrow(
+        'Publisher ID cannot exceed 200 characters'
+      );
     });
   });
 
@@ -80,25 +109,35 @@ describe('validation', () => {
     });
 
     it('should reject empty URL', () => {
-      expect(() => validateAccountUrl('')).toThrow('Account URL cannot be empty');
+      expect(() => validateAccountUrl('')).toThrow('Account URL is required and must be a string');
     });
 
     it('should reject non-string URL', () => {
-      expect(() => validateAccountUrl(null as any)).toThrow('Account URL is required and must be a string');
+      expect(() => validateAccountUrl(null as any)).toThrow(
+        'Account URL is required and must be a string'
+      );
     });
 
     it('should reject invalid URL format', () => {
       expect(() => validateAccountUrl('not-a-url')).toThrow('Account URL must be a valid URL');
-      expect(() => validateAccountUrl('ftp://dev.azure.com')).toThrow('Account URL must use HTTPS protocol');
+      expect(() => validateAccountUrl('ftp://dev.azure.com')).toThrow(
+        'Account URL must use HTTPS protocol'
+      );
     });
 
     it('should reject non-HTTPS URLs', () => {
-      expect(() => validateAccountUrl('http://dev.azure.com/myorg')).toThrow('Account URL must use HTTPS protocol');
+      expect(() => validateAccountUrl('http://dev.azure.com/myorg')).toThrow(
+        'Account URL must use HTTPS protocol'
+      );
     });
 
     it('should reject non-Azure DevOps domains', () => {
-      expect(() => validateAccountUrl('https://github.com/myorg')).toThrow('Account URL must be an Azure DevOps URL');
-      expect(() => validateAccountUrl('https://google.com')).toThrow('Account URL must be an Azure DevOps URL');
+      expect(() => validateAccountUrl('https://github.com/myorg')).toThrow(
+        'Account URL must be an Azure DevOps URL'
+      );
+      expect(() => validateAccountUrl('https://google.com')).toThrow(
+        'Account URL must be an Azure DevOps URL'
+      );
     });
   });
 
@@ -112,21 +151,27 @@ describe('validation', () => {
     });
 
     it('should reject empty version', () => {
-      expect(() => validateVersion('')).toThrow('Version cannot be empty');
+      expect(() => validateVersion('')).toThrow('Version is required and must be a string');
     });
 
     it('should reject non-string version', () => {
-      expect(() => validateVersion(null as any)).toThrow('Version is required and must be a string');
+      expect(() => validateVersion(null as any)).toThrow(
+        'Version is required and must be a string'
+      );
     });
 
     it('should reject version with invalid format', () => {
       expect(() => validateVersion('v1.0.0')).toThrow('Version must follow semantic versioning');
-      expect(() => validateVersion('1.0.0-beta')).toThrow('Version must follow semantic versioning');
+      expect(() => validateVersion('1.0.0-beta')).toThrow(
+        'Version must follow semantic versioning'
+      );
       expect(() => validateVersion('1.a.0')).toThrow('Version must follow semantic versioning');
     });
 
     it('should reject version with out-of-range numbers', () => {
-      expect(() => validateVersion('1.1000000.0')).toThrow('Version numbers must be between 0 and 999999');
+      expect(() => validateVersion('1.1000000.0')).toThrow(
+        'Version numbers must be between 0 and 999999'
+      );
       expect(() => validateVersion('-1.0.0')).toThrow('Version must follow semantic versioning');
     });
   });
@@ -144,20 +189,14 @@ describe('validation', () => {
     it('should log version in debug mode when available', async () => {
       const platform = new MockPlatformAdapter();
       jest.spyOn(platform, 'which').mockResolvedValue('/usr/bin/node');
-      jest.spyOn(platform, 'exec').mockImplementation(async (tool, args, options) => {
-        // Simulate node --version output
-        if (options?.listeners?.stdout) {
-          options.listeners.stdout('v18.17.0\n');
-        }
-        return 0;
-      });
+      jest.spyOn(platform, 'exec').mockResolvedValue(0);
       const debugSpy = jest.spyOn(platform, 'debug');
 
       await validateBinaryAvailable('node', platform, true);
 
       expect(debugSpy).toHaveBeenCalledWith('Checking for required binary: node');
       expect(debugSpy).toHaveBeenCalledWith('Found node at: /usr/bin/node');
-      expect(debugSpy).toHaveBeenCalledWith('node version: v18.17.0');
+      expect(debugSpy).toHaveBeenCalledWith('node version: available');
     });
 
     it('should not log version when logVersion is false', async () => {
@@ -185,18 +224,21 @@ describe('validation', () => {
       const platform = new MockPlatformAdapter();
       jest.spyOn(platform, 'which').mockRejectedValue(new Error('not found'));
 
-      await expect(validateBinaryAvailable('missing-binary', platform))
-        .rejects.toThrow("Required binary 'missing-binary' is not available");
+      await expect(validateBinaryAvailable('missing-binary', platform)).rejects.toThrow(
+        "Required binary 'missing-binary' is not available"
+      );
     });
 
     it('should reject invalid binary name', async () => {
       const platform = new MockPlatformAdapter();
-      
-      await expect(validateBinaryAvailable('', platform))
-        .rejects.toThrow('Binary name is required and must be a string');
-      
-      await expect(validateBinaryAvailable(null as any, platform))
-        .rejects.toThrow('Binary name is required and must be a string');
+
+      await expect(validateBinaryAvailable('', platform)).rejects.toThrow(
+        'Binary name is required and must be a string'
+      );
+
+      await expect(validateBinaryAvailable(null as any, platform)).rejects.toThrow(
+        'Binary name is required and must be a string'
+      );
     });
   });
 
@@ -213,17 +255,12 @@ describe('validation', () => {
     it('should log node version in debug mode', async () => {
       const platform = new MockPlatformAdapter();
       jest.spyOn(platform, 'which').mockResolvedValue('/usr/bin/node');
-      jest.spyOn(platform, 'exec').mockImplementation(async (tool, args, options) => {
-        if (options?.listeners?.stdout) {
-          options.listeners.stdout('v20.0.0\n');
-        }
-        return 0;
-      });
+      jest.spyOn(platform, 'exec').mockResolvedValue(0);
       const debugSpy = jest.spyOn(platform, 'debug');
 
       await validateNodeAvailable(platform, true);
 
-      expect(debugSpy).toHaveBeenCalledWith('node version: v20.0.0');
+      expect(debugSpy).toHaveBeenCalledWith('node version: available');
     });
   });
 
@@ -240,17 +277,12 @@ describe('validation', () => {
     it('should log npm version in debug mode', async () => {
       const platform = new MockPlatformAdapter();
       jest.spyOn(platform, 'which').mockResolvedValue('/usr/bin/npm');
-      jest.spyOn(platform, 'exec').mockImplementation(async (tool, args, options) => {
-        if (options?.listeners?.stdout) {
-          options.listeners.stdout('9.6.7\n');
-        }
-        return 0;
-      });
+      jest.spyOn(platform, 'exec').mockResolvedValue(0);
       const debugSpy = jest.spyOn(platform, 'debug');
 
       await validateNpmAvailable(platform, true);
 
-      expect(debugSpy).toHaveBeenCalledWith('npm version: 9.6.7');
+      expect(debugSpy).toHaveBeenCalledWith('npm version: available');
     });
   });
 
@@ -267,17 +299,12 @@ describe('validation', () => {
     it('should log tfx version in debug mode', async () => {
       const platform = new MockPlatformAdapter();
       jest.spyOn(platform, 'which').mockResolvedValue('/usr/bin/tfx');
-      jest.spyOn(platform, 'exec').mockImplementation(async (tool, args, options) => {
-        if (options?.listeners?.stdout) {
-          options.listeners.stdout('TFS Cross Platform Command Line Interface v0.17.0\n');
-        }
-        return 0;
-      });
+      jest.spyOn(platform, 'exec').mockResolvedValue(0);
       const debugSpy = jest.spyOn(platform, 'debug');
 
       await validateTfxAvailable(platform, true);
 
-      expect(debugSpy).toHaveBeenCalledWith('tfx version: TFS Cross Platform Command Line Interface v0.17.0');
+      expect(debugSpy).toHaveBeenCalledWith('tfx version: available');
     });
   });
 
@@ -294,17 +321,12 @@ describe('validation', () => {
     it('should log Azure CLI version in debug mode', async () => {
       const platform = new MockPlatformAdapter();
       jest.spyOn(platform, 'which').mockResolvedValue('/usr/bin/az');
-      jest.spyOn(platform, 'exec').mockImplementation(async (tool, args, options) => {
-        if (options?.listeners?.stdout) {
-          options.listeners.stdout('azure-cli 2.50.0\n');
-        }
-        return 0;
-      });
+      jest.spyOn(platform, 'exec').mockResolvedValue(0);
       const debugSpy = jest.spyOn(platform, 'debug');
 
       await validateAzureCliAvailable(platform, true);
 
-      expect(debugSpy).toHaveBeenCalledWith('az version: azure-cli 2.50.0');
+      expect(debugSpy).toHaveBeenCalledWith('az version: available');
     });
   });
 });

@@ -98,7 +98,7 @@ describe('VSIX Integration Tests', () => {
       expect(tasksInfo).toHaveLength(9);
 
       // Verify structure needed for verifyInstall
-      const publishTask = tasksInfo.find(t => t.name === 'PublishExtension');
+      const publishTask = tasksInfo.find((t) => t.name === 'PublishExtension');
       expect(publishTask).toBeDefined();
       expect(publishTask!.friendlyName).toBe('Publish Extension');
       expect(publishTask!.version).toBe('6.0.0');
@@ -117,18 +117,14 @@ describe('VSIX Integration Tests', () => {
       const [manifest1, manifest2, manifest3] = await Promise.all([
         reader1.readExtensionManifest(),
         reader2.readExtensionManifest(),
-        reader3.readExtensionManifest()
+        reader3.readExtensionManifest(),
       ]);
 
       // All should get the same data
       expect(manifest1.id).toBe(manifest2.id);
       expect(manifest2.id).toBe(manifest3.id);
 
-      await Promise.all([
-        reader1.close(),
-        reader2.close(),
-        reader3.close()
-      ]);
+      await Promise.all([reader1.close(), reader2.close(), reader3.close()]);
     });
 
     it('should read specific files by path', async () => {
@@ -150,11 +146,11 @@ describe('VSIX Integration Tests', () => {
       const files = await reader.listFiles();
 
       // Should have extension manifest
-      expect(files.some(f => f.path === 'extension.vsomanifest')).toBe(true);
+      expect(files.some((f) => f.path === 'extension.vsomanifest')).toBe(true);
 
       // Should have task manifests
-      expect(files.some(f => f.path === 'PublishTask/task.json')).toBe(true);
-      expect(files.some(f => f.path === 'PackageTask/task.json')).toBe(true);
+      expect(files.some((f) => f.path === 'PublishTask/task.json')).toBe(true);
+      expect(files.some((f) => f.path === 'PackageTask/task.json')).toBe(true);
 
       // All files should have size info
       for (const file of files) {
@@ -257,63 +253,63 @@ async function createRealWorldVsix(outputPath: string): Promise<void> {
     tags: ['Extension', 'Marketplace', 'VSIX', 'Publishing'],
     targets: [{ id: 'Microsoft.VisualStudio.Services' }],
     icons: {
-      default: 'extension-icon.png'
+      default: 'extension-icon.png',
     },
     contributions: [
       {
         id: 'publish-task',
         type: 'ms.vss-distributed-task.task',
         targets: ['ms.vss-distributed-task.tasks'],
-        properties: { name: 'PublishTask' }
+        properties: { name: 'PublishTask' },
       },
       {
         id: 'package-task',
         type: 'ms.vss-distributed-task.task',
         targets: ['ms.vss-distributed-task.tasks'],
-        properties: { name: 'PackageTask' }
+        properties: { name: 'PackageTask' },
       },
       {
         id: 'unpublish-task',
         type: 'ms.vss-distributed-task.task',
         targets: ['ms.vss-distributed-task.tasks'],
-        properties: { name: 'UnpublishTask' }
+        properties: { name: 'UnpublishTask' },
       },
       {
         id: 'share-task',
         type: 'ms.vss-distributed-task.task',
         targets: ['ms.vss-distributed-task.tasks'],
-        properties: { name: 'ShareTask' }
+        properties: { name: 'ShareTask' },
       },
       {
         id: 'unshare-task',
         type: 'ms.vss-distributed-task.task',
         targets: ['ms.vss-distributed-task.tasks'],
-        properties: { name: 'UnshareTask' }
+        properties: { name: 'UnshareTask' },
       },
       {
         id: 'install-task',
         type: 'ms.vss-distributed-task.task',
         targets: ['ms.vss-distributed-task.tasks'],
-        properties: { name: 'InstallTask' }
+        properties: { name: 'InstallTask' },
       },
       {
         id: 'show-task',
         type: 'ms.vss-distributed-task.task',
         targets: ['ms.vss-distributed-task.tasks'],
-        properties: { name: 'ShowTask' }
+        properties: { name: 'ShowTask' },
       },
       {
         id: 'isvalid-task',
         type: 'ms.vss-distributed-task.task',
         targets: ['ms.vss-distributed-task.tasks'],
-        properties: { name: 'IsValidTask' }
+        properties: { name: 'IsValidTask' },
       },
       {
         id: 'verifyinstall-task',
         type: 'ms.vss-distributed-task.task',
         targets: ['ms.vss-distributed-task.tasks'],
-        properties: { name: 'VerifyInstallTask' }
-      }
+        properties: { name: 'VerifyInstallTask' },
+      },
     ],
     files: [
       { path: 'PublishTask' },
@@ -324,21 +320,66 @@ async function createRealWorldVsix(outputPath: string): Promise<void> {
       { path: 'InstallTask' },
       { path: 'ShowTask' },
       { path: 'IsValidTask' },
-      { path: 'VerifyInstallTask' }
-    ]
+      { path: 'VerifyInstallTask' },
+    ],
   };
 
   // Create task manifests for all 9 tasks
   const tasks = [
-    { name: 'PublishExtension', friendlyName: 'Publish Extension', description: 'Publish an extension to the marketplace', folder: 'PublishTask' },
-    { name: 'PackageExtension', friendlyName: 'Package Extension', description: 'Package an extension as VSIX', folder: 'PackageTask' },
-    { name: 'UnpublishExtension', friendlyName: 'Unpublish Extension', description: 'Remove an extension from marketplace', folder: 'UnpublishTask' },
-    { name: 'ShareExtension', friendlyName: 'Share Extension', description: 'Share extension with organizations', folder: 'ShareTask' },
-    { name: 'UnshareExtension', friendlyName: 'Unshare Extension', description: 'Unshare extension from organizations', folder: 'UnshareTask' },
-    { name: 'InstallExtension', friendlyName: 'Install Extension', description: 'Install extension to organizations', folder: 'InstallTask' },
-    { name: 'ShowExtension', friendlyName: 'Show Extension', description: 'Query extension metadata', folder: 'ShowTask' },
-    { name: 'IsValidExtension', friendlyName: 'Validate Extension', description: 'Validate extension status', folder: 'IsValidTask' },
-    { name: 'VerifyInstallExtension', friendlyName: 'Verify Install', description: 'Verify tasks are installed', folder: 'VerifyInstallTask' }
+    {
+      name: 'PublishExtension',
+      friendlyName: 'Publish Extension',
+      description: 'Publish an extension to the marketplace',
+      folder: 'PublishTask',
+    },
+    {
+      name: 'PackageExtension',
+      friendlyName: 'Package Extension',
+      description: 'Package an extension as VSIX',
+      folder: 'PackageTask',
+    },
+    {
+      name: 'UnpublishExtension',
+      friendlyName: 'Unpublish Extension',
+      description: 'Remove an extension from marketplace',
+      folder: 'UnpublishTask',
+    },
+    {
+      name: 'ShareExtension',
+      friendlyName: 'Share Extension',
+      description: 'Share extension with organizations',
+      folder: 'ShareTask',
+    },
+    {
+      name: 'UnshareExtension',
+      friendlyName: 'Unshare Extension',
+      description: 'Unshare extension from organizations',
+      folder: 'UnshareTask',
+    },
+    {
+      name: 'InstallExtension',
+      friendlyName: 'Install Extension',
+      description: 'Install extension to organizations',
+      folder: 'InstallTask',
+    },
+    {
+      name: 'ShowExtension',
+      friendlyName: 'Show Extension',
+      description: 'Query extension metadata',
+      folder: 'ShowTask',
+    },
+    {
+      name: 'IsValidExtension',
+      friendlyName: 'Validate Extension',
+      description: 'Validate extension status',
+      folder: 'IsValidTask',
+    },
+    {
+      name: 'VerifyInstallExtension',
+      friendlyName: 'Verify Install',
+      description: 'Verify tasks are installed',
+      folder: 'VerifyInstallTask',
+    },
   ];
 
   const options = { compress: true };
@@ -365,9 +406,9 @@ async function createRealWorldVsix(outputPath: string): Promise<void> {
           name: 'extensionId',
           type: 'string',
           label: 'Extension ID',
-          required: true
-        }
-      ]
+          required: true,
+        },
+      ],
     };
 
     zip.addBuffer(
@@ -380,8 +421,5 @@ async function createRealWorldVsix(outputPath: string): Promise<void> {
   zip.end();
 
   // Write to file
-  await pipelineAsync(
-    zip.outputStream,
-    createWriteStream(outputPath)
-  );
+  await pipelineAsync(zip.outputStream, createWriteStream(outputPath));
 }

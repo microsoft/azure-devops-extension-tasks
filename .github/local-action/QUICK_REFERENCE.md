@@ -5,6 +5,7 @@ Common debugging scenarios and their configurations.
 ## GitHub Actions
 
 ### Package Extension (No Auth)
+
 ```bash
 # VSCode: Select "Debug GitHub Action - Package" and press F5
 
@@ -16,6 +17,7 @@ node packages/github-action/src/main.ts
 ```
 
 ### Publish Extension
+
 ```bash
 # Set token first:
 export MARKETPLACE_TOKEN="your-pat-token"
@@ -34,6 +36,7 @@ node packages/github-action/src/main.ts
 ```
 
 ### Test with Local Action
+
 ```bash
 cd ~/local-action
 ./run.sh \
@@ -45,6 +48,7 @@ cd ~/local-action
 ## Azure Pipelines
 
 ### Package Extension (No Auth)
+
 ```bash
 # VSCode: Select "Debug Azure Pipelines Task - Package" and press F5
 
@@ -56,6 +60,7 @@ node packages/azdo-task/src/main.ts
 ```
 
 ### Publish Extension (PAT)
+
 ```bash
 # Set token:
 export MARKETPLACE_TOKEN="your-pat-token"
@@ -79,6 +84,7 @@ node packages/azdo-task/src/main.ts
 ## Environment Variables Quick Reference
 
 ### GitHub Actions Inputs
+
 Pattern: `INPUT_<NAME>` (uppercase, keep hyphens)
 
 ```bash
@@ -93,6 +99,7 @@ INPUT_TFX-VERSION=built-in
 ```
 
 ### Azure Pipelines Inputs
+
 Pattern: `INPUT_<NAME>` (uppercase, no hyphens)
 
 ```bash
@@ -107,6 +114,7 @@ INPUT_TFXVERSION=built-in
 ```
 
 ### Service Endpoint (Azure Pipelines)
+
 ```bash
 ENDPOINT_AUTH_PARAMETER_<ConnectionName>_APITOKEN=your-token
 ENDPOINT_URL_<ConnectionName>=https://marketplace.visualstudio.com
@@ -114,6 +122,7 @@ ENDPOINT_AUTH_SCHEME_<ConnectionName>=Token
 ```
 
 ### Agent/Runner Variables
+
 ```bash
 # GitHub Actions
 RUNNER_TEMP=./.tmp
@@ -126,37 +135,41 @@ AGENT_TOOLSDIRECTORY=./.cache
 
 ## Operations Reference
 
-| Operation | Auth Required | Key Inputs |
-|-----------|---------------|------------|
-| package | No | root-folder, output-path |
-| publish | Yes | auth-type, token, publish-source, root-folder OR vsix-file |
-| unpublish | Yes | auth-type, token, publisher-id, extension-id |
-| share | Yes | auth-type, token, publisher-id, extension-id, share-with |
-| unshare | Yes | auth-type, token, publisher-id, extension-id, unshare-with |
-| install | Yes | auth-type, token, publisher-id, extension-id, accounts |
-| show | Yes | auth-type, token, publisher-id, extension-id |
-| is-valid | Yes | auth-type, token, publisher-id, extension-id |
-| verify-install | Yes | auth-type, token, publisher-id, extension-id, accounts |
+| Operation      | Auth Required | Key Inputs                                                 |
+| -------------- | ------------- | ---------------------------------------------------------- |
+| package        | No            | root-folder, output-path                                   |
+| publish        | Yes           | auth-type, token, publish-source, root-folder OR vsix-file |
+| unpublish      | Yes           | auth-type, token, publisher-id, extension-id               |
+| share          | Yes           | auth-type, token, publisher-id, extension-id, share-with   |
+| unshare        | Yes           | auth-type, token, publisher-id, extension-id, unshare-with |
+| install        | Yes           | auth-type, token, publisher-id, extension-id, accounts     |
+| show           | Yes           | auth-type, token, publisher-id, extension-id               |
+| is-valid       | Yes           | auth-type, token, publisher-id, extension-id               |
+| verify-install | Yes           | auth-type, token, publisher-id, extension-id, accounts     |
 
 ## Common Commands
 
 ### Build
+
 ```bash
 npm install
 npm run build:v6
 ```
 
 ### Bundle
+
 ```bash
 npm run bundle
 ```
 
 ### Test
+
 ```bash
 npm test
 ```
 
 ### Clean
+
 ```bash
 npm run clean
 ```
@@ -164,6 +177,7 @@ npm run clean
 ## VSCode Launch Configs
 
 Available debug configurations:
+
 - `Debug GitHub Action - Package`
 - `Debug GitHub Action - Publish`
 - `Debug GitHub Action - Show`

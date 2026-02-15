@@ -105,14 +105,14 @@ export async function installExtension(
 
     // Authentication (using marketplace auth, not account-specific)
     args.option('--auth-type', auth.authType);
-    
+
     if (auth.authType === 'pat') {
-      args.option('--token', auth.token!);
-      platform.setSecret(auth.token!);
+      args.option('--token', auth.token);
+      platform.setSecret(auth.token);
     } else if (auth.authType === 'basic') {
-      args.option('--username', auth.username!);
-      args.option('--password', auth.password!);
-      platform.setSecret(auth.password!);
+      args.option('--username', auth.username);
+      args.option('--password', auth.password);
+      platform.setSecret(auth.password);
     }
 
     try {
@@ -164,9 +164,7 @@ export async function installExtension(
   const allSuccess = accountResults.every((r) => r.success);
   const successCount = accountResults.filter((r) => r.success).length;
 
-  platform.info(
-    `Installation complete: ${successCount}/${options.accounts.length} succeeded`
-  );
+  platform.info(`Installation complete: ${successCount}/${options.accounts.length} succeeded`);
 
   return {
     extensionId,

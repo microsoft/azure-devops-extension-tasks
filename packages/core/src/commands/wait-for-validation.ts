@@ -109,16 +109,16 @@ export async function waitForValidation(
 
     // Authentication
     args.option('--service-url', auth.serviceUrl);
-    
+
     if (auth.authType === 'pat') {
       args.option('--auth-type', 'pat');
-      args.option('--token', auth.token!);
-      platform.setSecret(auth.token!);
+      args.option('--token', auth.token);
+      platform.setSecret(auth.token);
     } else if (auth.authType === 'basic') {
       args.option('--auth-type', 'basic');
-      args.option('--username', auth.username!);
-      args.option('--password', auth.password!);
-      platform.setSecret(auth.password!);
+      args.option('--username', auth.username);
+      args.option('--password', auth.password);
+      platform.setSecret(auth.password);
     }
 
     try {
@@ -147,10 +147,7 @@ export async function waitForValidation(
             platform.info('⏳ Validation pending, retrying...');
             // Wait before retry with exponential backoff
             if (attempts < maxRetries) {
-              const waitTime = Math.min(
-                minTimeoutMs * Math.pow(2, attempts - 1),
-                maxTimeoutMs
-              );
+              const waitTime = Math.min(minTimeoutMs * Math.pow(2, attempts - 1), maxTimeoutMs);
               platform.debug(`Waiting ${waitTime / 1000}s before retry...`);
               await sleep(waitTime);
             }
@@ -186,7 +183,9 @@ export async function waitForValidation(
   }
 
   // Max retries reached
-  platform.error(`✗ Extension validation timed out after ${attempts} attempts (status: ${lastStatus})`);
+  platform.error(
+    `✗ Extension validation timed out after ${attempts} attempts (status: ${lastStatus})`
+  );
   return {
     status: lastStatus,
     isValid: false,

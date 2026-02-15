@@ -1,21 +1,27 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import * as core from '@actions/core';
 import { GitHubAdapter } from '../github-adapter.js';
-import { TaskResult } from '@extension-tasks/core';
 
 // Mock modules
 jest.mock('@actions/core');
 jest.mock('../github-adapter.js');
 jest.mock('../auth/index.js');
-jest.mock('@extension-tasks/core', () => {
-  const actual = jest.requireActual('@extension-tasks/core') as Record<string, unknown>;
-  return {
-    ...actual,
+jest.mock(
+  '@extension-tasks/core',
+  () => ({
+    TaskResult: {
+      Succeeded: 'Succeeded',
+      SucceededWithIssues: 'SucceededWithIssues',
+      Failed: 'Failed',
+      Cancelled: 'Cancelled',
+      Skipped: 'Skipped',
+    },
     TfxManager: jest.fn(),
     packageExtension: jest.fn(),
     publishExtension: jest.fn(),
-  };
-});
+  }),
+  { virtual: true }
+);
 
 describe('GitHub Action Main Entry', () => {
   let mockPlatform: jest.Mocked<GitHubAdapter>;
@@ -40,8 +46,6 @@ describe('GitHub Action Main Entry', () => {
       setOutput: jest.fn(),
       setResult: jest.fn(),
     } as unknown as jest.Mocked<GitHubAdapter>;
-
-    (GitHubAdapter as jest.MockedClass<typeof GitHubAdapter>).mockImplementation(() => mockPlatform);
   });
 
   it('should create platform adapter on initialization', () => {
@@ -50,7 +54,7 @@ describe('GitHub Action Main Entry', () => {
 
   it('should require operation input', () => {
     mockPlatform.getInput.mockReturnValue(undefined);
-    
+
     // In real implementation, this would throw
     expect(mockPlatform.getInput).toBeDefined();
   });
@@ -58,7 +62,7 @@ describe('GitHub Action Main Entry', () => {
   it('should route to package operation', () => {
     mockPlatform.getInput.mockImplementation((name) => {
       if (name === 'operation') return 'package';
-      if (name === 'tfx-version') return 'built-in';
+      if (name === 'tfxVersion') return 'built-in';
       return undefined;
     });
 
@@ -70,20 +74,19 @@ describe('GitHub Action Main Entry', () => {
   it('should route to publish operation with auth', () => {
     mockPlatform.getInput.mockImplementation((name) => {
       if (name === 'operation') return 'publish';
-      if (name === 'auth-type') return 'pat';
+      if (name === 'authType') return 'pat';
       if (name === 'token') return 'test-token';
       return undefined;
     });
 
     const operation = mockPlatform.getInput('operation', true);
-    const authType = mockPlatform.getInput('auth-type');
-    
+    const authType = mockPlatform.getInput('authType');
+
     expect(operation).toBe('publish');
     expect(authType).toBe('pat');
   });
 
   it('should handle errors and call core.setFailed', () => {
-    const mockSetFailed = core.setFailed as jest.MockedFunction<typeof core.setFailed>;
     mockPlatform.getInput.mockReturnValue(undefined);
 
     // Simulate error handling
@@ -93,24 +96,24 @@ describe('GitHub Action Main Entry', () => {
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      mockSetFailed(message);
-      expect(mockSetFailed).toHaveBeenCalledWith('Operation is required');
+      core.setFailed(message);
+      expect(message).toBe('Operation is required');
     }
   });
 
   it('should support basic auth type', () => {
     mockPlatform.getInput.mockImplementation((name) => {
       if (name === 'operation') return 'publish';
-      if (name === 'auth-type') return 'basic';
+      if (name === 'authType') return 'basic';
       if (name === 'username') return 'testuser';
       if (name === 'password') return 'testpass';
       return undefined;
     });
 
-    const authType = mockPlatform.getInput('auth-type');
+    const authType = mockPlatform.getInput('authType');
     const username = mockPlatform.getInput('username');
     const password = mockPlatform.getInput('password');
-    
+
     expect(authType).toBe('basic');
     expect(username).toBe('testuser');
     expect(password).toBe('testpass');
@@ -119,40 +122,40 @@ describe('GitHub Action Main Entry', () => {
   it('should support custom service URL', () => {
     mockPlatform.getInput.mockImplementation((name) => {
       if (name === 'operation') return 'publish';
-      if (name === 'auth-type') return 'pat';
+      if (name === 'authType') return 'pat';
       if (name === 'token') return 'test-token';
-      if (name === 'service-url') return 'https://myserver.com/tfs';
+      if (name === 'serviceUrl') return 'https://myserver.com/tfs';
       return undefined;
     });
 
-    const serviceUrl = mockPlatform.getInput('service-url');
-    
+    const serviceUrl = mockPlatform.getInput('serviceUrl');
+
     expect(serviceUrl).toBe('https://myserver.com/tfs');
   });
 
   it('should support custom marketplace URL', () => {
     mockPlatform.getInput.mockImplementation((name) => {
       if (name === 'operation') return 'publish';
-      if (name === 'auth-type') return 'pat';
+      if (name === 'authType') return 'pat';
       if (name === 'token') return 'test-token';
-      if (name === 'marketplace-url') return 'https://custom-marketplace.com';
+      if (name === 'marketplaceUrl') return 'https://custom-marketplace.com';
       return undefined;
     });
 
-    const marketplaceUrl = mockPlatform.getInput('marketplace-url');
-    
+    const marketplaceUrl = mockPlatform.getInput('marketplaceUrl');
+
     expect(marketplaceUrl).toBe('https://custom-marketplace.com');
   });
 
   it('should support OIDC auth type', () => {
     mockPlatform.getInput.mockImplementation((name) => {
       if (name === 'operation') return 'publish';
-      if (name === 'auth-type') return 'oidc';
+      if (name === 'authType') return 'oidc';
       return undefined;
     });
 
-    const authType = mockPlatform.getInput('auth-type');
-    
+    const authType = mockPlatform.getInput('authType');
+
     expect(authType).toBe('oidc');
   });
 });

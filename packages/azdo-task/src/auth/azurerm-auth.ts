@@ -5,7 +5,7 @@ import { AuthCredentials, IPlatformAdapter } from '@extension-tasks/core';
  * Get Azure RM authentication using workload identity federation (OIDC)
  * Note: This is a simplified implementation. Full OIDC support for marketplace
  * requires additional Azure configuration and token exchange.
- * 
+ *
  * For now, we get the endpoint and use the token from it.
  * In a real implementation, you'd need to exchange the OIDC token for a marketplace token.
  */
@@ -16,10 +16,10 @@ export async function getAzureRmAuth(
   try {
     const endpoint = new AzureRMEndpoint(connectionName);
     const azureEndpoint = await endpoint.getEndpoint();
-    
+
     // Get the token from the application token credentials
     const token = await azureEndpoint.applicationTokenCredentials.getToken();
-    
+
     if (!token) {
       throw new Error('Failed to get access token from Azure RM endpoint');
     }

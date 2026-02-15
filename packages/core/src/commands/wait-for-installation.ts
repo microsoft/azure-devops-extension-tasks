@@ -53,9 +53,7 @@ async function resolveExpectedTasks(
 ): Promise<ExpectedTask[]> {
   // If expectedTasks is provided directly, use it
   if (options.expectedTasks && options.expectedTasks.length > 0) {
-    platform.debug(
-      `Using ${options.expectedTasks.length} expected tasks from options`
-    );
+    platform.debug(`Using ${options.expectedTasks.length} expected tasks from options`);
     return options.expectedTasks;
   }
 
@@ -69,7 +67,7 @@ async function resolveExpectedTasks(
       const tasks: ExpectedTask[] = [];
       for (const taskPath of taskPaths) {
         try {
-          const taskManifest = await readManifest(taskPath, platform) as any;
+          const taskManifest = (await readManifest(taskPath, platform)) as any;
           if (taskManifest.name && taskManifest.version) {
             const version = `${taskManifest.version.Major}.${taskManifest.version.Minor}.${taskManifest.version.Patch}`;
             tasks.push({
@@ -101,14 +99,14 @@ async function resolveExpectedTasks(
     try {
       platform.debug(`Reading task versions from VSIX: ${options.vsixPath}`);
       const reader = await VsixReader.open(options.vsixPath);
-      
+
       try {
         const tasksInfo = await reader.getTasksInfo();
-        const tasks: ExpectedTask[] = tasksInfo.map(task => ({
+        const tasks: ExpectedTask[] = tasksInfo.map((task) => ({
           name: task.name,
           versions: [task.version],
         }));
-        
+
         platform.debug(`Resolved ${tasks.length} tasks from VSIX`);
         return tasks;
       } finally {
@@ -179,14 +177,11 @@ export async function waitForInstallation(
         pollCount++;
         const remainingMs = deadline - Date.now();
         const remainingMinutes = Math.ceil(remainingMs / 60_000);
-        
-        platform.debug(
-          `Poll attempt ${pollCount} (${remainingMinutes} minute(s) remaining)`
-        );
+
+        platform.debug(`Poll attempt ${pollCount} (${remainingMinutes} minute(s) remaining)`);
 
         try {
-          const taskDefinitions: TaskDefinition[] =
-            await taskAgentApi.getTaskDefinitions();
+          const taskDefinitions: TaskDefinition[] = await taskAgentApi.getTaskDefinitions();
 
           // Find tasks matching the extension
           const installedTasks: InstalledTask[] = [];
@@ -198,8 +193,8 @@ export async function waitForInstallation(
             for (const expectedTask of expectedTasks) {
               // Find all installed versions of this task
               const installedTaskVersions = taskDefinitions.filter(
-                (t) => t.name?.toLowerCase() === expectedTask.name.toLowerCase() && 
-                       t.id && t.version
+                (t) =>
+                  t.name?.toLowerCase() === expectedTask.name.toLowerCase() && t.id && t.version
               );
 
               if (installedTaskVersions.length === 0) {
@@ -214,31 +209,29 @@ export async function waitForInstallation(
 
               // Check each installed version of this task
               for (const installedTask of installedTaskVersions) {
-                const installedVersion = `${installedTask.version!.major}.${installedTask.version!.minor}.${installedTask.version!.patch}`;
-                
+                const installedVersion = `${installedTask.version.major}.${installedTask.version.minor}.${installedTask.version.patch}`;
+
                 // Check if this version matches any expected version
                 const matchesExpected = expectedTask.versions.includes(installedVersion);
 
                 installedTasks.push({
-                  name: installedTask.name!,
-                  id: installedTask.id!,
+                  name: installedTask.name,
+                  id: installedTask.id,
                   version: installedVersion,
-                  friendlyName: installedTask.friendlyName || installedTask.name!,
+                  friendlyName: installedTask.friendlyName || installedTask.name,
                   matchesExpected,
                 });
               }
 
               // Check if all required versions are present
               const installedVersionStrings = installedTaskVersions.map(
-                t => `${t.version!.major}.${t.version!.minor}.${t.version!.patch}`
+                (t) => `${t.version.major}.${t.version.minor}.${t.version.patch}`
               );
-              
+
               for (const expectedVer of expectedTask.versions) {
                 if (!installedVersionStrings.includes(expectedVer)) {
                   missingVersions.push(`${expectedTask.name}@${expectedVer}`);
-                  platform.debug(
-                    `Missing version ${expectedVer} for task ${expectedTask.name}`
-                  );
+                  platform.debug(`Missing version ${expectedVer} for task ${expectedTask.name}`);
                 }
               }
             }
@@ -249,20 +242,18 @@ export async function waitForInstallation(
               finalInstalledTasks = installedTasks;
               finalMissingTasks = missingTasks;
               finalMissingVersions = missingVersions;
-              
+
               // Count unique task names and total expected versions
-              const uniqueTasks = new Set(expectedTasks.map(t => t.name));
+              const uniqueTasks = new Set(expectedTasks.map((t) => t.name));
               const totalExpectedVersions = expectedTasks.reduce((sum, t) => {
                 return sum + t.versions.length;
               }, 0);
-              
+
               platform.info(
                 `✓ All ${uniqueTasks.size} expected task(s) with ${totalExpectedVersions} version(s) found in ${accountUrl}`
               );
             } else if (missingTasks.length > 0) {
-              platform.debug(
-                `Missing ${missingTasks.length} task(s): ${missingTasks.join(', ')}`
-              );
+              platform.debug(`Missing ${missingTasks.length} task(s): ${missingTasks.join(', ')}`);
             } else if (missingVersions.length > 0) {
               platform.debug(
                 `Missing ${missingVersions.length} version(s): ${missingVersions.join(', ')}`
@@ -295,24 +286,15 @@ export async function waitForInstallation(
 
           if (!found && Date.now() < deadline) {
             // Wait before next poll
-            platform.debug(
-              `Waiting ${pollingIntervalMs / 1000}s before next poll...`
-            );
-            await new Promise((resolve) =>
-              setTimeout(resolve, pollingIntervalMs)
-            );
+            platform.debug(`Waiting ${pollingIntervalMs / 1000}s before next poll...`);
+            await new Promise((resolve) => setTimeout(resolve, pollingIntervalMs));
           }
         } catch (error) {
-          lastError =
-            error instanceof Error ? error : new Error(String(error));
-          platform.debug(
-            `Error polling for tasks: ${lastError.message}. Retrying...`
-          );
+          lastError = error instanceof Error ? error : new Error(String(error));
+          platform.debug(`Error polling for tasks: ${lastError.message}. Retrying...`);
 
           if (Date.now() < deadline) {
-            await new Promise((resolve) =>
-              setTimeout(resolve, pollingIntervalMs)
-            );
+            await new Promise((resolve) => setTimeout(resolve, pollingIntervalMs));
           }
         }
       }
@@ -350,8 +332,7 @@ export async function waitForInstallation(
         });
       }
     } catch (error) {
-      const errorMsg =
-        error instanceof Error ? error.message : String(error);
+      const errorMsg = error instanceof Error ? error.message : String(error);
       platform.error(`Failed to verify installation in ${accountUrl}: ${errorMsg}`);
 
       // Calculate all missing versions for expected tasks
@@ -387,16 +368,12 @@ export async function waitForInstallation(
     const missingVersionAccounts = accountResults.filter(
       (r) => r.available && r.missingVersions.length > 0
     );
-    
+
     if (failedAccounts.length > 0) {
-      platform.warning(
-        `❌ Failed to verify tasks in ${failedAccounts.length} account(s)`
-      );
+      platform.warning(`❌ Failed to verify tasks in ${failedAccounts.length} account(s)`);
     }
     if (missingVersionAccounts.length > 0) {
-      platform.warning(
-        `⚠️ Missing versions found in ${missingVersionAccounts.length} account(s)`
-      );
+      platform.warning(`⚠️ Missing versions found in ${missingVersionAccounts.length} account(s)`);
     }
   }
 

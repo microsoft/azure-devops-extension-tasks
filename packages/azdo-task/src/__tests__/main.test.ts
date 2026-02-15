@@ -1,18 +1,27 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import * as tl from 'azure-pipelines-task-lib/task.js';
 import { AzdoAdapter } from '../azdo-adapter.js';
-import { TaskResult } from '@extension-tasks/core';
 
 // Mock azure-pipelines-task-lib
 jest.mock('azure-pipelines-task-lib/task.js');
 jest.mock('../azdo-adapter.js');
 jest.mock('../auth/index.js');
-jest.mock('@extension-tasks/core', () => ({
-  ...jest.requireActual('@extension-tasks/core'),
-  TfxManager: jest.fn(),
-  packageExtension: jest.fn(),
-  publishExtension: jest.fn(),
-}));
+jest.mock(
+  '@extension-tasks/core',
+  () => ({
+    TaskResult: {
+      Succeeded: 'Succeeded',
+      SucceededWithIssues: 'SucceededWithIssues',
+      Failed: 'Failed',
+      Cancelled: 'Cancelled',
+      Skipped: 'Skipped',
+    },
+    TfxManager: jest.fn(),
+    packageExtension: jest.fn(),
+    publishExtension: jest.fn(),
+  }),
+  { virtual: true }
+);
 
 describe('Azure DevOps Task Main Entry', () => {
   let mockPlatform: jest.Mocked<AzdoAdapter>;
@@ -37,8 +46,6 @@ describe('Azure DevOps Task Main Entry', () => {
       setOutput: jest.fn(),
       setResult: jest.fn(),
     } as unknown as jest.Mocked<AzdoAdapter>;
-
-    (AzdoAdapter as jest.MockedClass<typeof AzdoAdapter>).mockImplementation(() => mockPlatform);
   });
 
   it('should create platform adapter on initialization', () => {
@@ -47,7 +54,7 @@ describe('Azure DevOps Task Main Entry', () => {
 
   it('should require operation input', () => {
     mockPlatform.getInput.mockReturnValue(undefined);
-    
+
     // In real implementation, this would throw
     expect(mockPlatform.getInput).toBeDefined();
   });
@@ -74,7 +81,7 @@ describe('Azure DevOps Task Main Entry', () => {
 
     const operation = mockPlatform.getInput('operation', true);
     const connectionType = mockPlatform.getInput('connectionType', true);
-    
+
     expect(operation).toBe('publish');
     expect(connectionType).toBe('connectedService:VsTeam');
   });

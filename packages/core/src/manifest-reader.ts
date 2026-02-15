@@ -1,10 +1,10 @@
 /**
  * Manifest Reader - Base class for reading extension and task manifests
- * 
+ *
  * Provides abstract interface for reading manifests from different sources
  * (VSIX files, filesystem, etc.). Implementations provide source-specific
  * reading logic while sharing the same interface.
- * 
+ *
  * Architecture:
  * - ManifestReader (base/abstract) - defines interface
  * - VsixReader extends ManifestReader - reads from VSIX
@@ -86,10 +86,10 @@ export interface TaskInfo {
 
 /**
  * ManifestReader - Abstract base class for reading manifests
- * 
+ *
  * Provides a common interface for reading extension and task manifests
  * from different sources (VSIX files, filesystem, etc.).
- * 
+ *
  * Subclasses must implement:
  * - readExtensionManifest(): Read the main extension manifest
  * - readTaskManifest(path): Read a specific task manifest
@@ -135,7 +135,7 @@ export abstract class ManifestReader {
       try {
         const manifest = await this.readTaskManifest(taskPath);
         results.push({ path: taskPath, manifest });
-      } catch (_err) {
+      } catch {
         // Skip tasks that don't have valid task.json
         // Silently continue - caller can check if all expected tasks were found
       }
@@ -156,7 +156,7 @@ export abstract class ManifestReader {
       extensionId: manifest.id,
       version: manifest.version,
       name: manifest.name,
-      description: manifest.description
+      description: manifest.description,
     };
   }
 
@@ -171,7 +171,7 @@ export abstract class ManifestReader {
       name: manifest.name,
       friendlyName: manifest.friendlyName,
       version: `${manifest.version.Major}.${manifest.version.Minor}.${manifest.version.Patch}`,
-      path
+      path,
     }));
   }
 }

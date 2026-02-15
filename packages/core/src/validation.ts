@@ -98,15 +98,11 @@ export function validateAccountUrl(url: string): void {
   }
 
   // Check for Azure DevOps domains
-  const validDomains = [
-    'dev.azure.com',
-    'visualstudio.com',
-    'azure.com'
-  ];
+  const validDomains = ['dev.azure.com', 'visualstudio.com', 'azure.com'];
 
   const hostname = parsedUrl.hostname.toLowerCase();
-  const isValidDomain = validDomains.some(domain => 
-    hostname === domain || hostname.endsWith('.' + domain)
+  const isValidDomain = validDomains.some(
+    (domain) => hostname === domain || hostname.endsWith('.' + domain)
   );
 
   if (!isValidDomain) {
@@ -137,11 +133,9 @@ export function validateVersion(version: string): void {
   // Semantic versioning pattern (simplified)
   // Supports: 1.0.0, 1.0.0.0, 1.0, etc.
   const semverPattern = /^\d+(\.\d+){0,3}$/;
-  
+
   if (!semverPattern.test(version)) {
-    throw new Error(
-      'Version must follow semantic versioning (e.g., 1.0.0, 1.0.0.0)'
-    );
+    throw new Error('Version must follow semantic versioning (e.g., 1.0.0, 1.0.0.0)');
   }
 
   // Validate each part is within valid range
@@ -167,14 +161,14 @@ async function getBinaryVersion(
   try {
     // Different binaries use different flags for version info
     const versionArgs: { [key: string]: string[] } = {
-      'node': ['--version'],
-      'npm': ['--version'],
-      'az': ['--version'],
-      'tfx': ['version', '--no-prompt', '--no-color'] // tfx version command with clean output
+      node: ['--version'],
+      npm: ['--version'],
+      az: ['--version'],
+      tfx: ['version', '--no-prompt', '--no-color'], // tfx version command with clean output
     };
 
     const args = versionArgs[binary] || ['--version'];
-    
+
     // Execute binary to check if it's available
     const exitCode = await platform.exec(binary, args, {
       silent: true,
@@ -185,7 +179,7 @@ async function getBinaryVersion(
     if (exitCode === 0) {
       return 'available';
     }
-    
+
     return null;
   } catch {
     return null;
@@ -227,8 +221,8 @@ export async function validateBinaryAvailable(
     const errorMessage = error instanceof Error ? error.message : String(error);
     throw new Error(
       `Required binary '${binary}' is not available. ` +
-      `Please ensure ${binary} is installed and in your PATH. ` +
-      `Error: ${errorMessage}`
+        `Please ensure ${binary} is installed and in your PATH. ` +
+        `Error: ${errorMessage}`
     );
   }
 }

@@ -74,13 +74,16 @@ OR
 ### Optional Inputs
 
 #### Authentication
+
 - `auth-type`: Authentication type (`pat` or `oidc`, default: `pat`)
 - `token`: Personal Access Token (required when auth-type is `pat`)
 
 #### TFX Configuration
+
 - `tfx-version`: Version of tfx-cli to use (default: `built-in`)
 
 #### Extension Options
+
 - `extension-version`: Specific version to install (default: latest)
 
 ## Outputs
@@ -101,14 +104,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Publish Extension
         uses: jessehouwing/azure-devops-extension-tasks/publish@v6
         with:
           token: ${{ secrets.MARKETPLACE_TOKEN }}
           root-folder: './extension'
           extension-version: '1.0.${{ github.run_number }}'
-      
+
       - name: Install to Test Org
         uses: jessehouwing/azure-devops-extension-tasks/install@v6
         with:

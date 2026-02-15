@@ -70,10 +70,7 @@ export async function packageExtension(
   platform.info('Packaging extension...');
 
   // Build tfx arguments
-  const args = new ArgBuilder()
-    .arg(['extension', 'create'])
-    .flag('--json')
-    .flag('--no-color');
+  const args = new ArgBuilder().arg(['extension', 'create']).flag('--json').flag('--no-color');
 
   // Manifest arguments
   if (options.rootFolder) {
@@ -132,21 +129,21 @@ export async function packageExtension(
 
   // Handle manifest updates using the unified architecture
   let cleanupWriter: (() => Promise<void>) | null = null;
-  
+
   if (options.updateTasksVersion || options.updateTasksId) {
     platform.info('Updating task manifests before packaging...');
-    
+
     try {
       // Create filesystem reader for the source directory
       const rootFolder = options.rootFolder || '.';
       const manifestGlobs = options.manifestGlobs || ['vss-extension.json'];
-      
+
       const reader = new FilesystemManifestReader({
         rootFolder,
         manifestGlobs,
-        platform
+        platform,
       });
-      
+
       // Create editor and apply all options at once
       const editor = ManifestEditor.fromReader(reader);
       await editor.applyOptions({
@@ -160,24 +157,24 @@ export async function packageExtension(
         updateTasksVersionType: options.updateTasksVersionType,
         updateTasksId: options.updateTasksId,
       });
-      
+
       // Write modifications to filesystem
       const writer = await editor.toWriter();
       await writer.writeToFilesystem();
-      
+
       // Get overrides file path if generated
-      const overridesPath = (writer as any).getOverridesPath();
+      const overridesPath = writer.getOverridesPath();
       if (overridesPath) {
         platform.debug(`Using overrides file: ${overridesPath}`);
         args.option('--overrides-file', overridesPath);
       }
-      
+
       // Setup cleanup function
       cleanupWriter = async () => {
         await writer.close();
         await reader.close();
       };
-      
+
       platform.info('Task manifests updated successfully');
     } catch (err) {
       platform.error(`Failed to update task manifests: ${(err as Error).message}`);

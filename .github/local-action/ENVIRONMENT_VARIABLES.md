@@ -8,29 +8,29 @@ These variables are automatically set by GitHub Actions. For local debugging, th
 
 ### Runner Environment
 
-| Variable | Description | Example Value |
-|----------|-------------|---------------|
-| `RUNNER_TEMP` | Temporary directory path | `${workspaceFolder}/.tmp` |
-| `RUNNER_TOOL_CACHE` | Tool cache directory | `${workspaceFolder}/.cache` |
-| `GITHUB_WORKSPACE` | Working directory for the action | `${workspaceFolder}` |
+| Variable            | Description                      | Example Value               |
+| ------------------- | -------------------------------- | --------------------------- |
+| `RUNNER_TEMP`       | Temporary directory path         | `${workspaceFolder}/.tmp`   |
+| `RUNNER_TOOL_CACHE` | Tool cache directory             | `${workspaceFolder}/.cache` |
+| `GITHUB_WORKSPACE`  | Working directory for the action | `${workspaceFolder}`        |
 
 ### GitHub Context
 
-| Variable | Description | Example Value |
-|----------|-------------|---------------|
-| `GITHUB_ACTIONS` | Always set to `true` when running in GitHub Actions | `true` |
-| `GITHUB_WORKFLOW` | Name of the workflow | `Debug GitHub Action` |
-| `GITHUB_RUN_ID` | Unique number for each workflow run | `1` |
-| `GITHUB_RUN_NUMBER` | Unique number for each run of a particular workflow | `1` |
-| `GITHUB_JOB` | Job ID of the current job | `debug` |
-| `GITHUB_ACTION` | Unique identifier of the action | `debug-action` |
-| `GITHUB_ACTOR` | Name of the person or app that initiated the workflow | `developer` |
-| `GITHUB_REPOSITORY` | Owner and repository name | `owner/repo` |
-| `GITHUB_EVENT_NAME` | Name of the event that triggered the workflow | `workflow_dispatch` |
-| `GITHUB_SHA` | Commit SHA that triggered the workflow | 40-char hex string |
-| `GITHUB_REF` | Full form of the branch or tag ref | `refs/heads/main` |
-| `GITHUB_REF_NAME` | Short ref name | `main` |
-| `GITHUB_REF_TYPE` | Type of ref (branch or tag) | `branch` |
+| Variable            | Description                                           | Example Value         |
+| ------------------- | ----------------------------------------------------- | --------------------- |
+| `GITHUB_ACTIONS`    | Always set to `true` when running in GitHub Actions   | `true`                |
+| `GITHUB_WORKFLOW`   | Name of the workflow                                  | `Debug GitHub Action` |
+| `GITHUB_RUN_ID`     | Unique number for each workflow run                   | `1`                   |
+| `GITHUB_RUN_NUMBER` | Unique number for each run of a particular workflow   | `1`                   |
+| `GITHUB_JOB`        | Job ID of the current job                             | `debug`               |
+| `GITHUB_ACTION`     | Unique identifier of the action                       | `debug-action`        |
+| `GITHUB_ACTOR`      | Name of the person or app that initiated the workflow | `developer`           |
+| `GITHUB_REPOSITORY` | Owner and repository name                             | `owner/repo`          |
+| `GITHUB_EVENT_NAME` | Name of the event that triggered the workflow         | `workflow_dispatch`   |
+| `GITHUB_SHA`        | Commit SHA that triggered the workflow                | 40-char hex string    |
+| `GITHUB_REF`        | Full form of the branch or tag ref                    | `refs/heads/main`     |
+| `GITHUB_REF_NAME`   | Short ref name                                        | `main`                |
+| `GITHUB_REF_TYPE`   | Type of ref (branch or tag)                           | `branch`              |
 
 ### Action Inputs
 
@@ -57,39 +57,39 @@ These variables are automatically set by Azure Pipelines. For local debugging, t
 
 ### Agent Environment
 
-| Variable | Description | Example Value |
-|----------|-------------|---------------|
-| `AGENT_TEMPDIRECTORY` | Temporary directory path | `${workspaceFolder}/.tmp` |
-| `AGENT_TOOLSDIRECTORY` | Tool cache directory | `${workspaceFolder}/.cache` |
-| `AGENT_WORKFOLDER` | Working directory for the agent | `${workspaceFolder}/.work` |
-| `AGENT_VERSION` | Version of the agent | `3.0.0` |
-| `AGENT_JOBSTATUS` | Status of the current job | `Succeeded` |
-| `AGENT_NAME` | Name of the agent | `Debug Agent` |
-| `AGENT_MACHINENAME` | Name of the machine | `debug-machine` |
+| Variable               | Description                     | Example Value               |
+| ---------------------- | ------------------------------- | --------------------------- |
+| `AGENT_TEMPDIRECTORY`  | Temporary directory path        | `${workspaceFolder}/.tmp`   |
+| `AGENT_TOOLSDIRECTORY` | Tool cache directory            | `${workspaceFolder}/.cache` |
+| `AGENT_WORKFOLDER`     | Working directory for the agent | `${workspaceFolder}/.work`  |
+| `AGENT_VERSION`        | Version of the agent            | `3.0.0`                     |
+| `AGENT_JOBSTATUS`      | Status of the current job       | `Succeeded`                 |
+| `AGENT_NAME`           | Name of the agent               | `Debug Agent`               |
+| `AGENT_MACHINENAME`    | Name of the machine             | `debug-machine`             |
 
 ### Build Environment
 
-| Variable | Description | Example Value |
-|----------|-------------|---------------|
-| `BUILD_SOURCESDIRECTORY` | Local path on the agent where source code is downloaded | `${workspaceFolder}` |
-| `BUILD_REPOSITORY_LOCALPATH` | Local path on the agent where the repository is cloned | `${workspaceFolder}` |
-| `BUILD_BUILDID` | Unique identifier of the build | `1` |
-| `BUILD_BUILDNUMBER` | Name of the completed build | `1` |
-| `BUILD_DEFINITIONNAME` | Name of the build pipeline | `Debug Build` |
-| `BUILD_REPOSITORY_NAME` | Name of the repository | `repo` |
-| `BUILD_REPOSITORY_PROVIDER` | Type of repository (TfsGit, GitHub, etc.) | `GitHub` |
-| `BUILD_SOURCEVERSION` | Latest version control change that is included in this build | 40-char hex string |
-| `BUILD_SOURCEBRANCH` | Branch the build was queued for | `refs/heads/main` |
-| `BUILD_SOURCEBRANCHNAME` | Name of the branch | `main` |
+| Variable                     | Description                                                  | Example Value        |
+| ---------------------------- | ------------------------------------------------------------ | -------------------- |
+| `BUILD_SOURCESDIRECTORY`     | Local path on the agent where source code is downloaded      | `${workspaceFolder}` |
+| `BUILD_REPOSITORY_LOCALPATH` | Local path on the agent where the repository is cloned       | `${workspaceFolder}` |
+| `BUILD_BUILDID`              | Unique identifier of the build                               | `1`                  |
+| `BUILD_BUILDNUMBER`          | Name of the completed build                                  | `1`                  |
+| `BUILD_DEFINITIONNAME`       | Name of the build pipeline                                   | `Debug Build`        |
+| `BUILD_REPOSITORY_NAME`      | Name of the repository                                       | `repo`               |
+| `BUILD_REPOSITORY_PROVIDER`  | Type of repository (TfsGit, GitHub, etc.)                    | `GitHub`             |
+| `BUILD_SOURCEVERSION`        | Latest version control change that is included in this build | 40-char hex string   |
+| `BUILD_SOURCEBRANCH`         | Branch the build was queued for                              | `refs/heads/main`    |
+| `BUILD_SOURCEBRANCHNAME`     | Name of the branch                                           | `main`               |
 
 ### System Environment
 
-| Variable | Description | Example Value |
-|----------|-------------|---------------|
-| `SYSTEM_DEFAULTWORKINGDIRECTORY` | Default working directory path | `${workspaceFolder}` |
-| `SYSTEM_TEAMPROJECT` | Name of the project | `DebugProject` |
-| `SYSTEM_COLLECTIONURI` | Team Foundation Server or Azure DevOps collection URI | `https://dev.azure.com/debug/` |
-| `SYSTEM_TEAMFOUNDATIONCOLLECTIONURI` | Team Foundation Collection URI | `https://dev.azure.com/debug/` |
+| Variable                             | Description                                           | Example Value                  |
+| ------------------------------------ | ----------------------------------------------------- | ------------------------------ |
+| `SYSTEM_DEFAULTWORKINGDIRECTORY`     | Default working directory path                        | `${workspaceFolder}`           |
+| `SYSTEM_TEAMPROJECT`                 | Name of the project                                   | `DebugProject`                 |
+| `SYSTEM_COLLECTIONURI`               | Team Foundation Server or Azure DevOps collection URI | `https://dev.azure.com/debug/` |
+| `SYSTEM_TEAMFOUNDATIONCOLLECTIONURI` | Team Foundation Collection URI                        | `https://dev.azure.com/debug/` |
 
 ### Task Inputs
 
@@ -116,6 +116,7 @@ ENDPOINT_AUTH_SCHEME_<ConnectionName>=Token
 ```
 
 Example for connection named "MarketplaceConnection":
+
 ```bash
 ENDPOINT_URL_MarketplaceConnection=https://marketplace.visualstudio.com
 ENDPOINT_AUTH_PARAMETER_MarketplaceConnection_APITOKEN=your-pat-token
@@ -124,10 +125,10 @@ ENDPOINT_AUTH_SCHEME_MarketplaceConnection=Token
 
 ### Node.js Environment
 
-| Variable | Description | Example Value |
-|----------|-------------|---------------|
-| `NODE_ENV` | Node environment | `production` |
-| `NO_UPDATE_NOTIFIER` | Disable npm update notifier | `true` |
+| Variable             | Description                 | Example Value |
+| -------------------- | --------------------------- | ------------- |
+| `NODE_ENV`           | Node environment            | `production`  |
+| `NO_UPDATE_NOTIFIER` | Disable npm update notifier | `true`        |
 
 ### References
 
@@ -205,6 +206,7 @@ All environment variables are pre-configured in `.vscode/launch.json`. To custom
 4. Press F5 to start debugging
 
 Example:
+
 ```json
 {
   "env": {
@@ -255,6 +257,7 @@ Use `${env:VARIABLE_NAME}` to reference existing environment variables:
 ### Test Package Command
 
 No authentication required:
+
 ```bash
 INPUT_OPERATION=package
 INPUT_ROOTFOLDER=./extension
@@ -264,6 +267,7 @@ INPUT_OUTPUTPATH=./dist
 ### Test Publish Command
 
 Requires authentication:
+
 ```bash
 INPUT_OPERATION=publish
 INPUT_AUTH-TYPE=pat

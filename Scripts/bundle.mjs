@@ -38,13 +38,7 @@ async function bundle() {
     format: 'cjs',
     outfile: path.join(rootDir, 'packages/github-action/dist/bundle.js'),
     sourcemap: true,
-    external: [
-      '@actions/core',
-      '@actions/exec',
-      '@actions/tool-cache',
-      '@actions/io',
-      'tfx-cli',
-    ],
+    external: ['@actions/core', '@actions/exec', '@actions/tool-cache', '@actions/io', 'tfx-cli'],
   });
   console.log('✓ GitHub Action bundled');
 }

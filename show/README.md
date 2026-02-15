@@ -61,13 +61,16 @@ OR
 ### Optional Inputs
 
 #### Authentication
+
 - `auth-type`: Authentication type (`pat` or `oidc`, default: `pat`)
 - `token`: Personal Access Token (required when auth-type is `pat`)
 
 #### TFX Configuration
+
 - `tfx-version`: Version of tfx-cli to use (default: `built-in`)
 
 #### Output Options
+
 - `output-variable`: Name of output variable to store metadata JSON
 
 ## Outputs
@@ -92,13 +95,13 @@ jobs:
           token: ${{ secrets.MARKETPLACE_TOKEN }}
           publisher-id: 'my-publisher'
           extension-id: 'my-extension'
-      
+
       - name: Parse version
         id: version
         run: |
           VERSION=$(echo '${{ steps.show.outputs.extension-metadata }}' | jq -r '.versions[0].version')
           echo "current-version=$VERSION" >> $GITHUB_OUTPUT
-      
+
       - name: Display current version
         run: echo "Current version is ${{ steps.version.outputs.current-version }}"
 ```

@@ -68,6 +68,7 @@ export function resolveTaskManifestPaths(
   extensionManifestPath: string,
   _platform: IPlatformAdapter
 ): string[] {
+  void _platform;
   // Get task contributions from manifest
   const taskContributions = getTaskContributions(extensionManifest);
 
@@ -101,8 +102,7 @@ function getTaskContributions(manifest: any): any[] {
   }
 
   return manifest.contributions.filter(
-    (c: any) =>
-      c.type === 'ms.vss-distributed-task.task' && c.properties && c.properties.name
+    (c: any) => c.type === 'ms.vss-distributed-task.task' && c.properties && c.properties.name
   );
 }
 

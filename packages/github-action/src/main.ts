@@ -26,10 +26,10 @@ import {
 async function run(): Promise<void> {
   try {
     const platform = new GitHubAdapter();
-    
+
     // Validate node is available (always required)
     await validateNodeAvailable(platform);
-    
+
     // Get the operation to perform
     const operation = platform.getInput('operation', true);
     if (!operation) {
@@ -56,7 +56,7 @@ async function run(): Promise<void> {
 
     // Create TfxManager
     const tfxVersion = platform.getInput('tfx-version') || 'built-in';
-    
+
     // Validate binaries based on tfx version mode
     if (tfxVersion === 'path') {
       // User wants to use tfx from PATH
@@ -65,26 +65,26 @@ async function run(): Promise<void> {
       // Version spec mode - need npm to download
       await validateNpmAvailable(platform);
     }
-    
+
     const tfxManager = new TfxManager({ tfxVersion: tfxVersion, platform });
 
     // Get authentication if needed (not required for package)
     let auth;
     if (operation !== 'package') {
       const authType = (platform.getInput('auth-type') || 'pat') as AuthType;
-      
+
       // For OIDC auth, validate Azure CLI is available
       if (authType === 'oidc') {
         await validateAzureCliAvailable(platform);
       }
-      
+
       // Get authentication credentials with optional service/marketplace URLs
       const token = platform.getInput('token');
       const username = platform.getInput('username');
       const password = platform.getInput('password');
       const serviceUrl = platform.getInput('service-url');
       const marketplaceUrl = platform.getInput('marketplace-url');
-      
+
       auth = await getAuth(authType, platform, {
         token,
         username,
@@ -92,7 +92,7 @@ async function run(): Promise<void> {
         serviceUrl,
         marketplaceUrl,
       });
-      
+
       // Secret masking is now handled inside auth providers
       // But we keep this as defense in depth
       if (auth.token) {
@@ -101,7 +101,7 @@ async function run(): Promise<void> {
       if (auth.password) {
         platform.setSecret(auth.password);
       }
-      
+
       // Validate service URL if present
       if (auth.serviceUrl) {
         validateAccountUrl(auth.serviceUrl);
@@ -111,7 +111,7 @@ async function run(): Promise<void> {
     // Validate account URLs for operations that need them
     if (operation === 'install' || operation === 'wait-for-installation') {
       const accounts = platform.getDelimitedInput('accounts', ';', false);
-      accounts.forEach(account => {
+      accounts.forEach((account) => {
         if (account) {
           validateAccountUrl(account);
         }
@@ -123,43 +123,43 @@ async function run(): Promise<void> {
       case 'package':
         await runPackage(platform, tfxManager);
         break;
-      
+
       case 'publish':
-        await runPublish(platform, tfxManager, auth!);
+        await runPublish(platform, tfxManager, auth);
         break;
-      
+
       case 'unpublish':
-        await runUnpublish(platform, tfxManager, auth!);
+        await runUnpublish(platform, tfxManager, auth);
         break;
-      
+
       case 'share':
-        await runShare(platform, tfxManager, auth!);
+        await runShare(platform, tfxManager, auth);
         break;
-      
+
       case 'unshare':
-        await runUnshare(platform, tfxManager, auth!);
+        await runUnshare(platform, tfxManager, auth);
         break;
-      
+
       case 'install':
-        await runInstall(platform, tfxManager, auth!);
+        await runInstall(platform, tfxManager, auth);
         break;
-      
+
       case 'show':
-        await runShow(platform, tfxManager, auth!);
+        await runShow(platform, tfxManager, auth);
         break;
 
       case 'query-version':
-        await runQueryVersion(platform, tfxManager, auth!);
+        await runQueryVersion(platform, tfxManager, auth);
         break;
-      
+
       case 'wait-for-validation':
-        await runWaitForValidation(platform, tfxManager, auth!);
+        await runWaitForValidation(platform, tfxManager, auth);
         break;
-      
+
       case 'wait-for-installation':
-        await runWaitForInstallation(platform, auth!);
+        await runWaitForInstallation(platform, auth);
         break;
-      
+
       default:
         throw new Error(`Unknown operation: ${operation}`);
     }
@@ -194,60 +194,104 @@ async function runPackage(platform: GitHubAdapter, tfxManager: TfxManager): Prom
   }
 }
 
-async function runPublish(platform: GitHubAdapter, tfxManager: TfxManager, auth: any): Promise<void> {
+async function runPublish(
+  platform: GitHubAdapter,
+  tfxManager: TfxManager,
+  auth: any
+): Promise<void> {
   const publishSource = platform.getInput('publish-source', true) as 'manifest' | 'vsix';
-  
-  const result = await publishExtension({
-    publishSource,
-    vsixFile: publishSource === 'vsix' ? platform.getInput('vsix-file', true) : undefined,
-    manifestGlobs: publishSource === 'manifest' ? platform.getDelimitedInput('manifest-globs', '\n', true) : undefined,
-    rootFolder: publishSource === 'manifest' ? platform.getInput('root-folder') : undefined,
-    publisherId: platform.getInput('publisher-id'),
-    extensionId: platform.getInput('extension-id'),
-    extensionTag: platform.getInput('extension-tag'),
-    extensionVersion: platform.getInput('extension-version'),
-    extensionName: platform.getInput('extension-name'),
-    extensionVisibility: platform.getInput('extension-visibility') as any,
-    shareWith: platform.getDelimitedInput('share-with', '\n'),
-    noWaitValidation: platform.getBoolInput('no-wait-validation'),
-    bypassValidation: platform.getBoolInput('bypass-validation'),
-    updateTasksVersion: platform.getBoolInput('update-tasks-version'),
-    updateTasksId: platform.getBoolInput('update-tasks-id'),
-  }, auth, tfxManager, platform);
+
+  const result = await publishExtension(
+    {
+      publishSource,
+      vsixFile: publishSource === 'vsix' ? platform.getInput('vsix-file', true) : undefined,
+      manifestGlobs:
+        publishSource === 'manifest'
+          ? platform.getDelimitedInput('manifest-globs', '\n', true)
+          : undefined,
+      rootFolder: publishSource === 'manifest' ? platform.getInput('root-folder') : undefined,
+      publisherId: platform.getInput('publisher-id'),
+      extensionId: platform.getInput('extension-id'),
+      extensionTag: platform.getInput('extension-tag'),
+      extensionVersion: platform.getInput('extension-version'),
+      extensionName: platform.getInput('extension-name'),
+      extensionVisibility: platform.getInput('extension-visibility') as any,
+      shareWith: platform.getDelimitedInput('share-with', '\n'),
+      noWaitValidation: platform.getBoolInput('no-wait-validation'),
+      bypassValidation: platform.getBoolInput('bypass-validation'),
+      updateTasksVersion: platform.getBoolInput('update-tasks-version'),
+      updateTasksId: platform.getBoolInput('update-tasks-id'),
+    },
+    auth,
+    tfxManager,
+    platform
+  );
 
   platform.debug(`Published: ${JSON.stringify(result)}`);
 }
 
-async function runUnpublish(platform: GitHubAdapter, tfxManager: TfxManager, auth: any): Promise<void> {
-  await unpublishExtension({
-    publisherId: platform.getInput('publisher-id', true)!,
-    extensionId: platform.getInput('extension-id', true)!,
-  }, auth, tfxManager, platform);
+async function runUnpublish(
+  platform: GitHubAdapter,
+  tfxManager: TfxManager,
+  auth: any
+): Promise<void> {
+  await unpublishExtension(
+    {
+      publisherId: platform.getInput('publisher-id', true),
+      extensionId: platform.getInput('extension-id', true),
+    },
+    auth,
+    tfxManager,
+    platform
+  );
 }
 
 async function runShare(platform: GitHubAdapter, tfxManager: TfxManager, auth: any): Promise<void> {
-  await shareExtension({
-    publisherId: platform.getInput('publisher-id', true)!,
-    extensionId: platform.getInput('extension-id', true)!,
-    shareWith: platform.getDelimitedInput('share-with', '\n', true),
-  }, auth, tfxManager, platform);
+  await shareExtension(
+    {
+      publisherId: platform.getInput('publisher-id', true),
+      extensionId: platform.getInput('extension-id', true),
+      shareWith: platform.getDelimitedInput('share-with', '\n', true),
+    },
+    auth,
+    tfxManager,
+    platform
+  );
 }
 
-async function runUnshare(platform: GitHubAdapter, tfxManager: TfxManager, auth: any): Promise<void> {
-  await unshareExtension({
-    publisherId: platform.getInput('publisher-id', true)!,
-    extensionId: platform.getInput('extension-id', true)!,
-    unshareWith: platform.getDelimitedInput('unshare-with', '\n', true),
-  }, auth, tfxManager, platform);
+async function runUnshare(
+  platform: GitHubAdapter,
+  tfxManager: TfxManager,
+  auth: any
+): Promise<void> {
+  await unshareExtension(
+    {
+      publisherId: platform.getInput('publisher-id', true),
+      extensionId: platform.getInput('extension-id', true),
+      unshareWith: platform.getDelimitedInput('unshare-with', '\n', true),
+    },
+    auth,
+    tfxManager,
+    platform
+  );
 }
 
-async function runInstall(platform: GitHubAdapter, tfxManager: TfxManager, auth: any): Promise<void> {
-  const result = await installExtension({
-    publisherId: platform.getInput('publisher-id', true)!,
-    extensionId: platform.getInput('extension-id', true)!,
-    accounts: platform.getDelimitedInput('accounts', '\n', true),
-    extensionVersion: platform.getInput('extension-version'),
-  }, auth, tfxManager, platform);
+async function runInstall(
+  platform: GitHubAdapter,
+  tfxManager: TfxManager,
+  auth: any
+): Promise<void> {
+  const result = await installExtension(
+    {
+      publisherId: platform.getInput('publisher-id', true),
+      extensionId: platform.getInput('extension-id', true),
+      accounts: platform.getDelimitedInput('accounts', '\n', true),
+      extensionVersion: platform.getInput('extension-version'),
+    },
+    auth,
+    tfxManager,
+    platform
+  );
 
   if (!result.allSuccess) {
     throw new Error(`Some accounts failed to install the extension`);
@@ -256,8 +300,8 @@ async function runInstall(platform: GitHubAdapter, tfxManager: TfxManager, auth:
 
 async function runShow(platform: GitHubAdapter, tfxManager: TfxManager, auth: any): Promise<void> {
   const options = {
-    publisherId: platform.getInput('publisher-id', true)!,
-    extensionId: platform.getInput('extension-id', true)!,
+    publisherId: platform.getInput('publisher-id', true),
+    extensionId: platform.getInput('extension-id', true),
     outputVariable: platform.getInput('output-variable'),
   };
 
@@ -268,17 +312,18 @@ async function runShow(platform: GitHubAdapter, tfxManager: TfxManager, auth: an
   }
 }
 
-async function runQueryVersion(platform: GitHubAdapter, tfxManager: TfxManager, auth: any): Promise<void> {
+async function runQueryVersion(
+  platform: GitHubAdapter,
+  tfxManager: TfxManager,
+  auth: any
+): Promise<void> {
   const result = await queryVersion(
     {
-      publisherId: platform.getInput('publisher-id', true)!,
-      extensionId: platform.getInput('extension-id', true)!,
+      publisherId: platform.getInput('publisher-id', true),
+      extensionId: platform.getInput('extension-id', true),
       extensionTag: platform.getInput('extension-tag'),
-      versionAction: (platform.getInput('version-action') as
-        | 'None'
-        | 'Major'
-        | 'Minor'
-        | 'Patch') ?? 'None',
+      versionAction:
+        (platform.getInput('version-action') as 'None' | 'Major' | 'Minor' | 'Patch') ?? 'None',
       extensionVersionOverrideVariable: platform.getInput('extension-version-override'),
       outputVariable: platform.getInput('output-variable'),
     },
@@ -291,16 +336,25 @@ async function runQueryVersion(platform: GitHubAdapter, tfxManager: TfxManager, 
   platform.setOutput('current-version', result.currentVersion);
 }
 
-async function runWaitForValidation(platform: GitHubAdapter, tfxManager: TfxManager, auth: any): Promise<void> {
-  const result = await waitForValidation({
-    publisherId: platform.getInput('publisher-id', true)!,
-    extensionId: platform.getInput('extension-id', true)!,
-    rootFolder: platform.getInput('root-folder'),
-    manifestGlobs: platform.getDelimitedInput('manifest-globs', '\n'),
-    maxRetries: parseInt(platform.getInput('max-retries') || '10'),
-    minTimeout: parseInt(platform.getInput('min-timeout') || '1'),
-    maxTimeout: parseInt(platform.getInput('max-timeout') || '15'),
-  }, auth, tfxManager, platform);
+async function runWaitForValidation(
+  platform: GitHubAdapter,
+  tfxManager: TfxManager,
+  auth: any
+): Promise<void> {
+  const result = await waitForValidation(
+    {
+      publisherId: platform.getInput('publisher-id', true),
+      extensionId: platform.getInput('extension-id', true),
+      rootFolder: platform.getInput('root-folder'),
+      manifestGlobs: platform.getDelimitedInput('manifest-globs', '\n'),
+      maxRetries: parseInt(platform.getInput('max-retries') || '10'),
+      minTimeout: parseInt(platform.getInput('min-timeout') || '1'),
+      maxTimeout: parseInt(platform.getInput('max-timeout') || '15'),
+    },
+    auth,
+    tfxManager,
+    platform
+  );
 
   if (result.status !== 'success') {
     throw new Error(`Validation failed with status: ${result.status}`);
@@ -318,16 +372,20 @@ async function runWaitForInstallation(platform: GitHubAdapter, auth: any): Promi
     }
   }
 
-  const result = await waitForInstallation({
-    publisherId: platform.getInput('publisher-id', true)!,
-    extensionId: platform.getInput('extension-id', true)!,
-    accounts: platform.getDelimitedInput('accounts', '\n', true),
-    expectedTasks,
-    manifestPath: platform.getInput('manifest-path'),
-    vsixPath: platform.getInput('vsix-path'),
-    timeoutMinutes: parseInt(platform.getInput('timeout-minutes') || '10'),
-    pollingIntervalSeconds: parseInt(platform.getInput('polling-interval-seconds') || '30'),
-  }, auth, platform);
+  const result = await waitForInstallation(
+    {
+      publisherId: platform.getInput('publisher-id', true),
+      extensionId: platform.getInput('extension-id', true),
+      accounts: platform.getDelimitedInput('accounts', '\n', true),
+      expectedTasks,
+      manifestPath: platform.getInput('manifest-path'),
+      vsixPath: platform.getInput('vsix-path'),
+      timeoutMinutes: parseInt(platform.getInput('timeout-minutes') || '10'),
+      pollingIntervalSeconds: parseInt(platform.getInput('polling-interval-seconds') || '30'),
+    },
+    auth,
+    platform
+  );
 
   if (!result.success) {
     throw new Error(`Verification failed - not all tasks are available`);
@@ -335,4 +393,4 @@ async function runWaitForInstallation(platform: GitHubAdapter, auth: any): Promi
 }
 
 // Run the action
-run();
+void run();

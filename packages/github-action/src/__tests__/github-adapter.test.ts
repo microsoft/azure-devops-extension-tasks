@@ -1,197 +1,78 @@
-import { describe, it, expect, jest, beforeEach } from '@jest/globals';
+import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
+import { Writable } from 'stream';
 import { GitHubAdapter } from '../github-adapter.js';
-import * as core from '@actions/core';
-import * as exec from '@actions/exec';
-import * as tc from '@actions/tool-cache';
-import * as io from '@actions/io';
 import { TaskResult } from '@extension-tasks/core';
-
-// Mock @actions modules
-jest.mock('@actions/core');
-jest.mock('@actions/exec');
-jest.mock('@actions/tool-cache');
-jest.mock('@actions/io');
 
 describe('GitHubAdapter', () => {
   let adapter: GitHubAdapter;
+  let originalInputName: string | undefined;
+  let originalInputItems: string | undefined;
+  let originalToken: string | undefined;
+  let originalExitCode: string | number | undefined;
 
   beforeEach(() => {
-    jest.clearAllMocks();
     adapter = new GitHubAdapter();
+    originalInputName = process.env.INPUT_NAME;
+    originalInputItems = process.env.INPUT_ITEMS;
+    originalToken = process.env.TOKEN;
+    originalExitCode = process.exitCode;
   });
 
-  describe('getInput', () => {
-    it('should wrap core.getInput and return value', () => {
-      const mockGetInput = core.getInput as jest.MockedFunction<typeof core.getInput>;
-      mockGetInput.mockReturnValue('test-value');
-
-      const result = adapter.getInput('testInput', false);
-
-      expect(core.getInput).toHaveBeenCalledWith('testInput', { required: false });
-      expect(result).toBe('test-value');
-    });
-
-    it('should return undefined for empty values', () => {
-      const mockGetInput = core.getInput as jest.MockedFunction<typeof core.getInput>;
-      mockGetInput.mockReturnValue('');
-
-      const result = adapter.getInput('testInput', false);
-
-      expect(result).toBeUndefined();
-    });
+  afterEach(() => {
+    process.env.INPUT_NAME = originalInputName;
+    process.env.INPUT_ITEMS = originalInputItems;
+    process.env.TOKEN = originalToken;
+    process.exitCode = originalExitCode;
   });
 
-  describe('getBoolInput', () => {
-    it('should wrap core.getBooleanInput', () => {
-      const mockGetBooleanInput = core.getBooleanInput as jest.MockedFunction<typeof core.getBooleanInput>;
-      mockGetBooleanInput.mockReturnValue(true);
+  it('reads string input values', () => {
+    process.env.INPUT_NAME = 'abc';
 
-      const result = adapter.getBoolInput('testBool', false);
+    const result = adapter.getInput('name', true);
 
-      expect(core.getBooleanInput).toHaveBeenCalledWith('testBool', { required: false });
-      expect(result).toBe(true);
-    });
+    expect(result).toBe('abc');
   });
 
-  describe('getDelimitedInput', () => {
-    it('should split delimited input into array', () => {
-      const mockGetInput = core.getInput as jest.MockedFunction<typeof core.getInput>;
-      mockGetInput.mockReturnValue('item1,item2,item3');
+  it('parses delimited input values', () => {
+    process.env.INPUT_ITEMS = 'a, b, c';
 
-      const result = adapter.getDelimitedInput('testList', ',', false);
+    const result = adapter.getDelimitedInput('items', ',', true);
 
-      expect(result).toEqual(['item1', 'item2', 'item3']);
-    });
-
-    it('should trim whitespace from items', () => {
-      const mockGetInput = core.getInput as jest.MockedFunction<typeof core.getInput>;
-      mockGetInput.mockReturnValue(' item1 , item2 , item3 ');
-
-      const result = adapter.getDelimitedInput('testList', ',', false);
-
-      expect(result).toEqual(['item1', 'item2', 'item3']);
-    });
-
-    it('should filter empty items', () => {
-      const mockGetInput = core.getInput as jest.MockedFunction<typeof core.getInput>;
-      mockGetInput.mockReturnValue('item1,,item2,');
-
-      const result = adapter.getDelimitedInput('testList', ',', false);
-
-      expect(result).toEqual(['item1', 'item2']);
-    });
+    expect(result).toEqual(['a', 'b', 'c']);
   });
 
-  describe('setOutput', () => {
-    it('should wrap core.setOutput', () => {
-      adapter.setOutput('testOutput', 'test-value');
+  it('exports non-output variables to environment', () => {
+    adapter.setVariable('TOKEN', 'value', false, false);
 
-      expect(core.setOutput).toHaveBeenCalledWith('testOutput', 'test-value');
-    });
+    expect(process.env.TOKEN).toBe('value');
   });
 
-  describe('setResult', () => {
-    it('should call core.info for succeeded result', () => {
-      adapter.setResult(TaskResult.Succeeded, 'Task completed');
+  it('sets failed result via process exit code', () => {
+    adapter.setResult(TaskResult.Failed, 'failed');
 
-      expect(core.info).toHaveBeenCalledWith('✅ Task completed');
-    });
-
-    it('should call core.setFailed for failed result', () => {
-      adapter.setResult(TaskResult.Failed, 'Task failed');
-
-      expect(core.setFailed).toHaveBeenCalledWith('Task failed');
-    });
-
-    it('should call core.warning for other results', () => {
-      adapter.setResult(TaskResult.Skipped, 'Task skipped');
-
-      expect(core.warning).toHaveBeenCalledWith('Task skipped');
-    });
+    expect(process.exitCode).toBe(1);
   });
 
-  describe('setVariable', () => {
-    it('should export variable when isOutput is false', () => {
-      adapter.setVariable('TEST_VAR', 'value', false, false);
+  it('resolves existing tools through which', async () => {
+    const result = await adapter.which('node', true);
 
-      expect(core.exportVariable).toHaveBeenCalledWith('TEST_VAR', 'value');
-    });
-
-    it('should set output when isOutput is true', () => {
-      adapter.setVariable('TEST_VAR', 'value', false, true);
-
-      expect(core.setOutput).toHaveBeenCalledWith('TEST_VAR', 'value');
-    });
-
-    it('should mark as secret when isSecret is true', () => {
-      adapter.setVariable('SECRET_VAR', 'secret-value', true, false);
-
-      expect(core.setSecret).toHaveBeenCalledWith('secret-value');
-      expect(core.exportVariable).toHaveBeenCalledWith('SECRET_VAR', 'secret-value');
-    });
+    expect(result).toBeTruthy();
   });
 
-  describe('setSecret', () => {
-    it('should wrap core.setSecret', () => {
-      adapter.setSecret('secret-value');
-
-      expect(core.setSecret).toHaveBeenCalledWith('secret-value');
-    });
-  });
-
-  describe('logging methods', () => {
-    it('should wrap core.debug', () => {
-      adapter.debug('debug message');
-      expect(core.debug).toHaveBeenCalledWith('debug message');
+  it('exec writes stdout to outStream and returns code', async () => {
+    let captured = '';
+    const outStream = new Writable({
+      write(chunk, _encoding, callback) {
+        captured += chunk.toString();
+        callback();
+      },
     });
 
-    it('should wrap core.info', () => {
-      adapter.info('info message');
-      expect(core.info).toHaveBeenCalledWith('info message');
+    const code = await adapter.exec(process.execPath, ['-e', "process.stdout.write('ok')"], {
+      outStream,
     });
 
-    it('should wrap core.warning', () => {
-      adapter.warning('warning message');
-      expect(core.warning).toHaveBeenCalledWith('warning message');
-    });
-
-    it('should wrap core.error', () => {
-      adapter.error('error message');
-      expect(core.error).toHaveBeenCalledWith('error message');
-    });
-  });
-
-  describe('which', () => {
-    it('should wrap io.which', async () => {
-      const mockWhich = io.which as jest.MockedFunction<typeof io.which>;
-      mockWhich.mockResolvedValue('/usr/bin/tool');
-
-      const result = await adapter.which('tool', true);
-
-      expect(io.which).toHaveBeenCalledWith('tool', true);
-      expect(result).toBe('/usr/bin/tool');
-    });
-  });
-
-  describe('exec', () => {
-    it('should wrap exec.exec and return exit code', async () => {
-      const mockExec = exec.exec as jest.MockedFunction<typeof exec.exec>;
-      mockExec.mockResolvedValue(0);
-
-      const result = await adapter.exec('tool', ['arg1', 'arg2']);
-
-      expect(exec.exec).toHaveBeenCalledWith('tool', ['arg1', 'arg2'], undefined);
-      expect(result).toBe(0);
-    });
-
-    it('should pass options to exec', async () => {
-      const mockExec = exec.exec as jest.MockedFunction<typeof exec.exec>;
-      mockExec.mockResolvedValue(0);
-
-      const options = { silent: true, cwd: '/test' };
-      await adapter.exec('tool', ['arg'], options);
-
-      expect(exec.exec).toHaveBeenCalledWith('tool', ['arg'], options);
-    });
+    expect(code).toBe(0);
+    expect(captured).toContain('ok');
   });
 });

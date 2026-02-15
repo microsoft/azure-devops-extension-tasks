@@ -12,28 +12,28 @@ If you plan to publish to the Marketplace, you will need to [create a personal a
 
 Azure DevOps
 
-* **Package**: package a VSTS extension into an extension package (.VSIX) file
-* **Publish**: (optionally) package and publish an extension (either privately or publicly) to the Visual Studio Marketplace
-* **Unpublish**: unpublish an extension from the Visual Studio Marketplace
-* **Share**: share an extension with an Azure DevOps organisation
-* **Install**: install an extension to an Azure DevOps organisation or Team Foundation Server
-* **Query version**: query an extension's version (to make it easy to increment on your next package or publish)
-* **Wait for validation**: waits for the Marketplace validation to come through.
+- **Package**: package a VSTS extension into an extension package (.VSIX) file
+- **Publish**: (optionally) package and publish an extension (either privately or publicly) to the Visual Studio Marketplace
+- **Unpublish**: unpublish an extension from the Visual Studio Marketplace
+- **Share**: share an extension with an Azure DevOps organisation
+- **Install**: install an extension to an Azure DevOps organisation or Team Foundation Server
+- **Query version**: query an extension's version (to make it easy to increment on your next package or publish)
+- **Wait for validation**: waits for the Marketplace validation to come through.
 
 Visual Studio
 
-* **Publish**: Publish a Visual Studio extension to the Visual Studio Marketplace
+- **Publish**: Publish a Visual Studio extension to the Visual Studio Marketplace
 
 ### Required scopes
 
- When creating a personal access token for use by your pipeline, make sure the token has at least the following scopes for the task(s) you are using:
+When creating a personal access token for use by your pipeline, make sure the token has at least the following scopes for the task(s) you are using:
 
-* **Publish**: `All accessible organisations`, `Marketplace (publish)`
-* **Unpublish**: `All accessible organisations`, `Marketplace (manage)`
-* **Share**: `All accessible organisations`, `Marketplace (publish)`
-* **Install**: `All accessible organisations` or a specific Organisation, `Extensions (read and manage)`, `Marketplace (acquire)`
-* **Query Version**: `All accessible organisations`, `Marketplace (read)`
-* **Is Valid**: `All accessible organisations`, `Marketplace (read)`
+- **Publish**: `All accessible organisations`, `Marketplace (publish)`
+- **Unpublish**: `All accessible organisations`, `Marketplace (manage)`
+- **Share**: `All accessible organisations`, `Marketplace (publish)`
+- **Install**: `All accessible organisations` or a specific Organisation, `Extensions (read and manage)`, `Marketplace (acquire)`
+- **Query Version**: `All accessible organisations`, `Marketplace (read)`
+- **Is Valid**: `All accessible organisations`, `Marketplace (read)`
 
 ![Permissions](./Images/permissions.png)
 

@@ -8,6 +8,10 @@ import {
 } from '../manifest-utils.js';
 import { MockPlatformAdapter } from './helpers/mock-platform.js';
 
+function normalizePathSlashes(path: string): string {
+  return path.replace(/\\/g, '/');
+}
+
 describe('manifest-utils', () => {
   let platform: MockPlatformAdapter;
 
@@ -53,9 +57,7 @@ describe('manifest-utils', () => {
     });
 
     it('should throw if file does not exist', async () => {
-      await expect(readManifest('/nonexistent.json', platform)).rejects.toThrow(
-        'File not found'
-      );
+      await expect(readManifest('/nonexistent.json', platform)).rejects.toThrow('ENOENT');
     });
 
     it('should throw if JSON is invalid', async () => {
@@ -103,7 +105,10 @@ describe('manifest-utils', () => {
 
       const paths = resolveTaskManifestPaths(manifest, '/root/vss-extension.json', platform);
 
-      expect(paths).toEqual(['/root/PackageTask/task.json', '/root/PublishTask/task.json']);
+      expect(paths.map(normalizePathSlashes)).toEqual([
+        '/root/PackageTask/task.json',
+        '/root/PublishTask/task.json',
+      ]);
     });
 
     it('should return empty array if no contributions', () => {
@@ -128,7 +133,7 @@ describe('manifest-utils', () => {
 
       const paths = resolveTaskManifestPaths(manifest, '/root/vss-extension.json', platform);
 
-      expect(paths).toEqual(['/root/MyTask/task.json']);
+      expect(paths.map(normalizePathSlashes)).toEqual(['/root/MyTask/task.json']);
     });
 
     it('should handle contributions without name property', () => {

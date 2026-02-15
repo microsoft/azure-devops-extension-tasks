@@ -2,11 +2,7 @@ import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import * as tc from '@actions/tool-cache';
 import * as io from '@actions/io';
-import {
-  IPlatformAdapter,
-  TaskResult,
-  ExecOptions,
-} from '@extension-tasks/core';
+import { IPlatformAdapter, TaskResult, ExecOptions } from '@extension-tasks/core';
 import { promises as fs } from 'fs';
 import * as os from 'os';
 
@@ -16,7 +12,7 @@ import * as os from 'os';
  */
 export class GitHubAdapter implements IPlatformAdapter {
   // ===== Input =====
-  
+
   getInput(name: string, required?: boolean): string | undefined {
     const value = core.getInput(name, { required: required || false });
     return value || undefined;
@@ -26,14 +22,13 @@ export class GitHubAdapter implements IPlatformAdapter {
     return core.getBooleanInput(name, { required: required || false });
   }
 
-  getDelimitedInput(
-    name: string,
-    delimiter: string,
-    required?: boolean
-  ): string[] {
+  getDelimitedInput(name: string, delimiter: string, required?: boolean): string[] {
     const value = core.getInput(name, { required: required || false });
     if (!value) return [];
-    return value.split(delimiter).map((v) => v.trim()).filter((v) => v);
+    return value
+      .split(delimiter)
+      .map((v) => v.trim())
+      .filter((v) => v);
   }
 
   // ===== Output =====
@@ -52,12 +47,7 @@ export class GitHubAdapter implements IPlatformAdapter {
     }
   }
 
-  setVariable(
-    name: string,
-    value: string,
-    isSecret?: boolean,
-    isOutput?: boolean
-  ): void {
+  setVariable(name: string, value: string, isSecret?: boolean, isOutput?: boolean): void {
     if (isSecret) {
       core.setSecret(value);
     }
@@ -97,18 +87,12 @@ export class GitHubAdapter implements IPlatformAdapter {
     return result;
   }
 
-  async exec(
-    tool: string,
-    args: string[],
-    options?: ExecOptions
-  ): Promise<number> {
-    let stdout = '';
+  async exec(tool: string, args: string[], options?: ExecOptions): Promise<number> {
     let stderr = '';
 
     const listeners = {
       stdout: (data: Buffer) => {
         const str = data.toString();
-        stdout += str;
         if (options?.outStream) {
           options.outStream.write(str);
         }
@@ -140,6 +124,8 @@ export class GitHubAdapter implements IPlatformAdapter {
   // ===== Filesystem =====
 
   findMatch(_root: string, _patterns: string[]): string[] {
+    void _root;
+    void _patterns;
     // GitHub Actions doesn't have a built-in glob matcher
     // We'd need to implement this or use a library
     // For now, return empty array (will be enhanced later)
@@ -184,11 +170,7 @@ export class GitHubAdapter implements IPlatformAdapter {
 
   // ===== Tool Management =====
 
-  async cacheDir(
-    sourceDir: string,
-    tool: string,
-    version: string
-  ): Promise<string> {
+  async cacheDir(sourceDir: string, tool: string, version: string): Promise<string> {
     return tc.cacheDir(sourceDir, tool, version);
   }
 

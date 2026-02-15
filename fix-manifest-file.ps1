@@ -26,7 +26,7 @@ Write-Host "Removed $removedCount files with contentType 'application/octet-stre
 
 # Get all files in BuildTasks folders referenced by the manifest
 $manifestTaskDirectories = $extensionManifest.files |
-    Where-Object { $_.path -like "BuildTasks/*" } |
+    Where-Object { $_.path -like "packages/*" } |
     ForEach-Object {
         $fullPath = Join-Path -Path $repoRoot -ChildPath ($_.path -replace '/', '\')
         if (Test-Path -LiteralPath $fullPath -PathType Container) {

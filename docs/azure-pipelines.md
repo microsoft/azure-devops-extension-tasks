@@ -227,18 +227,18 @@ The task exposes output variables including:
 
 ```yaml
 steps:
-- task: ExtensionTasks@6
-  name: packageExt
-  inputs:
-    operation: package
-    rootFolder: $(Build.SourcesDirectory)
-    outputPath: $(Build.ArtifactStagingDirectory)
+  - task: ExtensionTasks@6
+    name: packageExt
+    inputs:
+      operation: package
+      rootFolder: $(Build.SourcesDirectory)
+      outputPath: $(Build.ArtifactStagingDirectory)
 
-- task: ExtensionTasks@6
-  inputs:
-    operation: publish
-    connectionType: connectedService:VsTeam
-    connectionName: MyMarketplaceConnection
-    publishSource: vsix
-    vsixFile: $(packageExt.Extension.OutputPath)
+  - task: ExtensionTasks@6
+    inputs:
+      operation: publish
+      connectionType: connectedService:VsTeam
+      connectionName: MyMarketplaceConnection
+      publishSource: vsix
+      vsixFile: $(packageExt.Extension.OutputPath)
 ```

@@ -86,7 +86,10 @@ function normalizeDescriptionForComparison(value: unknown): string {
     .toLowerCase();
 }
 
-function descriptionContainsFullRootText(compositeDescription: unknown, rootDescription: unknown): boolean {
+function descriptionContainsFullRootText(
+  compositeDescription: unknown,
+  rootDescription: unknown
+): boolean {
   const compositeNormalized = normalizeDescriptionForComparison(compositeDescription);
   const rootNormalized = normalizeDescriptionForComparison(rootDescription);
 
@@ -107,7 +110,9 @@ function assertNoMismatches(mismatches: string[]): void {
   const hiddenCount = mismatches.length - visible.length;
   const summary = hiddenCount > 0 ? `\n...and ${hiddenCount} more mismatch(es).` : '';
 
-  throw new Error(`Found ${mismatches.length} metadata mismatch(es):\n${visible.join('\n')}\n${summary}`);
+  throw new Error(
+    `Found ${mismatches.length} metadata mismatch(es):\n${visible.join('\n')}\n${summary}`
+  );
 }
 
 describe('Action metadata parity', () => {
@@ -115,79 +120,88 @@ describe('Action metadata parity', () => {
   const mainInputs = mainAction.inputs ?? {};
   const mainOutputs = mainAction.outputs ?? {};
 
-  describe.each(compositeActionTable)('$operation composite action ($relativePath)', ({ absolutePath, relativePath }) => {
-    it('keeps inputs aligned with the root action (except required)', () => {
-      const compositeAction = loadActionDefinition(absolutePath);
-      const compositeInputs = compositeAction.inputs ?? {};
+  describe.each(compositeActionTable)(
+    '$operation composite action ($relativePath)',
+    ({ absolutePath, relativePath }) => {
+      it('keeps inputs aligned with the root action (except required)', () => {
+        const compositeAction = loadActionDefinition(absolutePath);
+        const compositeInputs = compositeAction.inputs ?? {};
 
-      const mismatches: string[] = [];
+        const mismatches: string[] = [];
 
-      for (const [inputName, compositeInput] of Object.entries(compositeInputs)) {
-        const mainInput = mainInputs[inputName];
-        if (!mainInput) {
-          mismatches.push(`${relativePath}: input '${inputName}' is missing from root action`);
-          continue;
+        for (const [inputName, compositeInput] of Object.entries(compositeInputs)) {
+          const mainInput = mainInputs[inputName];
+          if (!mainInput) {
+            mismatches.push(`${relativePath}: input '${inputName}' is missing from root action`);
+            continue;
+          }
+
+          if (typeof compositeInput.description !== typeof mainInput.description) {
+            mismatches.push(
+              `${relativePath}: input '${inputName}' has description type '${typeof compositeInput.description}' but root has '${typeof mainInput.description}'`
+            );
+          }
+
+          if (!descriptionContainsFullRootText(compositeInput.description, mainInput.description)) {
+            const compositeDescription = normalizeDescription(compositeInput.description);
+            const mainDescription = normalizeDescription(mainInput.description);
+            mismatches.push(
+              `${relativePath}: input '${inputName}' description does not fully include root description (excluding 'Required for...' lines)\n  composite: ${JSON.stringify(compositeDescription)}\n  root:      ${JSON.stringify(mainDescription)}`
+            );
+          }
+
+          if (typeof compositeInput.default !== typeof mainInput.default) {
+            mismatches.push(
+              `${relativePath}: input '${inputName}' has default type '${typeof compositeInput.default}' but root has '${typeof mainInput.default}'`
+            );
+          }
+
+          if (
+            compositeInput.default !== undefined &&
+            mainInput.default !== undefined &&
+            compositeInput.default !== mainInput.default
+          ) {
+            mismatches.push(
+              `${relativePath}: input '${inputName}' default mismatch\n  composite: ${JSON.stringify(compositeInput.default)}\n  root:      ${JSON.stringify(mainInput.default)}`
+            );
+          }
         }
 
-        if (typeof compositeInput.description !== typeof mainInput.description) {
-          mismatches.push(
-            `${relativePath}: input '${inputName}' has description type '${typeof compositeInput.description}' but root has '${typeof mainInput.description}'`
-          );
+        assertNoMismatches(mismatches);
+      });
+
+      it('keeps outputs aligned with the root action', () => {
+        const compositeAction = loadActionDefinition(absolutePath);
+        const compositeOutputs = compositeAction.outputs ?? {};
+
+        const mismatches: string[] = [];
+
+        for (const [outputName, compositeOutput] of Object.entries(compositeOutputs)) {
+          const mainOutput = mainOutputs[outputName];
+          if (!mainOutput) {
+            mismatches.push(`${relativePath}: output '${outputName}' is missing from root action`);
+            continue;
+          }
+
+          if (typeof compositeOutput.description !== typeof mainOutput.description) {
+            mismatches.push(
+              `${relativePath}: output '${outputName}' has description type '${typeof compositeOutput.description}' but root has '${typeof mainOutput.description}'`
+            );
+          }
+
+          if (
+            !descriptionContainsFullRootText(compositeOutput.description, mainOutput.description)
+          ) {
+            const compositeDescription = normalizeDescription(compositeOutput.description);
+            const mainDescription = normalizeDescription(mainOutput.description);
+            mismatches.push(
+              `${relativePath}: output '${outputName}' description does not fully include root description (excluding 'Required for...' lines)\n  composite: ${JSON.stringify(compositeDescription)}\n  root:      ${JSON.stringify(mainDescription)}`
+            );
+          }
         }
 
-        if (!descriptionContainsFullRootText(compositeInput.description, mainInput.description)) {
-          const compositeDescription = normalizeDescription(compositeInput.description);
-          const mainDescription = normalizeDescription(mainInput.description);
-          mismatches.push(
-            `${relativePath}: input '${inputName}' description does not fully include root description (excluding 'Required for...' lines)\n  composite: ${JSON.stringify(compositeDescription)}\n  root:      ${JSON.stringify(mainDescription)}`
-          );
-        }
-
-        if (typeof compositeInput.default !== typeof mainInput.default) {
-          mismatches.push(
-            `${relativePath}: input '${inputName}' has default type '${typeof compositeInput.default}' but root has '${typeof mainInput.default}'`
-          );
-        }
-
-        if (compositeInput.default !== undefined && mainInput.default !== undefined && compositeInput.default !== mainInput.default) {
-          mismatches.push(
-            `${relativePath}: input '${inputName}' default mismatch\n  composite: ${JSON.stringify(compositeInput.default)}\n  root:      ${JSON.stringify(mainInput.default)}`
-          );
-        }
-      }
-
-      assertNoMismatches(mismatches);
-    });
-
-    it('keeps outputs aligned with the root action', () => {
-      const compositeAction = loadActionDefinition(absolutePath);
-      const compositeOutputs = compositeAction.outputs ?? {};
-
-      const mismatches: string[] = [];
-
-      for (const [outputName, compositeOutput] of Object.entries(compositeOutputs)) {
-        const mainOutput = mainOutputs[outputName];
-        if (!mainOutput) {
-          mismatches.push(`${relativePath}: output '${outputName}' is missing from root action`);
-          continue;
-        }
-
-        if (typeof compositeOutput.description !== typeof mainOutput.description) {
-          mismatches.push(
-            `${relativePath}: output '${outputName}' has description type '${typeof compositeOutput.description}' but root has '${typeof mainOutput.description}'`
-          );
-        }
-
-        if (!descriptionContainsFullRootText(compositeOutput.description, mainOutput.description)) {
-          const compositeDescription = normalizeDescription(compositeOutput.description);
-          const mainDescription = normalizeDescription(mainOutput.description);
-          mismatches.push(
-            `${relativePath}: output '${outputName}' description does not fully include root description (excluding 'Required for...' lines)\n  composite: ${JSON.stringify(compositeDescription)}\n  root:      ${JSON.stringify(mainDescription)}`
-          );
-        }
-      }
-
-      assertNoMismatches(mismatches);
-    });
-  });
+        assertNoMismatches(mismatches);
+      });
+    }
+  );
 });

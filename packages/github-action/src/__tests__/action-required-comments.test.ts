@@ -137,7 +137,9 @@ describe('Main action required-for comments', () => {
       }
 
       if (commandScopedInputs.has(inputName) && !requiredFromComment) {
-        mismatches.push(`Input '${inputName}' is command-scoped required but is missing 'Required for command: ...' phrasing in main action.yml`);
+        mismatches.push(
+          `Input '${inputName}' is command-scoped required but is missing 'Required for command: ...' phrasing in main action.yml`
+        );
         continue;
       }
 

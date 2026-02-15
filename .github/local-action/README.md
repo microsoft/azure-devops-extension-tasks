@@ -58,7 +58,8 @@ cd ~/local-action
 
 ## Environment Variables
 
-GitHub Actions use INPUT_* pattern for inputs (uppercase, hyphens converted to underscores):
+GitHub Actions use INPUT\_\* pattern for inputs (uppercase, hyphens converted to underscores):
+
 - `INPUT_OPERATION` - The operation to perform (package, publish, show, etc.)
 - `INPUT_AUTH-TYPE` - Authentication type (pat, oidc)
 - `INPUT_TOKEN` - Marketplace PAT token
@@ -83,7 +84,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Package Extension
         uses: ./
         with:
@@ -109,14 +110,17 @@ Then run with local-action:
 ## Troubleshooting
 
 ### Action fails to start
+
 - Ensure you've built the action: `npm run build:v6`
 - Check that action.yml exists in the root
 
 ### Authentication errors
+
 - Verify MARKETPLACE_TOKEN is set and valid
 - Check token has correct permissions for the operation
 
 ### Module not found errors
+
 - Run `npm install` in the repository root
 - Ensure all workspace packages are built
 

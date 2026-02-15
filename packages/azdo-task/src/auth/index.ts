@@ -3,7 +3,10 @@ import { getPatAuth } from './pat-auth.js';
 import { getBasicAuth } from './basic-auth.js';
 import { getAzureRmAuth } from './azurerm-auth.js';
 
-export type ConnectionType = 'connectedService:VsTeam' | 'connectedService:AzureRM' | 'connectedService:Generic';
+export type ConnectionType =
+  | 'connectedService:VsTeam'
+  | 'connectedService:AzureRM'
+  | 'connectedService:Generic';
 
 /**
  * Get authentication credentials based on connection type
@@ -16,13 +19,13 @@ export async function getAuth(
   switch (connectionType) {
     case 'connectedService:VsTeam':
       return getPatAuth(connectionName, platform);
-    
+
     case 'connectedService:AzureRM':
       return getAzureRmAuth(connectionName, platform);
-    
+
     case 'connectedService:Generic':
       return getBasicAuth(connectionName, platform);
-    
+
     default:
       throw new Error(`Unsupported connection type: ${connectionType}`);
   }

@@ -57,10 +57,14 @@ export async function queryVersion(
   const versionAction = options.versionAction ?? 'None';
 
   if (options.extensionVersionOverrideVariable) {
-    platform.debug(`Override variable '${options.extensionVersionOverrideVariable}' specified, checking for value.`);
+    platform.debug(
+      `Override variable '${options.extensionVersionOverrideVariable}' specified, checking for value.`
+    );
     const overrideVersion = platform.getVariable(options.extensionVersionOverrideVariable);
     if (overrideVersion) {
-      platform.info(`Ignoring marketplace version and using supplied override: ${overrideVersion}.`);
+      platform.info(
+        `Ignoring marketplace version and using supplied override: ${overrideVersion}.`
+      );
       platform.setVariable('Extension.Version', overrideVersion, false, false);
       platform.setVariable('Extension.Version', overrideVersion, false, true);
       if (options.outputVariable) {

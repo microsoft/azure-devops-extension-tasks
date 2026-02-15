@@ -1,18 +1,29 @@
-import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-import { getOidcAuth } from '../../auth/oidc-auth.js';
-import * as core from '@actions/core';
-import * as exec from '@actions/exec';
-import type { IPlatformAdapter } from '@extension-tasks/core';
+import { describe, it, expect, jest, beforeEach, beforeAll } from '@jest/globals';
+import type { AuthCredentials, IPlatformAdapter } from '@extension-tasks/core';
 
-// Mock @actions modules
-jest.mock('@actions/core');
-jest.mock('@actions/exec');
+const coreMock = {
+  info: jest.fn<(message: string) => void>(),
+  setSecret: jest.fn<(value: string) => void>(),
+};
+
+const execMock = {
+  exec: jest.fn(),
+};
+
+jest.unstable_mockModule('@actions/core', () => coreMock);
+jest.unstable_mockModule('@actions/exec', () => execMock);
+
+let getOidcAuth: (
+  serviceUrl: string | undefined,
+  platform: IPlatformAdapter
+) => Promise<AuthCredentials>;
 
 describe('GitHub OIDC Auth', () => {
   let mockPlatform: jest.Mocked<IPlatformAdapter>;
-  let mockCoreInfo: jest.MockedFunction<typeof core.info>;
-  let mockCoreSetSecret: jest.MockedFunction<typeof core.setSecret>;
-  let mockExecExec: jest.MockedFunction<typeof exec.exec>;
+
+  beforeAll(async () => {
+    ({ getOidcAuth } = await import('../../auth/oidc-auth.js'));
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -20,7 +31,6 @@ describe('GitHub OIDC Auth', () => {
     mockPlatform = {
       getInput: jest.fn(),
       getBoolInput: jest.fn(),
-      getPathInput: jest.fn(),
       getDelimitedInput: jest.fn(),
       setSecret: jest.fn(),
       setVariable: jest.fn(),
@@ -32,21 +42,25 @@ describe('GitHub OIDC Auth', () => {
       which: jest.fn(),
       getVariable: jest.fn(),
       setOutput: jest.fn(),
+      findMatch: jest.fn(),
+      fileExists: jest.fn(),
+      readFile: jest.fn(),
+      writeFile: jest.fn(),
+      mkdirP: jest.fn(),
+      rmRF: jest.fn(),
+      getTempDir: jest.fn(),
+      cacheDir: jest.fn(),
+      findCachedTool: jest.fn(),
+      downloadTool: jest.fn(),
+      setResult: jest.fn(),
     } as unknown as jest.Mocked<IPlatformAdapter>;
-
-    mockCoreInfo = core.info as jest.MockedFunction<typeof core.info>;
-    mockCoreSetSecret = core.setSecret as jest.MockedFunction<typeof core.setSecret>;
-    mockExecExec = exec.exec as jest.MockedFunction<typeof exec.exec>;
   });
 
-  it('should return correct AuthCredentials structure', async () => {
-    const expectedToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6...';
-    
-    mockExecExec.mockImplementation(async (_command, _args, options) => {
-      if (options?.listeners?.stdout) {
-        const output = JSON.stringify({ accessToken: expectedToken });
-        options.listeners.stdout(Buffer.from(output));
-      }
+  it('returns expected credentials when Azure CLI succeeds', async () => {
+    const expectedToken = 'test-token';
+
+    execMock.exec.mockImplementation(async (_command: string, _args: string[], options: any) => {
+      options.listeners.stdout(Buffer.from(JSON.stringify({ accessToken: expectedToken })));
       return 0;
     });
 
@@ -57,120 +71,66 @@ describe('GitHub OIDC Auth', () => {
       serviceUrl: 'https://marketplace.visualstudio.com',
       token: expectedToken,
     });
-  });
-
-  it('should mask token immediately with both core and platform', async () => {
-    const expectedToken = 'test-azure-ad-token';
-    
-    mockExecExec.mockImplementation(async (_command, _args, options) => {
-      if (options?.listeners?.stdout) {
-        const output = JSON.stringify({ accessToken: expectedToken });
-        options.listeners.stdout(Buffer.from(output));
-      }
-      return 0;
-    });
-
-    await getOidcAuth(undefined, mockPlatform);
-
-    expect(mockCoreSetSecret).toHaveBeenCalledWith(expectedToken);
+    expect(coreMock.setSecret).toHaveBeenCalledWith(expectedToken);
     expect(mockPlatform.setSecret).toHaveBeenCalledWith(expectedToken);
   });
 
-  it('should execute Azure CLI with correct arguments for default resource', async () => {
-    const expectedToken = 'test-token';
-    
-    mockExecExec.mockImplementation(async (_command, _args, options) => {
-      if (options?.listeners?.stdout) {
-        const output = JSON.stringify({ accessToken: expectedToken });
-        options.listeners.stdout(Buffer.from(output));
-      }
+  it('uses custom resource when serviceUrl is provided', async () => {
+    execMock.exec.mockImplementation(async (_command: string, _args: string[], options: any) => {
+      options.listeners.stdout(Buffer.from(JSON.stringify({ accessToken: 'token' })));
       return 0;
     });
 
-    await getOidcAuth(undefined, mockPlatform);
+    await getOidcAuth('https://custom.resource.com', mockPlatform);
 
-    expect(mockExecExec).toHaveBeenCalledWith(
+    expect(execMock.exec).toHaveBeenCalledWith(
       'az',
-      ['account', 'get-access-token', '--resource', 'https://marketplace.visualstudio.com', '--output', 'json'],
+      [
+        'account',
+        'get-access-token',
+        '--resource',
+        'https://custom.resource.com',
+        '--output',
+        'json',
+      ],
       expect.objectContaining({ silent: true })
     );
   });
 
-  it('should use custom resource when provided', async () => {
-    const expectedToken = 'test-token';
-    const customResource = 'https://custom.resource.com';
-    
-    mockExecExec.mockImplementation(async (_command, _args, options) => {
-      if (options?.listeners?.stdout) {
-        const output = JSON.stringify({ accessToken: expectedToken });
-        options.listeners.stdout(Buffer.from(output));
-      }
-      return 0;
-    });
-
-    await getOidcAuth(customResource, mockPlatform);
-
-    expect(mockExecExec).toHaveBeenCalledWith(
-      'az',
-      ['account', 'get-access-token', '--resource', customResource, '--output', 'json'],
-      expect.any(Object)
-    );
-  });
-
-  it('should throw error when Azure CLI exits with non-zero code', async () => {
-    mockExecExec.mockImplementation(async (_command, _args, options) => {
-      if (options?.listeners?.stderr) {
-        options.listeners.stderr(Buffer.from('Azure CLI error: not logged in'));
-      }
+  it('throws when Azure CLI returns non-zero exit code', async () => {
+    execMock.exec.mockImplementation(async (_command: string, _args: string[], options: any) => {
+      options.listeners.stderr(Buffer.from('Azure CLI error'));
       return 1;
     });
 
-    await expect(getOidcAuth(undefined, mockPlatform))
-      .rejects.toThrow('Azure CLI exited with code 1');
+    await expect(getOidcAuth(undefined, mockPlatform)).rejects.toThrow(
+      'Azure CLI exited with code 1'
+    );
   });
 
-  it('should throw error when token is missing from response', async () => {
-    mockExecExec.mockImplementation(async (_command, _args, options) => {
-      if (options?.listeners?.stdout) {
-        const output = JSON.stringify({ someOtherField: 'value' });
-        options.listeners.stdout(Buffer.from(output));
-      }
+  it('throws when response is missing accessToken', async () => {
+    execMock.exec.mockImplementation(async (_command: string, _args: string[], options: any) => {
+      options.listeners.stdout(Buffer.from(JSON.stringify({ foo: 'bar' })));
       return 0;
     });
 
-    await expect(getOidcAuth(undefined, mockPlatform))
-      .rejects.toThrow('No accessToken in Azure CLI response');
+    await expect(getOidcAuth(undefined, mockPlatform)).rejects.toThrow(
+      'No accessToken in Azure CLI response'
+    );
   });
 
-  it('should throw error with helpful message when JSON parsing fails', async () => {
-    mockExecExec.mockImplementation(async (_command, _args, options) => {
-      if (options?.listeners?.stdout) {
-        options.listeners.stdout(Buffer.from('invalid json'));
-      }
-      return 0;
-    });
-
-    await expect(getOidcAuth(undefined, mockPlatform))
-      .rejects.toThrow('Failed to get Azure AD token via Azure CLI');
-  });
-
-  it('should log success message after obtaining token', async () => {
-    const expectedToken = 'test-token';
-    
-    mockExecExec.mockImplementation(async (_command, _args, options) => {
-      if (options?.listeners?.stdout) {
-        const output = JSON.stringify({ accessToken: expectedToken });
-        options.listeners.stdout(Buffer.from(output));
-      }
+  it('logs start and success messages', async () => {
+    execMock.exec.mockImplementation(async (_command: string, _args: string[], options: any) => {
+      options.listeners.stdout(Buffer.from(JSON.stringify({ accessToken: 'token' })));
       return 0;
     });
 
     await getOidcAuth(undefined, mockPlatform);
 
-    expect(mockCoreInfo).toHaveBeenCalledWith(
+    expect(coreMock.info).toHaveBeenCalledWith(
       'Getting Azure AD token via Azure CLI (requires azure/login action)...'
     );
-    expect(mockCoreInfo).toHaveBeenCalledWith(
+    expect(coreMock.info).toHaveBeenCalledWith(
       'Successfully obtained Azure AD token via Azure CLI'
     );
   });

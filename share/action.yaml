@@ -128,17 +128,17 @@ inputs:
 runs:
   using: composite
   steps:
-  - id: share
-    uses: jessehouwing/azure-devops-extension-tasks@v6
-    with:
-      operation: share
-      auth-type: ${{ inputs.auth-type }}
-      token: ${{ inputs.token }}
-      username: ${{ inputs.username }}
-      password: ${{ inputs.password }}
-      service-url: ${{ inputs.service-url }}
-      marketplace-url: ${{ inputs.marketplace-url }}
-      tfx-version: ${{ inputs.tfx-version }}
-      publisher-id: ${{ inputs.publisher-id }}
-      extension-id: ${{ inputs.extension-id }}
-      share-with: ${{ inputs.share-with }}
+    - id: share
+      uses: jessehouwing/azure-devops-extension-tasks@v6
+      with:
+        operation: share
+        auth-type: ${{ inputs.auth-type }}
+        token: ${{ inputs.token }}
+        username: ${{ inputs.username }}
+        password: ${{ inputs.password }}
+        service-url: ${{ inputs.service-url }}
+        marketplace-url: ${{ inputs.marketplace-url }}
+        tfx-version: ${{ inputs.tfx-version }}
+        publisher-id: ${{ inputs.publisher-id }}
+        extension-id: ${{ inputs.extension-id }}
+        share-with: ${{ inputs.share-with }}

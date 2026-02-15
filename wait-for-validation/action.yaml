@@ -145,19 +145,19 @@ inputs:
 runs:
   using: composite
   steps:
-  - id: wait-for-validation
-    uses: jessehouwing/azure-devops-extension-tasks@v6
-    with:
-      operation: wait-for-validation
-      auth-type: ${{ inputs.auth-type }}
-      token: ${{ inputs.token }}
-      username: ${{ inputs.username }}
-      password: ${{ inputs.password }}
-      service-url: ${{ inputs.service-url }}
-      marketplace-url: ${{ inputs.marketplace-url }}
-      tfx-version: ${{ inputs.tfx-version }}
-      publisher-id: ${{ inputs.publisher-id }}
-      extension-id: ${{ inputs.extension-id }}
-      max-retries: ${{ inputs.max-retries }}
-      min-timeout: ${{ inputs.min-timeout }}
-      max-timeout: ${{ inputs.max-timeout }}
+    - id: wait-for-validation
+      uses: jessehouwing/azure-devops-extension-tasks@v6
+      with:
+        operation: wait-for-validation
+        auth-type: ${{ inputs.auth-type }}
+        token: ${{ inputs.token }}
+        username: ${{ inputs.username }}
+        password: ${{ inputs.password }}
+        service-url: ${{ inputs.service-url }}
+        marketplace-url: ${{ inputs.marketplace-url }}
+        tfx-version: ${{ inputs.tfx-version }}
+        publisher-id: ${{ inputs.publisher-id }}
+        extension-id: ${{ inputs.extension-id }}
+        max-retries: ${{ inputs.max-retries }}
+        min-timeout: ${{ inputs.min-timeout }}
+        max-timeout: ${{ inputs.max-timeout }}

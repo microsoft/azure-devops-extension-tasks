@@ -115,18 +115,18 @@ permissions:
   contents: read
 
 steps:
-- uses: azure/login@v2
-  with:
-    client-id: ${{ secrets.AZURE_CLIENT_ID }}
-    tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-    subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  - uses: azure/login@v2
+    with:
+      client-id: ${{ secrets.AZURE_CLIENT_ID }}
+      tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+      subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-- uses: jessehouwing/azure-devops-extension-tasks@v6
-  with:
-    operation: publish
-    auth-type: oidc
-    publisher-id: mypublisher
-    extension-id: myextension
+  - uses: jessehouwing/azure-devops-extension-tasks@v6
+    with:
+      operation: publish
+      auth-type: oidc
+      publisher-id: mypublisher
+      extension-id: myextension
 ```
 
 ---

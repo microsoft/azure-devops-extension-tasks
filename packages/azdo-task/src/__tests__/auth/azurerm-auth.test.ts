@@ -1,14 +1,22 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-import { getAzureRmAuth } from '../../auth/azurerm-auth.js';
-import { AzureRMEndpoint } from 'azure-pipelines-tasks-azure-arm-rest/azure-arm-endpoint.js';
 import type { IPlatformAdapter } from '@extension-tasks/core';
 
-// Mock azure-pipelines-tasks-azure-arm-rest
-jest.mock('azure-pipelines-tasks-azure-arm-rest/azure-arm-endpoint.js');
+const mockAzureRmEndpointCtor = jest.fn();
+
+jest.unstable_mockModule('azure-pipelines-tasks-azure-arm-rest/azure-arm-endpoint.js', () => ({
+  AzureRMEndpoint: mockAzureRmEndpointCtor,
+}));
+
+let getAzureRmAuth: typeof import('../../auth/azurerm-auth.js').getAzureRmAuth;
+
+beforeEach(async () => {
+  if (!getAzureRmAuth) {
+    ({ getAzureRmAuth } = await import('../../auth/azurerm-auth.js'));
+  }
+});
 
 describe('Azure RM Auth', () => {
   let mockPlatform: jest.Mocked<IPlatformAdapter>;
-  let MockAzureRMEndpoint: jest.MockedClass<typeof AzureRMEndpoint>;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -29,8 +37,6 @@ describe('Azure RM Auth', () => {
       getVariable: jest.fn(),
       setOutput: jest.fn(),
     } as unknown as jest.Mocked<IPlatformAdapter>;
-
-    MockAzureRMEndpoint = AzureRMEndpoint as jest.MockedClass<typeof AzureRMEndpoint>;
   });
 
   it('should return correct AuthCredentials structure', async () => {
@@ -38,14 +44,14 @@ describe('Azure RM Auth', () => {
     const expectedToken = 'azure-ad-token-12345';
 
     const mockEndpointInstance = {
-      getEndpoint: jest.fn().mockResolvedValue({
+      getEndpoint: async () => ({
         applicationTokenCredentials: {
-          getToken: jest.fn().mockResolvedValue(expectedToken),
+          getToken: async () => expectedToken,
         },
       }),
     };
 
-    MockAzureRMEndpoint.mockImplementation(() => mockEndpointInstance as any);
+    mockAzureRmEndpointCtor.mockImplementation(() => mockEndpointInstance as never);
 
     const result = await getAzureRmAuth(connectionName, mockPlatform);
 
@@ -61,14 +67,14 @@ describe('Azure RM Auth', () => {
     const expectedToken = 'azure-ad-token-67890';
 
     const mockEndpointInstance = {
-      getEndpoint: jest.fn().mockResolvedValue({
+      getEndpoint: async () => ({
         applicationTokenCredentials: {
-          getToken: jest.fn().mockResolvedValue(expectedToken),
+          getToken: async () => expectedToken,
         },
       }),
     };
 
-    MockAzureRMEndpoint.mockImplementation(() => mockEndpointInstance as any);
+    mockAzureRmEndpointCtor.mockImplementation(() => mockEndpointInstance as never);
 
     await getAzureRmAuth(connectionName, mockPlatform);
 
@@ -81,14 +87,14 @@ describe('Azure RM Auth', () => {
     const setSecretCalls: string[] = [];
 
     const mockEndpointInstance = {
-      getEndpoint: jest.fn().mockResolvedValue({
+      getEndpoint: async () => ({
         applicationTokenCredentials: {
-          getToken: jest.fn().mockResolvedValue(expectedToken),
+          getToken: async () => expectedToken,
         },
       }),
     };
 
-    MockAzureRMEndpoint.mockImplementation(() => mockEndpointInstance as any);
+    mockAzureRmEndpointCtor.mockImplementation(() => mockEndpointInstance as never);
 
     mockPlatform.setSecret.mockImplementation((secret: string) => {
       setSecretCalls.push(secret);
@@ -96,7 +102,6 @@ describe('Azure RM Auth', () => {
 
     const result = await getAzureRmAuth(connectionName, mockPlatform);
 
-    // Verify setSecret was called before the function returned
     expect(setSecretCalls.length).toBe(1);
     expect(setSecretCalls[0]).toBe(expectedToken);
     expect(result.token).toBe(expectedToken);
@@ -107,65 +112,72 @@ describe('Azure RM Auth', () => {
     const expectedToken = 'test-token';
 
     const mockEndpointInstance = {
-      getEndpoint: jest.fn().mockResolvedValue({
+      getEndpoint: async () => ({
         applicationTokenCredentials: {
-          getToken: jest.fn().mockResolvedValue(expectedToken),
+          getToken: async () => expectedToken,
         },
       }),
     };
 
-    MockAzureRMEndpoint.mockImplementation(() => mockEndpointInstance as any);
+    mockAzureRmEndpointCtor.mockImplementation(() => mockEndpointInstance as never);
 
     await getAzureRmAuth(connectionName, mockPlatform);
 
-    expect(MockAzureRMEndpoint).toHaveBeenCalledWith(connectionName);
+    expect(mockAzureRmEndpointCtor).toHaveBeenCalledWith(connectionName);
   });
 
   it('should throw error when token is null or undefined', async () => {
     const connectionName = 'TestAzureRM';
 
     const mockEndpointInstance = {
-      getEndpoint: jest.fn().mockResolvedValue({
+      getEndpoint: async () => ({
         applicationTokenCredentials: {
-          getToken: jest.fn().mockResolvedValue(null),
+          getToken: async () => null,
         },
       }),
     };
 
-    MockAzureRMEndpoint.mockImplementation(() => mockEndpointInstance as any);
+    mockAzureRmEndpointCtor.mockImplementation(() => mockEndpointInstance as never);
 
-    await expect(getAzureRmAuth(connectionName, mockPlatform))
-      .rejects.toThrow('Failed to get access token from Azure RM endpoint');
+    await expect(getAzureRmAuth(connectionName, mockPlatform)).rejects.toThrow(
+      'Failed to get Azure RM authentication: Failed to get access token from Azure RM endpoint'
+    );
   });
 
   it('should throw error when endpoint fails', async () => {
     const connectionName = 'TestAzureRM';
 
     const mockEndpointInstance = {
-      getEndpoint: jest.fn().mockRejectedValue(new Error('Endpoint error')),
+      getEndpoint: async () => {
+        throw new Error('Endpoint error');
+      },
     };
 
-    MockAzureRMEndpoint.mockImplementation(() => mockEndpointInstance as any);
+    mockAzureRmEndpointCtor.mockImplementation(() => mockEndpointInstance as never);
 
-    await expect(getAzureRmAuth(connectionName, mockPlatform))
-      .rejects.toThrow('Failed to get Azure RM authentication: Endpoint error');
+    await expect(getAzureRmAuth(connectionName, mockPlatform)).rejects.toThrow(
+      'Failed to get Azure RM authentication: Endpoint error'
+    );
   });
 
   it('should throw error when getToken fails', async () => {
     const connectionName = 'TestAzureRM';
 
     const mockEndpointInstance = {
-      getEndpoint: jest.fn().mockResolvedValue({
+      getEndpoint: async () => ({
         applicationTokenCredentials: {
-          getToken: jest.fn().mockRejectedValue(new Error('Token retrieval failed')),
+          getToken: async () => {
+            throw new Error('Token retrieval failed');
+          },
         },
       }),
     };
 
-    MockAzureRMEndpoint.mockImplementation(() => mockEndpointInstance as any);
+    mockAzureRmEndpointCtor.mockImplementation(() => mockEndpointInstance as never);
 
-    await expect(getAzureRmAuth(connectionName, mockPlatform))
-      .rejects.toThrow('Failed to get Azure RM authentication: Token retrieval failed');
+    await expect(getAzureRmAuth(connectionName, mockPlatform)).rejects.toThrow(
+      'Failed to get Azure RM authentication: Token retrieval failed'
+    );
   });
 
   it('should use marketplace.visualstudio.com as service URL', async () => {
@@ -173,14 +185,14 @@ describe('Azure RM Auth', () => {
     const expectedToken = 'test-token';
 
     const mockEndpointInstance = {
-      getEndpoint: jest.fn().mockResolvedValue({
+      getEndpoint: async () => ({
         applicationTokenCredentials: {
-          getToken: jest.fn().mockResolvedValue(expectedToken),
+          getToken: async () => expectedToken,
         },
       }),
     };
 
-    MockAzureRMEndpoint.mockImplementation(() => mockEndpointInstance as any);
+    mockAzureRmEndpointCtor.mockImplementation(() => mockEndpointInstance as never);
 
     const result = await getAzureRmAuth(connectionName, mockPlatform);
 

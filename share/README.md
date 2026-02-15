@@ -62,10 +62,12 @@ OR
 ### Optional Inputs
 
 #### Authentication
+
 - `auth-type`: Authentication type (`pat` or `oidc`, default: `pat`)
 - `token`: Personal Access Token (required when auth-type is `pat`)
 
 #### TFX Configuration
+
 - `tfx-version`: Version of tfx-cli to use (default: `built-in`)
 
 ## Outputs

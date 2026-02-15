@@ -22,5 +22,11 @@
     "**/dist": true,
     "**/*.vsix": true,
     "**/coverage": true
+  },
+  "chat.tools.terminal.autoApprove": {
+    "/^node --experimental-vm-modules \\./node_modules/jest/bin/jest\\.js packages/core/src/__tests__/filesystem-manifest-writer\\.test\\.ts --no-coverage$/": {
+      "approve": true,
+      "matchCommandLine": true
+    }
   }
 }

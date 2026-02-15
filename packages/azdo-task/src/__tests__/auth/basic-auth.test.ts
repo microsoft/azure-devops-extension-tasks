@@ -1,17 +1,23 @@
-import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-import { getBasicAuth } from '../../auth/basic-auth.js';
-import * as tl from 'azure-pipelines-task-lib/task.js';
+import { describe, it, expect, jest, beforeEach, beforeAll } from '@jest/globals';
 import type { IPlatformAdapter } from '@extension-tasks/core';
 
-// Mock azure-pipelines-task-lib
-jest.mock('azure-pipelines-task-lib/task.js');
+const taskLibMock = {
+  getEndpointAuthorization: jest.fn(),
+};
+
+jest.unstable_mockModule('azure-pipelines-task-lib/task.js', () => taskLibMock);
+
+let getBasicAuth: (
+  connectionName: string,
+  platform: IPlatformAdapter
+) => Promise<{ authType: string; serviceUrl: string; username?: string; password?: string }>;
 
 describe('Azure Pipelines Basic Auth', () => {
   let mockPlatform: jest.Mocked<IPlatformAdapter>;
-  let mockGetEndpointUrl: jest.MockedFunction<typeof tl.getEndpointUrl>;
-  let mockGetEndpointAuthorizationParameter: jest.MockedFunction<
-    typeof tl.getEndpointAuthorizationParameter
-  >;
+
+  beforeAll(async () => {
+    ({ getBasicAuth } = await import('../../auth/basic-auth.js'));
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -19,7 +25,6 @@ describe('Azure Pipelines Basic Auth', () => {
     mockPlatform = {
       getInput: jest.fn(),
       getBoolInput: jest.fn(),
-      getPathInput: jest.fn(),
       getDelimitedInput: jest.fn(),
       setSecret: jest.fn(),
       setVariable: jest.fn(),
@@ -31,103 +36,50 @@ describe('Azure Pipelines Basic Auth', () => {
       which: jest.fn(),
       getVariable: jest.fn(),
       setOutput: jest.fn(),
+      findMatch: jest.fn(),
+      fileExists: jest.fn(),
+      readFile: jest.fn(),
+      writeFile: jest.fn(),
+      mkdirP: jest.fn(),
+      rmRF: jest.fn(),
+      getTempDir: jest.fn(),
+      cacheDir: jest.fn(),
+      findCachedTool: jest.fn(),
+      downloadTool: jest.fn(),
+      setResult: jest.fn(),
     } as unknown as jest.Mocked<IPlatformAdapter>;
-
-    mockGetEndpointUrl = tl.getEndpointUrl as jest.MockedFunction<typeof tl.getEndpointUrl>;
-    mockGetEndpointAuthorizationParameter = tl.getEndpointAuthorizationParameter as jest.MockedFunction<
-      typeof tl.getEndpointAuthorizationParameter
-    >;
   });
 
-  it('should return correct AuthCredentials with username and password', async () => {
-    const connectionName = 'TestConnection';
-    const expectedUrl = 'https://marketplace.visualstudio.com';
-    const expectedUsername = 'testuser';
-    const expectedPassword = 'testpassword123';
-
-    mockGetEndpointUrl.mockReturnValue(expectedUrl);
-    mockGetEndpointAuthorizationParameter.mockImplementation((conn, param) => {
-      if (param === 'username') return expectedUsername;
-      if (param === 'password') return expectedPassword;
-      return '';
+  it('returns basic credentials and masks password', async () => {
+    taskLibMock.getEndpointAuthorization.mockReturnValue({
+      parameters: { username: 'user', password: 'secret' },
     });
 
-    const result = await getBasicAuth(connectionName, mockPlatform);
+    const result = await getBasicAuth('MyConnection', mockPlatform);
 
+    expect(taskLibMock.getEndpointAuthorization).toHaveBeenCalledWith('MyConnection', false);
     expect(result).toEqual({
       authType: 'basic',
-      serviceUrl: expectedUrl,
-      username: expectedUsername,
-      password: expectedPassword,
+      serviceUrl: 'https://marketplace.visualstudio.com',
+      username: 'user',
+      password: 'secret',
     });
+    expect(mockPlatform.setSecret).toHaveBeenCalledWith('secret');
   });
 
-  it('should mask password via platform.setSecret() immediately (security critical)', async () => {
-    const connectionName = 'TestConnection';
-    const secretPassword = 'my-secret-password';
+  it('throws when service connection is not found', async () => {
+    taskLibMock.getEndpointAuthorization.mockReturnValue(undefined);
 
-    mockGetEndpointUrl.mockReturnValue('https://marketplace.visualstudio.com');
-    mockGetEndpointAuthorizationParameter.mockImplementation((conn, param) => {
-      if (param === 'username') return 'user';
-      if (param === 'password') return secretPassword;
-      return '';
-    });
-
-    await getBasicAuth(connectionName, mockPlatform);
-
-    expect(mockPlatform.setSecret).toHaveBeenCalledWith(secretPassword);
-    expect(mockPlatform.setSecret).toHaveBeenCalledTimes(1);
-  });
-
-  it('should retrieve username with correct parameter', async () => {
-    const connectionName = 'TestConnection';
-    mockGetEndpointUrl.mockReturnValue('https://marketplace.visualstudio.com');
-    mockGetEndpointAuthorizationParameter.mockReturnValue('value');
-
-    await getBasicAuth(connectionName, mockPlatform);
-
-    expect(mockGetEndpointAuthorizationParameter).toHaveBeenCalledWith(
-      connectionName,
-      'username',
-      false
+    await expect(getBasicAuth('MissingConnection', mockPlatform)).rejects.toThrow(
+      "Service connection 'MissingConnection' not found"
     );
   });
 
-  it('should retrieve password with correct parameter', async () => {
-    const connectionName = 'TestConnection';
-    mockGetEndpointUrl.mockReturnValue('https://marketplace.visualstudio.com');
-    mockGetEndpointAuthorizationParameter.mockReturnValue('value');
+  it('throws when username or password is missing', async () => {
+    taskLibMock.getEndpointAuthorization.mockReturnValue({ parameters: { username: 'user' } });
 
-    await getBasicAuth(connectionName, mockPlatform);
-
-    expect(mockGetEndpointAuthorizationParameter).toHaveBeenCalledWith(
-      connectionName,
-      'password',
-      false
+    await expect(getBasicAuth('MyConnection', mockPlatform)).rejects.toThrow(
+      "Username or password not found in service connection 'MyConnection'"
     );
-  });
-
-  it('should use authType "basic"', async () => {
-    mockGetEndpointUrl.mockReturnValue('https://marketplace.visualstudio.com');
-    mockGetEndpointAuthorizationParameter.mockReturnValue('value');
-
-    const result = await getBasicAuth('TestConnection', mockPlatform);
-
-    expect(result.authType).toBe('basic');
-  });
-
-  it('should handle empty password and still mask it', async () => {
-    const connectionName = 'TestConnection';
-    mockGetEndpointUrl.mockReturnValue('https://marketplace.visualstudio.com');
-    mockGetEndpointAuthorizationParameter.mockImplementation((conn, param) => {
-      if (param === 'username') return 'user';
-      if (param === 'password') return '';
-      return '';
-    });
-
-    const result = await getBasicAuth(connectionName, mockPlatform);
-
-    expect(result.password).toBe('');
-    expect(mockPlatform.setSecret).toHaveBeenCalledWith('');
   });
 });

@@ -1,25 +1,21 @@
 /**
  * Filesystem Manifest Reader - Read manifests from filesystem
- * 
+ *
  * Extends ManifestReader to provide filesystem-based reading of extension
  * and task manifests directly from source directories.
  */
 
 import { readFile } from 'fs/promises';
 import path from 'path';
-import {
-  ManifestReader,
-  type ExtensionManifest,
-  type TaskManifest,
-} from './manifest-reader.js';
+import { ManifestReader, type ExtensionManifest, type TaskManifest } from './manifest-reader.js';
 import type { IPlatformAdapter } from './platform.js';
 
 /**
  * FilesystemManifestReader - Read manifests from filesystem
- * 
+ *
  * Reads extension and task manifests directly from a source directory.
  * Useful for package command where manifests haven't been packaged yet.
- * 
+ *
  * Example usage:
  * ```typescript
  * const reader = new FilesystemManifestReader({
@@ -61,7 +57,7 @@ export class FilesystemManifestReader extends ManifestReader {
 
     // Try to find manifest using globs
     const matches = this.platform.findMatch(this.rootFolder, this.manifestGlobs);
-    
+
     if (matches.length === 0) {
       // Fallback: check for common manifest names
       const commonNames = ['vss-extension.json', 'extension.vsomanifest'];
@@ -74,7 +70,7 @@ export class FilesystemManifestReader extends ManifestReader {
       }
       throw new Error(
         `Extension manifest not found in ${this.rootFolder}. ` +
-        `Tried patterns: ${this.manifestGlobs.join(', ')}`
+          `Tried patterns: ${this.manifestGlobs.join(', ')}`
       );
     }
 
@@ -173,17 +169,17 @@ export class FilesystemManifestReader extends ManifestReader {
   async readTaskManifest(taskPath: string): Promise<TaskManifest> {
     // Build packagePath map to handle files with packagePath
     const packagePathMap = await this.buildPackagePathMap();
-    
+
     // Check if taskPath starts with a packagePath prefix and replace it
     let actualPath = taskPath;
-    
+
     // Normalize path separators for consistent matching
     const normalizedTaskPath = taskPath.replace(/\\/g, '/');
-    
+
     // Try to find a matching packagePath prefix
     for (const [pkgPath, sourcePath] of packagePathMap.entries()) {
       const normalizedPkgPath = pkgPath.replace(/\\/g, '/');
-      
+
       // Check for exact match or prefix match (packagePath/subdir)
       if (normalizedTaskPath === normalizedPkgPath) {
         // Exact match: TaskName → sourcePath
@@ -196,19 +192,19 @@ export class FilesystemManifestReader extends ManifestReader {
         break;
       }
     }
-    
+
     this.platform.debug(
       `Reading task manifest: taskPath='${taskPath}', actualPath='${actualPath}'`
     );
-    
+
     // Resolve relative path from rootFolder
-    const absoluteTaskPath = path.isAbsolute(actualPath) 
-      ? actualPath 
+    const absoluteTaskPath = path.isAbsolute(actualPath)
+      ? actualPath
       : path.join(this.rootFolder, actualPath);
-    
+
     const taskJsonPath = path.join(absoluteTaskPath, 'task.json');
-    
-    if (!await this.platform.fileExists(taskJsonPath)) {
+
+    if (!(await this.platform.fileExists(taskJsonPath))) {
       throw new Error(`Task manifest not found: ${taskJsonPath}`);
     }
 

@@ -15,7 +15,7 @@ export async function getBasicAuth(
 
   const username = endpoint.parameters['username'];
   const password = endpoint.parameters['password'];
-  
+
   if (!username || !password) {
     throw new Error(`Username or password not found in service connection '${connectionName}'`);
   }

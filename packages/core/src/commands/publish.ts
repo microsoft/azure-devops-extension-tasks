@@ -82,9 +82,8 @@ async function executeTfxPublish(
   if (options.shareWith && options.shareWith.length > 0) {
     // Only share if extension is not public
     const isPublic =
-      options.extensionVisibility === 'public' || 
-      options.extensionVisibility === 'public_preview';
-    
+      options.extensionVisibility === 'public' || options.extensionVisibility === 'public_preview';
+
     if (isPublic) {
       platform.warning('Ignoring shareWith - not available for public extensions');
     } else {
@@ -167,16 +166,16 @@ export async function publishExtension(
 
   // Authentication
   args.option('--service-url', auth.serviceUrl);
-  
+
   if (auth.authType === 'pat') {
     args.option('--auth-type', 'pat');
-    args.option('--token', auth.token!);
-    platform.setSecret(auth.token!);
+    args.option('--token', auth.token);
+    platform.setSecret(auth.token);
   } else if (auth.authType === 'basic') {
     args.option('--auth-type', 'basic');
-    args.option('--username', auth.username!);
-    args.option('--password', auth.password!);
-    platform.setSecret(auth.password!);
+    args.option('--username', auth.username);
+    args.option('--password', auth.password);
+    platform.setSecret(auth.password);
   }
 
   // Source-specific arguments
@@ -225,25 +224,25 @@ export async function publishExtension(
     // Handle task version and ID updates for manifest publishing
     // This uses the same approach as package.ts
     let cleanupWriter: (() => Promise<void>) | null = null;
-    
+
     if (options.updateTasksVersion || options.updateTasksId) {
       platform.info('Updating task manifests before publishing...');
-      
+
       try {
         // Import filesystem manifest modules
         const { FilesystemManifestReader } = await import('../filesystem-manifest-reader.js');
         const { ManifestEditor } = await import('../manifest-editor.js');
-        
+
         // Create filesystem reader for the source directory
         const rootFolder = options.rootFolder || '.';
         const manifestGlobs = options.manifestGlobs || ['vss-extension.json'];
-        
+
         const reader = new FilesystemManifestReader({
           rootFolder,
           manifestGlobs,
-          platform
+          platform,
         });
-        
+
         // Create editor and apply all options at once
         const editor = ManifestEditor.fromReader(reader);
         await editor.applyOptions({
@@ -257,24 +256,24 @@ export async function publishExtension(
           updateTasksVersionType: options.updateTasksVersionType,
           updateTasksId: options.updateTasksId,
         });
-        
+
         // Write modifications to filesystem
         const writer = await editor.toWriter();
         await writer.writeToFilesystem();
-        
+
         // Get overrides file path if generated
-        const overridesPath = (writer as any).getOverridesPath();
+        const overridesPath = writer.getOverridesPath();
         if (overridesPath) {
           platform.debug(`Using overrides file: ${overridesPath}`);
           args.option('--overrides-file', overridesPath);
         }
-        
+
         // Setup cleanup function
         cleanupWriter = async () => {
           await writer.close();
           await reader.close();
         };
-        
+
         platform.info('Task manifests updated successfully');
       } catch (err) {
         platform.error(`Failed to update task manifests: ${(err as Error).message}`);
@@ -282,7 +281,7 @@ export async function publishExtension(
       }
     }
 
-  // Execute tfx and handle cleanup
+    // Execute tfx and handle cleanup
     try {
       return await executeTfxPublish(tfx, args, platform, options);
     } finally {
@@ -315,11 +314,11 @@ export async function publishExtension(
 
     if (needsModification) {
       platform.info('Modifying VSIX before publishing...');
-      
+
       // Open the VSIX and create an editor using the unified architecture
       const reader = await VsixReader.open(options.vsixFile);
       const editor = ManifestEditor.fromReader(reader);
-      
+
       // Apply all options at once
       await editor.applyOptions({
         publisherId: options.publisherId,
@@ -332,20 +331,20 @@ export async function publishExtension(
         updateTasksVersionType: options.updateTasksVersionType,
         updateTasksId: options.updateTasksId,
       });
-      
+
       // Write modified VSIX to a temporary file
       const writer = await editor.toWriter();
       const tempDir = platform.getTempDir();
       const tempVsixPath = `${tempDir}/temp-${Date.now()}.vsix`;
-      
+
       platform.debug(`Writing modified VSIX to: ${tempVsixPath}`);
       await writer.writeToFile(tempVsixPath);
       await writer.close();
       await reader.close();
-      
+
       // Use the modified VSIX for publishing
       args.option('--vsix', tempVsixPath);
-      
+
       platform.info('VSIX modifications applied successfully');
     } else {
       // No modifications needed - publish as-is

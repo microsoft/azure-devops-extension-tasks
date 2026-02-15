@@ -12,7 +12,7 @@ describe('installExtension', () => {
   beforeEach(() => {
     platform = new MockPlatformAdapter();
     platform.registerTool('tfx', '/usr/bin/tfx');
-    tfxManager = new TfxManager({ version: 'built-in', platform });
+    tfxManager = new TfxManager({ tfxVersion: 'built-in', platform });
     auth = {
       authType: 'pat',
       serviceUrl: 'https://marketplace.visualstudio.com',
@@ -103,7 +103,7 @@ describe('installExtension', () => {
 
   it('should handle mixed success/failure across accounts', async () => {
     const mockExecute = jest.spyOn(tfxManager, 'execute');
-    
+
     // First account succeeds
     mockExecute.mockResolvedValueOnce({
       exitCode: 0,
@@ -111,7 +111,7 @@ describe('installExtension', () => {
       stdout: '',
       stderr: '',
     });
-    
+
     // Second account fails
     mockExecute.mockResolvedValueOnce({
       exitCode: 1,
@@ -253,7 +253,7 @@ describe('installExtension', () => {
 
     const call1Args = mockExecute.mock.calls[0][0];
     const call2Args = mockExecute.mock.calls[1][0];
-    
+
     expect(call1Args).toContain('https://dev.azure.com/org1');
     expect(call2Args).toContain('https://dev.azure.com/org2');
   });

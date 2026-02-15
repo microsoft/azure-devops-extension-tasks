@@ -12,7 +12,7 @@ export async function getBasicAuth(
   if (!username) {
     throw new Error('Username is required for basic authentication');
   }
-  
+
   if (password === undefined || password === null) {
     throw new Error('Password is required for basic authentication');
   }

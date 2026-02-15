@@ -11,7 +11,7 @@ import { JsonOutputStream } from './json-output-stream.js';
  * Options for TfxManager
  */
 export interface TfxManagerOptions {
-  /** 
+  /**
    * Version of tfx to use:
    * - "built-in": Use tfx-cli from core package dependencies
    * - "path": Use tfx from system PATH
@@ -86,7 +86,9 @@ export class TfxManager {
 
     // 4. Version spec - resolve to exact version first
     const exactVersion = await this.resolveVersionSpec(this.tfxVersion);
-    this.platform.info(`Resolved tfx-cli version spec '${this.tfxVersion}' to exact version '${exactVersion}'`);
+    this.platform.info(
+      `Resolved tfx-cli version spec '${this.tfxVersion}' to exact version '${exactVersion}'`
+    );
 
     // 5. Check platform tool cache (cross-step reuse)
     const cachedPath = this.platform.findCachedTool('tfx-cli', exactVersion);
@@ -104,18 +106,18 @@ export class TfxManager {
   /**
    * Resolve built-in tfx binary from core package dependencies
    * Similar to tfxinstaller v5 behavior
-   * 
+   *
    * The tfx-cli package is a direct dependency of the core package.
    * When bundled, tfx-cli is marked as external and will be in node_modules.
    * We use 'which' to locate it, which will find it in node_modules/.bin/ or PATH.
    */
   private async resolveBuiltIn(): Promise<string> {
     this.platform.info('Using built-in tfx-cli from core package dependencies');
-    
+
     // The tfx-cli is a dependency, so it's in node_modules
     // Use which to find the tfx executable (will check node_modules/.bin and PATH)
     const tfxPath = await this.platform.which('tfx', true);
-    
+
     this.platform.debug(`Resolved built-in tfx at: ${tfxPath}`);
     return tfxPath;
   }
@@ -126,10 +128,10 @@ export class TfxManager {
    */
   private async resolveFromPath(): Promise<string> {
     this.platform.info('Using tfx-cli from system PATH');
-    
+
     // Find tfx on PATH
     const tfxPath = await this.platform.which('tfx', true);
-    
+
     this.platform.debug(`Resolved tfx from PATH at: ${tfxPath}`);
     return tfxPath;
   }
@@ -142,31 +144,33 @@ export class TfxManager {
    */
   private async resolveVersionSpec(versionSpec: string): Promise<string> {
     this.platform.debug(`Resolving version spec: ${versionSpec}`);
-    
+
     try {
       // Use npm view to get the exact version
       const npmPath = await this.platform.which('npm', true);
-      
+
       // Create a temp buffer to capture output
       let output = '';
       const outStream: any = {
-        write: (data: string) => { output += data; }
+        write: (data: string) => {
+          output += data;
+        },
       };
-      
+
       const exitCode = await this.platform.exec(
         npmPath,
         ['view', `tfx-cli@${versionSpec}`, 'version', '--json'],
         { outStream }
       );
-      
+
       if (exitCode !== 0) {
         throw new Error(`npm view failed with exit code ${exitCode}`);
       }
-      
+
       // Parse the output
       const trimmed = output.trim();
       let exactVersion: string;
-      
+
       if (trimmed.startsWith('[')) {
         // Multiple versions returned, take the last one (latest)
         const versions = JSON.parse(trimmed) as string[];
@@ -178,7 +182,7 @@ export class TfxManager {
         // Plain version string
         exactVersion = trimmed;
       }
-      
+
       this.platform.debug(`Resolved '${versionSpec}' to exact version '${exactVersion}'`);
       return exactVersion;
     } catch (error) {
@@ -245,14 +249,14 @@ export class TfxManager {
         `Failed to install tfx-cli@${exactVersion}: ${error instanceof Error ? error.message : String(error)}`
       );
       this.platform.warning('Falling back to tfx from PATH');
-      
+
       try {
         const tfxPath = await this.platform.which('tfx', true);
         return tfxPath;
-      } catch (fallbackError) {
+      } catch {
         throw new Error(
           `Failed to install tfx-cli@${exactVersion} and no tfx found in PATH. ` +
-          `Original error: ${error instanceof Error ? error.message : String(error)}`
+            `Original error: ${error instanceof Error ? error.message : String(error)}`
         );
       }
     } finally {

@@ -6,17 +6,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          
+
       - name: Install dependencies
         run: |
           npm install
           npm run build:v6
-      
+
       - name: Package Extension
         id: package
         uses: ./
@@ -25,27 +25,27 @@ jobs:
           root-folder: './packages/core/src/__tests__/integration/fixtures/test-extension'
           output-path: './dist'
           tfx-version: 'built-in'
-      
+
       - name: Show package output
         run: |
           echo "VSIX Path: ${{ steps.package.outputs.vsix-path }}"
           ls -lah ./dist
-  
+
   test-show:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          
+
       - name: Install dependencies
         run: |
           npm install
           npm run build:v6
-      
+
       - name: Show Extension Info
         uses: ./
         with:

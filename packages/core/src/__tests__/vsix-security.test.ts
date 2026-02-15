@@ -32,10 +32,10 @@ describe('VSIX Security Tests', () => {
       await createSafeVsix(safeVsix);
 
       const reader = await VsixReader.open(safeVsix);
-      
+
       // Try to read with absolute path - should be rejected by our validation
       await expect(reader.readFile('/etc/passwd')).rejects.toThrow(/Security.*Absolute paths/);
-      
+
       await reader.close();
     });
 
@@ -44,10 +44,12 @@ describe('VSIX Security Tests', () => {
       await createSafeVsix(safeVsix);
 
       const reader = await VsixReader.open(safeVsix);
-      
+
       // Try to read with path traversal - should be rejected by our validation
-      await expect(reader.readFile('../../../etc/passwd')).rejects.toThrow(/Security.*Path traversal/);
-      
+      await expect(reader.readFile('../../../etc/passwd')).rejects.toThrow(
+        /Security.*Path traversal/
+      );
+
       await reader.close();
     });
 
@@ -56,11 +58,11 @@ describe('VSIX Security Tests', () => {
       await createSafeVsix(safeVsix);
 
       const reader = await VsixReader.open(safeVsix);
-      
+
       // Try various traversal patterns
       await expect(reader.readFile('legitimate/../../etc/passwd')).rejects.toThrow(/Security/);
       await expect(reader.readFile('./../../secret')).rejects.toThrow(/Security/);
-      
+
       await reader.close();
     });
 
@@ -69,11 +71,13 @@ describe('VSIX Security Tests', () => {
       await createSafeVsix(safeVsix);
 
       const reader = await VsixReader.open(safeVsix);
-      
+
       // Try Windows absolute paths - should be rejected by our validation
-      await expect(reader.readFile('C:\\Windows\\System32\\config\\sam')).rejects.toThrow(/Security/);
+      await expect(reader.readFile('C:\\Windows\\System32\\config\\sam')).rejects.toThrow(
+        /Security/
+      );
       await expect(reader.readFile('D:\\secrets\\data.txt')).rejects.toThrow(/Security/);
-      
+
       await reader.close();
     });
 
@@ -95,7 +99,9 @@ describe('VSIX Security Tests', () => {
       // Try to read with malicious paths
       await expect(reader.readFile('../../../etc/passwd')).rejects.toThrow(/Security/);
       await expect(reader.readFile('/etc/passwd')).rejects.toThrow(/Security/);
-      await expect(reader.readFile('C:\\Windows\\System32\\config\\sam')).rejects.toThrow(/Security/);
+      await expect(reader.readFile('C:\\Windows\\System32\\config\\sam')).rejects.toThrow(
+        /Security/
+      );
 
       await reader.close();
     });
@@ -151,14 +157,14 @@ describe('VSIX Security Tests', () => {
 
     it('should handle large file paths safely', async () => {
       const longPathVsix = join(testDir, 'long-path.vsix');
-      
+
       // Create a path that's very long but legitimate
       const longPath = 'a/'.repeat(100) + 'file.txt';
       await createMaliciousVsix(longPathVsix, longPath);
 
       const reader = await VsixReader.open(longPathVsix);
       const files = await reader.listFiles();
-      expect(files.some(f => f.path === longPath)).toBe(true);
+      expect(files.some((f) => f.path === longPath)).toBe(true);
 
       await reader.close();
     });
@@ -173,18 +179,11 @@ async function createMaliciousVsix(outputPath: string, maliciousPath: string): P
   const options = { compress: true };
 
   // Add a file with malicious path
-  zip.addBuffer(
-    Buffer.from('malicious content'),
-    maliciousPath,
-    options
-  );
+  zip.addBuffer(Buffer.from('malicious content'), maliciousPath, options);
 
   zip.end();
 
-  await pipelineAsync(
-    zip.outputStream,
-    createWriteStream(outputPath)
-  );
+  await pipelineAsync(zip.outputStream, createWriteStream(outputPath));
 }
 
 /**
@@ -197,27 +196,16 @@ async function createSafeVsix(outputPath: string): Promise<void> {
   const manifest = {
     id: 'safe-extension',
     publisher: 'test',
-    version: '1.0.0'
+    version: '1.0.0',
   };
 
-  zip.addBuffer(
-    Buffer.from(JSON.stringify(manifest)),
-    'extension.vsomanifest',
-    options
-  );
+  zip.addBuffer(Buffer.from(JSON.stringify(manifest)), 'extension.vsomanifest', options);
 
-  zip.addBuffer(
-    Buffer.from('{}'),
-    'tasks/task1/task.json',
-    options
-  );
+  zip.addBuffer(Buffer.from('{}'), 'tasks/task1/task.json', options);
 
   zip.end();
 
-  await pipelineAsync(
-    zip.outputStream,
-    createWriteStream(outputPath)
-  );
+  await pipelineAsync(zip.outputStream, createWriteStream(outputPath));
 }
 
 /**
@@ -230,7 +218,7 @@ async function createVsixWithEdgeCases(outputPath: string): Promise<void> {
   const manifest = {
     id: 'edge-case-extension',
     publisher: 'test',
-    version: '1.0.0'
+    version: '1.0.0',
   };
 
   // Legitimate edge cases
@@ -242,8 +230,5 @@ async function createVsixWithEdgeCases(outputPath: string): Promise<void> {
 
   zip.end();
 
-  await pipelineAsync(
-    zip.outputStream,
-    createWriteStream(outputPath)
-  );
+  await pipelineAsync(zip.outputStream, createWriteStream(outputPath));
 }

@@ -12,7 +12,7 @@ describe('showExtension', () => {
   beforeEach(() => {
     platform = new MockPlatformAdapter();
     platform.registerTool('tfx', '/usr/bin/tfx');
-    tfxManager = new TfxManager({ version: 'built-in', platform });
+    tfxManager = new TfxManager({ tfxVersion: 'built-in', platform });
     auth = {
       authType: 'pat',
       serviceUrl: 'https://marketplace.visualstudio.com',
@@ -132,7 +132,7 @@ describe('showExtension', () => {
     const outputs = platform.getOutputs();
     const outputData = outputs.get('EXT_DATA');
     expect(outputData).toBeDefined();
-    
+
     const parsed = JSON.parse(outputData!);
     expect(parsed.id).toBe('ext');
   });

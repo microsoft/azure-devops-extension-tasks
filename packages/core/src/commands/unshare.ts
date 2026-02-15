@@ -80,16 +80,16 @@ export async function unshareExtension(
 
   // Authentication
   args.option('--service-url', auth.serviceUrl);
-  
+
   if (auth.authType === 'pat') {
     args.option('--auth-type', 'pat');
-    args.option('--token', auth.token!);
-    platform.setSecret(auth.token!);
+    args.option('--token', auth.token);
+    platform.setSecret(auth.token);
   } else if (auth.authType === 'basic') {
     args.option('--auth-type', 'basic');
-    args.option('--username', auth.username!);
-    args.option('--password', auth.password!);
-    platform.setSecret(auth.password!);
+    args.option('--username', auth.username);
+    args.option('--password', auth.password);
+    platform.setSecret(auth.password);
   }
 
   // Execute tfx
@@ -100,9 +100,7 @@ export async function unshareExtension(
     throw new Error(`tfx extension unshare failed with exit code ${result.exitCode}`);
   }
 
-  platform.info(
-    `Successfully unshared extension from: ${options.unshareWith.join(', ')}`
-  );
+  platform.info(`Successfully unshared extension from: ${options.unshareWith.join(', ')}`);
 
   return {
     success: true,

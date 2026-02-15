@@ -1,19 +1,15 @@
 /**
  * Manifest Editor - Unified manifest editing for both VSIX and filesystem sources
- * 
+ *
  * Provides chainable API for modifying extension and task manifests.
  * Tracks modifications without writing until toWriter() is called.
  * Works with any ManifestReader implementation (VSIX or filesystem).
- * 
+ *
  * Centralizes all logic for calculating UUIDs, updating task versions, etc.
  */
 
 import { v5 as uuidv5 } from 'uuid';
-import type {
-  ManifestReader,
-  ExtensionManifest,
-  TaskManifest,
-} from './manifest-reader.js';
+import type { ManifestReader, ExtensionManifest, TaskManifest } from './manifest-reader.js';
 import { Buffer } from 'buffer';
 
 /**
@@ -45,7 +41,7 @@ export interface ApplyManifestOptions {
   extensionName?: string;
   extensionVisibility?: 'public' | 'private' | 'public_preview' | 'private_preview';
   extensionPricing?: 'free' | 'paid' | 'trial';
-  
+
   // Task updates
   updateTasksVersion?: boolean;
   updateTasksVersionType?: 'major' | 'minor' | 'patch';
@@ -54,11 +50,11 @@ export interface ApplyManifestOptions {
 
 /**
  * ManifestEditor - Unified editor for extension and task manifests
- * 
+ *
  * Works with any ManifestReader (VsixReader, FilesystemManifestReader, etc.)
  * Provides chainable API for modifications and centralizes all manifest
  * editing logic including UUID generation and task version calculations.
- * 
+ *
  * Example usage with VSIX:
  * ```typescript
  * const reader = await VsixReader.open('input.vsix');
@@ -71,7 +67,7 @@ export interface ApplyManifestOptions {
  * const writer = await editor.toWriter();
  * await writer.writeToFile('output.vsix');
  * ```
- * 
+ *
  * Example usage with filesystem:
  * ```typescript
  * const reader = new FilesystemManifestReader({ rootFolder: './src', platform });
@@ -88,7 +84,7 @@ export class ManifestEditor {
   private modifications: Map<string, FileModification> = new Map();
   private manifestModifications: Partial<ExtensionManifest> = {};
   private taskManifestModifications: Map<string, Partial<TaskManifest>> = new Map();
-  
+
   // Track original task IDs for updating extension manifest references
   private taskIdUpdates: Map<string, { oldId: string; newId: string }> = new Map();
 
@@ -109,7 +105,7 @@ export class ManifestEditor {
    * Apply a set of options to the manifest
    * This is the main entry point for batch modifications
    * All conditional logic for applying changes is contained here
-   * 
+   *
    * @param options Options to apply
    * @returns Promise<this> for async chaining
    */
@@ -118,7 +114,7 @@ export class ManifestEditor {
     if (options.publisherId) {
       this.setPublisher(options.publisherId);
     }
-    
+
     // Handle extension ID with optional tag
     if (options.extensionId) {
       let extensionId = options.extensionId;
@@ -127,33 +123,33 @@ export class ManifestEditor {
       }
       this.setExtensionId(extensionId);
     }
-    
+
     if (options.extensionVersion) {
       this.setVersion(options.extensionVersion);
     }
-    
+
     if (options.extensionName) {
       this.setName(options.extensionName);
     }
-    
+
     if (options.extensionVisibility) {
       this.setVisibility(options.extensionVisibility);
     }
-    
+
     if (options.extensionPricing) {
       this.setPricing(options.extensionPricing);
     }
-    
+
     // Apply task updates
     if (options.updateTasksVersion && options.extensionVersion) {
       const versionType = options.updateTasksVersionType || 'major';
       await this.updateAllTaskVersions(options.extensionVersion, versionType);
     }
-    
+
     if (options.updateTasksId) {
       await this.updateAllTaskIds();
     }
-    
+
     return this;
   }
 
@@ -216,8 +212,8 @@ export class ManifestEditor {
     if (!this.manifestModifications.galleryFlags) {
       this.manifestModifications.galleryFlags = [];
     }
-    const flags = this.manifestModifications.galleryFlags as string[];
-    
+    const flags = this.manifestModifications.galleryFlags;
+
     // Remove existing visibility flags
     const visibilityFlags = ['Public', 'Private', 'Preview'];
     for (const flag of visibilityFlags) {
@@ -226,7 +222,7 @@ export class ManifestEditor {
         flags.splice(index, 1);
       }
     }
-    
+
     // Add new flags based on visibility
     if (visibility === 'public') {
       flags.push('Public');
@@ -237,7 +233,7 @@ export class ManifestEditor {
     } else if (visibility === 'private_preview') {
       flags.push('Private', 'Preview');
     }
-    
+
     return this;
   }
 
@@ -250,8 +246,8 @@ export class ManifestEditor {
     if (!this.manifestModifications.galleryFlags) {
       this.manifestModifications.galleryFlags = [];
     }
-    const flags = this.manifestModifications.galleryFlags as string[];
-    
+    const flags = this.manifestModifications.galleryFlags;
+
     // Remove existing pricing flags
     const pricingFlags = ['Free', 'Paid', 'Trial'];
     for (const flag of pricingFlags) {
@@ -260,11 +256,11 @@ export class ManifestEditor {
         flags.splice(index, 1);
       }
     }
-    
+
     // Add new flag
     const flagMap = { free: 'Free', paid: 'Paid', trial: 'Trial' };
     flags.push(flagMap[pricing]);
-    
+
     return this;
   }
 
@@ -295,12 +291,12 @@ export class ManifestEditor {
     if (!this.taskManifestModifications.has(taskName)) {
       this.taskManifestModifications.set(taskName, {});
     }
-    
-    const taskMods = this.taskManifestModifications.get(taskName)!;
-    
+
+    const taskMods = this.taskManifestModifications.get(taskName);
+
     // Get existing version from modifications or we'll read it when applying
     const existingVersion = taskMods.version || { Major: 0, Minor: 0, Patch: 0 };
-    
+
     // Apply version update based on type (cascading per v5 logic)
     switch (versionType) {
       case 'major':
@@ -325,7 +321,7 @@ export class ManifestEditor {
         };
         break;
     }
-    
+
     return this;
   }
 
@@ -342,17 +338,17 @@ export class ManifestEditor {
     const marketplaceNamespace = uuidv5('https://marketplace.visualstudio.com/vsts', uuidv5.URL);
     const taskNamespace = `${publisherId}.${extensionId}.${taskName}`;
     const newId = uuidv5(taskNamespace, marketplaceNamespace);
-    
+
     if (!this.taskManifestModifications.has(taskName)) {
       this.taskManifestModifications.set(taskName, {});
     }
-    
-    const taskMods = this.taskManifestModifications.get(taskName)!;
-    
+
+    const taskMods = this.taskManifestModifications.get(taskName);
+
     // Store old ID for updating extension manifest references later
     // We'll read the old ID when applying modifications
     taskMods.id = newId;
-    
+
     return this;
   }
 
@@ -368,11 +364,52 @@ export class ManifestEditor {
     versionType: 'major' | 'minor' | 'patch' = 'major'
   ): Promise<this> {
     const tasks = await this.reader.getTasksInfo();
-    
+    const versionParts = extensionVersion.split('.');
+    const parsedVersion = {
+      major: parseInt(versionParts[0], 10) || 0,
+      minor: parseInt(versionParts[1], 10) || 0,
+      patch: parseInt(versionParts[2], 10) || 0,
+    };
+
     for (const task of tasks) {
-      this.updateTaskVersion(task.name, extensionVersion, versionType);
+      const existingParts = (task.version || '0.0.0').split('.');
+      const existingVersion = {
+        Major: parseInt(existingParts[0], 10) || 0,
+        Minor: parseInt(existingParts[1], 10) || 0,
+        Patch: parseInt(existingParts[2], 10) || 0,
+      };
+
+      if (!this.taskManifestModifications.has(task.name)) {
+        this.taskManifestModifications.set(task.name, {});
+      }
+
+      const taskMods = this.taskManifestModifications.get(task.name);
+
+      switch (versionType) {
+        case 'major':
+          taskMods.version = {
+            Major: parsedVersion.major,
+            Minor: parsedVersion.minor,
+            Patch: parsedVersion.patch,
+          };
+          break;
+        case 'minor':
+          taskMods.version = {
+            Major: existingVersion.Major,
+            Minor: parsedVersion.minor,
+            Patch: parsedVersion.patch,
+          };
+          break;
+        case 'patch':
+          taskMods.version = {
+            Major: existingVersion.Major,
+            Minor: existingVersion.Minor,
+            Patch: parsedVersion.patch,
+          };
+          break;
+      }
     }
-    
+
     return this;
   }
 
@@ -385,13 +422,13 @@ export class ManifestEditor {
     const manifest = await this.reader.readExtensionManifest();
     const publisherId = this.manifestModifications.publisher || manifest.publisher;
     const extensionId = this.manifestModifications.id || manifest.id;
-    
+
     const tasks = await this.reader.getTasksInfo();
-    
+
     for (const task of tasks) {
       this.updateTaskId(task.name, publisherId, extensionId);
     }
-    
+
     return this;
   }
 
@@ -404,13 +441,13 @@ export class ManifestEditor {
   setFile(path: string, content: Buffer | string): this {
     const buffer = Buffer.isBuffer(content) ? content : Buffer.from(content, 'utf-8');
     const normalizedPath = path.replace(/\\/g, '/');
-    
+
     this.modifications.set(normalizedPath, {
       type: 'modify',
       path: normalizedPath,
-      content: buffer
+      content: buffer,
     });
-    
+
     return this;
   }
 
@@ -421,12 +458,12 @@ export class ManifestEditor {
    */
   removeFile(path: string): this {
     const normalizedPath = path.replace(/\\/g, '/');
-    
+
     this.modifications.set(normalizedPath, {
       type: 'remove',
-      path: normalizedPath
+      path: normalizedPath,
     });
-    
+
     return this;
   }
 
@@ -438,7 +475,7 @@ export class ManifestEditor {
   async toWriter(): Promise<any> {
     // Dynamically import based on reader type
     const readerConstructorName = this.reader.constructor.name;
-    
+
     if (readerConstructorName === 'VsixReader') {
       const { VsixWriter } = await import('./vsix-writer.js');
       return VsixWriter.fromEditor(this);

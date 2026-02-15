@@ -12,7 +12,7 @@ describe('publishExtension', () => {
   beforeEach(() => {
     platform = new MockPlatformAdapter();
     platform.registerTool('tfx', '/usr/bin/tfx');
-    tfxManager = new TfxManager({ version: 'built-in', platform });
+    tfxManager = new TfxManager({ tfxVersion: 'built-in', platform });
     auth = {
       authType: 'pat',
       serviceUrl: 'https://marketplace.visualstudio.com',

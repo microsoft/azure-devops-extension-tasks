@@ -1,6 +1,6 @@
 /**
  * Tests for ManifestEditor.applyOptions()
- * 
+ *
  * Tests the unified options application that eliminates code duplication
  */
 
@@ -20,14 +20,14 @@ describe('ManifestEditor.applyOptions()', () => {
 
   beforeEach(async () => {
     mockPlatform = new MockPlatformAdapter();
-    
+
     // Create a test VSIX file
     testDir = join(tmpdir(), `manifest-editor-test-${Date.now()}`);
     mkdirSync(testDir, { recursive: true });
     testVsixPath = join(testDir, 'test.vsix');
-    
+
     const zipFile = new yazl.ZipFile();
-    
+
     // Add extension manifest
     const manifest = {
       manifestVersion: 1,
@@ -44,17 +44,14 @@ describe('ManifestEditor.applyOptions()', () => {
           type: 'ms.vss-distributed-task.task',
           targets: ['ms.vss-distributed-task.tasks'],
           properties: {
-            name: 'TestTask'
-          }
-        }
-      ]
+            name: 'TestTask',
+          },
+        },
+      ],
     };
-    
-    zipFile.addBuffer(
-      Buffer.from(JSON.stringify(manifest, null, 2)),
-      'vss-extension.json'
-    );
-    
+
+    zipFile.addBuffer(Buffer.from(JSON.stringify(manifest, null, 2)), 'vss-extension.json');
+
     // Add a task manifest
     const taskManifest = {
       id: 'old-task-id-123',
@@ -64,15 +61,12 @@ describe('ManifestEditor.applyOptions()', () => {
       version: {
         Major: 1,
         Minor: 0,
-        Patch: 0
-      }
+        Patch: 0,
+      },
     };
-    
-    zipFile.addBuffer(
-      Buffer.from(JSON.stringify(taskManifest, null, 2)),
-      'TestTask/task.json'
-    );
-    
+
+    zipFile.addBuffer(Buffer.from(JSON.stringify(taskManifest, null, 2)), 'TestTask/task.json');
+
     // Write to file
     await new Promise<void>((resolve, reject) => {
       zipFile.outputStream
@@ -92,171 +86,173 @@ describe('ManifestEditor.applyOptions()', () => {
   it('should apply publisher override', async () => {
     const reader = await VsixReader.open(testVsixPath);
     const editor = ManifestEditor.fromReader(reader);
-    
+
     await editor.applyOptions({
-      publisherId: 'new-publisher'
+      publisherId: 'new-publisher',
     });
-    
+
     const mods = editor.getManifestModifications();
     expect(mods.publisher).toBe('new-publisher');
-    
+
     await reader.close();
   });
 
   it('should apply extension ID with tag', async () => {
     const reader = await VsixReader.open(testVsixPath);
     const editor = ManifestEditor.fromReader(reader);
-    
+
     await editor.applyOptions({
       extensionId: 'my-extension',
-      extensionTag: '-dev'
+      extensionTag: '-dev',
     });
-    
+
     const mods = editor.getManifestModifications();
     expect(mods.id).toBe('my-extension-dev');
-    
+
     await reader.close();
   });
 
   it('should apply extension ID without tag', async () => {
     const reader = await VsixReader.open(testVsixPath);
     const editor = ManifestEditor.fromReader(reader);
-    
+
     await editor.applyOptions({
-      extensionId: 'my-extension'
+      extensionId: 'my-extension',
     });
-    
+
     const mods = editor.getManifestModifications();
     expect(mods.id).toBe('my-extension');
-    
+
     await reader.close();
   });
 
   it('should apply extension version', async () => {
     const reader = await VsixReader.open(testVsixPath);
     const editor = ManifestEditor.fromReader(reader);
-    
+
     await editor.applyOptions({
-      extensionVersion: '2.5.0'
+      extensionVersion: '2.5.0',
     });
-    
+
     const mods = editor.getManifestModifications();
     expect(mods.version).toBe('2.5.0');
-    
+
     await reader.close();
   });
 
   it('should apply extension name', async () => {
     const reader = await VsixReader.open(testVsixPath);
     const editor = ManifestEditor.fromReader(reader);
-    
+
     await editor.applyOptions({
-      extensionName: 'New Extension Name'
+      extensionName: 'New Extension Name',
     });
-    
+
     const mods = editor.getManifestModifications();
     expect(mods.name).toBe('New Extension Name');
-    
+
     await reader.close();
   });
 
   it('should apply visibility settings', async () => {
     const reader = await VsixReader.open(testVsixPath);
     const editor = ManifestEditor.fromReader(reader);
-    
+
     await editor.applyOptions({
-      extensionVisibility: 'public'
+      extensionVisibility: 'public',
     });
-    
+
     const mods = editor.getManifestModifications();
     expect(mods.galleryFlags).toContain('Public');
-    
+
     await reader.close();
   });
 
   it('should apply pricing settings', async () => {
     const reader = await VsixReader.open(testVsixPath);
     const editor = ManifestEditor.fromReader(reader);
-    
+
     await editor.applyOptions({
-      extensionPricing: 'free'
+      extensionPricing: 'free',
     });
-    
+
     const mods = editor.getManifestModifications();
     expect(mods.galleryFlags).toContain('Free');
-    
+
     await reader.close();
   });
 
   it('should update task versions when requested', async () => {
     const reader = await VsixReader.open(testVsixPath);
     const editor = ManifestEditor.fromReader(reader);
-    
+
     await editor.applyOptions({
       extensionVersion: '2.3.4',
       updateTasksVersion: true,
-      updateTasksVersionType: 'major'
+      updateTasksVersionType: 'major',
     });
-    
+
     const taskMods = editor.getTaskManifestModifications();
     const testTaskMod = taskMods.get('TestTask');
-    
+
     expect(testTaskMod).toBeDefined();
     expect(testTaskMod!.version).toEqual({
       Major: 2,
       Minor: 3,
-      Patch: 4
+      Patch: 4,
     });
-    
+
     await reader.close();
   });
 
   it('should use major as default version type', async () => {
     const reader = await VsixReader.open(testVsixPath);
     const editor = ManifestEditor.fromReader(reader);
-    
+
     await editor.applyOptions({
       extensionVersion: '3.0.0',
-      updateTasksVersion: true
+      updateTasksVersion: true,
       // No updateTasksVersionType specified
     });
-    
+
     const taskMods = editor.getTaskManifestModifications();
     const testTaskMod = taskMods.get('TestTask');
-    
+
     expect(testTaskMod!.version).toEqual({
       Major: 3,
       Minor: 0,
-      Patch: 0
+      Patch: 0,
     });
-    
+
     await reader.close();
   });
 
   it('should update task IDs when requested', async () => {
     const reader = await VsixReader.open(testVsixPath);
     const editor = ManifestEditor.fromReader(reader);
-    
+
     await editor.applyOptions({
-      updateTasksId: true
+      updateTasksId: true,
     });
-    
+
     const taskMods = editor.getTaskManifestModifications();
     const testTaskMod = taskMods.get('TestTask');
-    
+
     expect(testTaskMod).toBeDefined();
     expect(testTaskMod!.id).toBeDefined();
     expect(testTaskMod!.id).not.toBe('old-task-id-123');
     // Should be a UUID format
-    expect(testTaskMod!.id).toMatch(/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/);
-    
+    expect(testTaskMod!.id).toMatch(
+      /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/
+    );
+
     await reader.close();
   });
 
   it('should apply multiple options at once', async () => {
     const reader = await VsixReader.open(testVsixPath);
     const editor = ManifestEditor.fromReader(reader);
-    
+
     await editor.applyOptions({
       publisherId: 'new-pub',
       extensionId: 'new-ext',
@@ -266,9 +262,9 @@ describe('ManifestEditor.applyOptions()', () => {
       extensionVisibility: 'private',
       updateTasksVersion: true,
       updateTasksVersionType: 'minor',
-      updateTasksId: true
+      updateTasksId: true,
     });
-    
+
     // Check extension modifications
     const mods = editor.getManifestModifications();
     expect(mods.publisher).toBe('new-pub');
@@ -276,7 +272,7 @@ describe('ManifestEditor.applyOptions()', () => {
     expect(mods.version).toBe('2.0.0');
     expect(mods.name).toBe('New Name');
     expect(mods.galleryFlags).toContain('Private');
-    
+
     // Check task modifications
     const taskMods = editor.getTaskManifestModifications();
     const testTaskMod = taskMods.get('TestTask');
@@ -284,56 +280,56 @@ describe('ManifestEditor.applyOptions()', () => {
     expect(testTaskMod!.version).toBeDefined();
     expect(testTaskMod!.id).toBeDefined();
     expect(testTaskMod!.id).toMatch(/^[a-f0-9]{8}-/); // UUID format
-    
+
     await reader.close();
   });
 
   it('should handle empty options gracefully', async () => {
     const reader = await VsixReader.open(testVsixPath);
     const editor = ManifestEditor.fromReader(reader);
-    
+
     await editor.applyOptions({});
-    
+
     const mods = editor.getManifestModifications();
     expect(Object.keys(mods).length).toBe(0);
-    
+
     const taskMods = editor.getTaskManifestModifications();
     expect(taskMods.size).toBe(0);
-    
+
     await reader.close();
   });
 
   it('should skip task version update if no extension version provided', async () => {
     const reader = await VsixReader.open(testVsixPath);
     const editor = ManifestEditor.fromReader(reader);
-    
+
     await editor.applyOptions({
-      updateTasksVersion: true
+      updateTasksVersion: true,
       // No extensionVersion provided
     });
-    
+
     const taskMods = editor.getTaskManifestModifications();
     expect(taskMods.size).toBe(0);
-    
+
     await reader.close();
   });
 
   it('should return editor for chaining', async () => {
     const reader = await VsixReader.open(testVsixPath);
     const editor = ManifestEditor.fromReader(reader);
-    
+
     const result = await editor.applyOptions({
-      publisherId: 'test'
+      publisherId: 'test',
     });
-    
+
     expect(result).toBe(editor);
-    
+
     await reader.close();
   });
 
   it('should handle all visibility options', async () => {
     const reader = await VsixReader.open(testVsixPath);
-    
+
     const testCases: Array<{
       visibility: 'public' | 'private' | 'public_preview' | 'private_preview';
       expectedFlags: string[];
@@ -341,22 +337,22 @@ describe('ManifestEditor.applyOptions()', () => {
       { visibility: 'public', expectedFlags: ['Public'] },
       { visibility: 'private', expectedFlags: ['Private'] },
       { visibility: 'public_preview', expectedFlags: ['Public', 'Preview'] },
-      { visibility: 'private_preview', expectedFlags: ['Private', 'Preview'] }
+      { visibility: 'private_preview', expectedFlags: ['Private', 'Preview'] },
     ];
-    
+
     for (const testCase of testCases) {
       const editor = ManifestEditor.fromReader(reader);
-      
+
       await editor.applyOptions({
-        extensionVisibility: testCase.visibility
+        extensionVisibility: testCase.visibility,
       });
-      
+
       const mods = editor.getManifestModifications();
       for (const flag of testCase.expectedFlags) {
         expect(mods.galleryFlags).toContain(flag);
       }
     }
-    
+
     await reader.close();
   });
 });

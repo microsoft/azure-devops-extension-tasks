@@ -38,15 +38,15 @@ npm run format:check
 
 ## Key Commands
 
-| Command                | Description                                       |
-| ---------------------- | ------------------------------------------------- |
-| `npm run build`        | TypeScript compile all packages (via workspaces)  |
-| `npm run test`         | Jest unit tests (ESM mode)                        |
-| `npm run bundle`       | esbuild bundle for azdo-task and github-action    |
-| `npm run lint`         | ESLint check (flat config)                        |
-| `npm run lint:fix`     | Auto-fix ESLint issues                            |
-| `npm run format`       | Auto-format with Prettier                         |
-| `npm run format:check` | Check Prettier formatting                         |
+| Command                | Description                                      |
+| ---------------------- | ------------------------------------------------ |
+| `npm run build`        | TypeScript compile all packages (via workspaces) |
+| `npm run test`         | Jest unit tests (ESM mode)                       |
+| `npm run bundle`       | esbuild bundle for azdo-task and github-action   |
+| `npm run lint`         | ESLint check (flat config)                       |
+| `npm run lint:fix`     | Auto-fix ESLint issues                           |
+| `npm run format`       | Auto-format with Prettier                        |
+| `npm run format:check` | Check Prettier formatting                        |
 
 ## Architecture Principles
 
@@ -105,6 +105,7 @@ npm run bundle          # Regenerate distribution bundles
 ```
 
 This ensures:
+
 - Code style is consistent across the codebase
 - No linting errors or warnings remain
 - All unit tests pass (no regressions)

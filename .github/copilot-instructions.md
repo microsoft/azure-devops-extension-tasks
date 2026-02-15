@@ -5,6 +5,7 @@ Purpose: Help agents quickly contribute to Azure DevOps Extension Tasks v6 (unif
 ## Big Picture - V6 Architecture
 
 ### Repository Structure
+
 ```
 packages/
 ├── core/                 # Shared business logic
@@ -27,6 +28,7 @@ packages/
 ```
 
 ### V6 Key Concepts
+
 1. **Unified Core**: Single codebase for Azure Pipelines and GitHub Actions
 2. **Platform Adapters**: Thin wrappers (main.ts) that translate platform inputs/outputs
 3. **Manifest Architecture**: Reader→Editor→Writer pattern for all manifest operations
@@ -36,6 +38,7 @@ packages/
 ## Development Workflow
 
 ### Setup
+
 ```bash
 npm install              # Install root dependencies
 npm run build            # Build all packages
@@ -44,12 +47,14 @@ npm run lint             # Lint all packages
 ```
 
 ### Building
+
 ```bash
 npm run build            # Build all packages
 npm run bundle           # Bundle for distribution
 ```
 
 ### Testing
+
 ```bash
 npm test                 # Run all tests
 npm run test:coverage    # Run tests with coverage
@@ -58,15 +63,16 @@ npm run test:coverage    # Run tests with coverage
 ## Platform Adapters Pattern
 
 ### Azure Pipelines Adapter (packages/azdo-task/src/main.ts)
+
 ```typescript
 import { AzdoAdapter } from '@packages/core';
 
 async function run(): Promise<void> {
   const adapter = new AzdoAdapter();
-  
+
   // Validate inputs at entry point
   await adapter.validateInputs();
-  
+
   // Route to appropriate command
   const operation = adapter.getInput('operation', true);
   await adapter.routeToCommand(operation);
@@ -76,21 +82,23 @@ run();
 ```
 
 **Key Points:**
+
 - Uses `azure-pipelines-task-lib` for all platform interactions
 - Input names match task.json definitions
 - Outputs set via `tl.setVariable(name, value, false, true)`
 - Task results via `tl.setResult(TaskResult, message)`
 
 ### GitHub Actions Adapter (packages/github-action/src/main.ts)
+
 ```typescript
 import { GitHubAdapter } from '@packages/core';
 
 async function run(): Promise<void> {
   const adapter = new GitHubAdapter();
-  
+
   // Validate inputs at entry point
   await adapter.validateInputs();
-  
+
   // Route to appropriate command
   const operation = adapter.getInput('operation', true);
   await adapter.routeToCommand(operation);
@@ -100,13 +108,16 @@ run();
 ```
 
 **Key Points:**
+
 - Uses `@actions/core` for all platform interactions
 - Input names match action.yml definitions
 - Outputs set via `core.setOutput(name, value)`
 - Secrets marked via `core.setSecret(value)`
 
 ### Platform Adapter Interface (IPlatformAdapter)
+
 All platform-specific operations go through this interface:
+
 ```typescript
 interface IPlatformAdapter {
   // Input/Output
@@ -114,20 +125,20 @@ interface IPlatformAdapter {
   getBoolInput(name: string): boolean;
   setOutput(name: string, value: string): void;
   setSecret(value: string): void;
-  
+
   // File system
   which(tool: string): Promise<string>;
   resolvePath(...paths: string[]): string;
-  
+
   // Execution
   exec(command: string, args: string[]): Promise<number>;
-  
+
   // Logging
   debug(message: string): void;
   info(message: string): void;
   warning(message: string): void;
   error(message: string): void;
-  
+
   // Tool caching
   cacheDir(sourceDir: string, tool: string, version: string): Promise<string>;
   findCache(toolName: string, version: string): string | undefined;
@@ -139,13 +150,16 @@ interface IPlatformAdapter {
 ### Three-Layer Pattern
 
 #### 1. ManifestReader (Abstract Base)
+
 Provides common interface for reading manifests from different sources.
 
 **Implementations:**
+
 - `FilesystemManifestReader` - reads from directories
 - `VsixReader` - reads from VSIX ZIP archives
 
 **Key Methods:**
+
 ```typescript
 abstract class ManifestReader {
   abstract readExtensionManifest(): Promise<ExtensionManifest>;
@@ -157,44 +171,51 @@ abstract class ManifestReader {
 ```
 
 #### 2. ManifestEditor (Centralized Logic)
+
 Source-agnostic editor working with any ManifestReader.
 
 **Key Innovation - applyOptions() Method:**
+
 ```typescript
 const editor = ManifestEditor.fromReader(reader);
 await editor.applyOptions({
   publisherId: 'my-pub',
   extensionId: 'my-ext',
-  extensionTag: 'preview',           // Concatenates: my-ext-preview
+  extensionTag: 'preview', // Concatenates: my-ext-preview
   extensionVersion: '2.0.0',
   extensionName: 'My Extension',
   extensionVisibility: 'private',
   extensionPricing: 'free',
   updateTasksVersion: true,
-  updateTasksVersionType: 'major',   // major|minor|patch
-  updateTasksId: true
+  updateTasksVersionType: 'major', // major|minor|patch
+  updateTasksId: true,
 });
 ```
 
 **All conditional logic is inside applyOptions():**
+
 - Extension ID + tag concatenation
 - Task version cascading (major → all, minor → Minor+Patch, patch → Patch only)
 - Task UUID generation (deterministic UUID v5)
 - Visibility/pricing enum mapping
 
 #### 3. Writers
+
 Write modified manifests to targets.
 
 **FilesystemManifestWriter:**
+
 - Updates task.json files on filesystem
 - Generates overrides.json for tfx (`--overrides-file` flag)
 - Supports packagePath for compiled task directories
 
 **VsixWriter:**
+
 - Updates manifests inside VSIX archive
 - Optimized: only recompresses modified files
 
 ### Command Pattern (Package & Publish)
+
 Both commands follow identical minimal pattern:
 
 ```typescript
@@ -209,7 +230,7 @@ await editor.applyOptions(options);
 
 // 3. Write changes
 const writer = await editor.toWriter();
-await writer.writeToFilesystem();  // or writeToFile(vsixPath)
+await writer.writeToFilesystem(); // or writeToFile(vsixPath)
 
 // 4. Get overrides for tfx (filesystem only)
 const overridesPath = writer.getOverridesPath();
@@ -220,27 +241,30 @@ await reader.close();
 ```
 
 ### packagePath Directory Prefix Mapping
+
 Handles extensions where task sources are in different directories than package structure.
 
 **Manifest configuration:**
+
 ```json
 {
-  "files": [
-    { "path": "compiled/cli", "packagePath": "CLI" }
-  ]
+  "files": [{ "path": "compiled/cli", "packagePath": "CLI" }]
 }
 ```
 
 **How it works:**
+
 - `CLI` → `compiled/cli`
 - `CLI/v2` → `compiled/cli/v2`
 - `CLI/v2/task.json` → `compiled/cli/v2/task.json`
 
 **Important:** Requires path separator to prevent partial matches:
+
 - ✅ `CLI/v2` matches
 - ❌ `CLIOther` does NOT match
 
 **Used by:**
+
 - FilesystemManifestReader.readTaskManifest()
 - FilesystemManifestWriter.writeTaskManifests()
 
@@ -249,6 +273,7 @@ Handles extensions where task sources are in different directories than package 
 ### Supported Auth Methods
 
 #### 1. PAT (Personal Access Token)
+
 **Azure Pipelines:** Via service endpoint (VsTeam connection type)
 **GitHub Actions:** Via `pat` input or GITHUB_TOKEN
 
@@ -259,6 +284,7 @@ const credentials = await authProvider.getCredentials(endpoint);
 ```
 
 #### 2. Basic Authentication
+
 **Azure Pipelines only:** Via service endpoint (TFS connection type)
 
 ```typescript
@@ -267,6 +293,7 @@ const credentials = await authProvider.getCredentials(endpoint);
 ```
 
 #### 3. Azure RM (Workload Identity Federation)
+
 **Azure Pipelines:** Via AzureRM service connection with OIDC
 
 ```typescript
@@ -276,6 +303,7 @@ const credentials = await authProvider.getCredentials(endpoint);
 ```
 
 #### 4. GitHub OIDC
+
 **GitHub Actions:** Via OIDC token exchange with Azure
 
 ```typescript
@@ -286,9 +314,10 @@ const credentials = await authProvider.getCredentials();
 
 **Critical Security Rule:**
 All auth providers MUST call `platform.setSecret()` immediately after obtaining credentials:
+
 ```typescript
 const token = await getToken();
-platform.setSecret(token);  // Mark as secret BEFORE any other operation
+platform.setSecret(token); // Mark as secret BEFORE any other operation
 return { username, password: token };
 ```
 
@@ -297,6 +326,7 @@ return { username, password: token };
 ### Three Modes
 
 #### 1. Built-in Mode (default)
+
 Uses tfx-cli as direct dependency (bundled with extension).
 
 ```typescript
@@ -305,6 +335,7 @@ const tfxPath = await tfxManager.resolve('built-in');
 ```
 
 #### 2. Path Mode
+
 Uses tfx-cli from system PATH.
 
 ```typescript
@@ -313,6 +344,7 @@ const tfxPath = await tfxManager.resolve('path');
 ```
 
 #### 3. Version Spec Mode
+
 Downloads specific version from npm, caches it.
 
 ```typescript
@@ -321,6 +353,7 @@ const tfxPath = await tfxManager.resolve('^0.17.0');
 ```
 
 **Key Methods:**
+
 ```typescript
 class TfxManager {
   async resolve(tfxVersion: string): Promise<string>;
@@ -360,16 +393,19 @@ validateAzureCliAvailable(): Promise<void>;
 ```
 
 **Usage in adapters:**
+
 ```typescript
 // In main.ts entry point
-await adapter.validateInputs();  // Calls appropriate validators
+await adapter.validateInputs(); // Calls appropriate validators
 // If validation fails, throws Error and stops execution
 ```
 
 ## TypeScript Configuration
 
 ### Module System
+
 **All packages use ES modules with Node16 resolution:**
+
 ```json
 {
   "module": "Node16",
@@ -379,6 +415,7 @@ await adapter.validateInputs();  // Calls appropriate validators
 ```
 
 **CRITICAL: All imports MUST include .js extension:**
+
 ```typescript
 // ✅ Correct
 import { command } from './commands/package.js';
@@ -389,42 +426,47 @@ import { command } from './commands/package';
 ```
 
 ### Project References
+
 All packages use TypeScript project references for faster builds:
+
 ```json
 {
-  "references": [
-    { "path": "../core" }
-  ]
+  "references": [{ "path": "../core" }]
 }
 ```
 
 ### Strict Mode
+
 ```json
 {
   "strict": true,
-  "strictNullChecks": false  // Only exception
+  "strictNullChecks": false // Only exception
 }
 ```
 
 ## Bundling
 
 ### esbuild Configuration
+
 Both adapters bundle to single JS files using esbuild (Scripts/bundle.mjs).
 
 **External Dependencies:**
+
 ```javascript
 external: [
-  'azure-pipelines-task-lib',  // Azure Pipelines only
-  '@actions/core',             // GitHub Actions only
-  'tfx-cli'                    // Always external (not bundled)
-]
+  'azure-pipelines-task-lib', // Azure Pipelines only
+  '@actions/core', // GitHub Actions only
+  'tfx-cli', // Always external (not bundled)
+];
 ```
 
 **Platform-specific bundles:**
+
 - `packages/azdo-task/dist/bundle.js` - Azure Pipelines bundle
 - `packages/github-action/dist/bundle.js` - GitHub Actions bundle
 
 **Build command:**
+
 ```bash
 npm run bundle  # Builds both bundles
 ```
@@ -432,6 +474,7 @@ npm run bundle  # Builds both bundles
 ## Testing
 
 ### Test Structure
+
 ```
 packages/core/src/__tests__/
 ├── unit/                          # Unit tests
@@ -447,16 +490,17 @@ packages/core/src/__tests__/
 ### Test Patterns
 
 #### Mock Platform Adapter
+
 ```typescript
 class MockPlatformAdapter implements IPlatformAdapter {
   inputs = new Map<string, string>();
   outputs = new Map<string, string>();
   secrets = new Set<string>();
-  
+
   getInput(name: string): string {
     return this.inputs.get(name) || '';
   }
-  
+
   setSecret(value: string): void {
     this.secrets.add(value);
   }
@@ -465,19 +509,21 @@ class MockPlatformAdapter implements IPlatformAdapter {
 ```
 
 #### Testing Auth Providers
+
 ```typescript
 test('should mask token immediately', async () => {
   const platform = new MockPlatformAdapter();
   const provider = new PatAuthProvider(platform);
-  
+
   await provider.getCredentials(endpoint);
-  
+
   // Verify secret was masked
   expect(platform.secrets.has(token)).toBe(true);
 });
 ```
 
 ### Running Tests
+
 ```bash
 npm test                    # All tests
 npm run test:core           # Core library only
@@ -489,6 +535,7 @@ npm test -- --coverage      # Coverage report
 ## Commands Implementation
 
 ### All 9 Commands
+
 1. **package** - Create VSIX from manifest files
 2. **publish** - Publish extension (manifest or VSIX mode)
 3. **install** - Install extension to org/collection
@@ -500,6 +547,7 @@ npm test -- --coverage      # Coverage report
 9. **verify-install** - Verify extension is installed
 
 ### Command Pattern
+
 All commands follow consistent pattern:
 
 ```typescript
@@ -508,26 +556,26 @@ export async function commandName(
   platform: IPlatformAdapter
 ): Promise<CommandResult> {
   // 1. Validate inputs (if not done at entry point)
-  
+
   // 2. Get tfx executable
   const tfxManager = new TfxManager(platform);
   const tfxPath = await tfxManager.resolve(options.tfxVersion);
-  
+
   // 3. Build tfx arguments
   const args = ['command', 'subcommand'];
   if (options.someFlag) {
     args.push('--flag', options.someFlag);
   }
-  
+
   // 4. Execute tfx
   const exitCode = await platform.exec(tfxPath, args);
-  
+
   // 5. Parse output (if JSON output)
   const result = JSON.parse(output);
-  
+
   // 6. Set outputs
   platform.setOutput('result', result.value);
-  
+
   // 7. Return result
   return { success: exitCode === 0, data: result };
 }
@@ -547,16 +595,18 @@ export async function commandName(
 ## Common Patterns
 
 ### Error Handling
+
 ```typescript
 try {
   await someOperation();
 } catch (error) {
   platform.error(`Operation failed: ${error.message}`);
-  throw error;  // Let adapter handle setting task result
+  throw error; // Let adapter handle setting task result
 }
 ```
 
 ### Temp Files
+
 ```typescript
 import { tmpdir } from 'os';
 import { join } from 'path';
@@ -566,11 +616,12 @@ try {
   await fs.writeFile(tempFile, data);
   // Use tempFile
 } finally {
-  await fs.unlink(tempFile);  // Always cleanup
+  await fs.unlink(tempFile); // Always cleanup
 }
 ```
 
 ### File Globbing
+
 ```typescript
 // Azure Pipelines
 const files = tl.findMatch(rootDir, pattern);
@@ -579,12 +630,13 @@ if (files.length !== 1) {
 }
 
 // GitHub Actions
-const files = await glob.create(pattern).then(g => g.glob());
+const files = await glob.create(pattern).then((g) => g.glob());
 ```
 
 ## Conventions
 
 ### Naming
+
 - **Classes**: PascalCase (`ManifestEditor`, `VsixReader`)
 - **Functions**: camelCase (`readManifest`, `applyOptions`)
 - **Constants**: UPPER_SNAKE_CASE (`MARKETPLACE_NAMESPACE`)
@@ -592,12 +644,14 @@ const files = await glob.create(pattern).then(g => g.glob());
 - **Types**: PascalCase (`ExtensionManifest`, `TaskManifest`)
 
 ### File Organization
+
 - One class per file
 - File name matches class name (kebab-case)
 - Tests in `__tests__` directory
 - Index files for public API
 
 ### Code Style
+
 - Use `async`/`await` (not callbacks or raw promises)
 - Prefer `const` over `let`, never `var`
 - Use template literals for strings with variables
@@ -608,28 +662,34 @@ const files = await glob.create(pattern).then(g => g.glob());
 ## Common Pitfalls
 
 ### Import Extensions
+
 ❌ **Wrong:** `import { X } from './file'`
 ✅ **Correct:** `import { X } from './file.js'`
 
 ### Platform-Specific Code
+
 ❌ **Wrong:** Direct use of `tl` or `core` in commands
 ✅ **Correct:** Use `IPlatformAdapter` interface
 
 ### Secret Handling
+
 ❌ **Wrong:** Log or output before masking
 ✅ **Correct:** Call `platform.setSecret()` immediately
 
 ### Resource Cleanup
+
 ❌ **Wrong:** Forget to close readers/writers
 ✅ **Correct:** Always use try/finally blocks
 
 ### Manifest Modifications
+
 ❌ **Wrong:** Direct file writes in commands
 ✅ **Correct:** Use ManifestEditor.applyOptions()
 
 ## CI/CD
 
 ### GitHub Actions Workflows
+
 - `.github/workflows/ci.yml` - Main CI (build, test, lint)
 - `.github/workflows/unit-tests.yml` - Unit tests only
 - `.github/workflows/integration-tests.yml` - Integration tests
@@ -638,6 +698,7 @@ const files = await glob.create(pattern).then(g => g.glob());
 - `.github/workflows/release.yml` - Release automation
 
 ### Azure Pipelines
+
 - `azure-pipelines.yml` - Cross-platform build and test
   - Build stage: Windows 2022, Ubuntu Latest, macOS Latest
   - Test stage: Unit and integration tests
@@ -646,6 +707,7 @@ const files = await glob.create(pattern).then(g => g.glob());
 ## Documentation
 
 ### Key Documents
+
 - `MANIFEST_ARCHITECTURE.md` - Manifest handling architecture
 - `REFACTORING_SUMMARY.md` - V6 refactoring summary
 - `GITHUB_ACTIONS_OIDC_GUIDE.md` - GitHub OIDC setup
@@ -653,6 +715,7 @@ const files = await glob.create(pattern).then(g => g.glob());
 - `CONTRIBUTING.md` - Development setup and workflows
 
 ### In-Code Documentation
+
 - All public APIs have JSDoc comments
 - Complex algorithms have inline comments
 - task.json inputs have extensive helpMarkDown
@@ -661,15 +724,19 @@ const files = await glob.create(pattern).then(g => g.glob());
 ## Performance Considerations
 
 ### VsixWriter Optimization
+
 Only recompresses modified files. Unchanged entries copied directly.
 
 ### Manifest Caching
+
 ManifestReader caches all read manifests in memory.
 
 ### Tool Caching
+
 tfx-cli cached per version using platform tool cache.
 
 ### Bundling
+
 Single-file bundles reduce startup time and deployment size.
 
 ## When Unsure
@@ -684,6 +751,7 @@ Single-file bundles reduce startup time and deployment size.
 ## Quick Reference
 
 ### Build Commands
+
 ```bash
 npm install        # Install dependencies
 npm run build      # Build all packages
@@ -693,16 +761,20 @@ npm run lint       # Lint code
 ```
 
 ### CRITICAL: End-of-Job Verification
+
 **Before completing any coding session, ALWAYS run:**
+
 ```bash
 npm run format          # Fix formatting issues
-npm run lint:fix        # Fix linting issues  
+npm run lint:fix        # Fix linting issues
 npm run test            # Verify all tests pass
 npm run bundle          # Regenerate distribution bundles
 ```
+
 This ensures code style consistency, no regressions, and bundle files stay in sync. CI will fail otherwise.
 
 ### Key Files
+
 - `packages/core/src/commands/` - Command implementations
 - `packages/core/src/manifest-*` - Manifest architecture
 - `packages/azdo-task/src/main.ts` - Azure Pipelines entry
@@ -710,6 +782,7 @@ This ensures code style consistency, no regressions, and bundle files stay in sy
 - `packages/core/src/index.ts` - Public API exports
 
 ### Key Types
+
 - `IPlatformAdapter` - Platform abstraction
 - `ExtensionManifest` - vss-extension.json structure
 - `TaskManifest` - task.json structure

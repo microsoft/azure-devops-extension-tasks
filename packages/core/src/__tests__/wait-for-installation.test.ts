@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals';
 import type {
-    ExpectedTask,
-    WaitForInstallationOptions,
+  ExpectedTask,
+  WaitForInstallationOptions,
 } from '../commands/wait-for-installation.js';
 
 describe('waitForInstallation', () => {
@@ -104,17 +104,13 @@ describe('waitForInstallation', () => {
         'https://dev.azure.com/org2',
         'https://dev.azure.com/org3',
       ],
-      expectedTasks: [
-        { name: 'Task1', versions: ['1.0.0', '2.0.0'] },
-      ],
+      expectedTasks: [{ name: 'Task1', versions: ['1.0.0', '2.0.0'] }],
     };
     expect(options.accounts).toHaveLength(3);
   });
 
   it('should handle expected task with empty versions array', () => {
-    const expectedTasks: ExpectedTask[] = [
-      { name: 'AnyVersionTask', versions: [] },
-    ];
+    const expectedTasks: ExpectedTask[] = [{ name: 'AnyVersionTask', versions: [] }];
 
     const options: WaitForInstallationOptions = {
       publisherId: 'test',
@@ -128,7 +124,7 @@ describe('waitForInstallation', () => {
 
   it('should properly type InstalledTask with matchesExpected field', async () => {
     const { waitForInstallation } = await import('../commands/wait-for-installation.js');
-    
+
     // This test just verifies the type compiles correctly
     // Actual verification would require mocking Azure DevOps API
     expect(waitForInstallation).toBeDefined();
@@ -136,7 +132,7 @@ describe('waitForInstallation', () => {
 
   it('should properly type WaitForInstallationResult with missingVersions', async () => {
     const { waitForInstallation } = await import('../commands/wait-for-installation.js');
-    
+
     // This test just verifies the type compiles correctly
     // The result should have both missingTasks and missingVersions arrays
     expect(waitForInstallation).toBeDefined();

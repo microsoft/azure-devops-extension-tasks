@@ -88,6 +88,7 @@ OR
 ### Optional Inputs
 
 #### Authentication
+
 - `auth-type`: Authentication type (`pat`, `basic`, or `oidc`, default: `pat`)
 - `token`: Personal Access Token (required when auth-type is `pat`)
 - `username`: Username for basic authentication (required when auth-type is `basic`)
@@ -96,29 +97,36 @@ OR
 - `marketplace-url`: Marketplace URL (optional, for custom marketplace endpoints)
 
 #### TFX Configuration
+
 - `tfx-version`: Version of tfx-cli to use (default: `built-in`)
 
 #### Extension Identity
+
 - `publisher-id`: Publisher ID (default: from manifest)
 - `extension-id`: Extension ID (default: from manifest)
 - `extension-tag`: Tag to append to extension ID
 
 #### Source Selection
+
 - `publish-source`: Source type (`manifest` or `vsix`, default: `manifest`)
 
 #### Manifest Source (when publish-source is manifest)
+
 - `root-folder`: Root folder containing extension files
 - `manifest-globs`: Manifest file patterns, newline-separated
 
 #### VSIX Source (when publish-source is vsix)
+
 - `vsix-file`: Path to .vsix file
 
 #### Metadata Overrides
+
 - `extension-version`: Override extension version
 - `extension-name`: Override extension name
 - `extension-visibility`: Override visibility (`private`, `public`, `private_preview`, `public_preview`)
 
 #### Publish Options
+
 - `share-with`: Organizations to share with, newline-separated
 - `no-wait-validation`: Don't wait for validation (default: `false`)
 - `update-tasks-version`: Update task versions to match extension version (default: `false`)
@@ -142,7 +150,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Publish to Marketplace
         uses: jessehouwing/azure-devops-extension-tasks/publish@v6
         with:

@@ -25,10 +25,10 @@ import {
 async function run(): Promise<void> {
   try {
     const platform = new AzdoAdapter();
-    
+
     // Validate node is available (always required)
     await validateNodeAvailable(platform);
-    
+
     // Get the operation to perform
     const operation = platform.getInput('operation', true);
     if (!operation) {
@@ -55,7 +55,7 @@ async function run(): Promise<void> {
 
     // Create TfxManager
     const tfxVersion = platform.getInput('tfxVersion') || 'built-in';
-    
+
     // Validate binaries based on tfx version mode
     if (tfxVersion === 'path') {
       // User wants to use tfx from PATH
@@ -64,30 +64,30 @@ async function run(): Promise<void> {
       // Version spec mode - need npm to download
       await validateNpmAvailable(platform);
     }
-    
+
     const tfxManager = new TfxManager({ tfxVersion: tfxVersion, platform });
 
     // Get authentication if needed (not required for package)
     let auth;
     if (operation !== 'package') {
       const connectionType = platform.getInput('connectionType', true) as ConnectionType;
-      
+
       // Get the appropriate connection name based on type
       let connectionName: string | undefined;
       if (connectionType === 'connectedService:VsTeam') {
         connectionName = platform.getInput('connectionName', true);
       } else if (connectionType === 'connectedService:AzureRM') {
-        connectionName = platform.getInput('connectionNameAzureRM', true);
+        connectionName = platform.getInput('connectionNameAzureRm', true);
       } else if (connectionType === 'connectedService:Generic') {
         connectionName = platform.getInput('connectionNameGeneric', true);
       }
-      
+
       if (!connectionName) {
         throw new Error('Service connection name is required for this operation');
       }
-      
+
       auth = await getAuth(connectionType, connectionName, platform);
-      
+
       // Validate service URL if present
       if (auth.serviceUrl) {
         validateAccountUrl(auth.serviceUrl);
@@ -95,9 +95,9 @@ async function run(): Promise<void> {
     }
 
     // Validate account URLs for operations that need them
-    if (operation === 'install' || operation === 'waitForInstallation') {
+    if (operation === 'install' || operation === 'wait-for-installation') {
       const accounts = platform.getDelimitedInput('accounts', ';', false);
-      accounts.forEach(account => {
+      accounts.forEach((account) => {
         if (account) {
           validateAccountUrl(account);
         }
@@ -109,44 +109,43 @@ async function run(): Promise<void> {
       case 'package':
         await runPackage(platform, tfxManager);
         break;
-      
+
       case 'publish':
-        await runPublish(platform, tfxManager, auth!);
-        break;
-      
-      case 'unpublish':
-        await runUnpublish(platform, tfxManager, auth!);
-        break;
-      
-      case 'share':
-        await runShare(platform, tfxManager, auth!);
-        break;
-      
-      case 'unshare':
-        await runUnshare(platform, tfxManager, auth!);
-        break;
-      
-      case 'install':
-        await runInstall(platform, tfxManager, auth!);
-        break;
-      
-      case 'show':
-        await runShow(platform, tfxManager, auth!);
+        await runPublish(platform, tfxManager, auth);
         break;
 
-      case 'QueryVersion':
-      case 'queryVersion':
-        await runQueryVersion(platform, tfxManager, auth!);
+      case 'unpublish':
+        await runUnpublish(platform, tfxManager, auth);
         break;
-      
-      case 'waitForValidation':
-        await runWaitForValidation(platform, tfxManager, auth!);
+
+      case 'share':
+        await runShare(platform, tfxManager, auth);
         break;
-      
-      case 'waitForInstallation':
-        await runWaitForInstallation(platform, auth!);
+
+      case 'unshare':
+        await runUnshare(platform, tfxManager, auth);
         break;
-      
+
+      case 'install':
+        await runInstall(platform, tfxManager, auth);
+        break;
+
+      case 'show':
+        await runShow(platform, tfxManager, auth);
+        break;
+
+      case 'query-version':
+        await runQueryVersion(platform, tfxManager, auth);
+        break;
+
+      case 'wait-for-validation':
+        await runWaitForValidation(platform, tfxManager, auth);
+        break;
+
+      case 'wait-for-installation':
+        await runWaitForInstallation(platform, auth);
+        break;
+
       default:
         throw new Error(`Unknown operation: ${operation}`);
     }
@@ -184,58 +183,90 @@ async function runPackage(platform: AzdoAdapter, tfxManager: TfxManager): Promis
 
 async function runPublish(platform: AzdoAdapter, tfxManager: TfxManager, auth: any): Promise<void> {
   const publishSource = platform.getInput('publishSource', true) as 'manifest' | 'vsix';
-  
-  const result = await publishExtension({
-    publishSource,
-    vsixFile: publishSource === 'vsix' ? platform.getInput('vsixFile', true) : undefined,
-    manifestGlobs: publishSource === 'manifest' ? platform.getDelimitedInput('manifestGlobs', '\n', true) : undefined,
-    rootFolder: publishSource === 'manifest' ? platform.getInput('rootFolder') : undefined,
-    publisherId: platform.getInput('publisherId'),
-    extensionId: platform.getInput('extensionId'),
-    extensionTag: platform.getInput('extensionTag'),
-    extensionVersion: platform.getInput('extensionVersion'),
-    extensionName: platform.getInput('extensionName'),
-    extensionVisibility: platform.getInput('extensionVisibility') as any,
-    shareWith: platform.getDelimitedInput('shareWith', '\n'),
-    noWaitValidation: platform.getBoolInput('noWaitValidation'),
-    bypassValidation: platform.getBoolInput('bypassValidation'),
-    updateTasksVersion: platform.getBoolInput('updateTasksVersion'),
-    updateTasksId: platform.getBoolInput('updateTasksId'),
-  }, auth, tfxManager, platform);
+
+  const result = await publishExtension(
+    {
+      publishSource,
+      vsixFile: publishSource === 'vsix' ? platform.getInput('vsixFile', true) : undefined,
+      manifestGlobs:
+        publishSource === 'manifest'
+          ? platform.getDelimitedInput('manifestGlobs', '\n', true)
+          : undefined,
+      rootFolder: publishSource === 'manifest' ? platform.getInput('rootFolder') : undefined,
+      publisherId: platform.getInput('publisherId'),
+      extensionId: platform.getInput('extensionId'),
+      extensionTag: platform.getInput('extensionTag'),
+      extensionVersion: platform.getInput('extensionVersion'),
+      extensionName: platform.getInput('extensionName'),
+      extensionVisibility: platform.getInput('extensionVisibility') as any,
+      shareWith: platform.getDelimitedInput('shareWith', '\n'),
+      noWaitValidation: platform.getBoolInput('noWaitValidation'),
+      bypassValidation: platform.getBoolInput('bypassValidation'),
+      updateTasksVersion: platform.getBoolInput('updateTasksVersion'),
+      updateTasksId: platform.getBoolInput('updateTasksId'),
+    },
+    auth,
+    tfxManager,
+    platform
+  );
 
   platform.debug(`Published: ${JSON.stringify(result)}`);
 }
 
-async function runUnpublish(platform: AzdoAdapter, tfxManager: TfxManager, auth: any): Promise<void> {
-  await unpublishExtension({
-    publisherId: platform.getInput('publisherId', true)!,
-    extensionId: platform.getInput('extensionId', true)!,
-  }, auth, tfxManager, platform);
+async function runUnpublish(
+  platform: AzdoAdapter,
+  tfxManager: TfxManager,
+  auth: any
+): Promise<void> {
+  await unpublishExtension(
+    {
+      publisherId: platform.getInput('publisherId', true),
+      extensionId: platform.getInput('extensionId', true),
+    },
+    auth,
+    tfxManager,
+    platform
+  );
 }
 
 async function runShare(platform: AzdoAdapter, tfxManager: TfxManager, auth: any): Promise<void> {
-  await shareExtension({
-    publisherId: platform.getInput('publisherId', true)!,
-    extensionId: platform.getInput('extensionId', true)!,
-    shareWith: platform.getDelimitedInput('shareWith', '\n', true),
-  }, auth, tfxManager, platform);
+  await shareExtension(
+    {
+      publisherId: platform.getInput('publisherId', true),
+      extensionId: platform.getInput('extensionId', true),
+      shareWith: platform.getDelimitedInput('shareWith', '\n', true),
+    },
+    auth,
+    tfxManager,
+    platform
+  );
 }
 
 async function runUnshare(platform: AzdoAdapter, tfxManager: TfxManager, auth: any): Promise<void> {
-  await unshareExtension({
-    publisherId: platform.getInput('publisherId', true)!,
-    extensionId: platform.getInput('extensionId', true)!,
-    unshareWith: platform.getDelimitedInput('unshareWith', '\n', true),
-  }, auth, tfxManager, platform);
+  await unshareExtension(
+    {
+      publisherId: platform.getInput('publisherId', true),
+      extensionId: platform.getInput('extensionId', true),
+      unshareWith: platform.getDelimitedInput('unshareWith', '\n', true),
+    },
+    auth,
+    tfxManager,
+    platform
+  );
 }
 
 async function runInstall(platform: AzdoAdapter, tfxManager: TfxManager, auth: any): Promise<void> {
-  const result = await installExtension({
-    publisherId: platform.getInput('publisherId', true)!,
-    extensionId: platform.getInput('extensionId', true)!,
-    accounts: platform.getDelimitedInput('accounts', '\n', true),
-    extensionVersion: platform.getInput('extensionVersion'),
-  }, auth, tfxManager, platform);
+  const result = await installExtension(
+    {
+      publisherId: platform.getInput('publisherId', true),
+      extensionId: platform.getInput('extensionId', true),
+      accounts: platform.getDelimitedInput('accounts', '\n', true),
+      extensionVersion: platform.getInput('extensionVersion'),
+    },
+    auth,
+    tfxManager,
+    platform
+  );
 
   if (!result.allSuccess) {
     throw new Error(`Some accounts failed to install the extension`);
@@ -244,8 +275,8 @@ async function runInstall(platform: AzdoAdapter, tfxManager: TfxManager, auth: a
 
 async function runShow(platform: AzdoAdapter, tfxManager: TfxManager, auth: any): Promise<void> {
   const options = {
-    publisherId: platform.getInput('publisherId', true)!,
-    extensionId: platform.getInput('extensionId', true)!,
+    publisherId: platform.getInput('publisherId', true),
+    extensionId: platform.getInput('extensionId', true),
     outputVariable: platform.getInput('outputVariable'),
   };
 
@@ -256,17 +287,35 @@ async function runShow(platform: AzdoAdapter, tfxManager: TfxManager, auth: any)
   }
 }
 
-async function runQueryVersion(platform: AzdoAdapter, tfxManager: TfxManager, auth: any): Promise<void> {
+async function runQueryVersion(
+  platform: AzdoAdapter,
+  tfxManager: TfxManager,
+  auth: any
+): Promise<void> {
   const result = await queryVersion(
     {
-      publisherId: platform.getInput('publisherId', true)!,
-      extensionId: platform.getInput('extensionId', true)!,
+      publisherId: platform.getInput('publisherId', true),
+      extensionId: platform.getInput('extensionId', true),
       extensionTag: platform.getInput('extensionTag'),
-      versionAction: (platform.getInput('versionAction') as
-        | 'None'
-        | 'Major'
-        | 'Minor'
-        | 'Patch') ?? 'None',
+      versionAction:
+        (platform.getInput('versionAction') as 'none' | 'major' | 'minor' | 'patch' | undefined) ===
+        'major'
+          ? 'Major'
+          : (platform.getInput('versionAction') as
+                | 'none'
+                | 'major'
+                | 'minor'
+                | 'patch'
+                | undefined) === 'minor'
+            ? 'Minor'
+            : (platform.getInput('versionAction') as
+                  | 'none'
+                  | 'major'
+                  | 'minor'
+                  | 'patch'
+                  | undefined) === 'patch'
+              ? 'Patch'
+              : 'None',
       extensionVersionOverrideVariable: platform.getInput('extensionVersionOverride'),
       outputVariable: platform.getInput('outputVariable'),
     },
@@ -279,20 +328,29 @@ async function runQueryVersion(platform: AzdoAdapter, tfxManager: TfxManager, au
     tl.command('build.updatebuildnumber', undefined, result.proposedVersion);
   }
 
-  platform.setOutput('Extension.ProposedVersion', result.proposedVersion);
-  platform.setOutput('Extension.CurrentVersion', result.currentVersion);
+  platform.setOutput('extension.proposedVersion', result.proposedVersion);
+  platform.setOutput('extension.currentVersion', result.currentVersion);
 }
 
-async function runWaitForValidation(platform: AzdoAdapter, tfxManager: TfxManager, auth: any): Promise<void> {
-  const result = await waitForValidation({
-    publisherId: platform.getInput('publisherId', true)!,
-    extensionId: platform.getInput('extensionId', true)!,
-    rootFolder: platform.getInput('rootFolder'),
-    manifestGlobs: platform.getDelimitedInput('manifestGlobs', '\n'),
-    maxRetries: parseInt(platform.getInput('maxRetries') || '10'),
-    minTimeout: parseInt(platform.getInput('minTimeout') || '1'),
-    maxTimeout: parseInt(platform.getInput('maxTimeout') || '15'),
-  }, auth, tfxManager, platform);
+async function runWaitForValidation(
+  platform: AzdoAdapter,
+  tfxManager: TfxManager,
+  auth: any
+): Promise<void> {
+  const result = await waitForValidation(
+    {
+      publisherId: platform.getInput('publisherId', true),
+      extensionId: platform.getInput('extensionId', true),
+      rootFolder: platform.getInput('rootFolder'),
+      manifestGlobs: platform.getDelimitedInput('manifestGlobs', '\n'),
+      maxRetries: parseInt(platform.getInput('maxRetries') || '10'),
+      minTimeout: parseInt(platform.getInput('minTimeout') || '1'),
+      maxTimeout: parseInt(platform.getInput('maxTimeout') || '15'),
+    },
+    auth,
+    tfxManager,
+    platform
+  );
 
   if (result.status !== 'success') {
     throw new Error(`Validation failed with status: ${result.status}`);
@@ -310,16 +368,20 @@ async function runWaitForInstallation(platform: AzdoAdapter, auth: any): Promise
     }
   }
 
-  const result = await waitForInstallation({
-    publisherId: platform.getInput('publisherId', true)!,
-    extensionId: platform.getInput('extensionId', true)!,
-    accounts: platform.getDelimitedInput('accounts', '\n', true),
-    expectedTasks,
-    manifestPath: platform.getInput('manifestPath'),
-    vsixPath: platform.getInput('vsixPath'),
-    timeoutMinutes: parseInt(platform.getInput('timeoutMinutes') || '10'),
-    pollingIntervalSeconds: parseInt(platform.getInput('pollingIntervalSeconds') || '30'),
-  }, auth, platform);
+  const result = await waitForInstallation(
+    {
+      publisherId: platform.getInput('publisherId', true),
+      extensionId: platform.getInput('extensionId', true),
+      accounts: platform.getDelimitedInput('accounts', '\n', true),
+      expectedTasks,
+      manifestPath: platform.getInput('manifestPath'),
+      vsixPath: platform.getInput('vsixPath'),
+      timeoutMinutes: parseInt(platform.getInput('timeoutMinutes') || '10'),
+      pollingIntervalSeconds: parseInt(platform.getInput('pollingIntervalSeconds') || '30'),
+    },
+    auth,
+    platform
+  );
 
   if (!result.success) {
     throw new Error(`Verification failed - not all tasks are available`);
@@ -327,4 +389,4 @@ async function runWaitForInstallation(platform: AzdoAdapter, auth: any): Promise
 }
 
 // Run the task
-run();
+void run();

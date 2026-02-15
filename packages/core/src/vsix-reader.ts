@@ -1,20 +1,16 @@
 /**
  * VSIX Reader - Read-only operations for VSIX files
- * 
+ *
  * Extends ManifestReader to provide VSIX-specific reading from ZIP archives.
  * Completely separate from editing and writing concerns.
- * 
+ *
  * Security: Protected against zip slip attacks with path validation.
  */
 
 import yauzl from 'yauzl';
 import { Buffer } from 'buffer';
 import { normalize, isAbsolute } from 'path';
-import {
-  ManifestReader,
-  type ExtensionManifest,
-  type TaskManifest,
-} from './manifest-reader.js';
+import { ManifestReader, type ExtensionManifest, type TaskManifest } from './manifest-reader.js';
 
 /**
  * Validate that a path from a ZIP file is safe and doesn't escape the extraction directory
@@ -25,30 +21,30 @@ import {
 function validateZipPath(filePath: string): void {
   // Normalize the path to resolve any .. or . segments
   const normalizedPath = normalize(filePath);
-  
+
   // Check for absolute paths (e.g., /etc/passwd or C:\Windows\System32)
   if (isAbsolute(normalizedPath)) {
     throw new Error(`Security: Absolute paths are not allowed in VSIX files: ${filePath}`);
   }
-  
+
   // Check if the normalized path tries to escape upward (starts with ..)
   if (normalizedPath.startsWith('..') || normalizedPath.includes(`${normalize('../')}`)) {
     throw new Error(`Security: Path traversal detected in VSIX file: ${filePath}`);
   }
-  
+
   // Check for suspicious patterns
   const suspiciousPatterns = [
-    /\.\.[\/\\]/,  // Parent directory references
-    /^[\/\\]/,     // Root references
-    /[<>:"|?*]/,   // Windows invalid filename characters (except for paths)
+    /\.\.[/\\]/, // Parent directory references
+    /^[/\\]/, // Root references
+    /[<>:"|?*]/, // Windows invalid filename characters (except for paths)
   ];
-  
+
   for (const pattern of suspiciousPatterns) {
     if (pattern.test(filePath)) {
       throw new Error(`Security: Suspicious pattern detected in path: ${filePath}`);
     }
   }
-  
+
   // Validate that the path doesn't contain null bytes (another attack vector)
   if (filePath.includes('\0')) {
     throw new Error(`Security: Null byte detected in path: ${filePath}`);
@@ -66,7 +62,7 @@ export interface VsixFile {
 
 /**
  * VsixReader - Read-only VSIX file operations extending ManifestReader
- * 
+ *
  * Example usage:
  * ```typescript
  * const reader = await VsixReader.open('/path/to/extension.vsix');
@@ -74,7 +70,7 @@ export interface VsixFile {
  * const tasks = await reader.readTaskManifests();
  * await reader.close();
  * ```
- * 
+ *
  * Or chained:
  * ```typescript
  * const reader = await VsixReader.open('/path/to/extension.vsix');
@@ -113,13 +109,13 @@ export class VsixReader extends ManifestReader {
   private async openZip(): Promise<void> {
     return new Promise((resolve, reject) => {
       yauzl.open(
-        this.vsixPath, 
-        { 
-          lazyEntries: true, 
-          strictFileNames: false, 
+        this.vsixPath,
+        {
+          lazyEntries: true,
+          strictFileNames: false,
           validateEntrySizes: false,
-          autoClose: false  // Keep file open for multiple read operations
-        }, 
+          autoClose: false, // Keep file open for multiple read operations
+        },
         (err: Error | null, zipFile?: yauzl.ZipFile) => {
           if (err) {
             reject(new Error(`Failed to open VSIX file: ${err.message}`));
@@ -147,7 +143,7 @@ export class VsixReader extends ManifestReader {
 
     return new Promise((resolve, reject) => {
       const entries: yauzl.Entry[] = [];
-      
+
       const onEntry = (entry: yauzl.Entry) => {
         try {
           // Validate path for security
@@ -155,35 +151,35 @@ export class VsixReader extends ManifestReader {
           entries.push(entry);
         } catch (err) {
           // Security violation - reject the entire operation
-          this.zipFile!.removeListener('entry', onEntry);
-          this.zipFile!.removeListener('end', onEnd);
-          this.zipFile!.removeListener('error', onError);
+          this.zipFile.removeListener('entry', onEntry);
+          this.zipFile.removeListener('end', onEnd);
+          this.zipFile.removeListener('error', onError);
           reject(err);
           return;
         }
-        this.zipFile!.readEntry();
+        this.zipFile.readEntry();
       };
 
       const onEnd = () => {
-        this.zipFile!.removeListener('entry', onEntry);
-        this.zipFile!.removeListener('end', onEnd);
-        this.zipFile!.removeListener('error', onError);
+        this.zipFile.removeListener('entry', onEntry);
+        this.zipFile.removeListener('end', onEnd);
+        this.zipFile.removeListener('error', onError);
         this.entriesCache = entries;
         resolve(entries);
       };
 
       const onError = (err: Error) => {
-        this.zipFile!.removeListener('entry', onEntry);
-        this.zipFile!.removeListener('end', onEnd);
-        this.zipFile!.removeListener('error', onError);
+        this.zipFile.removeListener('entry', onEntry);
+        this.zipFile.removeListener('end', onEnd);
+        this.zipFile.removeListener('error', onError);
         reject(new Error(`Error reading VSIX entries: ${err.message}`));
       };
 
-      this.zipFile!.on('entry', onEntry);
-      this.zipFile!.on('end', onEnd);
-      this.zipFile!.on('error', onError);
+      this.zipFile.on('entry', onEntry);
+      this.zipFile.on('end', onEnd);
+      this.zipFile.on('error', onError);
 
-      this.zipFile!.readEntry();
+      this.zipFile.readEntry();
     });
   }
 
@@ -195,13 +191,13 @@ export class VsixReader extends ManifestReader {
   async readFile(filePath: string): Promise<Buffer> {
     // Validate path for security (zip slip protection)
     validateZipPath(filePath);
-    
+
     // Normalize path separators
     const normalizedPath = filePath.replace(/\\/g, '/');
-    
+
     // Check cache
     if (this.fileCache.has(normalizedPath)) {
-      return this.fileCache.get(normalizedPath)!;
+      return this.fileCache.get(normalizedPath);
     }
 
     if (!this.zipFile) {
@@ -209,14 +205,14 @@ export class VsixReader extends ManifestReader {
     }
 
     const entries = await this.readEntries();
-    const entry = entries.find(e => e.fileName === normalizedPath);
+    const entry = entries.find((e) => e.fileName === normalizedPath);
 
     if (!entry) {
       throw new Error(`File not found in VSIX: ${filePath}`);
     }
 
     return new Promise((resolve, reject) => {
-      this.zipFile!.openReadStream(entry, (err: Error | null, readStream?: any) => {
+      this.zipFile.openReadStream(entry, (err: Error | null, readStream?: any) => {
         if (err || !readStream) {
           reject(new Error(`Failed to read file ${filePath}: ${err?.message || 'No stream'}`));
           return;
@@ -244,7 +240,7 @@ export class VsixReader extends ManifestReader {
   async fileExists(filePath: string): Promise<boolean> {
     const normalizedPath = filePath.replace(/\\/g, '/');
     const entries = await this.readEntries();
-    return entries.some(e => e.fileName === normalizedPath);
+    return entries.some((e) => e.fileName === normalizedPath);
   }
 
   /**
@@ -254,11 +250,11 @@ export class VsixReader extends ManifestReader {
   async listFiles(): Promise<VsixFile[]> {
     const entries = await this.readEntries();
     return entries
-      .filter(e => !e.fileName.endsWith('/')) // Exclude directories
-      .map(e => ({
+      .filter((e) => !e.fileName.endsWith('/')) // Exclude directories
+      .map((e) => ({
         path: e.fileName,
         size: e.uncompressedSize,
-        compressedSize: e.compressedSize
+        compressedSize: e.compressedSize,
       }));
   }
 
@@ -272,13 +268,15 @@ export class VsixReader extends ManifestReader {
       const buffer = await this.readFile('extension.vsomanifest');
       return JSON.parse(buffer.toString('utf-8'));
     }
-    
+
     if (await this.fileExists('vss-extension.json')) {
       const buffer = await this.readFile('vss-extension.json');
       return JSON.parse(buffer.toString('utf-8'));
     }
 
-    throw new Error('Extension manifest not found in VSIX (expected vss-extension.json or extension.vsomanifest)');
+    throw new Error(
+      'Extension manifest not found in VSIX (expected vss-extension.json or extension.vsomanifest)'
+    );
   }
 
   /**
@@ -307,7 +305,7 @@ export class VsixReader extends ManifestReader {
       for (const file of manifest.files) {
         // Task directories typically contain task.json
         const taskJsonPath = `${file.path}/task.json`.replace(/\\/g, '/');
-        if (entries.some(e => e.fileName === taskJsonPath)) {
+        if (entries.some((e) => e.fileName === taskJsonPath)) {
           taskPathsSet.add(file.path);
         }
       }
@@ -348,5 +346,9 @@ export class VsixReader extends ManifestReader {
 }
 
 // Re-export types from manifest-reader for backwards compatibility
-export type { ExtensionManifest, TaskManifest, ManifestMetadata, TaskInfo } from './manifest-reader.js';
-
+export type {
+  ExtensionManifest,
+  TaskManifest,
+  ManifestMetadata,
+  TaskInfo,
+} from './manifest-reader.js';

@@ -58,13 +58,16 @@ OR
 ### Optional Inputs
 
 #### Authentication
+
 - `auth-type`: Authentication type (`pat` or `oidc`, default: `pat`)
 - `token`: Personal Access Token (required when auth-type is `pat`)
 
 #### TFX Configuration
+
 - `tfx-version`: Version of tfx-cli to use (default: `built-in`)
 
 #### Validation Options
+
 - `max-retries`: Maximum retry attempts (default: `10`)
 - `min-timeout`: Minimum timeout between retries in minutes (default: `1`)
 - `max-timeout`: Maximum timeout between retries in minutes (default: `15`)
@@ -87,13 +90,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Publish Extension
         uses: jessehouwing/azure-devops-extension-tasks/publish@v6
         with:
           token: ${{ secrets.MARKETPLACE_TOKEN }}
           root-folder: './extension'
-      
+
       - name: Validate Extension
         uses: jessehouwing/azure-devops-extension-tasks/wait-for-validation@v6
         with:
@@ -108,6 +111,7 @@ jobs:
 This action polls the marketplace to check if your extension has been successfully validated after publishing. The marketplace validation process can take several minutes, so the action uses exponential backoff with configurable retry settings.
 
 **Retry Logic**:
+
 - Starts with minimum timeout
 - Increases timeout exponentially on each retry
 - Caps at maximum timeout
