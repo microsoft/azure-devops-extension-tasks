@@ -1,7 +1,8 @@
-import { beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { promises as fs } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
+import type { PackageOptions } from '../commands/package.js';
 import { packageExtension } from '../commands/package.js';
 import { TfxManager } from '../tfx-manager.js';
 import { MockPlatformAdapter } from './helpers/mock-platform.js';
@@ -9,11 +10,29 @@ import { MockPlatformAdapter } from './helpers/mock-platform.js';
 describe('packageExtension', () => {
   let platform: MockPlatformAdapter;
   let tfxManager: TfxManager;
+  let testRootFolder: string;
 
-  beforeEach(() => {
+  const withManifestDefaults = (options: PackageOptions = {}): PackageOptions => ({
+    rootFolder: options.rootFolder ?? testRootFolder,
+    manifestGlobs: options.manifestGlobs ?? ['vss-extension.json'],
+    ...options,
+  });
+
+  beforeEach(async () => {
     platform = new MockPlatformAdapter();
     platform.registerTool('tfx', '/usr/bin/tfx');
     tfxManager = new TfxManager({ tfxVersion: 'built-in', platform });
+
+    testRootFolder = await fs.mkdtemp(join(tmpdir(), 'package-cmd-default-root-'));
+    await fs.writeFile(
+      join(testRootFolder, 'vss-extension.json'),
+      JSON.stringify({ id: 'ext', publisher: 'pub', version: '1.0.0', files: [] }),
+      'utf-8'
+    );
+  });
+
+  afterEach(async () => {
+    await fs.rm(testRootFolder, { recursive: true, force: true });
   });
 
   it('should package extension with minimal options', async () => {
@@ -31,7 +50,7 @@ describe('packageExtension', () => {
       stderr: '',
     });
 
-    const result = await packageExtension({}, tfxManager, platform);
+    const result = await packageExtension(withManifestDefaults(), tfxManager, platform);
 
     expect(result.vsixPath).toBe('/output/extension.vsix');
     expect(result.extensionId).toBe('my-extension');
@@ -88,9 +107,9 @@ describe('packageExtension', () => {
     });
 
     await packageExtension(
-      {
+      withManifestDefaults({
         manifestGlobs: ['vss-extension.json', '*.json'],
-      },
+      }),
       tfxManager,
       platform
     );
@@ -111,9 +130,9 @@ describe('packageExtension', () => {
     });
 
     await packageExtension(
-      {
+      withManifestDefaults({
         extensionId: 'my-extension',
-      },
+      }),
       tfxManager,
       platform
     );
@@ -132,7 +151,11 @@ describe('packageExtension', () => {
       stderr: '',
     });
 
-    await packageExtension({ publisherId: 'custom-publisher' }, tfxManager, platform);
+    await packageExtension(
+      withManifestDefaults({ publisherId: 'custom-publisher' }),
+      tfxManager,
+      platform
+    );
 
     const callArgs = mockExecute.mock.calls[0][0];
     expect(callArgs).toContain('--publisher');
@@ -188,7 +211,11 @@ describe('packageExtension', () => {
       stderr: '',
     });
 
-    await packageExtension({ outputPath: '/custom/output' }, tfxManager, platform);
+    await packageExtension(
+      withManifestDefaults({ outputPath: '/custom/output' }),
+      tfxManager,
+      platform
+    );
 
     const callArgs = mockExecute.mock.calls[0][0];
     expect(callArgs).toContain('--output-path');
@@ -204,7 +231,7 @@ describe('packageExtension', () => {
       stderr: '',
     });
 
-    await packageExtension({ bypassValidation: true }, tfxManager, platform);
+    await packageExtension(withManifestDefaults({ bypassValidation: true }), tfxManager, platform);
 
     const callArgs = mockExecute.mock.calls[0][0];
     expect(callArgs).toContain('--bypass-validation');
@@ -219,7 +246,7 @@ describe('packageExtension', () => {
       stderr: '',
     });
 
-    await packageExtension({ revVersion: true }, tfxManager, platform);
+    await packageExtension(withManifestDefaults({ revVersion: true }), tfxManager, platform);
 
     const callArgs = mockExecute.mock.calls[0][0];
     expect(callArgs).toContain('--rev-version');
@@ -234,7 +261,11 @@ describe('packageExtension', () => {
       stderr: '',
     });
 
-    await packageExtension({ outputVariable: 'MY_VSIX_PATH' }, tfxManager, platform);
+    await packageExtension(
+      withManifestDefaults({ outputVariable: 'MY_VSIX_PATH' }),
+      tfxManager,
+      platform
+    );
 
     const outputs = platform.getOutputs();
     expect(outputs.get('MY_VSIX_PATH')).toBe('/output/extension.vsix');
@@ -249,7 +280,7 @@ describe('packageExtension', () => {
       stderr: '',
     });
 
-    await packageExtension({}, tfxManager, platform);
+    await packageExtension(withManifestDefaults(), tfxManager, platform);
 
     const outputs = platform.getOutputs();
     expect(outputs.get('Extension.OutputPath')).toBe('/output/extension.vsix');
@@ -263,7 +294,7 @@ describe('packageExtension', () => {
       stderr: 'Error message',
     });
 
-    await expect(packageExtension({}, tfxManager, platform)).rejects.toThrow(
+    await expect(packageExtension(withManifestDefaults(), tfxManager, platform)).rejects.toThrow(
       'tfx extension create failed with exit code 1'
     );
 
@@ -280,7 +311,7 @@ describe('packageExtension', () => {
       stderr: '',
     });
 
-    await expect(packageExtension({}, tfxManager, platform)).rejects.toThrow(
+    await expect(packageExtension(withManifestDefaults(), tfxManager, platform)).rejects.toThrow(
       'tfx did not return expected JSON output with path'
     );
   });
@@ -294,7 +325,7 @@ describe('packageExtension', () => {
       stderr: '',
     });
 
-    await packageExtension({}, tfxManager, platform);
+    await packageExtension(withManifestDefaults(), tfxManager, platform);
 
     expect(platform.infoMessages).toContain('Packaging extension...');
     expect(platform.infoMessages.some((m) => m.includes('Packaged extension'))).toBe(true);
@@ -394,10 +425,10 @@ describe('packageExtension', () => {
     });
 
     await packageExtension(
-      {
+      withManifestDefaults({
         publisherId: 'new-publisher',
         extensionId: 'new-extension',
-      },
+      }),
       tfxManager,
       platform
     );

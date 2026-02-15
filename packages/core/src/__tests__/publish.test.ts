@@ -1,8 +1,9 @@
-import { beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { promises as fs } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import type { AuthCredentials } from '../auth.js';
+import type { PublishOptions } from '../commands/publish.js';
 import { publishExtension } from '../commands/publish.js';
 import { ManifestEditor } from '../manifest-editor.js';
 import { TfxManager } from '../tfx-manager.js';
@@ -13,8 +14,16 @@ describe('publishExtension', () => {
   let platform: MockPlatformAdapter;
   let tfxManager: TfxManager;
   let auth: AuthCredentials;
+  let testRootFolder: string;
 
-  beforeEach(() => {
+  const withManifestDefaults = (options: Partial<PublishOptions> = {}): PublishOptions => ({
+    publishSource: 'manifest' as const,
+    rootFolder: options.rootFolder ?? testRootFolder,
+    manifestGlobs: options.manifestGlobs ?? ['vss-extension.json'],
+    ...options,
+  });
+
+  beforeEach(async () => {
     platform = new MockPlatformAdapter();
     platform.registerTool('tfx', '/usr/bin/tfx');
     tfxManager = new TfxManager({ tfxVersion: 'built-in', platform });
@@ -23,6 +32,17 @@ describe('publishExtension', () => {
       serviceUrl: 'https://marketplace.visualstudio.com',
       token: 'test-token-123',
     };
+
+    testRootFolder = await fs.mkdtemp(join(tmpdir(), 'publish-cmd-default-root-'));
+    await fs.writeFile(
+      join(testRootFolder, 'vss-extension.json'),
+      JSON.stringify({ id: 'ext', publisher: 'pub', version: '1.0.0', files: [] }),
+      'utf-8'
+    );
+  });
+
+  afterEach(async () => {
+    await fs.rm(testRootFolder, { recursive: true, force: true });
   });
 
   describe('manifest publishing', () => {
@@ -41,12 +61,7 @@ describe('publishExtension', () => {
         stderr: '',
       });
 
-      const result = await publishExtension(
-        { publishSource: 'manifest' },
-        auth,
-        tfxManager,
-        platform
-      );
+      const result = await publishExtension(withManifestDefaults(), auth, tfxManager, platform);
 
       expect(result.published).toBe(true);
       expect(result.vsixPath).toBe('/output/extension.vsix');
@@ -79,7 +94,7 @@ describe('publishExtension', () => {
         stderr: '',
       });
 
-      await publishExtension({ publishSource: 'manifest' }, basicAuth, tfxManager, platform);
+      await publishExtension(withManifestDefaults(), basicAuth, tfxManager, platform);
 
       const callArgs = mockExecute.mock.calls[0][0];
       expect(callArgs).toContain('--auth-type');
@@ -121,14 +136,13 @@ describe('publishExtension', () => {
 
       try {
         await publishExtension(
-          {
-            publishSource: 'manifest',
+          withManifestDefaults({
             rootFolder,
             manifestGlobs: ['vss-extension.json'],
             publisherId: 'pub',
             extensionId: 'ext',
             extensionVersion: '2.0.0',
-          },
+          }),
           auth,
           tfxManager,
           platform
@@ -160,10 +174,9 @@ describe('publishExtension', () => {
       });
 
       await publishExtension(
-        {
-          publishSource: 'manifest',
+        withManifestDefaults({
           extensionId: 'my-ext',
-        },
+        }),
         auth,
         tfxManager,
         platform
@@ -242,11 +255,10 @@ describe('publishExtension', () => {
       });
 
       await publishExtension(
-        {
-          publishSource: 'manifest',
+        withManifestDefaults({
           shareWith: ['org1', 'org2'],
           extensionVisibility: 'private',
-        },
+        }),
         auth,
         tfxManager,
         platform
@@ -268,11 +280,10 @@ describe('publishExtension', () => {
       });
 
       await publishExtension(
-        {
-          publishSource: 'manifest',
+        withManifestDefaults({
           shareWith: ['org1'],
           extensionVisibility: 'public',
-        },
+        }),
         auth,
         tfxManager,
         platform
@@ -295,10 +306,9 @@ describe('publishExtension', () => {
       });
 
       await publishExtension(
-        {
-          publishSource: 'manifest',
+        withManifestDefaults({
           noWaitValidation: true,
-        },
+        }),
         auth,
         tfxManager,
         platform
@@ -318,10 +328,9 @@ describe('publishExtension', () => {
       });
 
       await publishExtension(
-        {
-          publishSource: 'manifest',
+        withManifestDefaults({
           bypassValidation: true,
-        },
+        }),
         auth,
         tfxManager,
         platform
@@ -342,7 +351,7 @@ describe('publishExtension', () => {
       });
 
       await expect(
-        publishExtension({ publishSource: 'manifest' }, auth, tfxManager, platform)
+        publishExtension(withManifestDefaults(), auth, tfxManager, platform)
       ).rejects.toThrow('tfx extension publish failed with exit code 1');
     });
 
@@ -356,7 +365,7 @@ describe('publishExtension', () => {
       });
 
       await expect(
-        publishExtension({ publishSource: 'manifest' }, auth, tfxManager, platform)
+        publishExtension(withManifestDefaults(), auth, tfxManager, platform)
       ).rejects.toThrow('tfx did not return expected JSON output');
     });
   });
@@ -371,10 +380,9 @@ describe('publishExtension', () => {
     });
 
     await publishExtension(
-      {
-        publishSource: 'manifest',
+      withManifestDefaults({
         outputVariable: 'PUBLISHED_VSIX',
-      },
+      }),
       auth,
       tfxManager,
       platform
@@ -429,13 +437,12 @@ describe('publishExtension', () => {
     });
 
     await publishExtension(
-      {
-        publishSource: 'manifest',
+      withManifestDefaults({
         rootFolder: root,
         manifestGlobs: ['vss-extension.json'],
         extensionVersion: '2.0.0',
         updateTasksVersion: true,
-      },
+      }),
       auth,
       tfxManager,
       platform
