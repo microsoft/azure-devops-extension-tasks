@@ -43,6 +43,36 @@ export interface WaitForInstallationResult {
   allTasksAvailable: boolean;
 }
 
+function validateWaitForInstallationServiceUrl(serviceUrl: string | undefined): void {
+  if (!serviceUrl) {
+    throw new Error(
+      'wait-for-installation requires service-url to be set to an Azure DevOps organization/server endpoint (not marketplace)'
+    );
+  }
+
+  let parsedUrl: URL;
+  try {
+    parsedUrl = new URL(serviceUrl);
+  } catch {
+    throw new Error(
+      'wait-for-installation requires service-url to be a valid HTTPS Azure DevOps organization/server URL'
+    );
+  }
+
+  const hostname = parsedUrl.hostname.toLowerCase();
+  if (hostname === 'marketplace.visualstudio.com') {
+    throw new Error(
+      'wait-for-installation cannot use the default marketplace endpoint. Set service-url to https://dev.azure.com/<organization>'
+    );
+  }
+
+  if (parsedUrl.protocol !== 'https:') {
+    throw new Error(
+      'wait-for-installation requires service-url to be a valid HTTPS Azure DevOps organization/server URL'
+    );
+  }
+}
+
 /**
  * Resolve expected tasks from various sources
  */
@@ -131,6 +161,8 @@ export async function waitForInstallation(
   auth: AuthCredentials,
   platform: IPlatformAdapter
 ): Promise<WaitForInstallationResult> {
+  validateWaitForInstallationServiceUrl(auth.serviceUrl);
+
   const fullExtensionId = options.extensionId;
 
   const timeoutMs = (options.timeoutMinutes ?? 10) * 60_000;

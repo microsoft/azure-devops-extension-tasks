@@ -8,7 +8,6 @@ export interface AuthOptions {
     username?: string;
     password?: string;
     serviceUrl?: string;
-    marketplaceUrl?: string;
 }
 /**
  * Get authentication credentials based on auth type

@@ -1,5 +1,5 @@
 ---
-applyTo: 'vss-extension.json,**/vss-extension.json,packages/**/task.json'
+applyTo: 'vss-extension.json,**/vss-extension.json,packages/**/task.json,action.yml,**/action.yaml'
 description: Guidance for Azure DevOps extension and task manifests
 ---
 
@@ -11,3 +11,19 @@ description: Guidance for Azure DevOps extension and task manifests
 - When renaming task inputs, keep backward compatibility by adding an `aliases` array to the new canonical input name.
 - Include legacy and commonly-used alternate names in `aliases` (for example old camelCase names and kebab-case variants).
 - Keep `visibleRule` expressions and execution/runtime references aligned to the canonical input name (not aliases).
+
+## Action wrapper synchronization strategy
+
+- Treat root `action.yml` as the source of truth for shared input/output metadata.
+- Keep every composite wrapper `*/action.yaml` synchronized for:
+  - input names and defaults
+  - forwarded `runs.steps[0].with` mappings
+  - input/output descriptions (wrapper descriptions must include root descriptions)
+  - operation-scoped required flags comments
+- After any change to root `action.yml` or any wrapper `action.yaml`, run the synchronization tests:
+  - `packages/github-action/src/__tests__/action-wrapper-contract.test.ts`
+  - `packages/github-action/src/__tests__/action-metadata-parity.test.ts`
+  - `packages/github-action/src/__tests__/action-required-comments.test.ts`
+- Preferred command:
+  - `npm test -- packages/github-action/src/__tests__/action-wrapper-contract.test.ts packages/github-action/src/__tests__/action-metadata-parity.test.ts packages/github-action/src/__tests__/action-required-comments.test.ts`
+- Do not merge wrapper metadata/input changes until these tests pass.

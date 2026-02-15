@@ -2875,8 +2875,8 @@ function getTaskContributions(manifest) {
 }
 
 // packages/core/dist/tfx-manager.js
-import path6 from "path";
 import fs2 from "fs/promises";
+import path6 from "path";
 var TfxManager = class {
   resolvedPath;
   tfxVersion;
@@ -2929,12 +2929,19 @@ var TfxManager = class {
     }
     const entryDir = path6.dirname(path6.resolve(entrypoint));
     const tfxExecutable = process.platform === "win32" ? "tfx.cmd" : "tfx";
-    const builtInPath = path6.join(entryDir, "node_modules", ".bin", tfxExecutable);
-    if (!await this.pathExists(builtInPath)) {
-      throw new Error(`Built-in tfx-cli not found at expected path: ${builtInPath}. Install runtime dependencies and ensure node_modules/.bin is present next to the entrypoint.`);
+    const candidateDirs = [entryDir];
+    const normalizedEntrypoint = path6.resolve(entrypoint).replace(/\\/g, "/");
+    if (normalizedEntrypoint.includes("/node_modules/")) {
+      candidateDirs.push(process.cwd());
     }
-    this.platform.debug(`Resolved built-in tfx at: ${builtInPath}`);
-    return builtInPath;
+    for (const candidateDir of candidateDirs) {
+      const builtInPath = path6.join(candidateDir, "node_modules", ".bin", tfxExecutable);
+      if (await this.pathExists(builtInPath)) {
+        this.platform.debug(`Resolved built-in tfx at: ${builtInPath}`);
+        return builtInPath;
+      }
+    }
+    throw new Error(`Built-in tfx-cli not found at expected path: ${path6.join(entryDir, "node_modules", ".bin", tfxExecutable)}.`);
   }
   async pathExists(filePath) {
     try {
@@ -4182,6 +4189,24 @@ function sleep(ms) {
 
 // packages/core/dist/commands/wait-for-installation.js
 import { WebApi, getPersonalAccessTokenHandler } from "azure-devops-node-api";
+function validateWaitForInstallationServiceUrl(serviceUrl) {
+  if (!serviceUrl) {
+    throw new Error("wait-for-installation requires service-url to be set to an Azure DevOps organization/server endpoint (not marketplace)");
+  }
+  let parsedUrl;
+  try {
+    parsedUrl = new URL(serviceUrl);
+  } catch {
+    throw new Error("wait-for-installation requires service-url to be a valid HTTPS Azure DevOps organization/server URL");
+  }
+  const hostname = parsedUrl.hostname.toLowerCase();
+  if (hostname === "marketplace.visualstudio.com") {
+    throw new Error("wait-for-installation cannot use the default marketplace endpoint. Set service-url to https://dev.azure.com/<organization>");
+  }
+  if (parsedUrl.protocol !== "https:") {
+    throw new Error("wait-for-installation requires service-url to be a valid HTTPS Azure DevOps organization/server URL");
+  }
+}
 async function resolveExpectedTasks(options, platform) {
   if (options.expectedTasks && options.expectedTasks.length > 0) {
     platform.debug(`Using ${options.expectedTasks.length} expected tasks from options`);
@@ -4238,6 +4263,7 @@ async function resolveExpectedTasks(options, platform) {
   return [];
 }
 async function waitForInstallation(options, auth, platform) {
+  validateWaitForInstallationServiceUrl(auth.serviceUrl);
   const fullExtensionId = options.extensionId;
   const timeoutMs = (options.timeoutMinutes ?? 10) * 6e4;
   const pollingIntervalMs = (options.pollingIntervalSeconds ?? 30) * 1e3;
@@ -4477,6 +4503,7 @@ var GitHubAdapter = class {
   }
   async exec(tool, args, options) {
     let stderr = "";
+    const toolCommand = tool.includes(" ") ? `"${tool}"` : tool;
     const listeners = {
       stdout: (data) => {
         const str = data.toString();
@@ -4492,7 +4519,7 @@ var GitHubAdapter = class {
         }
       }
     };
-    const exitCode = await exec.exec(tool, args, {
+    const exitCode = await exec.exec(toolCommand, args, {
       cwd: options?.cwd,
       env: options?.env,
       silent: options?.silent,
@@ -4653,7 +4680,7 @@ See: https://jessehouwing.net/authenticate-connect-mggraph-using-oidc-in-github-
 
 // packages/github-action/src/auth/index.ts
 async function getAuth(authType, platform, options) {
-  const finalServiceUrl = options.serviceUrl || options.marketplaceUrl;
+  const finalServiceUrl = options.serviceUrl;
   switch (authType) {
     case "pat":
       if (!options.token) {
@@ -4711,13 +4738,11 @@ async function run() {
       const username = platform.getInput("username");
       const password = platform.getInput("password");
       const serviceUrl = platform.getInput("service-url");
-      const marketplaceUrl = platform.getInput("marketplace-url");
       auth = await getAuth(authType, platform, {
         token,
         username,
         password,
-        serviceUrl,
-        marketplaceUrl
+        serviceUrl
       });
       if (auth.token) {
         platform.setSecret(auth.token);

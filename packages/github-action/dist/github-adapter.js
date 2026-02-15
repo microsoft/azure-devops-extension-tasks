@@ -78,6 +78,7 @@ export class GitHubAdapter {
     }
     async exec(tool, args, options) {
         let stderr = '';
+        const toolCommand = tool.includes(' ') ? `"${tool}"` : tool;
         const listeners = {
             stdout: (data) => {
                 const str = data.toString();
@@ -93,7 +94,7 @@ export class GitHubAdapter {
                 }
             },
         };
-        const exitCode = await exec.exec(tool, args, {
+        const exitCode = await exec.exec(toolCommand, args, {
             cwd: options?.cwd,
             env: options?.env,
             silent: options?.silent,

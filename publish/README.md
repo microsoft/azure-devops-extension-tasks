@@ -94,7 +94,6 @@ OR
 - `username`: Username for basic authentication (required when auth-type is `basic`)
 - `password`: Password for basic authentication (required when auth-type is `basic`)
 - `service-url`: Azure DevOps service URL (optional, for on-premises servers)
-- `marketplace-url`: Marketplace URL (optional, for custom marketplace endpoints)
 
 #### TFX Configuration
 

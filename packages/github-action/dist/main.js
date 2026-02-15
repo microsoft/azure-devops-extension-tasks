@@ -52,13 +52,11 @@ async function run() {
             const username = platform.getInput('username');
             const password = platform.getInput('password');
             const serviceUrl = platform.getInput('service-url');
-            const marketplaceUrl = platform.getInput('marketplace-url');
             auth = await getAuth(authType, platform, {
                 token,
                 username,
                 password,
                 serviceUrl,
-                marketplaceUrl,
             });
             // Secret masking is now handled inside auth providers
             // But we keep this as defense in depth

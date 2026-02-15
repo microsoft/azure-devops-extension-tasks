@@ -1,4 +1,4 @@
-import { describe, it, expect, jest, beforeEach } from '@jest/globals';
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 
 const setFailedMock = jest.fn();
 
@@ -166,7 +166,6 @@ describe('GitHub Action main entrypoint', () => {
       username: undefined,
       password: undefined,
       serviceUrl: undefined,
-      marketplaceUrl: undefined,
     });
     expect(platform.setSecret).toHaveBeenCalledWith('token');
     expect(platform.setSecret).toHaveBeenCalledWith('password');

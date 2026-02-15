@@ -1,27 +1,28 @@
 import * as core from '@actions/core';
-import { GitHubAdapter } from './github-adapter.js';
-import { getAuth, AuthType } from './auth/index.js';
-import { TfxManager, TaskResult } from '@extension-tasks/core';
 import {
+  installExtension,
   packageExtension,
   publishExtension,
-  unpublishExtension,
-  shareExtension,
-  unshareExtension,
-  installExtension,
-  showExtension,
   queryVersion,
-  waitForValidation,
-  waitForInstallation,
-  validateExtensionId,
-  validatePublisherId,
-  validateVersion,
+  shareExtension,
+  showExtension,
+  TaskResult,
+  TfxManager,
+  unpublishExtension,
+  unshareExtension,
   validateAccountUrl,
+  validateAzureCliAvailable,
+  validateExtensionId,
   validateNodeAvailable,
   validateNpmAvailable,
+  validatePublisherId,
   validateTfxAvailable,
-  validateAzureCliAvailable,
+  validateVersion,
+  waitForInstallation,
+  waitForValidation,
 } from '@extension-tasks/core';
+import { AuthType, getAuth } from './auth/index.js';
+import { GitHubAdapter } from './github-adapter.js';
 
 async function run(): Promise<void> {
   try {
@@ -83,14 +84,12 @@ async function run(): Promise<void> {
       const username = platform.getInput('username');
       const password = platform.getInput('password');
       const serviceUrl = platform.getInput('service-url');
-      const marketplaceUrl = platform.getInput('marketplace-url');
 
       auth = await getAuth(authType, platform, {
         token,
         username,
         password,
         serviceUrl,
-        marketplaceUrl,
       });
 
       // Secret masking is now handled inside auth providers

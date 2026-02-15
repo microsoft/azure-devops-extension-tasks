@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach, beforeAll, afterAll, jest } from '@jest/globals';
+import { afterAll, beforeAll, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import type { AuthCredentials } from '../auth.js';
 import { MockPlatformAdapter } from './helpers/mock-platform.js';
 
@@ -53,7 +53,7 @@ describe('waitForInstallation', () => {
     platform = new MockPlatformAdapter();
     auth = {
       authType: 'pat',
-      serviceUrl: 'https://marketplace.visualstudio.com',
+      serviceUrl: 'https://dev.azure.com/org1',
       token: 'test-token',
     };
 
@@ -170,7 +170,7 @@ describe('waitForInstallation', () => {
       },
       {
         authType: 'pat',
-        serviceUrl: 'https://marketplace.visualstudio.com',
+        serviceUrl: 'https://dev.azure.com/org1',
         token: '',
       },
       platform
@@ -307,5 +307,51 @@ describe('waitForInstallation', () => {
     expect(platform.warningMessages.some((m) => m.includes('Failed to read task manifest'))).toBe(
       true
     );
+  });
+
+  it('fails when service-url is marketplace endpoint', async () => {
+    await expect(
+      waitForInstallation(
+        {
+          publisherId: 'pub',
+          extensionId: 'ext',
+          accounts: ['https://dev.azure.com/org1'],
+          expectedTasks: [{ name: 'Task1', versions: ['1.0.0'] }],
+        },
+        {
+          authType: 'pat',
+          serviceUrl: 'https://marketplace.visualstudio.com',
+          token: 'test-token',
+        },
+        platform
+      )
+    ).rejects.toThrow('wait-for-installation cannot use the default marketplace endpoint');
+  });
+
+  it('allows non-dev.azure.com service-url for Azure DevOps Server installations', async () => {
+    getTaskDefinitionsMock.mockResolvedValue([
+      {
+        name: 'Task1',
+        id: 'task-1',
+        version: { major: 1, minor: 0, patch: 0 },
+      },
+    ]);
+
+    const result = await waitForInstallation(
+      {
+        publisherId: 'pub',
+        extensionId: 'ext',
+        accounts: ['https://myserver.local/tfs/DefaultCollection'],
+        expectedTasks: [{ name: 'Task1', versions: ['1.0.0'] }],
+      },
+      {
+        authType: 'pat',
+        serviceUrl: 'https://myserver.local/tfs/DefaultCollection',
+        token: 'test-token',
+      },
+      platform
+    );
+
+    expect(result.success).toBe(true);
   });
 });

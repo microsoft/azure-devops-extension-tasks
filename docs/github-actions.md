@@ -34,8 +34,7 @@ This repository ships a **unified JavaScript action** and **composite command wr
 - `auth-type`: `pat` | `basic` | `oidc` (default `pat`)
 - `token`: PAT when `auth-type=pat`
 - `username` + `password`: when `auth-type=basic`
-- `service-url`: optional override for Azure DevOps service URL
-- `marketplace-url`: optional override for Marketplace endpoint
+- `service-url`: optional override for Azure DevOps service URL (required for `wait-for-installation` as `https://dev.azure.com/<organization>`)
 
 ### Identity and tooling
 
@@ -159,6 +158,7 @@ This repository ships a **unified JavaScript action** and **composite command wr
 - Required:
   - `operation: wait-for-installation`
   - auth inputs
+  - `service-url: https://dev.azure.com/<organization>` (marketplace URL is rejected)
   - `publisher-id`, `extension-id`
   - `accounts`
 - Optional:

@@ -1,9 +1,9 @@
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
-import * as tc from '@actions/tool-cache';
-import * as io from '@actions/io';
 import * as glob from '@actions/glob';
-import { IPlatformAdapter, TaskResult, ExecOptions } from '@extension-tasks/core';
+import * as io from '@actions/io';
+import * as tc from '@actions/tool-cache';
+import { ExecOptions, IPlatformAdapter, TaskResult } from '@extension-tasks/core';
 import { promises as fs } from 'fs';
 import * as os from 'os';
 import path from 'path';
@@ -91,6 +91,7 @@ export class GitHubAdapter implements IPlatformAdapter {
 
   async exec(tool: string, args: string[], options?: ExecOptions): Promise<number> {
     let stderr = '';
+    const toolCommand = tool.includes(' ') ? `"${tool}"` : tool;
 
     const listeners = {
       stdout: (data: Buffer) => {
@@ -108,7 +109,7 @@ export class GitHubAdapter implements IPlatformAdapter {
       },
     };
 
-    const exitCode = await exec.exec(tool, args, {
+    const exitCode = await exec.exec(toolCommand, args, {
       cwd: options?.cwd,
       env: options?.env,
       silent: options?.silent,

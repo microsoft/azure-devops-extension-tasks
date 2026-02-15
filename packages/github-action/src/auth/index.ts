@@ -1,7 +1,7 @@
 import { AuthCredentials, IPlatformAdapter } from '@extension-tasks/core';
-import { getPatAuth } from './pat-auth.js';
 import { getBasicAuth } from './basic-auth.js';
 import { getOidcAuth } from './oidc-auth.js';
+import { getPatAuth } from './pat-auth.js';
 
 export type AuthType = 'pat' | 'basic' | 'oidc';
 
@@ -10,7 +10,6 @@ export interface AuthOptions {
   username?: string;
   password?: string;
   serviceUrl?: string;
-  marketplaceUrl?: string;
 }
 
 /**
@@ -21,8 +20,7 @@ export async function getAuth(
   platform: IPlatformAdapter,
   options: AuthOptions
 ): Promise<AuthCredentials> {
-  // Determine the final service URL (prefer serviceUrl, fallback to marketplaceUrl)
-  const finalServiceUrl = options.serviceUrl || options.marketplaceUrl;
+  const finalServiceUrl = options.serviceUrl;
 
   switch (authType) {
     case 'pat':
@@ -45,4 +43,4 @@ export async function getAuth(
   }
 }
 
-export { getPatAuth, getBasicAuth, getOidcAuth };
+export { getBasicAuth, getOidcAuth, getPatAuth };

@@ -5,8 +5,7 @@ import { getOidcAuth } from './oidc-auth.js';
  * Get authentication credentials based on auth type
  */
 export async function getAuth(authType, platform, options) {
-    // Determine the final service URL (prefer serviceUrl, fallback to marketplaceUrl)
-    const finalServiceUrl = options.serviceUrl || options.marketplaceUrl;
+    const finalServiceUrl = options.serviceUrl;
     switch (authType) {
         case 'pat':
             if (!options.token) {

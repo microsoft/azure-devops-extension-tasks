@@ -1,5 +1,5 @@
-import { describe, it, expect, jest, beforeAll, beforeEach } from '@jest/globals';
-import type { IPlatformAdapter, AuthCredentials } from '@extension-tasks/core';
+import type { AuthCredentials, IPlatformAdapter } from '@extension-tasks/core';
+import { beforeAll, beforeEach, describe, expect, it, jest } from '@jest/globals';
 
 const getPatAuthMock =
   jest.fn<
@@ -48,7 +48,7 @@ describe('GitHub Action getAuth router', () => {
     jest.clearAllMocks();
   });
 
-  it('routes PAT auth and prefers serviceUrl', async () => {
+  it('routes PAT auth using serviceUrl', async () => {
     getPatAuthMock.mockResolvedValue({
       authType: 'pat',
       serviceUrl: 'https://custom.marketplace',
@@ -58,7 +58,6 @@ describe('GitHub Action getAuth router', () => {
     const result = await getAuth('pat', platform, {
       token: 'pat-token',
       serviceUrl: 'https://custom.marketplace',
-      marketplaceUrl: 'https://fallback.marketplace',
     });
 
     expect(getPatAuthMock).toHaveBeenCalledWith(
@@ -69,7 +68,7 @@ describe('GitHub Action getAuth router', () => {
     expect(result.serviceUrl).toBe('https://custom.marketplace');
   });
 
-  it('routes basic auth and uses marketplaceUrl fallback', async () => {
+  it('routes basic auth using serviceUrl', async () => {
     getBasicAuthMock.mockResolvedValue({
       authType: 'basic',
       serviceUrl: 'https://fallback.marketplace',
@@ -80,13 +79,13 @@ describe('GitHub Action getAuth router', () => {
     const result = await getAuth('basic', platform, {
       username: 'user',
       password: 'pass',
-      marketplaceUrl: 'https://fallback.marketplace',
+      serviceUrl: 'https://custom.server/tfs',
     });
 
     expect(getBasicAuthMock).toHaveBeenCalledWith(
       'user',
       'pass',
-      'https://fallback.marketplace',
+      'https://custom.server/tfs',
       platform
     );
     expect(result.authType).toBe('basic');
@@ -112,7 +111,7 @@ describe('GitHub Action getAuth router', () => {
     });
 
     const result = await getAuth('oidc', platform, {
-      marketplaceUrl: 'https://marketplace.visualstudio.com',
+      serviceUrl: 'https://marketplace.visualstudio.com',
     });
 
     expect(getOidcAuthMock).toHaveBeenCalledWith('https://marketplace.visualstudio.com', platform);

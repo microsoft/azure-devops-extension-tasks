@@ -121,14 +121,25 @@ export class TfxManager {
 
     const entryDir = path.dirname(path.resolve(entrypoint));
     const tfxExecutable = process.platform === 'win32' ? 'tfx.cmd' : 'tfx';
-    const builtInPath = path.join(entryDir, 'node_modules', '.bin', tfxExecutable);
+    const candidateDirs = [entryDir];
+    const normalizedEntrypoint = path.resolve(entrypoint).replace(/\\/g, '/');
 
-    if (!(await this.pathExists(builtInPath))) {
-      throw new Error(`Built-in tfx-cli not found at expected path: ${builtInPath}.`);
+    if (normalizedEntrypoint.includes('/node_modules/')) {
+      candidateDirs.push(process.cwd());
     }
 
-    this.platform.debug(`Resolved built-in tfx at: ${builtInPath}`);
-    return builtInPath;
+    for (const candidateDir of candidateDirs) {
+      const builtInPath = path.join(candidateDir, 'node_modules', '.bin', tfxExecutable);
+
+      if (await this.pathExists(builtInPath)) {
+        this.platform.debug(`Resolved built-in tfx at: ${builtInPath}`);
+        return builtInPath;
+      }
+    }
+
+    throw new Error(
+      `Built-in tfx-cli not found at expected path: ${path.join(entryDir, 'node_modules', '.bin', tfxExecutable)}.`
+    );
   }
 
   private async pathExists(filePath: string): Promise<boolean> {
