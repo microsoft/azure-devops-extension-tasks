@@ -22,7 +22,8 @@ export interface PackageOptions {
   extensionId?: string;
   extensionName?: string;
   extensionVersion?: string;
-  extensionVisibility?: 'private' | 'public';
+  extensionVisibility?: 'private' | 'public' | 'private_preview' | 'public_preview';
+  extensionPricing?: 'free' | 'paid' | 'trial';
 
   // Task patching
   updateTasksVersion?: boolean;
@@ -118,7 +119,8 @@ export async function packageExtension(
     options.updateTasksId ||
     options.extensionVersion ||
     options.extensionName ||
-    options.extensionVisibility;
+    options.extensionVisibility ||
+    options.extensionPricing;
 
   if (shouldApplyManifestOptions) {
     platform.info('Updating task manifests before packaging...');
@@ -142,6 +144,7 @@ export async function packageExtension(
         extensionVersion: options.extensionVersion,
         extensionName: options.extensionName,
         extensionVisibility: options.extensionVisibility,
+        extensionPricing: options.extensionPricing,
         updateTasksVersion: options.updateTasksVersion,
         updateTasksVersionType: options.updateTasksVersionType,
         updateTasksId: options.updateTasksId,

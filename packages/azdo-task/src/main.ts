@@ -1,26 +1,27 @@
-import * as tl from 'azure-pipelines-task-lib/task.js';
-import { AzdoAdapter } from './azdo-adapter.js';
-import { getAuth, ConnectionType } from './auth/index.js';
-import { TfxManager, TaskResult } from '@extension-tasks/core';
 import {
+  installExtension,
   packageExtension,
   publishExtension,
-  unpublishExtension,
-  shareExtension,
-  unshareExtension,
-  installExtension,
-  showExtension,
   queryVersion,
-  waitForValidation,
-  waitForInstallation,
-  validateExtensionId,
-  validatePublisherId,
-  validateVersion,
+  shareExtension,
+  showExtension,
+  TaskResult,
+  TfxManager,
+  unpublishExtension,
+  unshareExtension,
   validateAccountUrl,
+  validateExtensionId,
   validateNodeAvailable,
   validateNpmAvailable,
+  validatePublisherId,
   validateTfxAvailable,
+  validateVersion,
+  waitForInstallation,
+  waitForValidation,
 } from '@extension-tasks/core';
+import * as tl from 'azure-pipelines-task-lib/task.js';
+import { ConnectionType, getAuth } from './auth/index.js';
+import { AzdoAdapter } from './azdo-adapter.js';
 
 async function run(): Promise<void> {
   try {
@@ -160,6 +161,8 @@ async function run(): Promise<void> {
 }
 
 async function runPackage(platform: AzdoAdapter, tfxManager: TfxManager): Promise<void> {
+  const extensionPricingInput = platform.getInput('extensionPricing');
+
   const options = {
     rootFolder: platform.getInput('rootFolder'),
     manifestGlobs: platform.getDelimitedInput('manifestGlobs', '\n'),
@@ -167,6 +170,14 @@ async function runPackage(platform: AzdoAdapter, tfxManager: TfxManager): Promis
     extensionId: platform.getInput('extensionId'),
     extensionVersion: platform.getInput('extensionVersion'),
     extensionName: platform.getInput('extensionName'),
+    extensionVisibility: platform.getInput('extensionVisibility') as any,
+    extensionPricing:
+      extensionPricingInput && extensionPricingInput !== 'default'
+        ? (extensionPricingInput as 'free' | 'paid' | 'trial')
+        : undefined,
+    updateTasksVersion: platform.getBoolInput('updateTasksVersion'),
+    updateTasksVersionType: platform.getInput('updateTasksVersionType') as any,
+    updateTasksId: platform.getBoolInput('updateTasksId'),
     outputPath: platform.getInput('outputPath'),
     outputVariable: platform.getInput('outputVariable'),
     bypassValidation: platform.getBoolInput('bypassValidation'),
@@ -182,6 +193,7 @@ async function runPackage(platform: AzdoAdapter, tfxManager: TfxManager): Promis
 
 async function runPublish(platform: AzdoAdapter, tfxManager: TfxManager, auth: any): Promise<void> {
   const publishSource = platform.getInput('publishSource', true) as 'manifest' | 'vsix';
+  const extensionPricingInput = platform.getInput('extensionPricing');
 
   const result = await publishExtension(
     {
@@ -197,10 +209,15 @@ async function runPublish(platform: AzdoAdapter, tfxManager: TfxManager, auth: a
       extensionVersion: platform.getInput('extensionVersion'),
       extensionName: platform.getInput('extensionName'),
       extensionVisibility: platform.getInput('extensionVisibility') as any,
+      extensionPricing:
+        extensionPricingInput && extensionPricingInput !== 'default'
+          ? (extensionPricingInput as 'free' | 'paid' | 'trial')
+          : undefined,
       shareWith: platform.getDelimitedInput('shareWith', '\n'),
       noWaitValidation: platform.getBoolInput('noWaitValidation'),
       bypassValidation: platform.getBoolInput('bypassValidation'),
       updateTasksVersion: platform.getBoolInput('updateTasksVersion'),
+      updateTasksVersionType: platform.getInput('updateTasksVersionType') as any,
       updateTasksId: platform.getBoolInput('updateTasksId'),
     },
     auth,

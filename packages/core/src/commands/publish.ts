@@ -35,6 +35,7 @@ export interface PublishOptions {
   extensionName?: string;
   extensionVersion?: string;
   extensionVisibility?: 'private' | 'public' | 'private_preview' | 'public_preview';
+  extensionPricing?: 'free' | 'paid' | 'trial';
 
   // Task patching
   updateTasksVersion?: boolean;
@@ -220,7 +221,7 @@ export async function publishExtension(
     // This uses the same approach as package.ts
     let cleanupWriter: (() => Promise<void>) | null = null;
 
-    if (options.updateTasksVersion || options.updateTasksId) {
+    if (options.updateTasksVersion || options.updateTasksId || options.extensionPricing) {
       platform.info('Updating task manifests before publishing...');
 
       try {
@@ -246,6 +247,7 @@ export async function publishExtension(
           extensionVersion: options.extensionVersion,
           extensionName: options.extensionName,
           extensionVisibility: options.extensionVisibility,
+          extensionPricing: options.extensionPricing,
           updateTasksVersion: options.updateTasksVersion,
           updateTasksVersionType: options.updateTasksVersionType,
           updateTasksId: options.updateTasksId,
@@ -302,6 +304,7 @@ export async function publishExtension(
       options.extensionVersion ||
       options.extensionName ||
       options.extensionVisibility ||
+      options.extensionPricing ||
       options.updateTasksVersion ||
       options.updateTasksId;
 
@@ -319,6 +322,7 @@ export async function publishExtension(
         extensionVersion: options.extensionVersion,
         extensionName: options.extensionName,
         extensionVisibility: options.extensionVisibility,
+        extensionPricing: options.extensionPricing,
         updateTasksVersion: options.updateTasksVersion,
         updateTasksVersionType: options.updateTasksVersionType,
         updateTasksId: options.updateTasksId,

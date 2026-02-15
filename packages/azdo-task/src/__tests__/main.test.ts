@@ -1,4 +1,4 @@
-import { describe, it, expect, jest, beforeEach } from '@jest/globals';
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 
 const tlErrorMock = jest.fn();
 const tlSetResultMock = jest.fn();
@@ -147,6 +147,49 @@ describe('Azure DevOps main entrypoint', () => {
     expect(platform.setResult).toHaveBeenCalledWith('Succeeded', 'package completed successfully');
   });
 
+  it('forwards package manifest editor options', async () => {
+    const platform = createPlatformMock({
+      inputs: {
+        operation: 'package',
+        tfxVersion: 'built-in',
+        rootFolder: '/repo',
+        manifestGlobs: 'vss-extension.json',
+        publisherId: 'publisher',
+        extensionId: 'extension',
+        extensionVersion: '1.2.3',
+        extensionName: 'Name',
+        extensionVisibility: 'private_preview',
+        extensionPricing: 'free',
+      },
+      boolInputs: {
+        updateTasksVersion: true,
+        updateTasksId: true,
+      },
+      delimitedInputs: {
+        'manifestGlobs|\n': ['vss-extension.json'],
+      },
+    });
+    azdoAdapterCtorMock.mockReturnValue(platform);
+
+    await importMainAndFlush();
+
+    expect(packageExtensionMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        publisherId: 'publisher',
+        extensionId: 'extension',
+        extensionVersion: '1.2.3',
+        extensionName: 'Name',
+        extensionVisibility: 'private_preview',
+        extensionPricing: 'free',
+        updateTasksVersion: true,
+        updateTasksVersionType: undefined,
+        updateTasksId: true,
+      }),
+      expect.anything(),
+      platform
+    );
+  });
+
   it('executes publish operation with auth and path-based tfx validation', async () => {
     const platform = createPlatformMock({
       inputs: {
@@ -170,6 +213,47 @@ describe('Azure DevOps main entrypoint', () => {
     expect(validateAccountUrlMock).toHaveBeenCalledWith('https://dev.azure.com/org');
     expect(publishExtensionMock).toHaveBeenCalled();
     expect(platform.setResult).toHaveBeenCalledWith('Succeeded', 'publish completed successfully');
+  });
+
+  it('forwards publish manifest editor options', async () => {
+    const platform = createPlatformMock({
+      inputs: {
+        operation: 'publish',
+        tfxVersion: 'built-in',
+        connectionType: 'connectedService:VsTeam',
+        connectionName: 'svc-connection',
+        publishSource: 'manifest',
+        rootFolder: '/repo',
+        extensionVisibility: 'public_preview',
+        extensionPricing: 'paid',
+        updateTasksVersionType: 'patch',
+      },
+      boolInputs: {
+        updateTasksVersion: true,
+        updateTasksId: true,
+      },
+      delimitedInputs: {
+        'manifestGlobs|\n': ['vss-extension.json'],
+      },
+    });
+    azdoAdapterCtorMock.mockReturnValue(platform);
+
+    await importMainAndFlush();
+
+    expect(publishExtensionMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        publishSource: 'manifest',
+        rootFolder: '/repo',
+        extensionVisibility: 'public_preview',
+        extensionPricing: 'paid',
+        updateTasksVersion: true,
+        updateTasksVersionType: 'patch',
+        updateTasksId: true,
+      }),
+      expect.anything(),
+      expect.anything(),
+      platform
+    );
   });
 
   it('fails install operation when not all accounts succeed', async () => {
