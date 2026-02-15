@@ -1,4 +1,4 @@
-import { describe, it, expect, jest } from '@jest/globals';
+import { describe, expect, it, jest } from '@jest/globals';
 import { JsonOutputStream } from '../json-output-stream.js';
 
 describe('JsonOutputStream', () => {
@@ -65,6 +65,59 @@ describe('JsonOutputStream', () => {
     stream.write('[{"id": 1}, {"id": 2}]');
 
     expect(stream.parseJson()).toEqual([{ id: 1 }, { id: 2 }]);
+  });
+
+  it('should handle JSON null literal', () => {
+    const lineWriter = jest.fn();
+    const stream = new JsonOutputStream(lineWriter);
+
+    stream.write('null');
+
+    expect(stream.parseJson()).toBeNull();
+    expect(lineWriter).not.toHaveBeenCalled();
+  });
+
+  it('should handle whitespace-prefixed JSON null literal', () => {
+    const lineWriter = jest.fn();
+    const stream = new JsonOutputStream(lineWriter);
+
+    stream.write('   null');
+
+    expect(stream.parseJson()).toBeNull();
+    expect(lineWriter).not.toHaveBeenCalled();
+  });
+
+  it('should handle JSON boolean literals', () => {
+    const lineWriter = jest.fn();
+    const streamTrue = new JsonOutputStream(lineWriter);
+    const streamFalse = new JsonOutputStream(lineWriter);
+
+    streamTrue.write('true');
+    streamFalse.write('false');
+
+    expect(streamTrue.parseJson()).toBe(true);
+    expect(streamFalse.parseJson()).toBe(false);
+    expect(lineWriter).not.toHaveBeenCalled();
+  });
+
+  it('should handle JSON number literals', () => {
+    const lineWriter = jest.fn();
+    const stream = new JsonOutputStream(lineWriter);
+
+    stream.write('-42.5');
+
+    expect(stream.parseJson()).toBe(-42.5);
+    expect(lineWriter).not.toHaveBeenCalled();
+  });
+
+  it('should handle JSON string literal', () => {
+    const lineWriter = jest.fn();
+    const stream = new JsonOutputStream(lineWriter);
+
+    stream.write('"hello"');
+
+    expect(stream.parseJson()).toBe('hello');
+    expect(lineWriter).not.toHaveBeenCalled();
   });
 
   it('should handle mixed output correctly', () => {

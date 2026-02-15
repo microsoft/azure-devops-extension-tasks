@@ -1,17 +1,60 @@
-import { describe, it, expect, beforeEach } from '@jest/globals';
-import { jest } from '@jest/globals';
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
+import fs from 'fs/promises';
+import os from 'os';
+import path from 'path';
 import { TfxManager } from '../tfx-manager.js';
 import { MockPlatformAdapter } from './helpers/mock-platform.js';
 
 describe('TfxManager', () => {
   let platform: MockPlatformAdapter;
+  let originalCwd: string;
+  let originalArgv1: string | undefined;
 
   beforeEach(() => {
     platform = new MockPlatformAdapter();
+    originalCwd = process.cwd();
+    originalArgv1 = process.argv[1];
   });
 
   describe('resolve', () => {
-    it('should use built-in tfx from core package dependencies', async () => {
+    it('should resolve built-in tfx from nearest node_modules', async () => {
+      const sandbox = await fs.mkdtemp(path.join(os.tmpdir(), 'tfx-built-in-'));
+      const entryFile = path.join(sandbox, 'dist', 'main.js');
+      const tfxShim =
+        process.platform === 'win32'
+          ? path.join(sandbox, 'dist', 'node_modules', '.bin', 'tfx.cmd')
+          : path.join(sandbox, 'dist', 'node_modules', '.bin', 'tfx');
+      await fs.mkdir(path.dirname(tfxShim), { recursive: true });
+      await fs.mkdir(path.dirname(entryFile), { recursive: true });
+      await fs.writeFile(entryFile, '', 'utf-8');
+      await fs.writeFile(tfxShim, 'echo tfx', 'utf-8');
+      process.argv[1] = entryFile;
+
+      const manager = new TfxManager({
+        tfxVersion: 'built-in',
+        platform,
+      });
+
+      try {
+        const tfxPath = await manager.resolve();
+
+        expect(tfxPath).toBe(tfxShim);
+        expect(platform.infoMessages).toContain(
+          'Using built-in tfx-cli from core package dependencies'
+        );
+      } finally {
+        process.chdir(originalCwd);
+        process.argv[1] = originalArgv1;
+        await fs.rm(sandbox, { recursive: true, force: true });
+      }
+    });
+
+    it('should fail built-in resolution when local node_modules tfx is missing', async () => {
+      const sandbox = await fs.mkdtemp(path.join(os.tmpdir(), 'tfx-built-in-missing-'));
+      const entryFile = path.join(sandbox, 'dist', 'main.js');
+      await fs.mkdir(path.dirname(entryFile), { recursive: true });
+      await fs.writeFile(entryFile, '', 'utf-8');
+      process.argv[1] = entryFile;
       platform.registerTool('tfx', '/usr/local/bin/tfx');
 
       const manager = new TfxManager({
@@ -19,28 +62,45 @@ describe('TfxManager', () => {
         platform,
       });
 
-      const tfxPath = await manager.resolve();
-
-      expect(tfxPath).toBe('/usr/local/bin/tfx');
-      expect(platform.infoMessages).toContain(
-        'Using built-in tfx-cli from core package dependencies'
-      );
+      try {
+        await expect(manager.resolve()).rejects.toThrow(/Built-in tfx-cli not found/);
+      } finally {
+        process.chdir(originalCwd);
+        process.argv[1] = originalArgv1;
+        await fs.rm(sandbox, { recursive: true, force: true });
+      }
     });
 
     it('should cache resolved path for subsequent calls', async () => {
-      platform.registerTool('tfx', '/usr/local/bin/tfx');
+      const sandbox = await fs.mkdtemp(path.join(os.tmpdir(), 'tfx-built-in-cache-'));
+      const entryFile = path.join(sandbox, 'dist', 'main.js');
+      const tfxShim =
+        process.platform === 'win32'
+          ? path.join(sandbox, 'dist', 'node_modules', '.bin', 'tfx.cmd')
+          : path.join(sandbox, 'dist', 'node_modules', '.bin', 'tfx');
+      await fs.mkdir(path.dirname(tfxShim), { recursive: true });
+      await fs.mkdir(path.dirname(entryFile), { recursive: true });
+      await fs.writeFile(entryFile, '', 'utf-8');
+      await fs.writeFile(tfxShim, 'echo tfx', 'utf-8');
+      process.argv[1] = entryFile;
 
       const manager = new TfxManager({
         tfxVersion: 'built-in',
         platform,
       });
 
-      const path1 = await manager.resolve();
-      const path2 = await manager.resolve();
+      try {
+        const path1 = await manager.resolve();
+        const path2 = await manager.resolve();
 
-      expect(path1).toBe(path2);
-      // Second call should use debug message about cached path
-      expect(platform.debugMessages.some((m) => m.includes('Using cached tfx path'))).toBe(true);
+        expect(path1).toBe(path2);
+        // Second call should use debug message about cached path
+        expect(platform.debugMessages.some((m) => m.includes('Using cached tfx path'))).toBe(true);
+      } finally {
+        process.chdir(originalCwd);
+        process.argv[1] = originalArgv1;
+        await fs.rm(sandbox, { recursive: true, force: true });
+      }
     });
 
     it('should find cached tool from platform cache', async () => {
@@ -98,7 +158,7 @@ describe('TfxManager', () => {
 
     it('should execute tfx with provided arguments', async () => {
       const manager = new TfxManager({
-        tfxVersion: 'built-in',
+        tfxVersion: 'path',
         platform,
       });
 
@@ -112,7 +172,7 @@ describe('TfxManager', () => {
 
     it('should add JSON flags when captureJson is true', async () => {
       const manager = new TfxManager({
-        tfxVersion: 'built-in',
+        tfxVersion: 'path',
         platform,
       });
 
@@ -126,7 +186,7 @@ describe('TfxManager', () => {
 
     it('should not duplicate JSON flags if already present', async () => {
       const manager = new TfxManager({
-        tfxVersion: 'built-in',
+        tfxVersion: 'path',
         platform,
       });
 
@@ -139,7 +199,7 @@ describe('TfxManager', () => {
 
     it('should pass working directory option', async () => {
       const manager = new TfxManager({
-        tfxVersion: 'built-in',
+        tfxVersion: 'path',
         platform,
       });
 
@@ -150,7 +210,7 @@ describe('TfxManager', () => {
 
     it('should pass environment variables', async () => {
       const manager = new TfxManager({
-        tfxVersion: 'built-in',
+        tfxVersion: 'path',
         platform,
       });
 
@@ -162,7 +222,7 @@ describe('TfxManager', () => {
 
     it('should log execution command', async () => {
       const manager = new TfxManager({
-        tfxVersion: 'built-in',
+        tfxVersion: 'path',
         platform,
       });
 
@@ -177,7 +237,7 @@ describe('TfxManager', () => {
 
     it('should create JsonOutputStream when captureJson is enabled', async () => {
       const manager = new TfxManager({
-        tfxVersion: 'built-in',
+        tfxVersion: 'path',
         platform,
       });
 

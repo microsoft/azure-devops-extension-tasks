@@ -33,13 +33,14 @@ export class JsonOutputStream extends Writable {
     callback: (error?: Error | null) => void
   ): void {
     const chunkStr = chunk.toString();
+    const trimmed = chunkStr.trimStart();
 
     // Azure Pipelines task-lib command output
     if (chunkStr.startsWith('[command]')) {
       this.writeOutput(chunkStr, this.lineWriter);
     }
     // If we haven't started collecting JSON yet and this doesn't look like JSON
-    else if (!this.jsonString && chunkStr[0] !== '{' && chunkStr[0] !== '[') {
+    else if (!this.jsonString && !this.looksLikeJsonStart(trimmed)) {
       this.messages.push(chunkStr);
       this.writeOutput(chunkStr, this.lineWriter);
     }
@@ -50,6 +51,17 @@ export class JsonOutputStream extends Writable {
     }
 
     callback();
+  }
+
+  /**
+   * Detect whether a chunk can be the start of a valid JSON value.
+   */
+  private looksLikeJsonStart(input: string): boolean {
+    if (!input) {
+      return false;
+    }
+
+    return /^(\{|\[|"|-?\d|true\b|false\b|null\b)/.test(input);
   }
 
   /**

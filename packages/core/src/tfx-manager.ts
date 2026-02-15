@@ -2,10 +2,10 @@
  * TfxManager - Manages tfx-cli installation, caching, and execution
  */
 
-import path from 'path';
 import fs from 'fs/promises';
-import type { IPlatformAdapter } from './platform.js';
+import path from 'path';
 import { JsonOutputStream } from './json-output-stream.js';
+import type { IPlatformAdapter } from './platform.js';
 
 /**
  * Options for TfxManager
@@ -114,12 +114,30 @@ export class TfxManager {
   private async resolveBuiltIn(): Promise<string> {
     this.platform.info('Using built-in tfx-cli from core package dependencies');
 
-    // The tfx-cli is a dependency, so it's in node_modules
-    // Use which to find the tfx executable (will check node_modules/.bin and PATH)
-    const tfxPath = await this.platform.which('tfx', true);
+    const entrypoint = process.argv[1];
+    if (!entrypoint) {
+      throw new Error('Built-in tfx-cli resolution failed: process.argv[1] is not set.');
+    }
 
-    this.platform.debug(`Resolved built-in tfx at: ${tfxPath}`);
-    return tfxPath;
+    const entryDir = path.dirname(path.resolve(entrypoint));
+    const tfxExecutable = process.platform === 'win32' ? 'tfx.cmd' : 'tfx';
+    const builtInPath = path.join(entryDir, 'node_modules', '.bin', tfxExecutable);
+
+    if (!(await this.pathExists(builtInPath))) {
+      throw new Error(`Built-in tfx-cli not found at expected path: ${builtInPath}.`);
+    }
+
+    this.platform.debug(`Resolved built-in tfx at: ${builtInPath}`);
+    return builtInPath;
+  }
+
+  private async pathExists(filePath: string): Promise<boolean> {
+    try {
+      await fs.access(filePath);
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   /**
