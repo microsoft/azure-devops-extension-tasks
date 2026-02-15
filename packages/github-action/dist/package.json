@@ -8,6 +8,9 @@
     "@actions/exec": "^3.0.0",
     "@actions/tool-cache": "^4.0.0",
     "@actions/io": "^3.0.2",
-    "tfx-cli": "^0.23.1"
+    "tfx-cli": "^0.23.1",
+    "yauzl": "^3.2.0",
+    "yazl": "^3.3.1",
+    "azure-devops-node-api": "^15.1.2"
   }
 }

@@ -27,18 +27,29 @@ const targets = [
       'packages/core/package.json',
       'package.json',
     ],
+    bundleFormat: 'cjs',
   },
   {
     name: 'GitHub Action',
     packageDir: 'packages/github-action',
     entryPoint: 'packages/github-action/src/main.ts',
     outFile: 'packages/github-action/dist/bundle.js',
-    external: ['@actions/core', '@actions/exec', '@actions/tool-cache', '@actions/io', 'tfx-cli'],
+    external: [
+      '@actions/core',
+      '@actions/exec',
+      '@actions/tool-cache',
+      '@actions/io',
+      'tfx-cli',
+      'yauzl',
+      'yazl',
+      'azure-devops-node-api',
+    ],
     manifestSources: [
       'packages/github-action/package.json',
       'packages/core/package.json',
       'package.json',
     ],
+    bundleFormat: 'esm',
   },
 ];
 
@@ -84,7 +95,7 @@ async function writeRuntimeDependencyManifest(target) {
     name: `${packageManifest.name}-runtime`,
     private: true,
     license: packageManifest.license || 'MIT',
-    type: packageManifest.type || 'commonjs',
+    type: target.bundleFormat === 'esm' ? 'module' : 'commonjs',
     dependencies,
   };
 
@@ -122,7 +133,22 @@ async function installRuntimeDependencies(target) {
   const distDir = path.join(rootDir, target.packageDir, 'dist');
   const nodeModulesDir = path.join(distDir, 'node_modules');
 
-  await fs.rm(nodeModulesDir, { recursive: true, force: true });
+  try {
+    await fs.rm(nodeModulesDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 250 });
+  } catch {
+    // Best effort; npm install can still proceed if node_modules was not present.
+  }
+
+  // On Windows, npm can fail with ENOTEMPTY when prior content still lingers.
+  // Move any residual folder out of the way and delete it separately.
+  try {
+    await fs.access(nodeModulesDir);
+    const staleDir = path.join(distDir, `node_modules.stale.${Date.now()}`);
+    await fs.rename(nodeModulesDir, staleDir);
+    await fs.rm(staleDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 250 });
+  } catch {
+    // No residual node_modules directory to handle.
+  }
 
   const npmCommand = process.platform === 'win32' ? 'npm.cmd' : 'npm';
   const installArgs = [
@@ -146,7 +172,7 @@ async function bundle() {
       bundle: true,
       platform: 'node',
       target: 'node20',
-      format: 'cjs',
+      format: target.bundleFormat,
       outfile: path.join(rootDir, target.outFile),
       sourcemap: true,
       external: target.external,

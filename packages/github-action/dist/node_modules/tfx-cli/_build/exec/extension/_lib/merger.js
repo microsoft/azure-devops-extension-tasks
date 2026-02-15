@@ -1,0 +1,404 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Merger = void 0;
+const extension_composer_factory_1 = require("./extension-composer-factory");
+const utils_1 = require("./utils");
+const _ = require("lodash");
+const fs = require("fs");
+const glob_1 = require("glob");
+const jju = require("jju");
+const jsonInPlace = require("json-in-place");
+const loc = require("./loc");
+const path = require("path");
+const trace = require("../../../lib/trace");
+const version = require("../../../lib/dynamicVersion");
+const util_1 = require("util");
+const fs_1 = require("fs");
+const fsUtils_1 = require("../../../lib/fsUtils");
+const jsonvalidate_1 = require("../../../lib/jsonvalidate");
+/**
+ * Facilitates the gathering/reading of partial manifests and creating the merged
+ * manifests (one for each manifest builder)
+ */
+class Merger {
+    /**
+     * constructor. Instantiates one of each manifest builder.
+     */
+    constructor(settings) {
+        this.settings = settings;
+        this.manifestBuilders = [];
+    }
+    async gatherManifests() {
+        trace.debug("merger.gatherManifests");
+        if (this.settings.manifestGlobs && this.settings.manifestGlobs.length > 0) {
+            const patterns = this.settings.manifestGlobs;
+            trace.debug("merger.gatherManifestsFromGlob");
+            const resultsArrays = await Promise.all(patterns.map(pattern => (0, glob_1.glob)(pattern, { cwd: this.settings.root })));
+            const relativeResults = _.uniq(_.flatten(resultsArrays));
+            const results = relativeResults.map(p => (path.isAbsolute(p) ? p : path.join(this.settings.root, p)));
+            if (results.length > 0) {
+                trace.debug("Merging %s manifests from the following paths: ", results.length.toString());
+                results.forEach(p => trace.debug(p));
+                return results;
+            }
+            else {
+                throw new Error("No manifests found from the following glob patterns: \n" + this.settings.manifestGlobs.join("\n"));
+            }
+        }
+        else {
+            const manifests = this.settings.manifests;
+            if (!manifests || manifests.length === 0) {
+                return Promise.reject("No manifests specified.");
+            }
+            this.settings.manifests = _.uniq(manifests).map(p => (path.isAbsolute(p) ? p : path.join(this.settings.root, p)));
+            trace.debug("Merging %s manifest%s from the following paths: ", manifests.length.toString(), manifests.length === 1 ? "" : "s");
+            manifests.forEach(p => trace.debug(p));
+            return this.settings.manifests;
+        }
+    }
+    loadManifestJs() {
+        trace.debug("merger.manifestJs");
+        // build environment object from --env parameter
+        const env = {};
+        (this.settings.env || []).forEach(kvp => {
+            const [key, ...value] = kvp.split('=');
+            env[key] = value.join('=');
+        });
+        const fullJsFile = path.resolve(this.settings.manifestJs);
+        const manifestModuleFn = require(fullJsFile);
+        if (!manifestModuleFn || typeof manifestModuleFn != "function") {
+            throw new Error(`Missing export function from manifest-js file ${fullJsFile}`);
+        }
+        const manifestData = manifestModuleFn(env);
+        if (!manifestData) {
+            throw new Error(`The export function from manifest-js file ${fullJsFile} must return the manifest object`);
+        }
+        return manifestData;
+    }
+    /**
+     * Finds all manifests and merges them into two JS Objects: vsoManifest and vsixManifest
+     * @return Q.Promise<SplitManifest> An object containing the two manifests
+     */
+    async merge() {
+        trace.debug("merger.merge");
+        let overridesProvided = false;
+        const manifestPromises = [];
+        if (this.settings.manifestJs) {
+            const result = this.loadManifestJs();
+            result.__origin = this.settings.manifestJs; // save the origin in order to resolve relative paths later.
+            manifestPromises.push(Promise.resolve(result));
+        }
+        else {
+            let manifestFiles = await this.gatherManifests();
+            manifestFiles.forEach(file => {
+                manifestPromises.push((0, util_1.promisify)(fs_1.readFile)(file, "utf8").then(data => {
+                    const jsonData = data.replace(/^\uFEFF/, "");
+                    try {
+                        const result = this.settings.json5 ? jju.parse(jsonData) : JSON.parse(jsonData);
+                        result.__origin = file; // save the origin in order to resolve relative paths later.
+                        return result;
+                    }
+                    catch (err) {
+                        trace.error("Error parsing the JSON in %s: ", file);
+                        trace.debug(jsonData, null);
+                        throw err;
+                    }
+                }));
+            });
+        }
+        // Add the overrides if necessary
+        if (this.settings.overrides) {
+            overridesProvided = true;
+            manifestPromises.push(Promise.resolve(this.settings.overrides));
+        }
+        return Promise.all(manifestPromises).then(partials => {
+            // Determine the targets so we can construct the builders
+            let targets = [];
+            let allContributions = [];
+            partials.forEach(partial => {
+                if (_.isArray(partial["targets"])) {
+                    targets = targets.concat(partial["targets"]);
+                }
+                if (_.isArray(partial["contributions"])) {
+                    allContributions = allContributions.concat(partial["contributions"]);
+                }
+            });
+            this.extensionComposer = extension_composer_factory_1.ComposerFactory.GetComposer(this.settings, targets);
+            this.manifestBuilders = this.extensionComposer.getBuilders();
+            let updateVersionPromise = Promise.resolve(null);
+            partials.forEach((partial, partialIndex) => {
+                // Rev the version if necessary
+                if (this.settings.revVersion) {
+                    if (partial["version"] && partial.__origin) {
+                        try {
+                            const parsedVersion = version.DynamicVersion.parse(partial["version"]);
+                            const newVersion = version.DynamicVersion.increase(parsedVersion);
+                            const newVersionString = newVersion.toString();
+                            partial["version"] = newVersionString;
+                            updateVersionPromise = (0, util_1.promisify)(fs_1.readFile)(partial.__origin, "utf8").then(versionPartial => {
+                                try {
+                                    let newPartial;
+                                    if (this.settings.json5) {
+                                        const parsed = jju.parse(versionPartial);
+                                        parsed["version"] = newVersionString;
+                                        newPartial = jju.update(versionPartial, parsed);
+                                    }
+                                    else {
+                                        newPartial = jsonInPlace(versionPartial).set("version", newVersionString).toString();
+                                    }
+                                    return (0, util_1.promisify)(fs_1.writeFile)(partial.__origin, newPartial);
+                                }
+                                catch (e) {
+                                    trace.warn("Failed to lex partial as JSON to update the version. Skipping version rev...");
+                                }
+                            });
+                        }
+                        catch (e) {
+                            trace.warn("Could not parse %s as a version (e.g. major.minor.patch). Skipping version rev...", partial["version"]);
+                        }
+                    }
+                }
+                // Transform asset paths to be relative to the root of all manifests, verify assets
+                if (_.isArray(partial["files"])) {
+                    partial["files"].forEach(asset => {
+                        const keys = Object.keys(asset);
+                        if (keys.indexOf("path") < 0) {
+                            throw new Error("Files must have an absolute or relative (to the manifest) path.");
+                        }
+                        let absolutePath;
+                        if (path.isAbsolute(asset.path)) {
+                            absolutePath = asset.path;
+                        }
+                        else {
+                            absolutePath = path.join(path.dirname(partial.__origin), asset.path);
+                        }
+                        asset.path = path.relative(this.settings.root, absolutePath);
+                    });
+                }
+                // Transform icon paths as above
+                if (_.isObject(partial["icons"])) {
+                    const icons = partial["icons"];
+                    Object.keys(icons).forEach((iconKind) => {
+                        const absolutePath = path.join(path.dirname(partial.__origin), icons[iconKind]);
+                        icons[iconKind] = path.relative(this.settings.root, absolutePath);
+                    });
+                }
+                // Expand any directories listed in the files array
+                if (_.isArray(partial["files"])) {
+                    for (let i = partial["files"].length - 1; i >= 0; --i) {
+                        const fileDecl = partial["files"][i];
+                        const fsPath = path.join(this.settings.root, fileDecl.path);
+                        if (fs.lstatSync(fsPath).isDirectory()) {
+                            Array.prototype.splice.apply(partial["files"], [i, 1].concat(this.pathToFileDeclarations(fsPath, this.settings.root, fileDecl)));
+                        }
+                    }
+                }
+                // Process each key by each manifest builder.
+                Object.keys(partial).forEach(key => {
+                    const isOverridePartial = partials.length - 1 === partialIndex && overridesProvided;
+                    if (partial[key] !== undefined && (partial[key] !== null || isOverridePartial)) {
+                        // Notify each manifest builder of the key/value pair
+                        this.manifestBuilders.forEach(builder => {
+                            builder.processKey(key, partial[key], isOverridePartial);
+                        });
+                    }
+                });
+            });
+            // Validate task.json files based on build task contributions
+            const taskJsonValidationPromise = this.validateBuildTaskContributions(allContributions);
+            // Generate localization resources
+            const locPrepper = new loc.LocPrep.LocKeyGenerator(this.manifestBuilders);
+            const resources = locPrepper.generateLocalizationKeys();
+            // Build up resource data by reading the translations from disk
+            return this.buildResourcesData().then(resourceData => {
+                if (resourceData) {
+                    resourceData["defaults"] = resources.combined;
+                }
+                // Build up a master file list
+                const packageFiles = {};
+                this.manifestBuilders.forEach(builder => {
+                    _.assign(packageFiles, builder.files);
+                });
+                const components = { builders: this.manifestBuilders, resources: resources };
+                // Finalize each builder
+                return Promise.all([updateVersionPromise, taskJsonValidationPromise].concat(this.manifestBuilders.map(b => b.finalize(packageFiles, resourceData, this.manifestBuilders)))).then(() => {
+                    // const the composer do validation
+                    return this.extensionComposer.validate(components).then(validationResult => {
+                        if (validationResult.length === 0 || this.settings.bypassValidation) {
+                            return components;
+                        }
+                        else {
+                            throw new Error("There were errors with your extension. Address the following and re-run the tool.\n" +
+                                validationResult);
+                        }
+                    });
+                });
+            });
+        });
+    }
+    /**
+     * For each folder F under the localization folder (--loc-root),
+     * look for a resources.resjson file within F. If it exists, split the
+     * resources.resjson into one file per manifest. Add
+     * each to the vsix archive as F/<manifest_loc_path> and F/Extension.vsixlangpack
+     */
+    buildResourcesData() {
+        // Make sure locRoot is set, that it refers to a directory, and
+        // iterate each subdirectory of that.
+        if (!this.settings.locRoot) {
+            return Promise.resolve(null);
+        }
+        const stringsPath = path.resolve(this.settings.locRoot);
+        const data = { defaults: null };
+        // Check that --loc-root exists and is a directory.
+        return (0, fsUtils_1.exists)(stringsPath)
+            .then(exists => {
+            if (exists) {
+                return (0, util_1.promisify)(fs_1.lstat)(stringsPath).then((stats) => {
+                    if (stats.isDirectory()) {
+                        return true;
+                    }
+                });
+            }
+            else {
+                return Promise.resolve(false);
+            }
+        })
+            .then(stringsFolderExists => {
+            if (!stringsFolderExists) {
+                return Promise.resolve(null);
+            }
+            // stringsPath exists and is a directory - read it.
+            return (0, util_1.promisify)(fs_1.readdir)(stringsPath).then((files) => {
+                const promises = [];
+                files.forEach(languageTag => {
+                    const filePath = path.join(stringsPath, languageTag);
+                    const promise = (0, util_1.promisify)(fs_1.lstat)(filePath).then(fileStats => {
+                        if (fileStats.isDirectory()) {
+                            // We're under a language tag directory within locRoot. Look for
+                            // resources.resjson and use that to generate manfiest files
+                            const resourcePath = path.join(filePath, "resources.resjson");
+                            return (0, fsUtils_1.exists)(resourcePath).then(exists => {
+                                if (exists) {
+                                    // A resources.resjson file exists in <locRoot>/<language_tag>/
+                                    return (0, util_1.promisify)(fs_1.readFile)(resourcePath, "utf8").then((contents) => {
+                                        const resourcesObj = JSON.parse(contents);
+                                        data[languageTag] = resourcesObj;
+                                    });
+                                }
+                            });
+                        }
+                    });
+                    promises.push(promise);
+                });
+                return Promise.all(promises);
+            });
+        })
+            .then(() => {
+            return data;
+        });
+    }
+    /**
+     * Recursively converts a given path to a flat list of FileDeclaration
+     * @TODO: Async.
+     */
+    pathToFileDeclarations(fsPath, root, fileDecl) {
+        let files = [];
+        if (fs.lstatSync(fsPath).isDirectory()) {
+            trace.debug("Path '%s` is a directory. Adding all contained files (recursive).", fsPath);
+            fs.readdirSync(fsPath).forEach(dirChildPath => {
+                trace.debug("-- %s", dirChildPath);
+                files = files.concat(this.pathToFileDeclarations(path.join(fsPath, dirChildPath), root, fileDecl));
+            });
+        }
+        else {
+            const relativePath = path.relative(root, fsPath);
+            let partName = "/" + relativePath;
+            if (fileDecl.partName || fileDecl.packagePath) {
+                partName = fileDecl.partName || fileDecl.packagePath;
+                if (typeof partName === "string") {
+                    partName = (0, utils_1.toZipItemName)((0, utils_1.forwardSlashesPath)(_.trimEnd(partName, "/") + relativePath.substr(fileDecl.path.length)));
+                }
+                else {
+                    partName = partName.map(pn => (0, utils_1.toZipItemName)((0, utils_1.forwardSlashesPath)(_.trimEnd(pn, "/") + relativePath.substr(fileDecl.path.length))));
+                }
+            }
+            files.push({
+                path: relativePath,
+                partName: partName,
+                auto: true,
+                addressable: fileDecl.addressable,
+            });
+        }
+        return files;
+    }
+    async validateBuildTaskContributions(contributions) {
+        try {
+            // Filter contributions to only build tasks
+            const buildTaskContributions = contributions.filter(contrib => contrib.type === "ms.vss-distributed-task.task" &&
+                contrib.properties &&
+                contrib.properties.name);
+            if (buildTaskContributions.length === 0) {
+                trace.debug("No build task contributions found, skipping task.json validation");
+                return;
+            }
+            const allTaskJsonPaths = [];
+            // For each build task contribution, look for task.json files and validate them
+            for (const contrib of buildTaskContributions) {
+                const taskPath = contrib.properties.name;
+                const absoluteTaskPath = path.join(this.settings.root, taskPath);
+                const contributionTaskJsonPaths = [];
+                // Check for task.json in the main directory
+                const mainTaskJsonPath = path.join(absoluteTaskPath, "task.json");
+                if (fs.existsSync(mainTaskJsonPath)) {
+                    contributionTaskJsonPaths.push(mainTaskJsonPath);
+                    trace.debug(`Found task.json: ${mainTaskJsonPath}`);
+                }
+                // Check for task.json in direct child directories (version folders)
+                if (fs.existsSync(absoluteTaskPath) && fs.lstatSync(absoluteTaskPath).isDirectory()) {
+                    try {
+                        const childDirs = fs.readdirSync(absoluteTaskPath);
+                        for (const childDir of childDirs) {
+                            const childPath = path.join(absoluteTaskPath, childDir);
+                            if (fs.lstatSync(childPath).isDirectory()) {
+                                const childTaskJsonPath = path.join(childPath, "task.json");
+                                if (fs.existsSync(childTaskJsonPath)) {
+                                    contributionTaskJsonPaths.push(childTaskJsonPath);
+                                    trace.debug(`Found task.json: ${childTaskJsonPath}`);
+                                }
+                            }
+                        }
+                    }
+                    catch (err) {
+                        trace.warn(`Error reading task directory ${absoluteTaskPath}: ${err}`);
+                    }
+                }
+                // Validate task.json files for this contribution with backwards compatibility checking
+                if (contributionTaskJsonPaths.length > 0) {
+                    trace.debug(`Validating ${contributionTaskJsonPaths.length} task.json files for contribution ${contrib.id || taskPath}`);
+                    for (const taskJsonPath of contributionTaskJsonPaths) {
+                        (0, jsonvalidate_1.validate)(taskJsonPath, "no task.json in specified directory", contributionTaskJsonPaths);
+                    }
+                    // Also collect for global tracking if needed
+                    allTaskJsonPaths.push(...contributionTaskJsonPaths);
+                }
+                else {
+                    trace.warn(`Build task contribution '${contrib.id || taskPath}' does not have a task.json file. Expected task.json in ${absoluteTaskPath} or its subdirectories.`);
+                }
+            }
+            if (allTaskJsonPaths.length === 0) {
+                trace.debug("No task.json files found in build task contributions");
+                return;
+            }
+            trace.debug(`Successfully validated ${allTaskJsonPaths.length} task.json files across ${buildTaskContributions.length} build task contributions`);
+        }
+        catch (err) {
+            const warningMessage = "Please, make sure the task.json file is correct. In the future, this warning will be treated as an error.\n";
+            trace.warn(err && err instanceof Error
+                ? warningMessage + err.message
+                : `Error occurred while validating build task contributions. ${warningMessage}`);
+        }
+    }
+}
+exports.Merger = Merger;
+//# sourceMappingURL=merger.js.map
