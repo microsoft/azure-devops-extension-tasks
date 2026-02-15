@@ -232,27 +232,27 @@ inputs:
 runs:
   using: composite
   steps:
-  - id: publish
-    uses: jessehouwing/azure-devops-extension-tasks@v6
-    with:
-      operation: publish
-      auth-type: ${{ inputs.auth-type }}
-      token: ${{ inputs.token }}
-      username: ${{ inputs.username }}
-      password: ${{ inputs.password }}
-      service-url: ${{ inputs.service-url }}
-      marketplace-url: ${{ inputs.marketplace-url }}
-      tfx-version: ${{ inputs.tfx-version }}
-      publisher-id: ${{ inputs.publisher-id }}
-      extension-id: ${{ inputs.extension-id }}
-      publish-source: ${{ inputs.publish-source }}
-      root-folder: ${{ inputs.root-folder }}
-      manifest-globs: ${{ inputs.manifest-globs }}
-      vsix-file: ${{ inputs.vsix-file }}
-      extension-version: ${{ inputs.extension-version }}
-      extension-name: ${{ inputs.extension-name }}
-      extension-visibility: ${{ inputs.extension-visibility }}
-      share-with: ${{ inputs.share-with }}
-      no-wait-validation: ${{ inputs.no-wait-validation }}
-      update-tasks-version: ${{ inputs.update-tasks-version }}
-      update-tasks-id: ${{ inputs.update-tasks-id }}
+    - id: publish
+      uses: jessehouwing/azure-devops-extension-tasks@v6
+      with:
+        operation: publish
+        auth-type: ${{ inputs.auth-type }}
+        token: ${{ inputs.token }}
+        username: ${{ inputs.username }}
+        password: ${{ inputs.password }}
+        service-url: ${{ inputs.service-url }}
+        marketplace-url: ${{ inputs.marketplace-url }}
+        tfx-version: ${{ inputs.tfx-version }}
+        publisher-id: ${{ inputs.publisher-id }}
+        extension-id: ${{ inputs.extension-id }}
+        publish-source: ${{ inputs.publish-source }}
+        root-folder: ${{ inputs.root-folder }}
+        manifest-globs: ${{ inputs.manifest-globs }}
+        vsix-file: ${{ inputs.vsix-file }}
+        extension-version: ${{ inputs.extension-version }}
+        extension-name: ${{ inputs.extension-name }}
+        extension-visibility: ${{ inputs.extension-visibility }}
+        share-with: ${{ inputs.share-with }}
+        no-wait-validation: ${{ inputs.no-wait-validation }}
+        update-tasks-version: ${{ inputs.update-tasks-version }}
+        update-tasks-id: ${{ inputs.update-tasks-id }}

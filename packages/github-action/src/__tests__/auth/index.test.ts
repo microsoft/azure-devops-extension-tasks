@@ -1,20 +1,27 @@
 import { describe, it, expect, jest, beforeAll, beforeEach } from '@jest/globals';
 import type { IPlatformAdapter, AuthCredentials } from '@extension-tasks/core';
 
-const getPatAuthMock = jest.fn<
-  (token: string, serviceUrl: string | undefined, platform: IPlatformAdapter) => Promise<AuthCredentials>
->();
-const getBasicAuthMock = jest.fn<
-  (
-    username: string,
-    password: string,
-    serviceUrl: string | undefined,
-    platform: IPlatformAdapter
-  ) => Promise<AuthCredentials>
->();
-const getOidcAuthMock = jest.fn<
-  (serviceUrl: string | undefined, platform: IPlatformAdapter) => Promise<AuthCredentials>
->();
+const getPatAuthMock =
+  jest.fn<
+    (
+      token: string,
+      serviceUrl: string | undefined,
+      platform: IPlatformAdapter
+    ) => Promise<AuthCredentials>
+  >();
+const getBasicAuthMock =
+  jest.fn<
+    (
+      username: string,
+      password: string,
+      serviceUrl: string | undefined,
+      platform: IPlatformAdapter
+    ) => Promise<AuthCredentials>
+  >();
+const getOidcAuthMock =
+  jest.fn<
+    (serviceUrl: string | undefined, platform: IPlatformAdapter) => Promise<AuthCredentials>
+  >();
 
 jest.unstable_mockModule('../../auth/pat-auth.js', () => ({
   getPatAuth: getPatAuthMock,

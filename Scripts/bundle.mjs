@@ -22,7 +22,11 @@ const targets = [
       'azure-devops-node-api',
       'tfx-cli',
     ],
-    manifestSources: ['packages/azdo-task/package.json', 'packages/core/package.json', 'package.json'],
+    manifestSources: [
+      'packages/azdo-task/package.json',
+      'packages/core/package.json',
+      'package.json',
+    ],
   },
   {
     name: 'GitHub Action',
@@ -84,7 +88,10 @@ async function writeRuntimeDependencyManifest(target) {
     dependencies,
   };
 
-  await fs.writeFile(path.join(distDir, 'package.json'), JSON.stringify(distPackage, null, 2) + '\n');
+  await fs.writeFile(
+    path.join(distDir, 'package.json'),
+    JSON.stringify(distPackage, null, 2) + '\n'
+  );
   await fs.writeFile(
     path.join(distDir, 'runtime-dependencies.json'),
     JSON.stringify({ external: target.external, dependencies }, null, 2) + '\n'
