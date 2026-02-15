@@ -91,6 +91,7 @@ jobs:
 
       - name: Setup summary
         run: |
+          actionlint_version="$("$(go env GOPATH)/bin/actionlint" -version | head -n 1)"
           {
             echo "## Copilot setup summary"
             echo "- Node: ${NODE_VERSION}"
@@ -98,7 +99,7 @@ jobs:
             echo "- tfx-cli: $(tfx --version)"
             echo "- jest: $(jest --version)"
             echo "- pre-commit: $(python3 -m pre_commit --version)"
-            echo "- actionlint: $($(go env GOPATH)/bin/actionlint -version | head -n 1)"
+            echo "- actionlint: ${actionlint_version}"
             echo "- Dependencies: ✅ Installed"
             echo "- Git hooks: ✅ Installed"
             echo "- Build: ✅ Successful"

@@ -41,5 +41,6 @@ jobs:
 
       - name: Run pre-commit
         run: |
-          export PATH="$(go env GOPATH)/bin:$PATH"
+          gopath="$(go env GOPATH)"
+          export PATH="${gopath}/bin:${PATH}"
           python3 -m pre_commit run --all-files
