@@ -29,3 +29,5 @@ vsixsigntool.exe
 .cache/
 .work/
 coverage/
+
+!packages/github-action/dist/

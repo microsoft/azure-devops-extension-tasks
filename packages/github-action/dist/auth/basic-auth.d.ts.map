@@ -1,0 +1,1 @@
+{"version":3,"file":"basic-auth.d.ts","sourceRoot":"","sources":["../../src/auth/basic-auth.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,eAAe,EAAE,gBAAgB,EAAE,MAAM,uBAAuB,CAAC;AAE1E;;GAEG;AACH,wBAAsB,YAAY,CAChC,QAAQ,EAAE,MAAM,EAChB,QAAQ,EAAE,MAAM,EAChB,UAAU,EAAE,MAAM,GAAG,SAAS,EAC9B,QAAQ,EAAE,gBAAgB,GACzB,OAAO,CAAC,eAAe,CAAC,CAuB1B"}

@@ -1,0 +1,1 @@
+{"version":3,"file":"oidc-auth.d.ts","sourceRoot":"","sources":["../../src/auth/oidc-auth.ts"],"names":[],"mappings":"AAEA,OAAO,EAAE,eAAe,EAAE,gBAAgB,EAAE,MAAM,uBAAuB,CAAC;AAE1E;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;GAgCG;AACH,wBAAsB,WAAW,CAC/B,UAAU,EAAE,MAAM,GAAG,SAAS,EAC9B,QAAQ,EAAE,gBAAgB,GACzB,OAAO,CAAC,eAAe,CAAC,CAoE1B"}
