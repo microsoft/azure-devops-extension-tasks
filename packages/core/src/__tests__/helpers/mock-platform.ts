@@ -7,11 +7,14 @@ import type { IPlatformAdapter, TaskResult, ExecOptions } from '../../platform.j
 import fs from 'fs/promises';
 import path, { dirname } from 'path';
 import { statSync } from 'fs';
+import { tmpdir } from 'os';
 
 /**
  * Mock platform adapter for testing
  */
 export class MockPlatformAdapter implements IPlatformAdapter {
+  private readonly fsSandboxRoot = path.join(tmpdir(), `mock-platform-${process.pid}`);
+
   // State
   private inputs = new Map<string, string>();
   private variables = new Map<string, string>();
@@ -173,7 +176,7 @@ export class MockPlatformAdapter implements IPlatformAdapter {
     }
 
     try {
-      await fs.access(path);
+      await fs.access(this.resolveFsPath(path));
       return true;
     } catch {
       return false;
@@ -186,22 +189,47 @@ export class MockPlatformAdapter implements IPlatformAdapter {
       return content;
     }
 
-    return fs.readFile(path, 'utf-8');
+    return fs.readFile(this.resolveFsPath(path), 'utf-8');
   }
 
   async writeFile(path: string, content: string): Promise<void> {
     this.files.set(path, content);
-    await fs.mkdir(dirname(path), { recursive: true });
-    await fs.writeFile(path, content, 'utf-8');
+    const fsPath = this.resolveFsPath(path);
+    await fs.mkdir(dirname(fsPath), { recursive: true });
+    await fs.writeFile(fsPath, content, 'utf-8');
   }
 
   async mkdirP(path: string): Promise<void> {
-    await fs.mkdir(path, { recursive: true });
+    await fs.mkdir(this.resolveFsPath(path), { recursive: true });
   }
 
   async rmRF(path: string): Promise<void> {
     this.files.delete(path);
-    await fs.rm(path, { recursive: true, force: true });
+    await fs.rm(this.resolveFsPath(path), { recursive: true, force: true });
+  }
+
+  private resolveFsPath(targetPath: string): string {
+    if (!this.shouldSandboxPath(targetPath)) {
+      return targetPath;
+    }
+
+    const relativeUnixPath = targetPath.replace(/^\/+/, '');
+    return path.join(this.fsSandboxRoot, relativeUnixPath);
+  }
+
+  private shouldSandboxPath(targetPath: string): boolean {
+    if (!path.isAbsolute(targetPath)) {
+      return false;
+    }
+
+    if (/^[a-zA-Z]:[\\/]/.test(targetPath)) {
+      return false;
+    }
+
+    const normalizedPath = targetPath.replace(/\\/g, '/');
+    const normalizedTmpDir = tmpdir().replace(/\\/g, '/').replace(/\/+$/, '');
+
+    return !normalizedPath.startsWith(`${normalizedTmpDir}/`) && normalizedPath !== normalizedTmpDir;
   }
 
   // ===== Environment =====
