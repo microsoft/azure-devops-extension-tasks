@@ -6,6 +6,8 @@ import type { IPlatformAdapter } from '../platform.js';
 import type { TfxManager } from '../tfx-manager.js';
 import type { AuthCredentials } from '../auth.js';
 import { ArgBuilder } from '../arg-builder.js';
+import { VsixReader } from '../vsix-reader.js';
+import { ManifestEditor } from '../manifest-editor.js';
 
 /**
  * Source for publishing
@@ -172,18 +174,14 @@ export async function publishExtension(
     if (needsModification) {
       platform.info('Modifying VSIX before publishing...');
       
-      // Import VSIX editor modules dynamically to avoid circular dependencies
-      const { VsixReader } = await import('../vsix-reader.js');
-      const { VsixEditor } = await import('../vsix-editor.js');
-      
-      // Open the VSIX and create an editor
+      // Open the VSIX and create an editor using the new unified architecture
       const reader = await VsixReader.open(options.vsixFile);
-      let editor = VsixEditor.fromReader(reader);
+      const editor = ManifestEditor.fromReader(reader);
       
       // Apply manifest overrides
       if (options.publisherId) {
         platform.debug(`Setting publisher: ${options.publisherId}`);
-        editor = editor.setPublisher(options.publisherId);
+        editor.setPublisher(options.publisherId);
       }
       
       let extensionId = options.extensionId;
@@ -194,50 +192,42 @@ export async function publishExtension(
       
       if (extensionId) {
         platform.debug(`Setting extension ID: ${extensionId}`);
-        editor = editor.setExtensionId(extensionId);
+        editor.setExtensionId(extensionId);
       }
       
       if (options.extensionVersion) {
         platform.debug(`Setting version: ${options.extensionVersion}`);
-        editor = editor.setVersion(options.extensionVersion);
+        editor.setVersion(options.extensionVersion);
       }
       
       if (options.extensionName) {
         platform.debug(`Setting name: ${options.extensionName}`);
-        editor = editor.setName(options.extensionName);
+        editor.setName(options.extensionName);
       }
       
       if (options.extensionVisibility) {
         platform.debug(`Setting visibility: ${options.extensionVisibility}`);
-        // Map extended visibility values to simple public/private for VsixEditor
-        const simpleVisibility = options.extensionVisibility.includes('public') ? 'public' : 'private';
-        editor = editor.setVisibility(simpleVisibility);
+        // Map extended visibility values to editor visibility type
+        const visibilityMap: Record<string, 'public' | 'private' | 'public_preview' | 'private_preview'> = {
+          'public': 'public',
+          'private': 'private',
+          'public_preview': 'public_preview',
+          'private_preview': 'private_preview',
+        };
+        const mappedVisibility = visibilityMap[options.extensionVisibility] || 'private';
+        editor.setVisibility(mappedVisibility);
       }
       
-      // Apply task modifications
+      // Apply task modifications using the new unified approach
       if (options.updateTasksVersion && options.extensionVersion) {
         platform.info('Updating task versions...');
-        const tasks = await reader.getTasksInfo();
-        for (const task of tasks) {
-          platform.debug(`Updating task ${task.name} to version ${options.extensionVersion}`);
-          editor = editor.updateTaskVersion(task.name, options.extensionVersion);
-        }
+        const versionType = options.updateTasksVersionType || 'major';
+        await editor.updateAllTaskVersions(options.extensionVersion, versionType);
       }
       
       if (options.updateTasksId) {
         platform.info('Updating task IDs...');
-        // Generate new UUIDs for tasks
-        const { v5: uuidv5 } = await import('uuid');
-        const tasks = await reader.getTasksInfo();
-        const extensionManifest = await reader.readExtensionManifest();
-        
-        for (const task of tasks) {
-          // Generate deterministic UUID based on namespace and task name
-          const namespace = `${extensionManifest.publisher}.${extensionManifest.id}.${task.name}`;
-          const newId = uuidv5(namespace, uuidv5.URL);
-          platform.debug(`Updating task ${task.name} ID to ${newId}`);
-          editor = editor.updateTaskId(task.name, newId);
-        }
+        await editor.updateAllTaskIds();
       }
       
       // Write modified VSIX to a temporary file

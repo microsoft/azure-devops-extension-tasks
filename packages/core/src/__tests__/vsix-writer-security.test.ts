@@ -6,7 +6,7 @@
 
 import { describe, it, expect, beforeEach } from '@jest/globals';
 import { VsixReader } from '../vsix-reader.js';
-import { VsixEditor } from '../vsix-editor.js';
+import { ManifestEditor } from '../manifest-editor.js';
 import { mkdirSync, writeFileSync, createWriteStream } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
@@ -51,7 +51,7 @@ describe('VsixWriter Security Tests', () => {
     const reader = await VsixReader.open(testVsixPath);
     
     await expect(async () => {
-      const writer = await VsixEditor.fromReader(reader)
+      const writer = await ManifestEditor.fromReader(reader)
         
         .setFile('/etc/passwd', 'malicious')
         .toWriter();
@@ -66,7 +66,7 @@ describe('VsixWriter Security Tests', () => {
     const reader = await VsixReader.open(testVsixPath);
     
     await expect(async () => {
-      const writer = await VsixEditor.fromReader(reader)
+      const writer = await ManifestEditor.fromReader(reader)
         
         .setFile('../../../etc/passwd', 'malicious')
         .toWriter();
@@ -81,7 +81,7 @@ describe('VsixWriter Security Tests', () => {
     const reader = await VsixReader.open(testVsixPath);
     
     await expect(async () => {
-      const writer = await VsixEditor.fromReader(reader)
+      const writer = await ManifestEditor.fromReader(reader)
         
         .setFile('C:\\Windows\\System32\\evil.dll', 'malicious')
         .toWriter();
@@ -96,7 +96,7 @@ describe('VsixWriter Security Tests', () => {
     const reader = await VsixReader.open(testVsixPath);
     
     await expect(async () => {
-      const writer = await VsixEditor.fromReader(reader)
+      const writer = await ManifestEditor.fromReader(reader)
         
         .setFile('file\0name.txt', 'malicious')
         .toWriter();
@@ -119,7 +119,7 @@ describe('VsixWriter Security Tests', () => {
     
     for (const path of sneakyPaths) {
       await expect(async () => {
-        const writer = await VsixEditor.fromReader(reader)
+        const writer = await ManifestEditor.fromReader(reader)
           .setFile(path, 'malicious')
           .toWriter();
         
@@ -141,7 +141,7 @@ describe('VsixWriter Security Tests', () => {
       'a/b/c/d/e/file.txt'
     ];
     
-    const editor = VsixEditor.fromReader(reader);
+    const editor = ManifestEditor.fromReader(reader);
     for (const path of safePaths) {
       editor.setFile(path, 'safe content');
     }
@@ -159,7 +159,7 @@ describe('VsixWriter Security Tests', () => {
     const reader = await VsixReader.open(testVsixPath);
     
     // Create editor with malicious path
-    const editor = VsixEditor.fromReader(reader);
+    const editor = ManifestEditor.fromReader(reader);
     
     // Bypass the editor's setFile and directly modify the internal state
     // This simulates if someone tried to hack around the API

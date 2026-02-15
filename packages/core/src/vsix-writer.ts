@@ -4,14 +4,14 @@
  * Optimizes ZIP file updates by copying unchanged entries directly
  * without recompression. Only modified/new files are recompressed.
  * 
- * Chain: Reader → Editor → Writer
+ * Chain: Reader → ManifestEditor → Writer
  */
 
 import yazl from 'yazl';
 import { Buffer } from 'buffer';
 import { createWriteStream } from 'fs';
-import type { VsixEditor } from './vsix-editor.js';
-import type { ExtensionManifest, TaskManifest } from './vsix-reader.js';
+import type { ManifestEditor } from './manifest-editor.js';
+import type { ExtensionManifest, TaskManifest } from './manifest-reader.js';
 
 /**
  * Validate that a path is safe for writing to ZIP
@@ -45,28 +45,27 @@ function validateZipPath(filePath: string): void {
  * Example usage:
  * ```typescript
  * const reader = await VsixReader.open('input.vsix');
- * const writer = await reader
- *   .toEditor()
- *   .setPublisher('new-publisher')
- *   .toWriter();
+ * const editor = ManifestEditor.fromReader(reader);
+ * editor.setPublisher('new-publisher');
+ * const writer = await editor.toWriter();
  * await writer.writeToFile('output.vsix');
  * await writer.close();
  * ```
  */
 export class VsixWriter {
-  private readonly editor: VsixEditor;
+  private readonly editor: ManifestEditor;
   private zipFile: yazl.ZipFile | null = null;
 
-  private constructor(editor: VsixEditor) {
+  private constructor(editor: ManifestEditor) {
     this.editor = editor;
   }
 
   /**
    * Create a writer from an editor
-   * @param editor The editor with modifications
+   * @param editor The ManifestEditor with modifications
    * @returns VsixWriter instance
    */
-  static fromEditor(editor: VsixEditor): VsixWriter {
+  static fromEditor(editor: ManifestEditor): VsixWriter {
     return new VsixWriter(editor);
   }
 

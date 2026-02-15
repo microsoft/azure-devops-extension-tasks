@@ -5,6 +5,8 @@
 import type { IPlatformAdapter } from '../platform.js';
 import type { TfxManager } from '../tfx-manager.js';
 import { ArgBuilder } from '../arg-builder.js';
+import { FilesystemManifestReader } from '../filesystem-manifest-reader.js';
+import { ManifestEditor } from '../manifest-editor.js';
 
 /**
  * Options for package command
@@ -128,40 +130,102 @@ export async function packageExtension(
     args.flag('--rev-version');
   }
 
-  // Note: updateTasksVersion and updateTasksId are not implemented for manifest-based packaging.
-  // Users should package first, then use publish with VSIX editing to modify task versions/IDs.
-  // This approach avoids duplicating complex manifest patching logic and leverages the
-  // VsixEditor implementation which handles task manifest updates correctly (see publish.ts lines 221-244).
-
-  // Execute tfx
-  const result = await tfx.execute(args.build(), { captureJson: true });
-
-  if (result.exitCode !== 0) {
-    platform.error(`tfx exited with code ${result.exitCode}`);
-    throw new Error(`tfx extension create failed with exit code ${result.exitCode}`);
+  // Handle task version and ID updates using the new architecture
+  // This replicates v5 functionality using ManifestReader/ManifestEditor/ManifestWriter
+  let cleanupWriter: (() => Promise<void>) | null = null;
+  
+  if (options.updateTasksVersion || options.updateTasksId) {
+    platform.info('Updating task manifests before packaging...');
+    
+    try {
+      // Create filesystem reader for the source directory
+      const rootFolder = options.rootFolder || '.';
+      const manifestGlobs = options.manifestGlobs || ['vss-extension.json'];
+      
+      const reader = new FilesystemManifestReader({
+        rootFolder,
+        manifestGlobs,
+        platform
+      });
+      
+      // Create editor and apply updates
+      const editor = ManifestEditor.fromReader(reader);
+      
+      // Update task versions if requested
+      if (options.updateTasksVersion && options.extensionVersion) {
+        platform.debug(`Updating task versions to ${options.extensionVersion} (${options.updateTasksVersionType || 'major'})`);
+        await editor.updateAllTaskVersions(
+          options.extensionVersion,
+          options.updateTasksVersionType || 'major'
+        );
+      }
+      
+      // Update task IDs if requested
+      if (options.updateTasksId) {
+        platform.debug('Updating task IDs...');
+        await editor.updateAllTaskIds();
+      }
+      
+      // Write modifications to filesystem
+      const writer = await editor.toWriter();
+      await writer.writeToFilesystem();
+      
+      // Get overrides file path if generated
+      const overridesPath = (writer as any).getOverridesPath();
+      if (overridesPath) {
+        platform.debug(`Using overrides file: ${overridesPath}`);
+        args.option('--overrides-file', overridesPath);
+      }
+      
+      // Setup cleanup function
+      cleanupWriter = async () => {
+        await writer.close();
+        await reader.close();
+      };
+      
+      platform.info('Task manifests updated successfully');
+    } catch (err) {
+      platform.error(`Failed to update task manifests: ${(err as Error).message}`);
+      throw err;
+    }
   }
 
-  // Parse JSON result
-  const json = result.json as any;
-  if (!json || !json.path) {
-    throw new Error('tfx did not return expected JSON output with path');
+  try {
+    // Execute tfx
+    const result = await tfx.execute(args.build(), { captureJson: true });
+
+    if (result.exitCode !== 0) {
+      platform.error(`tfx exited with code ${result.exitCode}`);
+      throw new Error(`tfx extension create failed with exit code ${result.exitCode}`);
+    }
+
+    // Parse JSON result
+    const json = result.json as any;
+    if (!json || !json.path) {
+      throw new Error('tfx did not return expected JSON output with path');
+    }
+
+    // Set output variable if specified
+    if (options.outputVariable) {
+      platform.setVariable(options.outputVariable, json.path, false, true);
+    }
+
+    // Always set Extension.OutputPath for compatibility
+    platform.setVariable('Extension.OutputPath', json.path, false, true);
+
+    platform.info(`Packaged extension: ${json.path}`);
+
+    return {
+      vsixPath: json.path,
+      extensionId: json.id || extensionId || '',
+      extensionVersion: json.version || options.extensionVersion || '',
+      publisherId: json.publisher || options.publisherId || '',
+      exitCode: result.exitCode,
+    };
+  } finally {
+    // Clean up writer resources if created
+    if (cleanupWriter) {
+      await cleanupWriter();
+    }
   }
-
-  // Set output variable if specified
-  if (options.outputVariable) {
-    platform.setVariable(options.outputVariable, json.path, false, true);
-  }
-
-  // Always set Extension.OutputPath for compatibility
-  platform.setVariable('Extension.OutputPath', json.path, false, true);
-
-  platform.info(`Packaged extension: ${json.path}`);
-
-  return {
-    vsixPath: json.path,
-    extensionId: json.id || extensionId || '',
-    extensionVersion: json.version || options.extensionVersion || '',
-    publisherId: json.publisher || options.publisherId || '',
-    exitCode: result.exitCode,
-  };
 }

@@ -2,7 +2,7 @@
  * Input validation functions for extension tasks
  */
 
-import type { IPlatformAdapter } from './platform-adapter.js';
+import type { IPlatformAdapter } from './platform.js';
 
 /**
  * Validates an extension ID
@@ -175,21 +175,15 @@ async function getBinaryVersion(
 
     const args = versionArgs[binary] || ['--version'];
     
-    // Capture output
-    let output = '';
+    // Execute binary to check if it's available
     const exitCode = await platform.exec(binary, args, {
       silent: true,
       ignoreReturnCode: true,
-      listeners: {
-        stdout: (data: string) => { output += data; },
-        stderr: (data: string) => { output += data; }
-      }
-    });
+    } as any);
 
-    if (exitCode === 0 && output) {
-      // Extract version from output (first line typically contains version)
-      const firstLine = output.split('\n')[0].trim();
-      return firstLine;
+    // If exec succeeds, binary is available
+    if (exitCode === 0) {
+      return 'available';
     }
     
     return null;

@@ -6,7 +6,7 @@
 
 import { describe, it, expect, beforeEach } from '@jest/globals';
 import { VsixReader } from '../vsix-reader.js';
-import { VsixEditor } from '../vsix-editor.js';
+import { ManifestEditor } from '../manifest-editor.js';
 import { writeFileSync, mkdirSync, existsSync, statSync, readFileSync, createWriteStream } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
@@ -111,7 +111,7 @@ describe('VSIX Chain Integration Tests', () => {
   it('should complete full read → edit → write chain', async () => {
     const reader = await VsixReader.open(testVsixPath);
     
-    const writer = await VsixEditor.fromReader(reader)
+    const writer = await ManifestEditor.fromReader(reader)
       .setPublisher('modified-publisher')
       .setVersion('6.0.0')
       .setName('Modified Name')
@@ -153,7 +153,7 @@ describe('VSIX Chain Integration Tests', () => {
     const originalReadme = await reader.readFile('README.md');
     const originalIcon = await reader.readFile('icon.png');
     
-    const writer = await VsixEditor.fromReader(reader)
+    const writer = await ManifestEditor.fromReader(reader)
       .setPublisher('new-publisher')
       .toWriter();
     
@@ -176,7 +176,7 @@ describe('VSIX Chain Integration Tests', () => {
   it('should handle file additions', async () => {
     const reader = await VsixReader.open(testVsixPath);
     
-    const writer = await VsixEditor.fromReader(reader)
+    const writer = await ManifestEditor.fromReader(reader)
       .setFile('newfile.txt', 'This is a new file')
       .setFile('another/nested/file.json', JSON.stringify({ test: true }))
       .toWriter();
@@ -200,7 +200,7 @@ describe('VSIX Chain Integration Tests', () => {
   it('should handle file removals', async () => {
     const reader = await VsixReader.open(testVsixPath);
     
-    const writer = await VsixEditor.fromReader(reader)
+    const writer = await ManifestEditor.fromReader(reader)
       .removeFile('README.md')
       .removeFile('icon.png')
       .toWriter();
@@ -224,7 +224,7 @@ describe('VSIX Chain Integration Tests', () => {
   it('should handle mixed operations (add, modify, remove)', async () => {
     const reader = await VsixReader.open(testVsixPath);
     
-    const writer = await VsixEditor.fromReader(reader)
+    const writer = await ManifestEditor.fromReader(reader)
       .setPublisher('mixed-publisher')
       .setVersion('7.0.0')
       .setFile('new-file.txt', 'new content')
@@ -255,7 +255,7 @@ describe('VSIX Chain Integration Tests', () => {
   it('should write to buffer and then to file', async () => {
     const reader = await VsixReader.open(testVsixPath);
     
-    const writer = await VsixEditor.fromReader(reader)
+    const writer = await ManifestEditor.fromReader(reader)
       .setPublisher('buffer-test')
       .toWriter();
     
@@ -282,7 +282,7 @@ describe('VSIX Chain Integration Tests', () => {
     const reader = await VsixReader.open(testVsixPath);
     
     // Only modify manifest, leave large files unchanged
-    const writer = await VsixEditor.fromReader(reader)
+    const writer = await ManifestEditor.fromReader(reader)
       .setVersion('5.1.0')
       .toWriter();
     
@@ -319,7 +319,7 @@ describe('VSIX Chain Integration Tests', () => {
     const originalFileNames = originalFiles.map(f => f.path).sort();
     
     // Make a non-destructive change
-    const writer = await VsixEditor.fromReader(reader)
+    const writer = await ManifestEditor.fromReader(reader)
       .setDescription('New description')
       .toWriter();
     
