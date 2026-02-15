@@ -28,3 +28,4 @@ vsixsigntool.exe
 .tmp/
 .cache/
 .work/
+coverage/

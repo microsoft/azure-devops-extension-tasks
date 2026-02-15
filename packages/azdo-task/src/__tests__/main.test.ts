@@ -227,4 +227,59 @@ describe('Azure DevOps main entrypoint', () => {
     expect(tlSetResultMock).toHaveBeenCalled();
     expect(String(tlSetResultMock.mock.calls[0][1])).toContain('Failed to parse expectedTasks');
   });
+
+  it('executes query-version and updates build number when requested', async () => {
+    queryVersionMock.mockImplementation(async () => ({
+      proposedVersion: '2.0.0',
+      currentVersion: '1.0.0',
+    }));
+
+    const platform = createPlatformMock({
+      inputs: {
+        operation: 'query-version',
+        connectionType: 'connectedService:VsTeam',
+        connectionName: 'svc-connection',
+        publisherId: 'publisher',
+        extensionId: 'extension',
+        versionAction: 'major',
+      },
+      boolInputs: {
+        setBuildNumber: true,
+      },
+    });
+    azdoAdapterCtorMock.mockReturnValue(platform);
+
+    await importMainAndFlush();
+
+    expect(queryVersionMock).toHaveBeenCalled();
+    expect(tlCommandMock).toHaveBeenCalledWith('build.updatebuildnumber', undefined, '2.0.0');
+    expect(platform.setOutput).toHaveBeenCalledWith('extension.proposedVersion', '2.0.0');
+    expect(platform.setOutput).toHaveBeenCalledWith('extension.currentVersion', '1.0.0');
+  });
+
+  it('fails wait-for-validation when status is not success', async () => {
+    waitForValidationMock.mockImplementation(async () => ({ status: 'failed' }));
+
+    const platform = createPlatformMock({
+      inputs: {
+        operation: 'wait-for-validation',
+        connectionType: 'connectedService:VsTeam',
+        connectionName: 'svc-connection',
+        publisherId: 'publisher',
+        extensionId: 'extension',
+      },
+      delimitedInputs: {
+        'manifestGlobs|\n': ['vss-extension.json'],
+      },
+    });
+    azdoAdapterCtorMock.mockReturnValue(platform);
+
+    await importMainAndFlush();
+
+    expect(waitForValidationMock).toHaveBeenCalled();
+    expect(tlSetResultMock).toHaveBeenCalledWith(
+      'Failed',
+      'Validation failed with status: failed'
+    );
+  });
 });

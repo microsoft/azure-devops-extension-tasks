@@ -210,4 +210,50 @@ describe('GitHub Action main entrypoint', () => {
 
     expect(setFailedMock).toHaveBeenCalledWith('Unknown operation: nope');
   });
+
+  it('executes query-version and sets outputs', async () => {
+    queryVersionMock.mockImplementation(async () => ({
+      proposedVersion: '2.0.0',
+      currentVersion: '1.0.0',
+    }));
+
+    const platform = createPlatformMock({
+      inputs: {
+        operation: 'query-version',
+        'auth-type': 'pat',
+        'publisher-id': 'publisher',
+        'extension-id': 'extension',
+        'version-action': 'Major',
+      },
+    });
+    githubAdapterCtorMock.mockReturnValue(platform);
+
+    await importMainAndFlush();
+
+    expect(queryVersionMock).toHaveBeenCalled();
+    expect(platform.setOutput).toHaveBeenCalledWith('proposed-version', '2.0.0');
+    expect(platform.setOutput).toHaveBeenCalledWith('current-version', '1.0.0');
+  });
+
+  it('fails wait-for-validation when status is not success', async () => {
+    waitForValidationMock.mockImplementation(async () => ({ status: 'failed' }));
+
+    const platform = createPlatformMock({
+      inputs: {
+        operation: 'wait-for-validation',
+        'auth-type': 'pat',
+        'publisher-id': 'publisher',
+        'extension-id': 'extension',
+      },
+      delimitedInputs: {
+        'manifest-globs|\n': ['vss-extension.json'],
+      },
+    });
+    githubAdapterCtorMock.mockReturnValue(platform);
+
+    await importMainAndFlush();
+
+    expect(waitForValidationMock).toHaveBeenCalled();
+    expect(setFailedMock).toHaveBeenCalledWith('Validation failed with status: failed');
+  });
 });

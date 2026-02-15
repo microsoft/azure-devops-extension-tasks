@@ -1,6 +1,9 @@
 import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import { AzdoAdapter } from '../azdo-adapter.js';
 import { TaskResult } from '@extension-tasks/core';
+import { promises as fs } from 'fs';
+import { join } from 'path';
+import { tmpdir } from 'os';
 
 describe('AzdoAdapter', () => {
   let adapter: AzdoAdapter;
@@ -42,6 +45,60 @@ describe('AzdoAdapter', () => {
     expect(() => adapter.setResult(TaskResult.Warning, 'warning')).not.toThrow();
   });
 
+  it('maps succeeded and failed setResult without throwing', () => {
+    expect(() => adapter.setResult(TaskResult.Succeeded, 'ok')).not.toThrow();
+    expect(() => adapter.setResult(TaskResult.Failed, 'nope')).not.toThrow();
+  });
+
+  it('reads boolean and delimited inputs', () => {
+    process.env.INPUT_MYFLAG = 'true';
+    process.env.INPUT_ITEMS = 'a,b,c';
+
+    expect(typeof adapter.getBoolInput('myFlag', false)).toBe('boolean');
+    expect(Array.isArray(adapter.getDelimitedInput('items', ',', false))).toBe(true);
+  });
+
+  it('writes output variables and secrets', () => {
+    adapter.setOutput('myOutput', 'value');
+    adapter.setSecret('secret-value');
+    adapter.debug('debug');
+    adapter.warning('warning');
+    adapter.error('error');
+
+    expect(process.env.MYOUTPUT).toBe('value');
+  });
+
+  it('handles filesystem read/write/mkdir/rm and existence', async () => {
+    const baseDir = await fs.mkdtemp(join(tmpdir(), 'azdo-adapter-'));
+    const nestedDir = join(baseDir, 'nested');
+    const filePath = join(nestedDir, 'file.txt');
+
+    await adapter.mkdirP(nestedDir);
+    await adapter.writeFile(filePath, 'hello');
+
+    expect(await adapter.fileExists(filePath)).toBe(true);
+    expect(await adapter.readFile(filePath)).toBe('hello');
+
+    await adapter.rmRF(baseDir);
+    expect(await adapter.fileExists(filePath)).toBe(false);
+  });
+
+  it('reads variables and temp dir value', () => {
+    adapter.setVariable('TEST_AZDO_VAR', 'x', false, false);
+    process.env.AGENT_TEMPDIRECTORY = tmpdir();
+
+    expect(adapter.getVariable('TEST_AZDO_VAR')).toBe('x');
+    expect(adapter.getTempDir()).toBeTruthy();
+    delete process.env.TEST_AZDO_VAR;
+    delete process.env.AGENT_TEMPDIRECTORY;
+  });
+
+  it('returns undefined for missing cached tool', () => {
+    process.env.AGENT_TOOLSDIRECTORY = tmpdir();
+    expect(adapter.findCachedTool('definitely-missing-tool', '0.0.0')).toBeUndefined();
+    delete process.env.AGENT_TOOLSDIRECTORY;
+  });
+
   it('finds node via which', async () => {
     const result = await adapter.which('node', true);
 
@@ -52,5 +109,17 @@ describe('AzdoAdapter', () => {
     const code = await adapter.exec(process.execPath, ['-e', "process.stdout.write('ok')"]);
 
     expect(code).toBe(0);
+  });
+
+  it('exec applies env options when provided', async () => {
+    await adapter.exec(process.execPath, ['-e', "process.stdout.write('ok')"], {
+      env: { ADAPTER_TEST_ENV: 'set-value' },
+      ignoreReturnCode: true,
+      silent: true,
+      failOnStdErr: false,
+    });
+
+    expect(process.env.ADAPTER_TEST_ENV).toBe('set-value');
+    delete process.env.ADAPTER_TEST_ENV;
   });
 });

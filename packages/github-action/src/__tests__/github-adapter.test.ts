@@ -1,7 +1,11 @@
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
+import { jest } from '@jest/globals';
 import { Writable } from 'stream';
 import { GitHubAdapter } from '../github-adapter.js';
 import { TaskResult } from '@extension-tasks/core';
+import { promises as fs } from 'fs';
+import { join } from 'path';
+import { tmpdir } from 'os';
 
 describe('GitHubAdapter', () => {
   let adapter: GitHubAdapter;
@@ -53,6 +57,61 @@ describe('GitHubAdapter', () => {
     expect(process.exitCode).toBe(1);
   });
 
+  it('sets succeeded and warning results without throwing', () => {
+    expect(() => adapter.setResult(TaskResult.Succeeded, 'ok')).not.toThrow();
+    expect(() => adapter.setResult(TaskResult.Warning, 'warn')).not.toThrow();
+  });
+
+  it('returns empty delimited input when not set', () => {
+    delete process.env.INPUT_ITEMS;
+    expect(adapter.getDelimitedInput('items', ',', false)).toEqual([]);
+  });
+
+  it('handles setVariable secret and output modes', () => {
+    adapter.setVariable('SECRET_VAR', 'secret', true, false);
+    adapter.setVariable('OUTPUT_VAR', 'output', false, true);
+
+    expect(process.env.SECRET_VAR).toBe('secret');
+  });
+
+  it('logs warning and returns empty array for findMatch', () => {
+    const result = adapter.findMatch(process.cwd(), ['**/*.ts']);
+    expect(result).toEqual([]);
+  });
+
+  it('handles filesystem read/write/mkdir/rm and existence', async () => {
+    const baseDir = await fs.mkdtemp(join(tmpdir(), 'github-adapter-'));
+    const nestedDir = join(baseDir, 'nested');
+    const filePath = join(nestedDir, 'file.txt');
+
+    await adapter.mkdirP(nestedDir);
+    await adapter.writeFile(filePath, 'hello');
+
+    expect(await adapter.fileExists(filePath)).toBe(true);
+    expect(await adapter.readFile(filePath)).toBe('hello');
+
+    await adapter.rmRF(baseDir);
+    expect(await adapter.fileExists(filePath)).toBe(false);
+  });
+
+  it('reads env variables and temp directory fallback', () => {
+    process.env.TEST_GH_VAR = 'x';
+    const originalRunnerTemp = process.env.RUNNER_TEMP;
+    delete process.env.RUNNER_TEMP;
+
+    expect(adapter.getVariable('TEST_GH_VAR')).toBe('x');
+    expect(adapter.getTempDir()).toBeTruthy();
+
+    process.env.RUNNER_TEMP = originalRunnerTemp;
+    delete process.env.TEST_GH_VAR;
+  });
+
+  it('returns undefined for missing cached tool', () => {
+    process.env.RUNNER_TOOL_CACHE = tmpdir();
+    expect(adapter.findCachedTool('definitely-missing-tool', '0.0.0')).toBeUndefined();
+    delete process.env.RUNNER_TOOL_CACHE;
+  });
+
   it('resolves existing tools through which', async () => {
     const result = await adapter.which('node', true);
 
@@ -74,5 +133,15 @@ describe('GitHubAdapter', () => {
 
     expect(code).toBe(0);
     expect(captured).toContain('ok');
+  });
+
+  it('exec throws when failOnStdErr is true and stderr is written', async () => {
+    await expect(
+      adapter.exec(
+        process.execPath,
+        ['-e', "process.stderr.write('boom')"],
+        { failOnStdErr: true, ignoreReturnCode: true }
+      )
+    ).rejects.toThrow('Command failed with stderr: boom');
   });
 });
