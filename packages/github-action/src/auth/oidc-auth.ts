@@ -43,8 +43,7 @@ export async function getOidcAuth(
   // If custom service URL is provided, use it as the token resource
   const tokenResource = serviceUrl || 'https://marketplace.visualstudio.com';
   
-  // For backwards compatibility, always use marketplace URL as the service URL
-  // unless explicitly overridden
+  // Use the provided service URL or default to marketplace URL
   const finalServiceUrl = serviceUrl || 'https://marketplace.visualstudio.com';
   
   core.info('Getting Azure AD token via Azure CLI (requires azure/login action)...');

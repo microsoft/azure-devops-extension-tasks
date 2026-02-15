@@ -21,21 +21,24 @@ export async function getAuth(
   platform: IPlatformAdapter,
   options: AuthOptions
 ): Promise<AuthCredentials> {
+  // Determine the final service URL (prefer serviceUrl, fallback to marketplaceUrl)
+  const finalServiceUrl = options.serviceUrl || options.marketplaceUrl;
+  
   switch (authType) {
     case 'pat':
       if (!options.token) {
         throw new Error('Token is required for PAT authentication');
       }
-      return getPatAuth(options.token, options.serviceUrl || options.marketplaceUrl, platform);
+      return getPatAuth(options.token, finalServiceUrl, platform);
     
     case 'basic':
       if (!options.username || !options.password) {
         throw new Error('Username and password are required for basic authentication');
       }
-      return getBasicAuth(options.username, options.password, options.serviceUrl || options.marketplaceUrl, platform);
+      return getBasicAuth(options.username, options.password, finalServiceUrl, platform);
     
     case 'oidc':
-      return getOidcAuth(options.serviceUrl || options.marketplaceUrl, platform);
+      return getOidcAuth(finalServiceUrl, platform);
     
     default:
       throw new Error(`Unsupported auth type: ${authType}`);
