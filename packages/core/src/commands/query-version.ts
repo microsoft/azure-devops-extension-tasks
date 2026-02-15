@@ -8,7 +8,6 @@ export type VersionAction = 'None' | 'Major' | 'Minor' | 'Patch';
 export interface QueryVersionOptions {
   publisherId: string;
   extensionId: string;
-  extensionTag?: string;
   versionAction?: VersionAction;
   extensionVersionOverrideVariable?: string;
   outputVariable?: string;
@@ -83,7 +82,6 @@ export async function queryVersion(
     {
       publisherId: options.publisherId,
       extensionId: options.extensionId,
-      extensionTag: options.extensionTag,
     },
     auth,
     tfx,

@@ -121,15 +121,6 @@
       "groupName": "operationConfig"
     },
     {
-      "name": "extensionTag",
-      "type": "string",
-      "label": "Extension Tag",
-      "required": false,
-      "helpMarkDown": "**Tag suffix** appended to extension ID for creating variants.\n\n**Use cases**:\n- Create dev/test versions: `-dev`, `-test`\n- Preview releases: `-preview`, `-beta`\n- Branch-specific builds: `-$(Build.SourceBranchName)`\n\n**Example**: If Extension ID is `my-extension` and tag is `-dev`, the actual ID becomes `my-extension-dev`",
-      "visibleRule": "operation = package || operation = publish",
-      "groupName": "operationConfig"
-    },
-    {
       "name": "publishSource",
       "type": "radio",
       "label": "Publish Source",

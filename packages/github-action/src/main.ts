@@ -178,7 +178,6 @@ async function runPackage(platform: GitHubAdapter, tfxManager: TfxManager): Prom
     manifestGlobs: platform.getDelimitedInput('manifest-globs', '\n'),
     publisherId: platform.getInput('publisher-id'),
     extensionId: platform.getInput('extension-id'),
-    extensionTag: platform.getInput('extension-tag'),
     extensionVersion: platform.getInput('extension-version'),
     extensionName: platform.getInput('extension-name'),
     outputPath: platform.getInput('output-path'),
@@ -212,7 +211,6 @@ async function runPublish(
       rootFolder: publishSource === 'manifest' ? platform.getInput('root-folder') : undefined,
       publisherId: platform.getInput('publisher-id'),
       extensionId: platform.getInput('extension-id'),
-      extensionTag: platform.getInput('extension-tag'),
       extensionVersion: platform.getInput('extension-version'),
       extensionName: platform.getInput('extension-name'),
       extensionVisibility: platform.getInput('extension-visibility') as any,
@@ -321,7 +319,6 @@ async function runQueryVersion(
     {
       publisherId: platform.getInput('publisher-id', true),
       extensionId: platform.getInput('extension-id', true),
-      extensionTag: platform.getInput('extension-tag'),
       versionAction:
         (platform.getInput('version-action') as 'None' | 'Major' | 'Minor' | 'Patch') ?? 'None',
       extensionVersionOverrideVariable: platform.getInput('extension-version-override'),

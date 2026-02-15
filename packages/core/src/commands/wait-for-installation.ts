@@ -14,7 +14,6 @@ export interface ExpectedTask {
 export interface WaitForInstallationOptions {
   publisherId: string;
   extensionId: string;
-  extensionTag?: string;
   accounts: string[]; // Target org URLs
   expectedTasks?: ExpectedTask[]; // Tasks with expected versions
   manifestPath?: string; // Path to extension manifest (vss-extension.json) to read task versions
@@ -132,9 +131,7 @@ export async function waitForInstallation(
   auth: AuthCredentials,
   platform: IPlatformAdapter
 ): Promise<WaitForInstallationResult> {
-  const fullExtensionId = options.extensionTag
-    ? `${options.extensionId}${options.extensionTag}`
-    : options.extensionId;
+  const fullExtensionId = options.extensionId;
 
   const timeoutMs = (options.timeoutMinutes ?? 10) * 60_000;
   const pollingIntervalMs = (options.pollingIntervalSeconds ?? 30) * 1000;

@@ -85,11 +85,11 @@ describe('packageExtension', () => {
     expect(callArgs).toContain('*.json');
   });
 
-  it('should apply extension ID with tag', async () => {
+  it('should apply extension ID override', async () => {
     const mockExecute = jest.spyOn(tfxManager, 'execute');
     mockExecute.mockResolvedValue({
       exitCode: 0,
-      json: { path: '/output/extension.vsix', id: 'my-extension-dev' },
+      json: { path: '/output/extension.vsix', id: 'my-extension' },
       stdout: '',
       stderr: '',
     });
@@ -97,7 +97,6 @@ describe('packageExtension', () => {
     await packageExtension(
       {
         extensionId: 'my-extension',
-        extensionTag: '-dev',
       },
       tfxManager,
       platform
@@ -105,8 +104,7 @@ describe('packageExtension', () => {
 
     const callArgs = mockExecute.mock.calls[0][0];
     expect(callArgs).toContain('--extension-id');
-    expect(callArgs).toContain('my-extension-dev');
-    expect(platform.debugMessages.some((m) => m.includes('my-extension-dev'))).toBe(true);
+    expect(callArgs).toContain('my-extension');
   });
 
   it('should include publisher override', async () => {

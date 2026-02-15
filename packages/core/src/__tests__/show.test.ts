@@ -84,11 +84,11 @@ describe('showExtension', () => {
     expect(callArgs).toContain('--json');
   });
 
-  it('should apply extension tag', async () => {
+  it('should use extension ID as provided', async () => {
     const mockExecute = jest.spyOn(tfxManager, 'execute');
     mockExecute.mockResolvedValue({
       exitCode: 0,
-      json: { id: 'ext-dev', publisher: 'pub', version: '1.0.0' },
+      json: { id: 'ext', publisher: 'pub', version: '1.0.0' },
       stdout: '',
       stderr: '',
     });
@@ -97,7 +97,6 @@ describe('showExtension', () => {
       {
         publisherId: 'pub',
         extensionId: 'ext',
-        extensionTag: '-dev',
       },
       auth,
       tfxManager,
@@ -106,7 +105,7 @@ describe('showExtension', () => {
 
     const callArgs = mockExecute.mock.calls[0][0];
     expect(callArgs).toContain('--extension-id');
-    expect(callArgs).toContain('ext-dev');
+    expect(callArgs).toContain('ext');
   });
 
   it('should set output variable when specified', async () => {
@@ -288,14 +287,13 @@ describe('showExtension', () => {
       {
         publisherId: 'pub',
         extensionId: 'ext',
-        extensionTag: '-dev',
       },
       auth,
       tfxManager,
       platform
     );
 
-    expect(result.metadata.id).toBe('ext-dev');
+    expect(result.metadata.id).toBe('ext');
     expect(result.metadata.name).toBe('FallbackName');
   });
 });

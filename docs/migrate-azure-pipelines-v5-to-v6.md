@@ -59,6 +59,24 @@ Additional commands now available in v6:
 - `show`
 - `wait-for-installation`
 
+## `extensionTag` in v6
+
+In v6, `extensionTag` is no longer supported. Supply the full `extensionId` value yourself.
+
+### Example using 2 variables
+
+```yaml
+variables:
+  EXTENSION_ID_BASE: 'vsts-developer-tools-build-tasks'
+  EXTENSION_ID_SUFFIX: '-dev'
+
+steps:
+  - task: ExtensionTasks@6
+    inputs:
+      operation: publish
+      extensionId: '$(EXTENSION_ID_BASE)$(EXTENSION_ID_SUFFIX)'
+```
+
 ## Before and after example
 
 ### Before (v5-style dedicated tasks)

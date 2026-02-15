@@ -168,7 +168,7 @@ describe('waitForValidation', () => {
     expect(callArgs).toContain('--json');
   });
 
-  it('should apply extension tag', async () => {
+  it('should use extension ID as provided', async () => {
     const mockExecute = jest.spyOn(tfxManager, 'execute');
     mockExecute.mockResolvedValue({
       exitCode: 0,
@@ -181,7 +181,6 @@ describe('waitForValidation', () => {
       {
         publisherId: 'pub',
         extensionId: 'ext',
-        extensionTag: '-dev',
       },
       auth,
       tfxManager,
@@ -190,7 +189,7 @@ describe('waitForValidation', () => {
 
     const callArgs = mockExecute.mock.calls[0][0];
     expect(callArgs).toContain('--extension-id');
-    expect(callArgs).toContain('ext-dev');
+    expect(callArgs).toContain('ext');
   });
 
   it('should include manifest arguments when provided', async () => {

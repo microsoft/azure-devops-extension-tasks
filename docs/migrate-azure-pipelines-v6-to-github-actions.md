@@ -46,13 +46,30 @@ Common input mappings:
 
 - `publisherId` → `publisher-id`
 - `extensionId` → `extension-id`
-- `extensionTag` → `extension-tag`
 - `rootFolder` → `root-folder`
 - `manifestGlobs` → `manifest-globs`
 - `publishSource` → `publish-source`
 - `vsixFile` → `vsix-file`
 - `extensionVersion` → `extension-version`
 - `outputVariable` → `output-variable`
+
+## `extensionTag` in v6
+
+In v6, `extensionTag` is no longer supported. Supply the full extension ID yourself on both platforms.
+
+### Example using 2 variables in GitHub Actions
+
+```yaml
+env:
+  EXTENSION_ID_BASE: vsts-developer-tools-build-tasks
+  EXTENSION_ID_SUFFIX: -dev
+
+steps:
+  - uses: jessehouwing/azure-devops-extension-tasks@v6
+    with:
+      operation: publish
+      extension-id: ${{ format('{0}{1}', env.EXTENSION_ID_BASE, env.EXTENSION_ID_SUFFIX) }}
+```
 
 ## Authentication migration
 

@@ -15,8 +15,6 @@ export interface InstallOptions {
   publisherId: string;
   /** Extension ID */
   extensionId: string;
-  /** Extension tag (optional, appended to extension ID) */
-  extensionTag?: string;
   /** Target organization URLs to install to */
   accounts: string[];
   /** Extension version to install (optional) */
@@ -75,12 +73,7 @@ export async function installExtension(
     `Installing extension ${options.publisherId}.${options.extensionId} to ${options.accounts.length} organization(s)...`
   );
 
-  // Build extension ID with tag if provided
-  let extensionId = options.extensionId;
-  if (options.extensionTag) {
-    extensionId = extensionId + options.extensionTag;
-    platform.debug(`Extension ID with tag: ${extensionId}`);
-  }
+  const extensionId = options.extensionId;
 
   const accountResults: InstallAccountResult[] = [];
   let overallExitCode = 0;

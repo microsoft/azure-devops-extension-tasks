@@ -44,7 +44,6 @@ These appear across multiple operations.
 
 - `publisherId`
 - `extensionId`
-- `extensionTag` (primarily package/publish)
 - `tfxVersion` (`built-in`, `path`, or npm version spec)
 
 ### Manifest / package source
@@ -78,7 +77,7 @@ Creates a VSIX from manifest files.
   - `operation: package`
 - Optional:
   - `rootFolder`, `manifestGlobs`, `localizationRoot`
-  - `publisherId`, `extensionId`, `extensionTag`
+  - `publisherId`, `extensionId`
   - `extensionVersion`, `extensionName`, `extensionVisibility`, `extensionPricing`
   - `outputPath`, `outputVariable`
   - `bypassValidation`, `revVersion`
@@ -96,7 +95,7 @@ Publishes to Marketplace from manifest or prebuilt VSIX.
   - If `publishSource = vsix`: `vsixFile`
 - Optional:
   - `rootFolder`, `manifestGlobs`, `localizationRoot`
-  - `publisherId`, `extensionId`, `extensionTag`
+  - `publisherId`, `extensionId`
   - `extensionVersion`, `extensionName`, `extensionVisibility`, `extensionPricing`
   - `shareWith`, `noWaitValidation`
   - `bypassValidation`

@@ -15,8 +15,6 @@ export interface UnpublishOptions {
   publisherId: string;
   /** Extension ID */
   extensionId: string;
-  /** Extension tag (optional, appended to extension ID) */
-  extensionTag?: string;
 }
 
 /**
@@ -49,12 +47,7 @@ export async function unpublishExtension(
 ): Promise<UnpublishResult> {
   platform.info(`Unpublishing extension ${options.publisherId}.${options.extensionId}...`);
 
-  // Build extension ID with tag if provided
-  let extensionId = options.extensionId;
-  if (options.extensionTag) {
-    extensionId = extensionId + options.extensionTag;
-    platform.debug(`Extension ID with tag: ${extensionId}`);
-  }
+  const extensionId = options.extensionId;
 
   // Build tfx arguments
   const args = new ArgBuilder()

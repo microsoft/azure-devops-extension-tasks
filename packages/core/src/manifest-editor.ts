@@ -36,7 +36,6 @@ export interface ApplyManifestOptions {
   // Extension manifest overrides
   publisherId?: string;
   extensionId?: string;
-  extensionTag?: string;
   extensionVersion?: string;
   extensionName?: string;
   extensionVisibility?: 'public' | 'private' | 'public_preview' | 'private_preview';
@@ -115,13 +114,9 @@ export class ManifestEditor {
       this.setPublisher(options.publisherId);
     }
 
-    // Handle extension ID with optional tag
+    // Handle extension ID
     if (options.extensionId) {
-      let extensionId = options.extensionId;
-      if (options.extensionTag) {
-        extensionId = extensionId + options.extensionTag;
-      }
-      this.setExtensionId(extensionId);
+      this.setExtensionId(options.extensionId);
     }
 
     if (options.extensionVersion) {

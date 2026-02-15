@@ -41,7 +41,6 @@ This repository ships a **unified JavaScript action** and **composite command wr
 
 - `publisher-id`
 - `extension-id`
-- `extension-tag`
 - `tfx-version`
 
 ### Packaging/publish source and overrides
@@ -71,7 +70,7 @@ This repository ships a **unified JavaScript action** and **composite command wr
 - Required:
   - `operation: package`
 - Optional:
-  - `publisher-id`, `extension-id`, `extension-tag`
+  - `publisher-id`, `extension-id`
   - `root-folder`, `manifest-globs`
   - `extension-version`, `extension-name`, `extension-visibility`
   - `output-path`, `output-variable`
@@ -142,7 +141,6 @@ This repository ships a **unified JavaScript action** and **composite command wr
   - auth inputs
   - `publisher-id`, `extension-id`
 - Optional:
-  - `extension-tag`
   - `version-action`
   - `extension-version-override`
   - `output-variable`

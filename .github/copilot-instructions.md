@@ -181,7 +181,6 @@ const editor = ManifestEditor.fromReader(reader);
 await editor.applyOptions({
   publisherId: 'my-pub',
   extensionId: 'my-ext',
-  extensionTag: 'preview', // Concatenates: my-ext-preview
   extensionVersion: '2.0.0',
   extensionName: 'My Extension',
   extensionVisibility: 'private',

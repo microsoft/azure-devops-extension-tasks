@@ -137,7 +137,7 @@ describe('installExtension', () => {
     expect(result.exitCode).toBe(1);
   });
 
-  it('should apply extension tag', async () => {
+  it('should use extension ID as provided', async () => {
     const mockExecute = jest.spyOn(tfxManager, 'execute');
     mockExecute.mockResolvedValue({
       exitCode: 0,
@@ -150,7 +150,6 @@ describe('installExtension', () => {
       {
         publisherId: 'pub',
         extensionId: 'ext',
-        extensionTag: '-dev',
         accounts: ['https://dev.azure.com/org1'],
       },
       auth,
@@ -160,7 +159,7 @@ describe('installExtension', () => {
 
     const callArgs = mockExecute.mock.calls[0][0];
     expect(callArgs).toContain('--extension-id');
-    expect(callArgs).toContain('ext-dev');
+    expect(callArgs).toContain('ext');
   });
 
   it('should include version if specified', async () => {

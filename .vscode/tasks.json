@@ -5,7 +5,7 @@
       "type": "npm",
       "script": "build:v6",
       "problemMatcher": ["$tsc"],
-      "label": "npm: build:v6",
+      "label": "npm: build",
       "detail": "Build all v6 packages"
     },
     {

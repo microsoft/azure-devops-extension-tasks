@@ -20,8 +20,6 @@ export interface WaitForValidationOptions {
   publisherId: string;
   /** Extension ID */
   extensionId: string;
-  /** Extension tag (optional, appended to extension ID) */
-  extensionTag?: string;
   /** Root folder for manifest (if validating from manifest) */
   rootFolder?: string;
   /** Manifest globs (if validating from manifest) */
@@ -69,12 +67,7 @@ export async function waitForValidation(
 ): Promise<WaitForValidationResult> {
   platform.info(`Validating extension ${options.publisherId}.${options.extensionId}...`);
 
-  // Build extension ID with tag if provided
-  let extensionId = options.extensionId;
-  if (options.extensionTag) {
-    extensionId = extensionId + options.extensionTag;
-    platform.debug(`Extension ID with tag: ${extensionId}`);
-  }
+  const extensionId = options.extensionId;
 
   // Retry configuration
   const maxRetries = options.maxRetries ?? 10;

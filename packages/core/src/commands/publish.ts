@@ -32,7 +32,6 @@ export interface PublishOptions {
   // Overrides
   publisherId?: string;
   extensionId?: string;
-  extensionTag?: string;
   extensionName?: string;
   extensionVersion?: string;
   extensionVisibility?: 'private' | 'public' | 'private_preview' | 'public_preview';
@@ -199,11 +198,7 @@ export async function publishExtension(
       args.option('--publisher', options.publisherId);
     }
 
-    let extensionId = options.extensionId;
-    if (extensionId && options.extensionTag) {
-      extensionId = extensionId + options.extensionTag;
-      platform.debug(`Extension ID with tag: ${extensionId}`);
-    }
+    const extensionId = options.extensionId;
 
     if (extensionId) {
       args.option('--extension-id', extensionId);
@@ -248,7 +243,6 @@ export async function publishExtension(
         await editor.applyOptions({
           publisherId: options.publisherId,
           extensionId: options.extensionId,
-          extensionTag: options.extensionTag,
           extensionVersion: options.extensionVersion,
           extensionName: options.extensionName,
           extensionVisibility: options.extensionVisibility,
@@ -323,7 +317,6 @@ export async function publishExtension(
       await editor.applyOptions({
         publisherId: options.publisherId,
         extensionId: options.extensionId,
-        extensionTag: options.extensionTag,
         extensionVersion: options.extensionVersion,
         extensionName: options.extensionName,
         extensionVisibility: options.extensionVisibility,

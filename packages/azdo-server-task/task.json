@@ -82,17 +82,6 @@
       "visibleRule": "operation = wait-for-validation"
     },
     {
-      "name": "extensionTag",
-      "type": "string",
-      "label": "Extension Tag",
-      "defaultValue": "",
-      "helpMarkDown": "Extension Tag to append to the extension ID",
-      "required": false,
-      "groupName": "operationConfig",
-      "aliases": ["extension-tag", "tag"],
-      "visibleRule": "operation = wait-for-validation"
-    },
-    {
       "name": "extensionVersion",
       "type": "string",
       "label": "Extension Version",
@@ -108,7 +97,7 @@
     "HttpRequest": {
       "Execute": {
         "EndpointId": "$(connectionName)",
-        "EndpointUrl": "$(endpoint.url)_apis/gallery/publishers/$(publisherId)/extensions/$(extensionId)$(extensionTag)?flags=1",
+        "EndpointUrl": "$(endpoint.url)_apis/gallery/publishers/$(publisherId)/extensions/$(extensionId)?flags=1",
         "Method": "GET",
         "Body": "",
         "Headers": "{\"Content-Type\":\"application/json\"}",

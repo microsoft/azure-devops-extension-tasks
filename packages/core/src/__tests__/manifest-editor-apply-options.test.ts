@@ -97,17 +97,16 @@ describe('ManifestEditor.applyOptions()', () => {
     await reader.close();
   });
 
-  it('should apply extension ID with tag', async () => {
+  it('should apply extension ID override', async () => {
     const reader = await VsixReader.open(testVsixPath);
     const editor = ManifestEditor.fromReader(reader);
 
     await editor.applyOptions({
       extensionId: 'my-extension',
-      extensionTag: '-dev',
     });
 
     const mods = editor.getManifestModifications();
-    expect(mods.id).toBe('my-extension-dev');
+    expect(mods.id).toBe('my-extension');
 
     await reader.close();
   });
@@ -256,7 +255,6 @@ describe('ManifestEditor.applyOptions()', () => {
     await editor.applyOptions({
       publisherId: 'new-pub',
       extensionId: 'new-ext',
-      extensionTag: '-preview',
       extensionVersion: '2.0.0',
       extensionName: 'New Name',
       extensionVisibility: 'private',
@@ -268,7 +266,7 @@ describe('ManifestEditor.applyOptions()', () => {
     // Check extension modifications
     const mods = editor.getManifestModifications();
     expect(mods.publisher).toBe('new-pub');
-    expect(mods.id).toBe('new-ext-preview');
+    expect(mods.id).toBe('new-ext');
     expect(mods.version).toBe('2.0.0');
     expect(mods.name).toBe('New Name');
     expect(mods.galleryFlags).toContain('Private');

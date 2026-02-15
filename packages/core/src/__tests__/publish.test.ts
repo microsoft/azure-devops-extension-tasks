@@ -129,7 +129,7 @@ describe('publishExtension', () => {
       expect(callArgs).toContain('2.0.0');
     });
 
-    it('should apply extension tag', async () => {
+    it('should apply extension ID override', async () => {
       const mockExecute = jest.spyOn(tfxManager, 'execute');
       mockExecute.mockResolvedValue({
         exitCode: 0,
@@ -142,7 +142,6 @@ describe('publishExtension', () => {
         {
           publishSource: 'manifest',
           extensionId: 'my-ext',
-          extensionTag: '-dev',
         },
         auth,
         tfxManager,
@@ -151,7 +150,7 @@ describe('publishExtension', () => {
 
       const callArgs = mockExecute.mock.calls[0][0];
       expect(callArgs).toContain('--extension-id');
-      expect(callArgs).toContain('my-ext-dev');
+      expect(callArgs).toContain('my-ext');
     });
   });
 

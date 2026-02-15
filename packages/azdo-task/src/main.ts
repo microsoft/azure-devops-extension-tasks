@@ -165,7 +165,6 @@ async function runPackage(platform: AzdoAdapter, tfxManager: TfxManager): Promis
     manifestGlobs: platform.getDelimitedInput('manifestGlobs', '\n'),
     publisherId: platform.getInput('publisherId'),
     extensionId: platform.getInput('extensionId'),
-    extensionTag: platform.getInput('extensionTag'),
     extensionVersion: platform.getInput('extensionVersion'),
     extensionName: platform.getInput('extensionName'),
     outputPath: platform.getInput('outputPath'),
@@ -195,7 +194,6 @@ async function runPublish(platform: AzdoAdapter, tfxManager: TfxManager, auth: a
       rootFolder: publishSource === 'manifest' ? platform.getInput('rootFolder') : undefined,
       publisherId: platform.getInput('publisherId'),
       extensionId: platform.getInput('extensionId'),
-      extensionTag: platform.getInput('extensionTag'),
       extensionVersion: platform.getInput('extensionVersion'),
       extensionName: platform.getInput('extensionName'),
       extensionVisibility: platform.getInput('extensionVisibility') as any,
@@ -296,7 +294,6 @@ async function runQueryVersion(
     {
       publisherId: platform.getInput('publisherId', true),
       extensionId: platform.getInput('extensionId', true),
-      extensionTag: platform.getInput('extensionTag'),
       versionAction:
         (platform.getInput('versionAction') as 'none' | 'major' | 'minor' | 'patch' | undefined) ===
         'major'

@@ -55,7 +55,7 @@ describe('unpublishExtension', () => {
     expect(platform.isSecret('test-token')).toBe(true);
   });
 
-  it('applies extension tag and basic authentication', async () => {
+  it('uses extension ID and basic authentication', async () => {
     const executeSpy = jest.spyOn(tfxManager, 'execute').mockResolvedValue({
       exitCode: 0,
       json: {},
@@ -67,7 +67,6 @@ describe('unpublishExtension', () => {
       {
         publisherId: 'pub',
         extensionId: 'ext',
-        extensionTag: '-dev',
       },
       {
         authType: 'basic',
@@ -81,7 +80,7 @@ describe('unpublishExtension', () => {
 
     const callArgs = executeSpy.mock.calls[0][0];
     expect(callArgs).toContain('--extension-id');
-    expect(callArgs).toContain('ext-dev');
+    expect(callArgs).toContain('ext');
     expect(callArgs).toContain('--auth-type');
     expect(callArgs).toContain('basic');
     expect(callArgs).toContain('--username');

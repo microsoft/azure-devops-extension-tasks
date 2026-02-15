@@ -104,7 +104,6 @@ OR
 
 - `publisher-id`: Publisher ID (default: from manifest)
 - `extension-id`: Extension ID (default: from manifest)
-- `extension-tag`: Tag to append to extension ID
 
 #### Source Selection
 

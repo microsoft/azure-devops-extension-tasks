@@ -15,8 +15,6 @@ export interface ShareOptions {
   publisherId: string;
   /** Extension ID */
   extensionId: string;
-  /** Extension tag (optional, appended to extension ID) */
-  extensionTag?: string;
   /** Array of organization names to share with */
   shareWith: string[];
 }
@@ -59,12 +57,7 @@ export async function shareExtension(
     `Sharing extension ${options.publisherId}.${options.extensionId} with ${options.shareWith.length} organization(s)...`
   );
 
-  // Build extension ID with tag if provided
-  let extensionId = options.extensionId;
-  if (options.extensionTag) {
-    extensionId = extensionId + options.extensionTag;
-    platform.debug(`Extension ID with tag: ${extensionId}`);
-  }
+  const extensionId = options.extensionId;
 
   // Build tfx arguments
   const args = new ArgBuilder()

@@ -137,17 +137,6 @@ inputs:
 
       **Example:** `my-extension` or `azure-devops-tasks`
     required: false
-  extension-tag:
-    description: |
-      **Tag suffix** appended to extension ID for creating variants.
-
-      **Use cases:**
-      - Create dev/test versions: `-dev`, `-test`
-      - Preview releases: `-preview`, `-beta`
-      - Branch-specific builds
-
-      **Example:** If Extension ID is `my-extension` and tag is `-dev`, the actual ID becomes `my-extension-dev`
-    required: false
 
   # Package & Publish - Manifest Source
   root-folder:

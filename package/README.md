@@ -59,7 +59,6 @@ None - all inputs are optional with sensible defaults.
 
 - `publisher-id`: Publisher ID from manifest (can override)
 - `extension-id`: Extension ID from manifest (can override)
-- `extension-tag`: Tag to append to extension ID
 
 #### Manifest Source
 

@@ -455,7 +455,6 @@ export interface PackageOptions {
   // Overrides
   publisherId?: string;
   extensionId?: string;
-  extensionTag?: string;
   extensionName?: string;
   extensionVersion?: string;
   extensionVisibility?: string;
@@ -510,7 +509,6 @@ import type { ITaskAgentApi } from 'azure-devops-node-api/TaskAgentApi.js';
 export interface VerifyInstallOptions {
   publisherId: string;
   extensionId: string;
-  extensionTag?: string;
   accounts: string[]; // Target org URLs
   expectedTaskNames?: string[]; // If known; otherwise derived from extension manifest
   timeoutMinutes?: number; // Default: 5
@@ -535,9 +533,7 @@ export async function verifyInstall(
   auth: AuthCredentials,
   platform: IPlatformAdapter
 ): Promise<VerifyInstallResult> {
-  const fullExtensionId = options.extensionTag
-    ? `${options.extensionId}${options.extensionTag}`
-    : options.extensionId;
+  const fullExtensionId = options.extensionId;
 
   for (const accountUrl of options.accounts) {
     const handler = getPersonalAccessTokenHandler(auth.token!);
@@ -1029,7 +1025,6 @@ import yazl from 'yazl';
 export interface VsixEditOptions {
   publisher?: string;
   extensionId?: string;
-  extensionTag?: string;
   extensionName?: string;
   extensionVersion?: string;
   extensionVisibility?: string;
@@ -1788,7 +1783,6 @@ Pin the default Node.js version for tools like `nvm`, `fnm`, `mise`, `nodenv`, a
 | `extensionSource` | radio (`manifest` / `vsix`) | package, publish     | How the extension is identified |
 | `publisherId`     | string                      | —                    | Publisher ID                    |
 | `extensionId`     | string                      | —                    | Extension ID                    |
-| `extensionTag`    | string                      | —                    | Tag appended to extension ID    |
 | `vsixFile`        | filePath                    | extensionSource=vsix | VSIX file path (supports globs) |
 
 ### Manifest Inputs (package, publish)
@@ -1889,12 +1883,10 @@ Matrix showing which inputs each command uses:
 | extensionSource          | ✅      | ✅      | ✅        | ✅    | ✅      | ✅      | —    | ✅      | —             |
 | publisherId              | ✅      | ✅      | ✅        | ✅    | ✅      | ✅      | ✅   | ✅      | ✅            |
 | extensionId              | ✅      | ✅      | ✅        | ✅    | ✅      | ✅      | ✅   | ✅      | ✅            |
-| extensionTag             | ✅      | ✅      | ✅        | ✅    | ✅      | ✅      | ✅   | ✅      | —             |
 | connectTo                | —       | ✅      | ✅        | ✅    | ✅      | ✅      | ✅   | ✅      |
 | extensionSource          | ✅      | ✅      | ✅        | ✅    | ✅      | ✅      | —    | ✅      |
 | publisherId              | ✅      | ✅      | ✅        | ✅    | ✅      | ✅      | ✅   | ✅      |
 | extensionId              | ✅      | ✅      | ✅        | ✅    | ✅      | ✅      | ✅   | ✅      |
-| extensionTag             | ✅      | ✅      | ✅        | ✅    | ✅      | ✅      | ✅   | ✅      |
 | vsixFile                 | ✅¹     | ✅¹     | ✅¹       | ✅¹   | ✅¹     | ✅¹     | —    | ✅¹     | —             |
 | rootFolder               | ✅      | ✅      | —         | —     | —       | —       | —    | —       | —             |
 | manifestGlobs            | ✅      | ✅      | —         | —     | —       | —       | —    | —       | —             |
@@ -1978,7 +1970,7 @@ Matrix showing which inputs each command uses:
 
 ### Issue #172 — Extension tags break internal contribution references
 
-**Root cause**: When `extensionTag` appends `-dev` to the extension ID (e.g., `myext` → `myext-dev`), internal references like `"featureId": "pub.myext.feature"` are not updated.
+**Root cause**: When extension IDs are changed to variant IDs (for example `myext` → `myext-dev`), internal references like `"featureId": "pub.myext.feature"` are not updated.
 
 **Fix**: After modifying the extension ID, scan ALL string values in the manifest for patterns matching `{publisher}.{originalExtensionId}.` and replace with `{publisher}.{newExtensionId}.`. Apply the same fix in VsixEditor for VSIX-based publishing.
 
