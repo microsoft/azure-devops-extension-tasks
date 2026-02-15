@@ -1,0 +1,237 @@
+/**
+ * Filesystem Manifest Writer - Write modified manifests to filesystem
+ * 
+ * Writes extension and task manifests back to the filesystem and generates
+ * an overrides.json file for tfx to use during packaging.
+ */
+
+import { writeFile } from 'fs/promises';
+import path from 'path';
+import type { ManifestEditor } from './manifest-editor.js';
+import type { ExtensionManifest, TaskManifest } from './manifest-reader.js';
+import type { IPlatformAdapter } from './platform.js';
+import type { FilesystemManifestReader } from './filesystem-manifest-reader.js';
+
+/**
+ * FilesystemManifestWriter - Write manifests to filesystem
+ * 
+ * Writes modified extension and task manifests directly to filesystem files.
+ * Also generates an overrides.json file in the temp directory that tfx can
+ * use to override values during packaging without modifying source files.
+ * 
+ * Example usage:
+ * ```typescript
+ * const reader = new FilesystemManifestReader({ rootFolder: './src', platform });
+ * const editor = ManifestEditor.fromReader(reader);
+ * editor.setVersion('2.0.0');
+ * await editor.updateAllTaskVersions('2.0.0', 'major');
+ * 
+ * const writer = await editor.toWriter();
+ * await writer.writeToFilesystem();
+ * await writer.close();
+ * 
+ * // Use writer.getOverridesPath() with tfx --overrides-file
+ * ```
+ */
+export class FilesystemManifestWriter {
+  private readonly editor: ManifestEditor;
+  private readonly platform: IPlatformAdapter;
+  private overridesPath: string | null = null;
+
+  private constructor(editor: ManifestEditor, platform: IPlatformAdapter) {
+    this.editor = editor;
+    this.platform = platform;
+  }
+
+  /**
+   * Create a writer from an editor
+   * @param editor The editor with modifications
+   * @returns FilesystemManifestWriter instance
+   */
+  static fromEditor(editor: ManifestEditor): FilesystemManifestWriter {
+    const reader = editor.getReader();
+    
+    // Ensure reader is a FilesystemManifestReader
+    if (reader.constructor.name !== 'FilesystemManifestReader') {
+      throw new Error(
+        'FilesystemManifestWriter can only be used with FilesystemManifestReader'
+      );
+    }
+    
+    // Get platform from reader (we need it for file operations)
+    const fsReader = reader as FilesystemManifestReader;
+    const platform = (fsReader as any).platform as IPlatformAdapter;
+    
+    return new FilesystemManifestWriter(editor, platform);
+  }
+
+  /**
+   * Write modified manifests to the filesystem
+   * 
+   * This updates task.json files directly and writes extension manifest changes.
+   * It also generates an overrides.json in the temp directory that can be passed
+   * to tfx with --overrides-file.
+   * 
+   * @returns Promise that resolves when writing is complete
+   */
+  async writeToFilesystem(): Promise<void> {
+    const reader = this.editor.getReader() as FilesystemManifestReader;
+    const rootFolder = (reader as any).getRootFolder() as string;
+    
+    const manifestMods = this.editor.getManifestModifications();
+    const taskManifestMods = this.editor.getTaskManifestModifications();
+    const fileMods = this.editor.getModifications();
+
+    this.platform.debug('Writing manifests to filesystem...');
+
+    // Step 1: Write task manifest modifications
+    if (taskManifestMods.size > 0) {
+      await this.writeTaskManifests(reader, rootFolder, taskManifestMods);
+    }
+
+    // Step 2: Write extension manifest modifications (if directly modifying source)
+    // Note: For package command, we typically use overrides.json instead
+    // But we support direct writes for other scenarios
+    if (Object.keys(manifestMods).length > 0) {
+      await this.writeExtensionManifest(reader, manifestMods);
+    }
+
+    // Step 3: Write any additional file modifications
+    for (const [filePath, mod] of fileMods) {
+      if (mod.type === 'modify' && mod.content) {
+        const absolutePath = path.isAbsolute(filePath)
+          ? filePath
+          : path.join(rootFolder, filePath);
+        
+        this.platform.debug(`Writing file: ${absolutePath}`);
+        await writeFile(absolutePath, mod.content);
+      }
+    }
+
+    // Step 4: Generate overrides.json for extension manifest overrides
+    // This is used by tfx during packaging to override values without modifying source
+    await this.generateOverridesFile(manifestMods);
+
+    this.platform.info('Manifests written to filesystem successfully');
+  }
+
+  /**
+   * Write task manifest modifications to filesystem
+   */
+  private async writeTaskManifests(
+    reader: FilesystemManifestReader,
+    rootFolder: string,
+    taskManifestMods: Map<string, Partial<TaskManifest>>
+  ): Promise<void> {
+    const tasks = await reader.readTaskManifests();
+    
+    for (const { path: taskPath, manifest } of tasks) {
+      const mods = taskManifestMods.get(manifest.name);
+      if (mods) {
+        // Apply modifications
+        Object.assign(manifest, mods);
+        
+        // Resolve absolute path
+        const absoluteTaskPath = path.isAbsolute(taskPath)
+          ? taskPath
+          : path.join(rootFolder, taskPath);
+        
+        const taskJsonPath = path.join(absoluteTaskPath, 'task.json');
+        
+        this.platform.debug(`Writing task manifest: ${taskJsonPath}`);
+        const manifestJson = JSON.stringify(manifest, null, 2) + '\n';
+        await writeFile(taskJsonPath, manifestJson, 'utf-8');
+      }
+    }
+  }
+
+  /**
+   * Write extension manifest modifications to filesystem
+   */
+  private async writeExtensionManifest(
+    reader: FilesystemManifestReader,
+    manifestMods: Partial<ExtensionManifest>
+  ): Promise<void> {
+    const manifest = await reader.readExtensionManifest();
+    Object.assign(manifest, manifestMods);
+    
+    // Get manifest path from reader
+    const manifestPath = (reader as any).getManifestPath() as string;
+    if (!manifestPath) {
+      throw new Error('Extension manifest path not resolved');
+    }
+    
+    this.platform.debug(`Writing extension manifest: ${manifestPath}`);
+    const manifestJson = JSON.stringify(manifest, null, 2) + '\n';
+    await writeFile(manifestPath, manifestJson, 'utf-8');
+  }
+
+  /**
+   * Generate overrides.json file in temp directory
+   * 
+   * This file can be passed to tfx with --overrides-file to override
+   * extension manifest values during packaging without modifying source files.
+   */
+  private async generateOverridesFile(
+    manifestMods: Partial<ExtensionManifest>
+  ): Promise<void> {
+    if (Object.keys(manifestMods).length === 0) {
+      this.platform.debug('No manifest modifications, skipping overrides.json generation');
+      return;
+    }
+
+    // Create overrides object with only the fields that should be overridden
+    const overrides: any = {};
+    
+    if (manifestMods.publisher) {
+      overrides.publisher = manifestMods.publisher;
+    }
+    
+    if (manifestMods.id) {
+      overrides.id = manifestMods.id;
+    }
+    
+    if (manifestMods.version) {
+      overrides.version = manifestMods.version;
+    }
+    
+    if (manifestMods.name) {
+      overrides.name = manifestMods.name;
+    }
+    
+    if (manifestMods.description) {
+      overrides.description = manifestMods.description;
+    }
+    
+    if (manifestMods.galleryFlags) {
+      overrides.galleryFlags = manifestMods.galleryFlags;
+    }
+
+    // Write to temp directory
+    const tempDir = this.platform.getTempDir();
+    this.overridesPath = path.join(tempDir, `overrides-${Date.now()}.json`);
+    
+    this.platform.debug(`Writing overrides file: ${this.overridesPath}`);
+    const overridesJson = JSON.stringify(overrides, null, 2) + '\n';
+    await writeFile(this.overridesPath, overridesJson, 'utf-8');
+    
+    this.platform.info(`Generated overrides file: ${this.overridesPath}`);
+  }
+
+  /**
+   * Get the path to the generated overrides.json file
+   * This can be passed to tfx with --overrides-file
+   * @returns Path to overrides.json or null if not generated
+   */
+  getOverridesPath(): string | null {
+    return this.overridesPath;
+  }
+
+  /**
+   * Close and cleanup resources
+   */
+  async close(): Promise<void> {
+    // Could clean up overrides file here, but we leave it for tfx to use
+    // Temp directory will be cleaned up by the build agent
+  }
+}

@@ -1,7 +1,7 @@
 /**
  * VSIX Reader - Read-only operations for VSIX files
  * 
- * Provides chainable API for reading VSIX archives and extracting manifests.
+ * Extends ManifestReader to provide VSIX-specific reading from ZIP archives.
  * Completely separate from editing and writing concerns.
  * 
  * Security: Protected against zip slip attacks with path validation.
@@ -10,6 +10,11 @@
 import yauzl from 'yauzl';
 import { Buffer } from 'buffer';
 import { normalize, isAbsolute } from 'path';
+import {
+  ManifestReader,
+  type ExtensionManifest,
+  type TaskManifest,
+} from './manifest-reader.js';
 
 /**
  * Validate that a path from a ZIP file is safe and doesn't escape the extraction directory
@@ -51,57 +56,6 @@ function validateZipPath(filePath: string): void {
 }
 
 /**
- * Extension manifest from vss-extension.json
- */
-export interface ExtensionManifest {
-  manifestVersion?: number;
-  id: string;
-  publisher: string;
-  version: string;
-  name?: string;
-  description?: string;
-  categories?: string[];
-  tags?: string[];
-  targets?: Array<{ id: string }>;
-  icons?: Record<string, string>;
-  content?: Record<string, string>;
-  files?: Array<{ path: string }>;
-  contributions?: Array<{
-    id: string;
-    type: string;
-    targets?: string[];
-    properties?: Record<string, unknown>;
-  }>;
-  [key: string]: unknown;
-}
-
-/**
- * Task manifest from task.json
- */
-export interface TaskManifest {
-  id: string;
-  name: string;
-  friendlyName: string;
-  description: string;
-  version: {
-    Major: number;
-    Minor: number;
-    Patch: number;
-  };
-  instanceNameFormat?: string;
-  inputs?: Array<{
-    name: string;
-    type: string;
-    label: string;
-    required?: boolean;
-    defaultValue?: string;
-    [key: string]: unknown;
-  }>;
-  execution?: Record<string, unknown>;
-  [key: string]: unknown;
-}
-
-/**
  * File entry in VSIX archive
  */
 export interface VsixFile {
@@ -111,28 +65,7 @@ export interface VsixFile {
 }
 
 /**
- * Quick metadata access
- */
-export interface VsixMetadata {
-  publisher: string;
-  extensionId: string;
-  version: string;
-  name?: string;
-  description?: string;
-}
-
-/**
- * Task information
- */
-export interface TaskInfo {
-  name: string;
-  friendlyName: string;
-  version: string;
-  path: string;
-}
-
-/**
- * VsixReader - Read-only VSIX file operations
+ * VsixReader - Read-only VSIX file operations extending ManifestReader
  * 
  * Example usage:
  * ```typescript
@@ -152,13 +85,14 @@ export interface TaskInfo {
  * await reader.close();
  * ```
  */
-export class VsixReader {
+export class VsixReader extends ManifestReader {
   private zipFile: yauzl.ZipFile | null = null;
   private readonly vsixPath: string;
   private fileCache: Map<string, Buffer> = new Map();
   private entriesCache: yauzl.Entry[] | null = null;
 
   private constructor(vsixPath: string) {
+    super();
     this.vsixPath = vsixPath;
   }
 
@@ -394,56 +328,6 @@ export class VsixReader {
   }
 
   /**
-   * Read all task manifests in the VSIX
-   * @returns Array of task manifests with their paths
-   */
-  async readTaskManifests(): Promise<Array<{ path: string; manifest: TaskManifest }>> {
-    const taskPaths = await this.findTaskPaths();
-    const results: Array<{ path: string; manifest: TaskManifest }> = [];
-
-    for (const taskPath of taskPaths) {
-      try {
-        const manifest = await this.readTaskManifest(taskPath);
-        results.push({ path: taskPath, manifest });
-      } catch (_err) {
-        // Skip tasks that don't have valid task.json
-        // Silently continue - caller can check if all expected tasks were found
-      }
-    }
-
-    return results;
-  }
-
-  /**
-   * Get quick metadata about the extension
-   * @returns Extension metadata
-   */
-  async getMetadata(): Promise<VsixMetadata> {
-    const manifest = await this.readExtensionManifest();
-    return {
-      publisher: manifest.publisher,
-      extensionId: manifest.id,
-      version: manifest.version,
-      name: manifest.name,
-      description: manifest.description
-    };
-  }
-
-  /**
-   * Get information about all tasks in the extension
-   * @returns Array of task information
-   */
-  async getTasksInfo(): Promise<TaskInfo[]> {
-    const tasks = await this.readTaskManifests();
-    return tasks.map(({ path, manifest }) => ({
-      name: manifest.name,
-      friendlyName: manifest.friendlyName,
-      version: `${manifest.version.Major}.${manifest.version.Minor}.${manifest.version.Patch}`,
-      path
-    }));
-  }
-
-  /**
    * Close the VSIX file and clean up resources
    */
   async close(): Promise<void> {
@@ -462,3 +346,7 @@ export class VsixReader {
     return this.vsixPath;
   }
 }
+
+// Re-export types from manifest-reader for backwards compatibility
+export type { ExtensionManifest, TaskManifest, ManifestMetadata, TaskInfo } from './manifest-reader.js';
+

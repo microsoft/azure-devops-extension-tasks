@@ -7,7 +7,8 @@
  * Chain: Reader → Editor → Writer
  */
 
-import type { VsixReader, ExtensionManifest, TaskManifest } from './vsix-reader.js';
+import type { VsixReader } from './vsix-reader.js';
+import type { ExtensionManifest, TaskManifest } from './manifest-reader.js';
 import type { VsixWriter } from './vsix-writer.js';
 import { Buffer } from 'buffer';
 
