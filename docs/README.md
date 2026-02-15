@@ -19,6 +19,12 @@ This folder contains implementation and usage documentation for the v6 architect
   - v6 package architecture, adapters, command routing, manifest pipeline
 - [Contributing](./contributing.md)
   - Local setup, build, debug, test, lint/format, and bundling workflow
+- [Migrate Azure Pipelines from v5 to v6](./migrate-azure-pipelines-v5-to-v6.md)
+  - Step-by-step migration from legacy v5 task usage to unified `ExtensionTasks@6`
+- [Migrate Azure Pipelines to GitHub Actions](./migrate-azure-pipelines-v6-to-github-actions.md)
+  - Input/auth/output mapping and end-to-end workflow translation guidance
+- [Migrate Azure Pipelines v5 to GitHub Actions](./migrate-azure-pipelines-v5-to-github-actions.md)
+  - Direct migration path from legacy v5 task model to GitHub Actions workflows
 
 ## Scope
 

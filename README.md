@@ -1,37 +1,37 @@
 # Azure DevOps Extension Tasks
 
-This extension provides build and release tasks for packaging and publishing Azure Devops Extensions to the [Visual Studio Marketplace](https://marketplace.visualstudio.com). There are also tasks to share and install your extension to your Azure Devops organization or Team Foundation Server.
+This extension provides Azure Pipelines tasks to package, publish, and manage Azure DevOps extensions in the [Visual Studio Marketplace](https://marketplace.visualstudio.com).
 
 ## To use
 
 [Learn more](https://marketplace.visualstudio.com/items?itemName=ms-devlabs.vsts-developer-tools-build-tasks) about this extension and install the extension into your Azure DevOps Organization via the Visual Studio Marketplace.
 
-## Available tasks
+## Available commands
 
-Azure DevOps
-
-- **Package**: package an Azure DevOps extension into an extension package (.VSIX) file
-- **Publish**: (optionally) package and publish an extension (either privately or publicly) to the Visual Studio Marketplace
-- **Unpublish**: unpublish an extension from the Visual Studio Marketplace
-- **Share**: share an extension with an Azure DevOps organization
-- **Install**: install an extension to an Azure DevOps organization
-- **Query version**: query an extension's version (to make it easy to increment on your next package or publish)
-- **Wait for validation**: waits for the Visual Studio Marketplace validation to come through.
-
-Visual Studio
-
-- **Publish**: Publish a Visual Studio extension to the Visual Studio Marketplace
+- **Package**: Package an Azure DevOps extension into a `.vsix` file.
+- **Publish**: Optionally package and publish an extension to the Visual Studio Marketplace.
+- **Unpublish**: Remove an extension from the Visual Studio Marketplace.
+- **Share**: Share an extension with an Azure DevOps organization.
+- **Unshare**: Remove sharing for an extension from one or more Azure DevOps organizations.
+- **Install**: Install an extension into an Azure DevOps organization.
+- **Show**: Query extension metadata from the marketplace.
+- **Query version**: Query the current extension version and optionally increment it.
+- **Wait for validation**: Wait for Marketplace validation to finish.
+- **Wait for installation**: Wait until extension tasks are available in target organizations.
 
 ### Required scopes
 
-When creating a personal access token for use by your pipeline, make sure the token has at least the following scopes for the task(s) you are using:
+When creating a PAT for pipeline automation, include at least the following scopes:
 
-- **Publish**: `All accessible organizations`, `Marketplace (publish)`
-- **Unpublish**: `All accessible organizations`, `Marketplace (manage)`
-- **Share**: `All accessible organizations`, `Marketplace (publish)`
-- **Install**: `All accessible organizations` or a specific Organization, `Extensions (read and manage)`, `Marketplace (acquire)`
-- **Query Version**: `All accessible organizations`, `Marketplace (read)`
-- **Is Valid**: `All accessible organizations`, `Marketplace (read)`
+- **Publish**: `Marketplace (publish)`
+- **Unpublish**: `Marketplace (manage)`
+- **Share**: `Marketplace (publish)`
+- **Unshare**: `Marketplace (publish)`
+- **Install**: `Extensions (read and manage)`, `Marketplace (acquire)`
+- **Show**: `Marketplace (read)`
+- **Query version**: `Marketplace (read)`
+- **Wait for validation**: `Marketplace (read)`
+- **Wait for installation**: `Extensions (read and manage)`, `Agent Pools (read)`
 
 ![Permissions](./Metadata/Images/permissions.png)
 
@@ -43,6 +43,9 @@ When creating a personal access token for use by your pipeline, make sure the to
 - [Authentication and OIDC](./docs/authentication-and-oidc.md)
 - [Design and architecture](./docs/design-and-architecture.md)
 - [Contributing guide](./docs/contributing.md)
+- [Migrate Azure Pipelines from v5 to v6](./docs/migrate-azure-pipelines-v5-to-v6.md)
+- [Migrate Azure Pipelines to GitHub Actions](./docs/migrate-azure-pipelines-v6-to-github-actions.md)
+- [Migrate Azure Pipelines v5 to GitHub Actions](./docs/migrate-azure-pipelines-v5-to-github-actions.md)
 
 ## Contribute
 

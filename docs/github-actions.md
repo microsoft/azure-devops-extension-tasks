@@ -202,6 +202,36 @@ Use these when you prefer a dedicated command surface over setting `operation` m
 - run: echo "VSIX: ${{ steps.package.outputs.vsix-path }}"
 ```
 
+## Recommended publish example (OIDC)
+
+```yaml
+permissions:
+  contents: read
+  id-token: write
+
+steps:
+  - uses: actions/checkout@v4
+
+  - uses: azure/login@v2
+    with:
+      client-id: ${{ secrets.AZURE_CLIENT_ID }}
+      tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+      subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+  - id: package
+    uses: jessehouwing/azure-devops-extension-tasks@v6
+    with:
+      operation: package
+      root-folder: .
+
+  - uses: jessehouwing/azure-devops-extension-tasks@v6
+    with:
+      operation: publish
+      auth-type: oidc
+      publish-source: vsix
+      vsix-file: ${{ steps.package.outputs.vsix-path }}
+```
+
 ## OIDC note for GitHub Actions
 
 For `auth-type: oidc`, authenticate to Azure first (for example using `azure/login@v2`) and ensure your federated identity can request a token for resource `499b84ac-1321-427f-aa17-267ca6975798`.
