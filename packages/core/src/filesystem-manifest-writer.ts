@@ -5,7 +5,7 @@
  * an overrides.json file for tfx to use during packaging.
  */
 
-import { writeFile, readFile, readdir } from 'fs/promises';
+import { writeFile, readFile, readdir, mkdir } from 'fs/promises';
 import path from 'path';
 import type { ManifestEditor } from './manifest-editor.js';
 import type { ExtensionManifest, TaskManifest } from './manifest-reader.js';
@@ -300,6 +300,7 @@ export class FilesystemManifestWriter {
 
     // Write to temp directory
     const tempDir = this.platform.getTempDir();
+    await mkdir(tempDir, { recursive: true });
     this.overridesPath = path.join(tempDir, `overrides-${Date.now()}.json`);
 
     this.platform.debug(`Writing overrides file: ${this.overridesPath}`);
