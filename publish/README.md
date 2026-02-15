@@ -38,6 +38,18 @@ Publish an Azure DevOps extension to the Visual Studio Marketplace.
     root-folder: './my-extension'
 ```
 
+### Publish with Basic Authentication (On-Premises)
+
+```yaml
+- uses: jessehouwing/azure-devops-extension-tasks/publish@v6
+  with:
+    auth-type: 'basic'
+    username: ${{ secrets.TFS_USERNAME }}
+    password: ${{ secrets.TFS_PASSWORD }}
+    service-url: 'https://myserver.com/tfs'
+    root-folder: './my-extension'
+```
+
 ### Publish with Sharing
 
 ```yaml
@@ -76,8 +88,12 @@ OR
 ### Optional Inputs
 
 #### Authentication
-- `auth-type`: Authentication type (`pat` or `oidc`, default: `pat`)
+- `auth-type`: Authentication type (`pat`, `basic`, or `oidc`, default: `pat`)
 - `token`: Personal Access Token (required when auth-type is `pat`)
+- `username`: Username for basic authentication (required when auth-type is `basic`)
+- `password`: Password for basic authentication (required when auth-type is `basic`)
+- `service-url`: Azure DevOps service URL (optional, for on-premises servers)
+- `marketplace-url`: Marketplace URL (optional, for custom marketplace endpoints)
 
 #### TFX Configuration
 - `tfx-version`: Version of tfx-cli to use (default: `built-in`)
