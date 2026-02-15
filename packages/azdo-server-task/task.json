@@ -7,7 +7,7 @@
   "helpMarkDown": "",
   "category": "Deploy",
   "version": {
-    "Major": 5,
+    "Major": 6,
     "Minor": 0,
     "Patch": 0
   },
@@ -15,43 +15,49 @@
   "runsOn": ["Server", "ServerGate"],
   "groups": [
     {
-      "name": "extension",
-      "displayName": "Extension",
+      "name": "operationConfig",
+      "displayName": "Operation Configuration",
       "isExpanded": true
     }
   ],
   "instanceNameFormat": "Check Marketplace validation status: $(extensionId)",
   "inputs": [
     {
-      "name": "connectTo",
-      "type": "radio",
-      "label": "Connect to",
+      "name": "operation",
+      "type": "pickList",
+      "label": "Operation",
       "required": true,
-      "defaultValue": "VsTeam",
-      "helpMarkDown": "Connect to Visual Studio Marketplace.",
+      "defaultValue": "wait-for-validation",
+      "helpMarkDown": "Operation to perform.",
+      "groupName": "operationConfig",
+      "aliases": ["method"],
       "options": {
-        "VsTeam": "Visual Studio Marketplace"
+        "wait-for-validation": "Wait for Validation"
       }
     },
     {
-      "name": "connectedServiceName",
+      "name": "connectionType",
+      "type": "pickList",
+      "label": "Connection Type",
+      "required": true,
+      "defaultValue": "VsTeam",
+      "helpMarkDown": "Authentication method for marketplace operations.",
+      "groupName": "operationConfig",
+      "aliases": ["connectTo"],
+      "options": {
+        "VsTeam": "Visual Studio Marketplace"
+      },
+      "visibleRule": "operation = wait-for-validation"
+    },
+    {
+      "name": "connectionName",
       "type": "connectedService:VstsMarketplacePublishing",
       "label": "Visual Studio Marketplace",
       "required": true,
       "helpMarkDown": "Service endpoint connection to install the extension.",
-      "visibleRule": "connectTo=VsTeam"
-    },
-    {
-      "name": "method",
-      "type": "radio",
-      "label": "Validate using",
-      "required": true,
-      "defaultValue": "id",
-      "helpMarkDown": "Validate using either an existing VSIX or using the Publisher, Extension ID and version.",
-      "options": {
-        "id": "Publisher + Extension ID"
-      },
-      "groupName": "extension"
+      "groupName": "operationConfig",
+      "aliases": ["connectedServiceName"],
+      "visibleRule": "operation = wait-for-validation && connectionType = VsTeam"
     },
     {
       "name": "publisherId",
@@ -60,8 +66,9 @@
       "defaultValue": "",
       "required": true,
       "helpMarkDown": "Publisher ID of the extension to be installed.",
-      "groupName": "extension",
-      "visibleRule": "method = id"
+      "groupName": "operationConfig",
+      "aliases": ["publisher-id", "publisher"],
+      "visibleRule": "operation = wait-for-validation"
     },
     {
       "name": "extensionId",
@@ -70,8 +77,9 @@
       "defaultValue": "",
       "helpMarkDown": "Extension ID of the extension to be installed",
       "required": true,
-      "groupName": "extension",
-      "visibleRule": "method = id"
+      "groupName": "operationConfig",
+      "aliases": ["extension-id", "extension"],
+      "visibleRule": "operation = wait-for-validation"
     },
     {
       "name": "extensionTag",
@@ -80,8 +88,9 @@
       "defaultValue": "",
       "helpMarkDown": "Extension Tag to append to the extension ID",
       "required": false,
-      "groupName": "extension",
-      "visibleRule": "method = id"
+      "groupName": "operationConfig",
+      "aliases": ["extension-tag", "tag"],
+      "visibleRule": "operation = wait-for-validation"
     },
     {
       "name": "extensionVersion",
@@ -90,14 +99,15 @@
       "defaultValue": "latest",
       "helpMarkDown": "Extension version (enter 'latest' or leave the value empty to check the last submitted version).",
       "required": false,
-      "groupName": "extension",
-      "visibleRule": "method = id"
+      "groupName": "operationConfig",
+      "aliases": ["extension-version", "version"],
+      "visibleRule": "operation = wait-for-validation"
     }
   ],
   "execution": {
     "HttpRequest": {
       "Execute": {
-        "EndpointId": "$(connectedServiceName)",
+        "EndpointId": "$(connectionName)",
         "EndpointUrl": "$(endpoint.url)_apis/gallery/publishers/$(publisherId)/extensions/$(extensionId)$(extensionTag)?flags=1",
         "Method": "GET",
         "Body": "",
