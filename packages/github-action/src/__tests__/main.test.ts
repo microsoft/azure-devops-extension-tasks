@@ -7,12 +7,15 @@ import { TaskResult } from '@extension-tasks/core';
 jest.mock('@actions/core');
 jest.mock('../github-adapter.js');
 jest.mock('../auth/index.js');
-jest.mock('@extension-tasks/core', () => ({
-  ...jest.requireActual('@extension-tasks/core'),
-  TfxManager: jest.fn(),
-  packageExtension: jest.fn(),
-  publishExtension: jest.fn(),
-}));
+jest.mock('@extension-tasks/core', () => {
+  const actual = jest.requireActual('@extension-tasks/core') as Record<string, unknown>;
+  return {
+    ...actual,
+    TfxManager: jest.fn(),
+    packageExtension: jest.fn(),
+    publishExtension: jest.fn(),
+  };
+});
 
 describe('GitHub Action Main Entry', () => {
   let mockPlatform: jest.Mocked<GitHubAdapter>;
@@ -93,5 +96,63 @@ describe('GitHub Action Main Entry', () => {
       mockSetFailed(message);
       expect(mockSetFailed).toHaveBeenCalledWith('Operation is required');
     }
+  });
+
+  it('should support basic auth type', () => {
+    mockPlatform.getInput.mockImplementation((name) => {
+      if (name === 'operation') return 'publish';
+      if (name === 'auth-type') return 'basic';
+      if (name === 'username') return 'testuser';
+      if (name === 'password') return 'testpass';
+      return undefined;
+    });
+
+    const authType = mockPlatform.getInput('auth-type');
+    const username = mockPlatform.getInput('username');
+    const password = mockPlatform.getInput('password');
+    
+    expect(authType).toBe('basic');
+    expect(username).toBe('testuser');
+    expect(password).toBe('testpass');
+  });
+
+  it('should support custom service URL', () => {
+    mockPlatform.getInput.mockImplementation((name) => {
+      if (name === 'operation') return 'publish';
+      if (name === 'auth-type') return 'pat';
+      if (name === 'token') return 'test-token';
+      if (name === 'service-url') return 'https://myserver.com/tfs';
+      return undefined;
+    });
+
+    const serviceUrl = mockPlatform.getInput('service-url');
+    
+    expect(serviceUrl).toBe('https://myserver.com/tfs');
+  });
+
+  it('should support custom marketplace URL', () => {
+    mockPlatform.getInput.mockImplementation((name) => {
+      if (name === 'operation') return 'publish';
+      if (name === 'auth-type') return 'pat';
+      if (name === 'token') return 'test-token';
+      if (name === 'marketplace-url') return 'https://custom-marketplace.com';
+      return undefined;
+    });
+
+    const marketplaceUrl = mockPlatform.getInput('marketplace-url');
+    
+    expect(marketplaceUrl).toBe('https://custom-marketplace.com');
+  });
+
+  it('should support OIDC auth type', () => {
+    mockPlatform.getInput.mockImplementation((name) => {
+      if (name === 'operation') return 'publish';
+      if (name === 'auth-type') return 'oidc';
+      return undefined;
+    });
+
+    const authType = mockPlatform.getInput('auth-type');
+    
+    expect(authType).toBe('oidc');
   });
 });

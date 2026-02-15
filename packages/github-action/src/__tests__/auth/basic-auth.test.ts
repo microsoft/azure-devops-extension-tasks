@@ -58,7 +58,7 @@ describe('GitHub Actions Basic Auth', () => {
   });
 
   it('should throw error for missing password', async () => {
-    await expect(getBasicAuth('username', '', undefined, mockPlatform)).rejects.toThrow(
+    await expect(getBasicAuth('username', null as any, undefined, mockPlatform)).rejects.toThrow(
       'Password is required for basic authentication'
     );
   });

@@ -13,12 +13,13 @@ export async function getBasicAuth(
     throw new Error('Username is required for basic authentication');
   }
   
-  if (!password) {
+  if (password === undefined || password === null) {
     throw new Error('Password is required for basic authentication');
   }
 
   // Mask the password immediately to prevent exposure in logs
   // Note: username is typically not sensitive, but password definitely is
+  // We mask even empty passwords for consistency
   platform.setSecret(password);
 
   // Use provided service URL or default to marketplace
