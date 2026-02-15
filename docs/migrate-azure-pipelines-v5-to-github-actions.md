@@ -35,6 +35,7 @@ Common conversions from Azure Pipelines-style names to GitHub Actions inputs:
 
 - `publisherId` → `publisher-id`
 - `extensionId` → `extension-id`
+- `extensionTag` → `extension-id`
 - `rootFolder` → `root-folder`
 - `manifestGlobs` → `manifest-globs`
 - `publishSource` → `publish-source`
