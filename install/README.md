@@ -78,7 +78,7 @@ OR
 - `token`: Personal Access Token (required when auth-type is `pat`)
 
 #### TFX Configuration
-- `tfx-version`: Version of tfx-cli to use (default: `embedded`)
+- `tfx-version`: Version of tfx-cli to use (default: `built-in`)
 
 #### Extension Options
 - `extension-version`: Specific version to install (default: latest)

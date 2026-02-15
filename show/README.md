@@ -65,7 +65,7 @@ OR
 - `token`: Personal Access Token (required when auth-type is `pat`)
 
 #### TFX Configuration
-- `tfx-version`: Version of tfx-cli to use (default: `embedded`)
+- `tfx-version`: Version of tfx-cli to use (default: `built-in`)
 
 #### Output Options
 - `output-variable`: Name of output variable to store metadata JSON

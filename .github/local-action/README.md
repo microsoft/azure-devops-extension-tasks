@@ -24,7 +24,7 @@ cd ~/local-action
   --env INPUT_OPERATION=package \
   --env INPUT_ROOT-FOLDER=./packages/core/src/__tests__/integration/fixtures/test-extension \
   --env INPUT_OUTPUT-PATH=./dist \
-  --env INPUT_TFX-VERSION=embedded
+  --env INPUT_TFX-VERSION=built-in
 ```
 
 ### Test Publish Command (requires token)
@@ -40,7 +40,7 @@ cd ~/local-action
   --env INPUT_ROOT-FOLDER=./packages/core/src/__tests__/integration/fixtures/test-extension \
   --env INPUT_PUBLISHER-ID=your-publisher \
   --env INPUT_EXTENSION-ID=your-extension \
-  --env INPUT_TFX-VERSION=embedded
+  --env INPUT_TFX-VERSION=built-in
 ```
 
 ### Test Show Command
@@ -66,7 +66,7 @@ GitHub Actions use INPUT_* pattern for inputs (uppercase, hyphens converted to u
 - `INPUT_OUTPUT-PATH` - Output directory for package command
 - `INPUT_PUBLISHER-ID` - Extension publisher ID
 - `INPUT_EXTENSION-ID` - Extension ID
-- `INPUT_TFX-VERSION` - TFX CLI version (embedded, latest, or specific version)
+- `INPUT_TFX-VERSION` - TFX CLI version (built-in, latest, or specific version)
 
 See [action.yml](../../action.yml) for complete list of inputs.
 

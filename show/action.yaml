@@ -17,9 +17,9 @@ inputs:
   
   # TFX Configuration
   tfx-version:
-    description: 'Version of tfx-cli to use (embedded, latest, or specific version)'
+    description: "Version of tfx-cli to use: 'built-in' (bundled), 'path' (system), or version spec (e.g., '^0.17', 'latest')"
     required: false
-    default: 'embedded'
+    default: 'built-in'
   
   # Extension Identity (Required)
   publisher-id:

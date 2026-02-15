@@ -24,7 +24,7 @@ jobs:
           operation: 'package'
           root-folder: './packages/core/src/__tests__/integration/fixtures/test-extension'
           output-path: './dist'
-          tfx-version: 'embedded'
+          tfx-version: 'built-in'
       
       - name: Show package output
         run: |

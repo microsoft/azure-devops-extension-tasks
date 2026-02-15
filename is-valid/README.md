@@ -62,7 +62,7 @@ OR
 - `token`: Personal Access Token (required when auth-type is `pat`)
 
 #### TFX Configuration
-- `tfx-version`: Version of tfx-cli to use (default: `embedded`)
+- `tfx-version`: Version of tfx-cli to use (default: `built-in`)
 
 #### Validation Options
 - `max-retries`: Maximum retry attempts (default: `10`)

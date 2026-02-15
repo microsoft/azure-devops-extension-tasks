@@ -89,7 +89,7 @@ INPUT_AUTH-TYPE=pat
 INPUT_TOKEN=your-token
 INPUT_PUBLISHER-ID=publisher
 INPUT_EXTENSION-ID=extension
-INPUT_TFX-VERSION=embedded
+INPUT_TFX-VERSION=built-in
 ```
 
 ### Azure Pipelines Inputs
@@ -103,7 +103,7 @@ INPUT_CONNECTIONTYPE=connectedService:VsTeam
 INPUT_CONNECTIONNAME=MarketplaceConnection
 INPUT_PUBLISHERID=publisher
 INPUT_EXTENSIONID=extension
-INPUT_TFXVERSION=embedded
+INPUT_TFXVERSION=built-in
 ```
 
 ### Service Endpoint (Azure Pipelines)

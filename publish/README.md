@@ -80,7 +80,7 @@ OR
 - `token`: Personal Access Token (required when auth-type is `pat`)
 
 #### TFX Configuration
-- `tfx-version`: Version of tfx-cli to use (default: `embedded`)
+- `tfx-version`: Version of tfx-cli to use (default: `built-in`)
 
 #### Extension Identity
 - `publisher-id`: Publisher ID (default: from manifest)

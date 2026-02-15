@@ -48,8 +48,8 @@ None - all inputs are optional with sensible defaults.
 - `token`: Personal Access Token (not needed for package operation)
 
 #### TFX Configuration
-- `tfx-version`: Version of tfx-cli to use (default: `embedded`)
-  - `embedded`: Use bundled tfx-cli
+- `tfx-version`: Version of tfx-cli to use (default: `built-in`)
+  - `built-in`: Use bundled tfx-cli
   - `latest`: Download latest version from npm
   - `0.17.x`: Download specific version
 
