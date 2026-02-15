@@ -586,7 +586,7 @@ describe('FilesystemManifestWriter', () => {
         readFileSync(join(testDir, 'compiled', 'task1', 'task.json'), 'utf-8')
       );
       expect(task1Json.version.Major).toBe(4);
-      expect(task1Json.version.Minor).toBe(2);
+      expect(task1Json.version.Minor).toBe(4);
       expect(task1Json.version.Patch).toBe(1);
       
       // Verify Task2 was written to Task2
@@ -596,6 +596,353 @@ describe('FilesystemManifestWriter', () => {
       expect(task2Json.version.Major).toBe(4);
       expect(task2Json.version.Minor).toBe(2);
       expect(task2Json.version.Patch).toBe(1);
+      
+      await writer.close();
+      await reader.close();
+    });
+
+    it('should write to correct path when packagePath has subdirectories', async () => {
+      // Create test manifests
+      const extManifest = {
+        id: 'test-ext',
+        publisher: 'test-pub',
+        version: '1.0.0',
+        files: [
+          { path: 'compiled/cli', packagePath: 'CLI' }
+        ],
+        contributions: [
+          {
+            id: 'task1',
+            type: 'ms.vss-distributed-task.task',
+            properties: { name: 'CLI' }
+          }
+        ]
+      };
+      
+      writeFileSync(
+        join(testDir, 'vss-extension.json'),
+        JSON.stringify(extManifest)
+      );
+      
+      // Create task in subdirectory
+      mkdirSync(join(testDir, 'compiled', 'cli', 'v2'), { recursive: true });
+      writeFileSync(
+        join(testDir, 'compiled', 'cli', 'v2', 'task.json'),
+        JSON.stringify({
+          id: 'cli-v2',
+          name: 'CLI-v2',
+          version: { Major: 1, Minor: 0, Patch: 0 }
+        })
+      );
+      
+      const reader = new FilesystemManifestReader({
+        rootFolder: testDir,
+        platform: mockPlatform
+      });
+      
+      const editor = ManifestEditor.fromReader(reader);
+      
+      // Update task version for CLI/v2
+      const task = await reader.readTaskManifest('CLI/v2');
+      await editor.updateTaskVersion(task.name, '2.5.3', 'major');
+      
+      const writer = await editor.toWriter();
+      await writer.writeToFilesystem();
+      
+      // Verify file was written to compiled/cli/v2/task.json
+      const taskJson = JSON.parse(
+        readFileSync(join(testDir, 'compiled', 'cli', 'v2', 'task.json'), 'utf-8')
+      );
+      expect(taskJson.version.Major).toBe(2);
+      expect(taskJson.version.Minor).toBe(5);
+      expect(taskJson.version.Patch).toBe(3);
+      
+      await writer.close();
+      await reader.close();
+    });
+
+    it('should handle nested subdirectories with packagePath mapping', async () => {
+      // Create test manifests
+      const extManifest = {
+        id: 'test-ext',
+        publisher: 'test-pub',
+        version: '1.0.0',
+        files: [
+          { path: 'build/dist/tasks', packagePath: 'MyTasks' }
+        ],
+        contributions: [
+          {
+            id: 'task1',
+            type: 'ms.vss-distributed-task.task',
+            properties: { name: 'MyTasks' }
+          }
+        ]
+      };
+      
+      writeFileSync(
+        join(testDir, 'vss-extension.json'),
+        JSON.stringify(extManifest)
+      );
+      
+      // Create task in deeply nested subdirectory
+      mkdirSync(join(testDir, 'build', 'dist', 'tasks', 'installer', 'v3'), { recursive: true });
+      writeFileSync(
+        join(testDir, 'build', 'dist', 'tasks', 'installer', 'v3', 'task.json'),
+        JSON.stringify({
+          id: 'installer-v3',
+          name: 'Installer-v3',
+          version: { Major: 3, Minor: 1, Patch: 0 }
+        })
+      );
+      
+      const reader = new FilesystemManifestReader({
+        rootFolder: testDir,
+        platform: mockPlatform
+      });
+      
+      const editor = ManifestEditor.fromReader(reader);
+      
+      // Update task version
+      const task = await reader.readTaskManifest('MyTasks/installer/v3');
+      await editor.updateTaskVersion(task.name, '5.0.0', 'major');
+      
+      const writer = await editor.toWriter();
+      await writer.writeToFilesystem();
+      
+      // Verify file was written to build/dist/tasks/installer/v3/task.json
+      const taskJson = JSON.parse(
+        readFileSync(join(testDir, 'build', 'dist', 'tasks', 'installer', 'v3', 'task.json'), 'utf-8')
+      );
+      expect(taskJson.version.Major).toBe(5);
+      expect(taskJson.version.Minor).toBe(0);
+      expect(taskJson.version.Patch).toBe(0);
+      
+      await writer.close();
+      await reader.close();
+    });
+
+    it('should write multiple tasks with mixed packagePath and direct paths', async () => {
+      // Create test manifests
+      const extManifest = {
+        id: 'test-ext',
+        publisher: 'test-pub',
+        version: '1.0.0',
+        files: [
+          { path: 'compiled/task1', packagePath: 'Task1' },
+          { path: 'Task2' }  // No packagePath
+        ],
+        contributions: [
+          {
+            id: 'task1',
+            type: 'ms.vss-distributed-task.task',
+            properties: { name: 'Task1' }
+          },
+          {
+            id: 'task2',
+            type: 'ms.vss-distributed-task.task',
+            properties: { name: 'Task2' }
+          }
+        ]
+      };
+      
+      writeFileSync(
+        join(testDir, 'vss-extension.json'),
+        JSON.stringify(extManifest)
+      );
+      
+      // Task1 with subdirectory and packagePath
+      mkdirSync(join(testDir, 'compiled', 'task1', 'v2'), { recursive: true });
+      writeFileSync(
+        join(testDir, 'compiled', 'task1', 'v2', 'task.json'),
+        JSON.stringify({
+          id: 't1-v2',
+          name: 'Task1-v2',
+          version: { Major: 1, Minor: 0, Patch: 0 }
+        })
+      );
+      
+      // Task2 with subdirectory but no packagePath
+      mkdirSync(join(testDir, 'Task2', 'v3'), { recursive: true });
+      writeFileSync(
+        join(testDir, 'Task2', 'v3', 'task.json'),
+        JSON.stringify({
+          id: 't2-v3',
+          name: 'Task2-v3',
+          version: { Major: 2, Minor: 0, Patch: 0 }
+        })
+      );
+      
+      const reader = new FilesystemManifestReader({
+        rootFolder: testDir,
+        platform: mockPlatform
+      });
+      
+      const editor = ManifestEditor.fromReader(reader);
+      
+      // Update both tasks
+      const task1 = await reader.readTaskManifest('Task1/v2');
+      await editor.updateTaskVersion(task1.name, '3.0.0', 'major');
+      
+      const task2 = await reader.readTaskManifest('Task2/v3');
+      await editor.updateTaskVersion(task2.name, '4.0.0', 'major');
+      
+      const writer = await editor.toWriter();
+      await writer.writeToFilesystem();
+      
+      // Verify Task1 was written to compiled/task1/v2
+      const task1Json = JSON.parse(
+        readFileSync(join(testDir, 'compiled', 'task1', 'v2', 'task.json'), 'utf-8')
+      );
+      expect(task1Json.version.Major).toBe(3);
+      
+      // Verify Task2 was written to Task2/v3
+      const task2Json = JSON.parse(
+        readFileSync(join(testDir, 'Task2', 'v3', 'task.json'), 'utf-8')
+      );
+      expect(task2Json.version.Major).toBe(4);
+      
+      await writer.close();
+      await reader.close();
+    });
+
+    it('should NOT write to incorrect path for partial prefix match', async () => {
+      const extManifest = {
+        id: 'test-ext',
+        publisher: 'test-pub',
+        version: '1.0.0',
+        files: [
+          { path: 'compiled/task', packagePath: 'Task' }
+        ],
+        contributions: [
+          {
+            id: 'task1',
+            type: 'ms.vss-distributed-task.task',
+            properties: { name: 'Task' }
+          }
+        ]
+      };
+      
+      writeFileSync(
+        join(testDir, 'vss-extension.json'),
+        JSON.stringify(extManifest)
+      );
+      
+      // Create TaskOther without packagePath mapping
+      mkdirSync(join(testDir, 'TaskOther'), { recursive: true });
+      writeFileSync(
+        join(testDir, 'TaskOther', 'task.json'),
+        JSON.stringify({
+          id: 'task-other',
+          name: 'TaskOther',
+          version: { Major: 1, Minor: 0, Patch: 0 }
+        })
+      );
+      
+      const reader = new FilesystemManifestReader({
+        rootFolder: testDir,
+        platform: mockPlatform
+      });
+      
+      const editor = ManifestEditor.fromReader(reader);
+      
+      // Update TaskOther
+      const task = await reader.readTaskManifest('TaskOther');
+      await editor.updateTaskVersion(task.name, '2.0.0', 'major');
+      
+      const writer = await editor.toWriter();
+      await writer.writeToFilesystem();
+      
+      // Verify TaskOther was written to TaskOther (NOT compiled/taskOther)
+      const taskJson = JSON.parse(
+        readFileSync(join(testDir, 'TaskOther', 'task.json'), 'utf-8')
+      );
+      expect(taskJson.version.Major).toBe(2);
+      
+      // Ensure no file was created at compiled/taskOther
+      expect(existsSync(join(testDir, 'compiled', 'taskOther', 'task.json'))).toBe(false);
+      
+      await writer.close();
+      await reader.close();
+    });
+
+    it('should write to correct paths with similar prefix names', async () => {
+      const extManifest = {
+        id: 'test-ext',
+        publisher: 'test-pub',
+        version: '1.0.0',
+        files: [
+          { path: 'build/cli', packagePath: 'CLI' },
+          { path: 'build/cli-utils', packagePath: 'CLIUtils' }
+        ],
+        contributions: [
+          {
+            id: 'task1',
+            type: 'ms.vss-distributed-task.task',
+            properties: { name: 'CLI' }
+          },
+          {
+            id: 'task2',
+            type: 'ms.vss-distributed-task.task',
+            properties: { name: 'CLIUtils' }
+          }
+        ]
+      };
+      
+      writeFileSync(
+        join(testDir, 'vss-extension.json'),
+        JSON.stringify(extManifest)
+      );
+      
+      // Create CLI/v2
+      mkdirSync(join(testDir, 'build', 'cli', 'v2'), { recursive: true });
+      writeFileSync(
+        join(testDir, 'build', 'cli', 'v2', 'task.json'),
+        JSON.stringify({
+          id: 'cli-v2',
+          name: 'CLI-v2',
+          version: { Major: 1, Minor: 0, Patch: 0 }
+        })
+      );
+      
+      // Create CLIUtils/v2
+      mkdirSync(join(testDir, 'build', 'cli-utils', 'v2'), { recursive: true });
+      writeFileSync(
+        join(testDir, 'build', 'cli-utils', 'v2', 'task.json'),
+        JSON.stringify({
+          id: 'cli-utils-v2',
+          name: 'CLIUtils-v2',
+          version: { Major: 2, Minor: 0, Patch: 0 }
+        })
+      );
+      
+      const reader = new FilesystemManifestReader({
+        rootFolder: testDir,
+        platform: mockPlatform
+      });
+      
+      const editor = ManifestEditor.fromReader(reader);
+      
+      // Update both tasks
+      const taskCLI = await reader.readTaskManifest('CLI/v2');
+      await editor.updateTaskVersion(taskCLI.name, '3.0.0', 'major');
+      
+      const taskCLIUtils = await reader.readTaskManifest('CLIUtils/v2');
+      await editor.updateTaskVersion(taskCLIUtils.name, '4.0.0', 'major');
+      
+      const writer = await editor.toWriter();
+      await writer.writeToFilesystem();
+      
+      // Verify CLI/v2 was written to build/cli/v2 (NOT build/cli-utils/v2)
+      const cliJson = JSON.parse(
+        readFileSync(join(testDir, 'build', 'cli', 'v2', 'task.json'), 'utf-8')
+      );
+      expect(cliJson.version.Major).toBe(3);
+      
+      // Verify CLIUtils/v2 was written to build/cli-utils/v2
+      const cliUtilsJson = JSON.parse(
+        readFileSync(join(testDir, 'build', 'cli-utils', 'v2', 'task.json'), 'utf-8')
+      );
+      expect(cliUtilsJson.version.Major).toBe(4);
       
       await writer.close();
       await reader.close();

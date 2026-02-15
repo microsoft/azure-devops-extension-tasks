@@ -174,8 +174,28 @@ export class FilesystemManifestReader extends ManifestReader {
     // Build packagePath map to handle files with packagePath
     const packagePathMap = await this.buildPackagePathMap();
     
-    // Check if this is a packagePath that maps to a different source path
-    const actualPath = packagePathMap.get(taskPath) || taskPath;
+    // Check if taskPath starts with a packagePath prefix and replace it
+    let actualPath = taskPath;
+    
+    // Normalize path separators for consistent matching
+    const normalizedTaskPath = taskPath.replace(/\\/g, '/');
+    
+    // Try to find a matching packagePath prefix
+    for (const [pkgPath, sourcePath] of packagePathMap.entries()) {
+      const normalizedPkgPath = pkgPath.replace(/\\/g, '/');
+      
+      // Check for exact match or prefix match (packagePath/subdir)
+      if (normalizedTaskPath === normalizedPkgPath) {
+        // Exact match: TaskName → sourcePath
+        actualPath = sourcePath;
+        break;
+      } else if (normalizedTaskPath.startsWith(normalizedPkgPath + '/')) {
+        // Prefix match: TaskName/v2 → sourcePath/v2
+        const remainder = normalizedTaskPath.substring(normalizedPkgPath.length + 1);
+        actualPath = path.join(sourcePath, remainder);
+        break;
+      }
+    }
     
     this.platform.debug(
       `Reading task manifest: taskPath='${taskPath}', actualPath='${actualPath}'`

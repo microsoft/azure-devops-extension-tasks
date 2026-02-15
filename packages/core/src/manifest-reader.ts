@@ -26,7 +26,7 @@ export interface ExtensionManifest {
   targets?: Array<{ id: string }>;
   icons?: Record<string, string>;
   content?: Record<string, string>;
-  files?: Array<{ path: string }>;
+  files?: Array<{ path: string; packagePath?: string }>;
   contributions?: Array<{
     id: string;
     type: string;

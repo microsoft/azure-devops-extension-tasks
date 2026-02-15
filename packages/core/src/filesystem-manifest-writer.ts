@@ -134,8 +134,26 @@ export class FilesystemManifestWriter {
         // Apply modifications
         Object.assign(manifest, mods);
         
-        // Resolve actual source path (taskPath might be a packagePath)
-        const actualPath = packagePathMap.get(taskPath) || taskPath;
+        // Resolve actual source path using prefix matching (same logic as reader)
+        let actualPath = taskPath;
+        const normalizedTaskPath = taskPath.replace(/\\/g, '/');
+        
+        // Try to find a matching packagePath prefix
+        for (const [pkgPath, sourcePath] of packagePathMap.entries()) {
+          const normalizedPkgPath = pkgPath.replace(/\\/g, '/');
+          
+          // Check for exact match or prefix match (packagePath/subdir)
+          if (normalizedTaskPath === normalizedPkgPath) {
+            // Exact match: TaskName → sourcePath
+            actualPath = sourcePath;
+            break;
+          } else if (normalizedTaskPath.startsWith(normalizedPkgPath + '/')) {
+            // Prefix match: TaskName/v2 → sourcePath/v2
+            const remainder = normalizedTaskPath.substring(normalizedPkgPath.length + 1);
+            actualPath = path.join(sourcePath, remainder);
+            break;
+          }
+        }
         
         this.platform.debug(
           `Writing task manifest: taskPath='${taskPath}', actualPath='${actualPath}'`
