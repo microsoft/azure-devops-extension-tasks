@@ -25,11 +25,21 @@ jobs:
         with:
           python-version: '3.x'
 
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: stable
+
       - name: Install dependencies
         run: npm install
 
       - name: Install pre-commit
         run: python3 -m pip install --user pre-commit
 
+      - name: Install actionlint
+        run: go install github.com/rhysd/actionlint/cmd/actionlint@latest
+
       - name: Run pre-commit
-        run: python3 -m pre_commit run --all-files
+        run: |
+          export PATH="$(go env GOPATH)/bin:$PATH"
+          python3 -m pre_commit run --all-files

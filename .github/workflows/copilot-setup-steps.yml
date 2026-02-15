@@ -33,6 +33,18 @@ jobs:
           registry-url: https://registry.npmjs.org
           cache: npm
 
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.x'
+          cache: pip
+
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: stable
+          cache: true
+
       - name: Ensure Azure CLI is installed
         run: |
           set -euo pipefail
@@ -62,6 +74,12 @@ jobs:
           python3 -m pip install --user pre-commit
           python3 -m pre_commit --version
 
+      - name: Ensure actionlint is installed
+        run: |
+          set -euo pipefail
+          go install github.com/rhysd/actionlint/cmd/actionlint@latest
+          "$(go env GOPATH)/bin/actionlint" -version
+
       - name: Install dependencies
         run: npm install
 
@@ -80,6 +98,7 @@ jobs:
             echo "- tfx-cli: $(tfx --version)"
             echo "- jest: $(jest --version)"
             echo "- pre-commit: $(python3 -m pre_commit --version)"
+            echo "- actionlint: $($(go env GOPATH)/bin/actionlint -version | head -n 1)"
             echo "- Dependencies: ✅ Installed"
             echo "- Git hooks: ✅ Installed"
             echo "- Build: ✅ Successful"

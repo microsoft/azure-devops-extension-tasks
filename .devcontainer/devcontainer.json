@@ -3,9 +3,10 @@
   "image": "mcr.microsoft.com/devcontainers/typescript-node:24",
   "features": {
     "ghcr.io/devcontainers/features/github-cli:1": {},
-    "ghcr.io/devcontainers/features/python:1": {}
+    "ghcr.io/devcontainers/features/python:1": {},
+    "ghcr.io/devcontainers/features/go:1": {}
   },
-  "postCreateCommand": "npm install && python3 -m pip install --user pre-commit && python3 -m pre_commit install --install-hooks",
+  "postCreateCommand": "npm install && go install github.com/rhysd/actionlint/cmd/actionlint@latest && python3 -m pip install --user pre-commit && python3 -m pre_commit install --install-hooks",
   "customizations": {
     "vscode": {
       "settings": {

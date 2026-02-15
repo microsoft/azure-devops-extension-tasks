@@ -1,5 +1,5 @@
 {
-  "name": "vsts-developer-tools",
+  "name": "azdo-extension-tasks",
   "version": "6.0.0-alpha.1",
   "description": "Azure DevOps Extension Tasks",
   "repository": {
@@ -29,6 +29,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "bundle": "node Scripts/bundle.mjs",
+    "setup:windows:path": "powershell -NoProfile -ExecutionPolicy Bypass -File ./Scripts/setup-windows-path.ps1",
     "clean": "git clean -fdX"
   },
   "author": "Jesse Houwing",

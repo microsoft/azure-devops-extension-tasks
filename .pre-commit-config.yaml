@@ -1,17 +1,14 @@
 repos:
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
-    hooks:
-      - id: check-merge-conflict
-      - id: end-of-file-fixer
-      - id: trailing-whitespace
-      - id: check-yaml
-
   - repo: local
     hooks:
+      - id: actionlint
+        name: actionlint
+        entry: actionlint
+        language: system
+        files: '^\.github/workflows/.*\.ya?ml$'
       - id: prettier
         name: prettier
-        entry: npx prettier --write
+        entry: npx prettier --write --config .prettierrc.yml
         language: system
         files: '\.(ts|js|mjs|cjs|json|md|yml|yaml)$'
       - id: eslint
@@ -19,3 +16,11 @@ repos:
         entry: npx eslint --fix
         language: system
         files: '\.(ts|js|mjs|cjs)$'
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-merge-conflict
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-yaml

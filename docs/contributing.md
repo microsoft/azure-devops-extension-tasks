@@ -18,6 +18,16 @@ python -m pip install --user pre-commit
 pre-commit install --install-hooks
 ```
 
+### Windows PATH setup
+
+On Windows, add user-level paths for `pre-commit` and `actionlint`:
+
+```powershell
+npm run setup:windows:path
+```
+
+Open a new terminal after running this command.
+
 ## Pre-commit hooks
 
 Run hooks manually across the repository:
