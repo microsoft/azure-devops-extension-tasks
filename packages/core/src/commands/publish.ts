@@ -115,6 +115,38 @@ async function executeTfxPublish(
     throw new Error('tfx did not return expected JSON output with published status');
   }
 
+  let extensionId = '';
+  let extensionVersion = '';
+  let publisherId = '';
+
+  if (options.publishSource === 'vsix') {
+    const metadataVsixPath = publishedVsixPath ?? options.vsixFile;
+
+    if (metadataVsixPath && (await platform.fileExists(metadataVsixPath))) {
+      try {
+        const reader = await VsixReader.open(metadataVsixPath);
+        const metadata = await reader.getMetadata();
+        await reader.close();
+
+        extensionId = metadata.extensionId;
+        extensionVersion = metadata.version;
+        publisherId = metadata.publisher;
+      } catch (error) {
+        platform.debug(
+          `Could not read VSIX metadata from ${metadataVsixPath}: ${error instanceof Error ? error.message : String(error)}`
+        );
+      }
+    }
+  } else {
+    extensionId = json.id || '';
+    extensionVersion = json.version || '';
+    publisherId = json.publisher || '';
+  }
+
+  extensionId = extensionId || options.extensionId || '';
+  extensionVersion = extensionVersion || options.extensionVersion || '';
+  publisherId = publisherId || options.publisherId || '';
+
   // Determine vsix path
   let vsixPath = '';
   if (options.publishSource === 'manifest') {
@@ -123,14 +155,16 @@ async function executeTfxPublish(
     vsixPath = publishedVsixPath || options.vsixFile || '';
   }
 
-  platform.info(`Published extension: ${json.id} v${json.version}`);
+  platform.info(
+    `Published extension: ${extensionId || '(unknown id)'} v${extensionVersion || '(unknown version)'}`
+  );
 
   return {
     published: json.published === true,
     vsixPath,
-    extensionId: json.id || options.extensionId || '',
-    extensionVersion: json.version || options.extensionVersion || '',
-    publisherId: json.publisher || options.publisherId || '',
+    extensionId,
+    extensionVersion,
+    publisherId,
     exitCode: result.exitCode,
   };
 }

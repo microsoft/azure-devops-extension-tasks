@@ -259,6 +259,35 @@ describe('publishExtension', () => {
         )
       ).rejects.toThrow('VSIX file not found');
     });
+
+    it('should handle minimal vsix publish payload without metadata', async () => {
+      platform.setFileContent('/path/to/extension.vsix', 'mock vsix content');
+
+      const mockExecute = jest.spyOn(tfxManager, 'execute');
+      mockExecute.mockResolvedValue({
+        exitCode: 0,
+        json: {
+          packaged: null,
+          published: true,
+          shared: null,
+        },
+        stdout: '',
+        stderr: '',
+      });
+
+      const result = await publishExtension(
+        {
+          publishSource: 'vsix',
+          vsixFile: '/path/to/extension.vsix',
+        },
+        auth,
+        tfxManager,
+        platform
+      );
+
+      expect(result.published).toBe(true);
+      expect(result.vsixPath).toBe('/path/to/extension.vsix');
+    });
   });
 
   describe('sharing', () => {
