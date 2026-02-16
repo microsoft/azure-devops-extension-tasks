@@ -6,7 +6,7 @@ branding:
   color: blue
 inputs:
   tfx-version:
-    description: |-
+    description: |
       **Version of tfx-cli to use:**
 
       - `built-in` (default): Use tfx-cli bundled with this action
@@ -17,26 +17,28 @@ inputs:
     required: false
     default: built-in
   publisher-id:
-    description: |-
+    description: |
       **Publisher ID** that owns the extension.
 
       - Must match publisher in manifest (or override it)
+      - Required for command: install, query-version, share, show, unpublish, unshare, wait-for-validation.
       - Alphanumeric with hyphens, dots, underscores only
 
       **Example:** `mycompany` or `my-publisher-id`
     required: false
   extension-id:
-    description: |-
+    description: |
       **Extension ID** - unique identifier within the publisher namespace.
 
       - Must match ID in manifest (or override it)
       - Combined with Publisher ID forms full identifier: `publisherId.extensionId`
+      - Required for command: install, query-version, share, show, unpublish, unshare, wait-for-validation.
       - Alphanumeric with hyphens, dots, underscores only
 
       **Example:** `my-extension` or `azure-devops-tasks`
     required: false
   root-folder:
-    description: |-
+    description: |
       **Root folder** containing extension manifest and source files.
 
       - Defaults to repository root if not specified
@@ -44,7 +46,7 @@ inputs:
       - Must contain `vss-extension.json` (or other manifest specified in manifest-globs)
     required: false
   manifest-globs:
-    description: |-
+    description: |
       **Glob patterns for manifest files** (newline-separated).
 
       - Defaults to `vss-extension.json` if not specified
@@ -58,7 +60,7 @@ inputs:
       ```
     required: false
   extension-version:
-    description: |-
+    description: |
       **Override extension version** specified in manifest.
 
       - Must follow semantic versioning: `major.minor.patch`
@@ -67,7 +69,7 @@ inputs:
       **Examples:** `1.2.3`, `1.0.$``{{ github.run_number }}`
     required: false
   extension-name:
-    description: |-
+    description: |
       **Override extension display name** shown in marketplace.
 
       - Does not affect the extension ID
@@ -76,7 +78,7 @@ inputs:
       **Example:** `My Extension - Development`
     required: false
   extension-visibility:
-    description: |-
+    description: |
       **Override extension visibility** in marketplace.
 
       - `private`: Only visible to organizations you share it with
@@ -87,7 +89,7 @@ inputs:
       **Note:** Private extensions must be explicitly shared with organizations
     required: false
   output-path:
-    description: |-
+    description: |
       **Output directory** for generated .vsix file (package operation).
 
       - Defaults to current directory if not specified
@@ -97,7 +99,7 @@ inputs:
       **Output:** Full path stored in `vsix-path` output
     required: false
   bypass-validation:
-    description: |-
+    description: |
       **Skip extension validation checks** during package/publish.
 
       - Not recommended for production use
@@ -108,7 +110,7 @@ inputs:
     required: false
     default: 'false'
   rev-version:
-    description: |-
+    description: |
       **Automatically increment the patch version** of the extension.
 
       - Increments the last digit: `1.2.3` → `1.2.4`
@@ -119,7 +121,7 @@ inputs:
     required: false
     default: 'false'
   update-tasks-version:
-    description: |-
+    description: |
       **Automatically update task versions** to match extension version.
 
       - Updates all task.json files in the extension
@@ -129,7 +131,7 @@ inputs:
     required: false
     default: 'false'
   update-tasks-id:
-    description: |-
+    description: |
       **Generate new deterministic task IDs** for all tasks.
 
       - Creates UUID v5 IDs based on publisher + extension + task name

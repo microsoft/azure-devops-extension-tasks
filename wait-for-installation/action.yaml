@@ -6,7 +6,7 @@ branding:
   color: green
 inputs:
   auth-type:
-    description: |-
+    description: |
       Authentication type: 'pat', 'basic', or 'oidc'
       - pat: Use Personal Access Token (recommended for most users)
       - basic: Use username/password authentication (for on-premises Azure DevOps Server)
@@ -35,7 +35,7 @@ inputs:
     required: false
     default: pat
   token:
-    description: |-
+    description: |
       Personal Access Token for marketplace authentication
       Required when auth-type is 'pat'
       Not needed for other auth types
@@ -44,7 +44,7 @@ inputs:
       Create a PAT at: https://dev.azure.com/_usersSettings/tokens
     required: false
   username:
-    description: |-
+    description: |
       Username for basic authentication
       Required when auth-type is 'basic'
       Not needed for other auth types
@@ -52,7 +52,7 @@ inputs:
       Use for on-premises TFS or Azure DevOps Server deployments
     required: false
   password:
-    description: |-
+    description: |
       Password for basic authentication
       Required when auth-type is 'basic'
       Not needed for other auth types
@@ -60,7 +60,7 @@ inputs:
       Use for on-premises TFS or Azure DevOps Server deployments
     required: false
   tfx-version:
-    description: |-
+    description: |
       **Version of tfx-cli to use:**
 
       - `built-in` (default): Use tfx-cli bundled with this action
@@ -71,26 +71,28 @@ inputs:
     required: false
     default: built-in
   publisher-id:
-    description: |-
+    description: |
       **Publisher ID** that owns the extension.
 
       - Must match publisher in manifest (or override it)
+      - Required for command: install, query-version, share, show, unpublish, unshare, wait-for-validation.
       - Alphanumeric with hyphens, dots, underscores only
 
       **Example:** `mycompany` or `my-publisher-id`
     required: false
   extension-id:
-    description: |-
+    description: |
       **Extension ID** - unique identifier within the publisher namespace.
 
       - Must match ID in manifest (or override it)
       - Combined with Publisher ID forms full identifier: `publisherId.extensionId`
+      - Required for command: install, query-version, share, show, unpublish, unshare, wait-for-validation.
       - Alphanumeric with hyphens, dots, underscores only
 
       **Example:** `my-extension` or `azure-devops-tasks`
     required: false
   accounts:
-    description: |-
+    description: |
       **Azure DevOps accounts/organizations** (newline-separated).
 
       - Required for command: install, wait-for-installation, share, unshare.
@@ -111,7 +113,7 @@ inputs:
       ```
     required: true
   expected-tasks:
-    description: |-
+    description: |
       **Expected tasks as JSON** - manually specify tasks to verify.
 
       **Format:** Array of objects with `name` and `versions` properties
@@ -127,7 +129,7 @@ inputs:
       **Note:** Use this OR auto-discovery options (manifest-path/vsix-path), not both
     required: false
   manifest-path:
-    description: |-
+    description: |
       **Path to extension manifest** for auto-discovering task versions.
 
       - Reads manifest to find all tasks and their versions
@@ -136,7 +138,7 @@ inputs:
       **Note:** Use this OR expected-tasks/vsix-path, not multiple
     required: false
   vsix-path:
-    description: |-
+    description: |
       **Path to .vsix file** for auto-extracting task versions.
 
       - Extracts task.json files from VSIX package
@@ -145,7 +147,7 @@ inputs:
       **Note:** Use this OR expected-tasks/manifest-path, not multiple
     required: false
   timeout-minutes:
-    description: |-
+    description: |
       **Maximum time to wait** for tasks to become available (in minutes).
 
       - Task polls Azure DevOps at regular intervals
@@ -155,7 +157,7 @@ inputs:
     required: false
     default: '10'
   polling-interval-seconds:
-    description: |-
+    description: |
       **Interval between task availability checks** (in seconds).
 
       - How often to check if tasks are available
@@ -163,9 +165,9 @@ inputs:
 
       **Recommendation:** 30-60 seconds is usually sufficient
 
-      **Default:** `30`
+      **Default:** `15`
     required: false
-    default: '30'
+    default: '15'
 runs:
   using: composite
   steps:

@@ -116,7 +116,7 @@ inputs:
       **Publisher ID** that owns the extension.
 
       - Must match publisher in manifest (or override it)
-      - Required for command: install, query-version, share, show, unpublish, unshare, wait-for-installation, wait-for-validation.
+      - Required for command: install, query-version, share, show, unpublish, unshare, wait-for-validation.
       - Alphanumeric with hyphens, dots, underscores only
 
       **Example:** `mycompany` or `my-publisher-id`
@@ -127,7 +127,7 @@ inputs:
 
       - Must match ID in manifest (or override it)
       - Combined with Publisher ID forms full identifier: `publisherId.extensionId`
-      - Required for command: install, query-version, share, show, unpublish, unshare, wait-for-installation, wait-for-validation.
+      - Required for command: install, query-version, share, show, unpublish, unshare, wait-for-validation.
       - Alphanumeric with hyphens, dots, underscores only
 
       **Example:** `my-extension` or `azure-devops-tasks`

@@ -6,7 +6,7 @@ branding:
   color: blue
 inputs:
   auth-type:
-    description: |-
+    description: |
       Authentication type: 'pat', 'basic', or 'oidc'
       - pat: Use Personal Access Token (recommended for most users)
       - basic: Use username/password authentication (for on-premises Azure DevOps Server)
@@ -35,7 +35,7 @@ inputs:
     required: false
     default: pat
   token:
-    description: |-
+    description: |
       Personal Access Token for marketplace authentication
       Required when auth-type is 'pat'
       Not needed for other auth types
@@ -44,7 +44,7 @@ inputs:
       Create a PAT at: https://dev.azure.com/_usersSettings/tokens
     required: false
   username:
-    description: |-
+    description: |
       Username for basic authentication
       Required when auth-type is 'basic'
       Not needed for other auth types
@@ -52,16 +52,15 @@ inputs:
       Use for on-premises TFS or Azure DevOps Server deployments
     required: false
   password:
-    description: |-
+    description: |
       Password for basic authentication
       Required when auth-type is 'basic'
       Not needed for other auth types
 
       Use for on-premises TFS or Azure DevOps Server deployments
     required: false
-
   tfx-version:
-    description: |-
+    description: |
       **Version of tfx-cli to use:**
 
       - `built-in` (default): Use tfx-cli bundled with this action
@@ -72,26 +71,28 @@ inputs:
     required: false
     default: built-in
   publisher-id:
-    description: |-
+    description: |
       **Publisher ID** that owns the extension.
 
       - Must match publisher in manifest (or override it)
+      - Required for command: install, query-version, share, show, unpublish, unshare, wait-for-validation.
       - Alphanumeric with hyphens, dots, underscores only
 
       **Example:** `mycompany` or `my-publisher-id`
     required: true
   extension-id:
-    description: |-
+    description: |
       **Extension ID** - unique identifier within the publisher namespace.
 
       - Must match ID in manifest (or override it)
       - Combined with Publisher ID forms full identifier: `publisherId.extensionId`
+      - Required for command: install, query-version, share, show, unpublish, unshare, wait-for-validation.
       - Alphanumeric with hyphens, dots, underscores only
 
       **Example:** `my-extension` or `azure-devops-tasks`
     required: true
   accounts:
-    description: |-
+    description: |
       **Azure DevOps accounts/organizations** (newline-separated).
 
       - Required for command: install, wait-for-installation, share, unshare.

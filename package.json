@@ -29,6 +29,8 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "sync:action-inputs": "node Scripts/sync-action-inputs.mjs",
+    "sync:action-inputs:check": "node Scripts/sync-action-inputs.mjs --check",
     "bundle": "node Scripts/bundle.mjs",
     "setup:windows:path": "powershell -NoProfile -ExecutionPolicy Bypass -File ./Scripts/setup-windows-path.ps1",
     "clean": "git clean -fdX"
