@@ -252,7 +252,7 @@ describe('packageExtension', () => {
     expect(callArgs).toContain('--rev-version');
   });
 
-  it('should always set Extension.OutputPath variable', async () => {
+  it('should set vsixPath output variable', async () => {
     const mockExecute = jest.spyOn(tfxManager, 'execute');
     mockExecute.mockResolvedValue({
       exitCode: 0,
@@ -264,7 +264,7 @@ describe('packageExtension', () => {
     await packageExtension(withManifestDefaults(), tfxManager, platform);
 
     const outputs = platform.getOutputs();
-    expect(outputs.get('Extension.OutputPath')).toBe('/output/extension.vsix');
+    expect(outputs.get('vsixPath')).toBe('/output/extension.vsix');
   });
 
   it('should throw error on non-zero exit code', async () => {

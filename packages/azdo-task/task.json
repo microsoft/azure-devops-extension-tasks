@@ -223,7 +223,7 @@
       "type": "filePath",
       "label": "Output Path",
       "required": false,
-      "helpMarkDown": "**Output directory** for generated .vsix file.\n\n- Defaults to current directory if not specified\n- Directory will be created if it doesn't exist\n- The actual filename is based on publisher.extension-id-version.vsix\n\n**Example**: `$(Build.ArtifactStagingDirectory)`\n\n**Output**: Full path is stored in `extension.outputPath` variable",
+      "helpMarkDown": "**Output directory** for generated .vsix file.\n\n- Defaults to current directory if not specified\n- Directory will be created if it doesn't exist\n- The actual filename is based on publisher.extension-id-version.vsix\n\n**Example**: `$(Build.ArtifactStagingDirectory)`\n\n**Output**: Full path is stored in `vsixPath` variable",
       "visibleRule": "operation = package",
       "groupName": "operationConfig"
     },
@@ -434,43 +434,43 @@
   ],
   "outputVariables": [
     {
-      "name": "extension.outputPath",
+      "name": "vsixPath",
       "description": "Path to the generated .vsix file (package operation only)"
     },
     {
-      "name": "extension.metadata",
+      "name": "extensionMetadata",
       "description": "JSON metadata about the extension (show operation only)"
     },
     {
-      "name": "extension.proposedVersion",
+      "name": "proposedVersion",
       "description": "Proposed extension version after applying version action (query-version operation only)"
     },
     {
-      "name": "extension.currentVersion",
+      "name": "currentVersion",
       "description": "Current marketplace version before applying version action (query-version operation only)"
     },
     {
-      "name": "extension.published",
+      "name": "published",
       "description": "Whether the extension was published (true/false, publish operation only)"
     },
     {
-      "name": "extension.shared",
+      "name": "shared",
       "description": "Whether the extension was shared (true/false, share operation only)"
     },
     {
-      "name": "extension.unshared",
+      "name": "unshared",
       "description": "Whether the extension was unshared (true/false, unshare operation only)"
     },
     {
-      "name": "extension.installed",
+      "name": "installed",
       "description": "Whether the extension was installed (true/false, install operation only)"
     },
     {
-      "name": "extension.waitForValidation",
+      "name": "waitForValidation",
       "description": "Whether the extension passed validation (true/false, wait-for-validation operation only)"
     },
     {
-      "name": "extension.waitForInstallation",
+      "name": "waitForInstallation",
       "description": "Whether installation verification succeeded (true/false, wait-for-installation operation only)"
     }
   ],

@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeEach, jest } from '@jest/globals';
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
+import type { AuthCredentials } from '../auth.js';
 import { queryVersion } from '../commands/query-version.js';
 import { TfxManager } from '../tfx-manager.js';
 import { MockPlatformAdapter } from './helpers/mock-platform.js';
-import type { AuthCredentials } from '../auth.js';
 
 describe('queryVersion', () => {
   let platform: MockPlatformAdapter;
@@ -129,7 +129,7 @@ describe('queryVersion', () => {
     expect(executeSpy).not.toHaveBeenCalled();
   });
 
-  it('sets Extension.Version output when override variable is used', async () => {
+  it('sets currentVersion and proposedVersion outputs when override variable is used', async () => {
     platform.setVariableValue('OVERRIDE_VERSION', '9.9.9');
 
     await queryVersion(
@@ -144,10 +144,11 @@ describe('queryVersion', () => {
     );
 
     const outputs = platform.getOutputs();
-    expect(outputs.get('Extension.Version')).toBe('9.9.9');
+    expect(outputs.get('currentVersion')).toBe('9.9.9');
+    expect(outputs.get('proposedVersion')).toBe('9.9.9');
   });
 
-  it('sets Extension.Version output when marketplace version is used', async () => {
+  it('sets currentVersion and proposedVersion outputs when marketplace version is used', async () => {
     jest.spyOn(tfxManager, 'execute').mockResolvedValue({
       exitCode: 0,
       json: { extensionId: 'ext', publisher: 'pub', version: '1.2.3' },
@@ -167,7 +168,8 @@ describe('queryVersion', () => {
     );
 
     const outputs = platform.getOutputs();
-    expect(outputs.get('Extension.Version')).toBe('1.2.4');
+    expect(outputs.get('currentVersion')).toBe('1.2.3');
+    expect(outputs.get('proposedVersion')).toBe('1.2.4');
   });
 
   it('throws for invalid marketplace semantic version when action increments', async () => {

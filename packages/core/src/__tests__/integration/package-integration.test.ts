@@ -1,13 +1,13 @@
-import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
-import path from 'path';
-import fs from 'fs/promises';
-import { fileURLToPath } from 'url';
+import { afterEach, beforeEach, describe, expect, it } from '@jest/globals';
 import { execFile } from 'child_process';
+import fs from 'fs/promises';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { promisify } from 'util';
 import { packageExtension } from '../../commands/package.js';
-import { MockPlatformAdapter } from '../helpers/mock-platform.js';
 import { TfxManager } from '../../tfx-manager.js';
 import { VsixReader } from '../../vsix-reader.js';
+import { MockPlatformAdapter } from '../helpers/mock-platform.js';
 
 const execFileAsync = promisify(execFile);
 const __filename = fileURLToPath(import.meta.url);
@@ -146,6 +146,37 @@ describe('Package Command Integration Test', () => {
     expect(errors).toHaveLength(0);
   }, 60000); // 60 second timeout for package operation
 
+  it('should set vsixPath output variable', async () => {
+    if (!canRunTfx) return;
+    // Arrange
+    const outputPath = path.join(outputDir, 'custom-var-test.vsix');
+    const tfx = new TfxManager({
+      tfxVersion: 'built-in',
+      platform,
+    });
+
+    // Act
+    try {
+      await packageExtension(
+        {
+          rootFolder: fixturesDir,
+          manifestGlobs: ['vss-extension.json'],
+          outputPath,
+          bypassValidation: true,
+        },
+        tfx,
+        platform
+      );
+    } catch (error) {
+      if (isUnsupportedTfxOutput(error)) return;
+      throw error;
+    }
+
+    // Assert - Check output was set via setVariable
+    const outputValue = platform.getVariable('vsixPath');
+    expect(outputValue).toBe(outputPath);
+  }, 60000);
+
   it('should create VSIX with correct structure', async () => {
     if (!canRunTfx) return;
     // Arrange
@@ -184,36 +215,5 @@ describe('Package Command Integration Test', () => {
     expect(taskManifests.length).toBeGreaterThan(0);
 
     await reader.close();
-  }, 60000);
-
-  it('should set Extension.OutputPath output variable', async () => {
-    if (!canRunTfx) return;
-    // Arrange
-    const outputPath = path.join(outputDir, 'custom-var-test.vsix');
-    const tfx = new TfxManager({
-      tfxVersion: 'built-in',
-      platform,
-    });
-
-    // Act
-    try {
-      await packageExtension(
-        {
-          rootFolder: fixturesDir,
-          manifestGlobs: ['vss-extension.json'],
-          outputPath,
-          bypassValidation: true,
-        },
-        tfx,
-        platform
-      );
-    } catch (error) {
-      if (isUnsupportedTfxOutput(error)) return;
-      throw error;
-    }
-
-    // Assert - Check output was set via setVariable
-    const outputValue = platform.getVariable('Extension.OutputPath');
-    expect(outputValue).toBe(outputPath);
   }, 60000);
 });

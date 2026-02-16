@@ -191,8 +191,7 @@ export async function packageExtension(
       throw new Error('tfx did not return expected JSON output with path');
     }
 
-    // Always set Extension.OutputPath for compatibility
-    platform.setVariable('Extension.OutputPath', json.path, false, true);
+    platform.setVariable('vsixPath', json.path, false, true);
 
     platform.info(`Packaged extension: ${json.path}`);
 

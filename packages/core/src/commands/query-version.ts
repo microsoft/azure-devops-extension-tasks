@@ -1,6 +1,6 @@
+import type { AuthCredentials } from '../auth.js';
 import type { IPlatformAdapter } from '../platform.js';
 import type { TfxManager } from '../tfx-manager.js';
-import type { AuthCredentials } from '../auth.js';
 import { showExtension } from './show.js';
 
 export type VersionAction = 'None' | 'Major' | 'Minor' | 'Patch';
@@ -63,7 +63,8 @@ export async function queryVersion(
       platform.info(
         `Ignoring marketplace version and using supplied override: ${overrideVersion}.`
       );
-      platform.setVariable('Extension.Version', overrideVersion, false, true);
+      platform.setVariable('currentVersion', overrideVersion, false, true);
+      platform.setVariable('proposedVersion', overrideVersion, false, true);
       return {
         currentVersion: overrideVersion,
         proposedVersion: overrideVersion,
@@ -96,7 +97,8 @@ export async function queryVersion(
     platform.info(`Updated to       : ${updatedVersion}.`);
   }
 
-  platform.setVariable('Extension.Version', updatedVersion, false, true);
+  platform.setVariable('currentVersion', marketplaceVersion, false, true);
+  platform.setVariable('proposedVersion', updatedVersion, false, true);
 
   return {
     currentVersion: marketplaceVersion,

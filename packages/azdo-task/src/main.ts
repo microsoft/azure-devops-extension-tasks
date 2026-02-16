@@ -186,7 +186,7 @@ async function runPackage(platform: AzdoAdapter, tfxManager: TfxManager): Promis
   const result = await packageExtension(options, tfxManager, platform);
 
   if (result.vsixPath) {
-    platform.setOutput('extension.outputPath', result.vsixPath);
+    platform.setOutput('vsixPath', result.vsixPath);
   }
 }
 
@@ -224,7 +224,7 @@ async function runPublish(platform: AzdoAdapter, tfxManager: TfxManager, auth: a
     platform
   );
 
-  platform.setOutput('extension.published', String(result.published));
+  platform.setOutput('published', String(result.published));
 
   platform.debug(`Published: ${JSON.stringify(result)}`);
 }
@@ -257,7 +257,7 @@ async function runShare(platform: AzdoAdapter, tfxManager: TfxManager, auth: any
     platform
   );
 
-  platform.setOutput('extension.shared', 'true');
+  platform.setOutput('shared', 'true');
 }
 
 async function runUnshare(platform: AzdoAdapter, tfxManager: TfxManager, auth: any): Promise<void> {
@@ -272,7 +272,7 @@ async function runUnshare(platform: AzdoAdapter, tfxManager: TfxManager, auth: a
     platform
   );
 
-  platform.setOutput('extension.unshared', 'true');
+  platform.setOutput('unshared', 'true');
 }
 
 async function runInstall(platform: AzdoAdapter, tfxManager: TfxManager, auth: any): Promise<void> {
@@ -292,7 +292,7 @@ async function runInstall(platform: AzdoAdapter, tfxManager: TfxManager, auth: a
     throw new Error(`Some accounts failed to install the extension`);
   }
 
-  platform.setOutput('extension.installed', 'true');
+  platform.setOutput('installed', 'true');
 }
 
 async function runShow(platform: AzdoAdapter, tfxManager: TfxManager, auth: any): Promise<void> {
@@ -304,7 +304,7 @@ async function runShow(platform: AzdoAdapter, tfxManager: TfxManager, auth: any)
   const result = await showExtension(options, auth, tfxManager, platform);
 
   if (result.metadata) {
-    platform.setOutput('extension.metadata', JSON.stringify(result.metadata));
+    platform.setOutput('extensionMetadata', JSON.stringify(result.metadata));
   }
 }
 
@@ -347,8 +347,8 @@ async function runQueryVersion(
     tl.command('build.updatebuildnumber', undefined, result.proposedVersion);
   }
 
-  platform.setOutput('extension.proposedVersion', result.proposedVersion);
-  platform.setOutput('extension.currentVersion', result.currentVersion);
+  platform.setOutput('proposedVersion', result.proposedVersion);
+  platform.setOutput('currentVersion', result.currentVersion);
 }
 
 async function runWaitForValidation(
@@ -375,7 +375,7 @@ async function runWaitForValidation(
     throw new Error(`Validation failed with status: ${result.status}`);
   }
 
-  platform.setOutput('extension.waitForValidation', 'true');
+  platform.setOutput('waitForValidation', 'true');
 }
 
 async function runWaitForInstallation(platform: AzdoAdapter, auth: any): Promise<void> {
@@ -408,7 +408,7 @@ async function runWaitForInstallation(platform: AzdoAdapter, auth: any): Promise
     throw new Error(`Verification failed - not all tasks are available`);
   }
 
-  platform.setOutput('extension.waitForInstallation', 'true');
+  platform.setOutput('waitForInstallation', 'true');
 }
 
 // Run the task

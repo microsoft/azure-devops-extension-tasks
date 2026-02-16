@@ -144,7 +144,7 @@ describe('Azure DevOps main entrypoint', () => {
 
     expect(validateNodeAvailableMock).toHaveBeenCalledWith(platform);
     expect(packageExtensionMock).toHaveBeenCalled();
-    expect(platform.setOutput).toHaveBeenCalledWith('extension.outputPath', '/tmp/ext.vsix');
+    expect(platform.setOutput).toHaveBeenCalledWith('vsixPath', '/tmp/ext.vsix');
     expect(getAuthMock).not.toHaveBeenCalled();
     expect(platform.setResult).toHaveBeenCalledWith('Succeeded', 'package completed successfully');
   });
@@ -214,7 +214,7 @@ describe('Azure DevOps main entrypoint', () => {
     expect(getAuthMock).toHaveBeenCalledWith('connectedService:VsTeam', 'svc-connection', platform);
     expect(validateAccountUrlMock).toHaveBeenCalledWith('https://dev.azure.com/org');
     expect(publishExtensionMock).toHaveBeenCalled();
-    expect(platform.setOutput).toHaveBeenCalledWith('extension.published', 'true');
+    expect(platform.setOutput).toHaveBeenCalledWith('published', 'true');
     expect(platform.setResult).toHaveBeenCalledWith('Succeeded', 'publish completed successfully');
   });
 
@@ -235,10 +235,10 @@ describe('Azure DevOps main entrypoint', () => {
 
     await importMainAndFlush();
 
-    expect(platform.setOutput).toHaveBeenCalledWith('extension.metadata', JSON.stringify(metadata));
+    expect(platform.setOutput).toHaveBeenCalledWith('extensionMetadata', JSON.stringify(metadata));
   });
 
-  it('sets extension.installed output when install succeeds', async () => {
+  it('sets installed output when install succeeds', async () => {
     const platform = createPlatformMock({
       inputs: {
         operation: 'install',
@@ -256,7 +256,7 @@ describe('Azure DevOps main entrypoint', () => {
 
     await importMainAndFlush();
 
-    expect(platform.setOutput).toHaveBeenCalledWith('extension.installed', 'true');
+    expect(platform.setOutput).toHaveBeenCalledWith('installed', 'true');
   });
 
   it('forwards publish manifest editor options', async () => {
@@ -300,7 +300,7 @@ describe('Azure DevOps main entrypoint', () => {
     );
   });
 
-  it('sets extension.shared output when share succeeds', async () => {
+  it('sets shared output when share succeeds', async () => {
     const platform = createPlatformMock({
       inputs: {
         operation: 'share',
@@ -317,10 +317,10 @@ describe('Azure DevOps main entrypoint', () => {
 
     await importMainAndFlush();
 
-    expect(platform.setOutput).toHaveBeenCalledWith('extension.shared', 'true');
+    expect(platform.setOutput).toHaveBeenCalledWith('shared', 'true');
   });
 
-  it('sets extension.unshared output when unshare succeeds', async () => {
+  it('sets unshared output when unshare succeeds', async () => {
     const platform = createPlatformMock({
       inputs: {
         operation: 'unshare',
@@ -337,7 +337,7 @@ describe('Azure DevOps main entrypoint', () => {
 
     await importMainAndFlush();
 
-    expect(platform.setOutput).toHaveBeenCalledWith('extension.unshared', 'true');
+    expect(platform.setOutput).toHaveBeenCalledWith('unshared', 'true');
   });
 
   it('fails install operation when not all accounts succeed', async () => {
@@ -417,11 +417,11 @@ describe('Azure DevOps main entrypoint', () => {
 
     expect(queryVersionMock).toHaveBeenCalled();
     expect(tlCommandMock).toHaveBeenCalledWith('build.updatebuildnumber', undefined, '2.0.0');
-    expect(platform.setOutput).toHaveBeenCalledWith('extension.proposedVersion', '2.0.0');
-    expect(platform.setOutput).toHaveBeenCalledWith('extension.currentVersion', '1.0.0');
+    expect(platform.setOutput).toHaveBeenCalledWith('proposedVersion', '2.0.0');
+    expect(platform.setOutput).toHaveBeenCalledWith('currentVersion', '1.0.0');
   });
 
-  it('sets extension.waitForInstallation output when verification succeeds', async () => {
+  it('sets waitForInstallation output when verification succeeds', async () => {
     const platform = createPlatformMock({
       inputs: {
         operation: 'wait-for-installation',
@@ -439,7 +439,7 @@ describe('Azure DevOps main entrypoint', () => {
 
     await importMainAndFlush();
 
-    expect(platform.setOutput).toHaveBeenCalledWith('extension.waitForInstallation', 'true');
+    expect(platform.setOutput).toHaveBeenCalledWith('waitForInstallation', 'true');
   });
 
   it('fails wait-for-validation when status is not success', async () => {
@@ -465,7 +465,7 @@ describe('Azure DevOps main entrypoint', () => {
     expect(tlSetResultMock).toHaveBeenCalledWith('Failed', 'Validation failed with status: failed');
   });
 
-  it('sets extension.waitForValidation output when validation succeeds', async () => {
+  it('sets waitForValidation output when validation succeeds', async () => {
     waitForValidationMock.mockImplementation(async () => ({ status: 'success' }));
 
     const platform = createPlatformMock({
@@ -484,6 +484,6 @@ describe('Azure DevOps main entrypoint', () => {
 
     await importMainAndFlush();
 
-    expect(platform.setOutput).toHaveBeenCalledWith('extension.waitForValidation', 'true');
+    expect(platform.setOutput).toHaveBeenCalledWith('waitForValidation', 'true');
   });
 });

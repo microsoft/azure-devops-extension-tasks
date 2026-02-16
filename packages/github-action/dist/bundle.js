@@ -3106,10 +3106,7 @@ async function packageExtension(options, tfx, platform) {
     if (!json || !json.path) {
       throw new Error("tfx did not return expected JSON output with path");
     }
-    if (options.outputVariable) {
-      platform.setVariable(options.outputVariable, json.path, false, true);
-    }
-    platform.setVariable("Extension.OutputPath", json.path, false, true);
+    platform.setVariable("vsixPath", json.path, false, true);
     platform.info(`Packaged extension: ${json.path}`);
     return {
       vsixPath: json.path,
@@ -3127,7 +3124,7 @@ async function packageExtension(options, tfx, platform) {
 
 // packages/core/dist/commands/publish.js
 init_manifest_editor();
-async function executeTfxPublish(tfx, args, platform, options) {
+async function executeTfxPublish(tfx, args, platform, options, publishedVsixPath) {
   if (options.shareWith && options.shareWith.length > 0) {
     const isPublic = options.extensionVisibility === "public" || options.extensionVisibility === "public_preview";
     if (isPublic) {
@@ -3156,10 +3153,7 @@ async function executeTfxPublish(tfx, args, platform, options) {
   if (options.publishSource === "manifest") {
     vsixPath = json.packaged || "";
   } else {
-    vsixPath = options.vsixFile || "";
-  }
-  if (options.outputVariable && vsixPath) {
-    platform.setVariable(options.outputVariable, vsixPath, false, true);
+    vsixPath = publishedVsixPath || options.vsixFile || "";
   }
   platform.info(`Published extension: ${json.id} v${json.version}`);
   return {
@@ -3272,6 +3266,7 @@ async function publishExtension(options, auth, tfx, platform) {
       throw new Error(`VSIX file not found: ${options.vsixFile}`);
     }
     const needsModification = options.publisherId || options.extensionId || options.extensionVersion || options.extensionName || options.extensionVisibility || options.extensionPricing || options.updateTasksVersion || options.updateTasksId;
+    let vsixPathToPublish = options.vsixFile;
     if (needsModification) {
       platform.info("Modifying VSIX before publishing...");
       const reader = await VsixReader.open(options.vsixFile);
@@ -3294,11 +3289,13 @@ async function publishExtension(options, auth, tfx, platform) {
       await writer.writeToFile(tempVsixPath);
       await writer.close();
       await reader.close();
+      vsixPathToPublish = tempVsixPath;
       args.option("--vsix", tempVsixPath);
       platform.info("VSIX modifications applied successfully");
     } else {
       args.option("--vsix", options.vsixFile);
     }
+    return executeTfxPublish(tfx, args, platform, options, vsixPathToPublish);
   }
   return executeTfxPublish(tfx, args, platform, options);
 }
@@ -3516,9 +3513,6 @@ async function showExtension(options, auth, tfx, platform) {
     ...json
     // Include all other fields
   };
-  if (options.outputVariable) {
-    platform.setVariable(options.outputVariable, JSON.stringify(metadata), false, true);
-  }
   platform.info(`Extension: ${metadata.name || metadata.id} v${metadata.version}`);
   if (metadata.description) {
     platform.info(`Description: ${metadata.description}`);
@@ -3556,11 +3550,8 @@ async function queryVersion(options, auth, tfx, platform) {
     const overrideVersion = platform.getVariable(options.extensionVersionOverrideVariable);
     if (overrideVersion) {
       platform.info(`Ignoring marketplace version and using supplied override: ${overrideVersion}.`);
-      platform.setVariable("Extension.Version", overrideVersion, false, false);
-      platform.setVariable("Extension.Version", overrideVersion, false, true);
-      if (options.outputVariable) {
-        platform.setVariable(options.outputVariable, overrideVersion, false, true);
-      }
+      platform.setVariable("currentVersion", overrideVersion, false, true);
+      platform.setVariable("proposedVersion", overrideVersion, false, true);
       return {
         currentVersion: overrideVersion,
         proposedVersion: overrideVersion,
@@ -3583,11 +3574,8 @@ async function queryVersion(options, auth, tfx, platform) {
   if (updatedVersion !== marketplaceVersion) {
     platform.info(`Updated to       : ${updatedVersion}.`);
   }
-  platform.setVariable("Extension.Version", updatedVersion, false, false);
-  platform.setVariable("Extension.Version", updatedVersion, false, true);
-  if (options.outputVariable) {
-    platform.setVariable(options.outputVariable, updatedVersion, false, true);
-  }
+  platform.setVariable("currentVersion", marketplaceVersion, false, true);
+  platform.setVariable("proposedVersion", updatedVersion, false, true);
   return {
     currentVersion: marketplaceVersion,
     proposedVersion: updatedVersion,

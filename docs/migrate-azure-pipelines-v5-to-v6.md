@@ -109,7 +109,7 @@ steps:
       connectionType: connectedService:VsTeam
       connectionName: MyMarketplaceConnection
       publishSource: vsix
-      vsixFile: $(packageExt.Extension.OutputPath)
+      vsixFile: $(packageExt.vsixPath)
 ```
 
 ## Authentication changes
@@ -129,14 +129,16 @@ For OIDC setup and Entra workload federation details, see:
 
 Common v6 outputs:
 
-- `Extension.OutputPath`
-- `Extension.Metadata`
-- `Extension.ProposedVersion`
-- `Extension.CurrentVersion`
-- `Extension.Published`
-- `Extension.Installed`
-- `Extension.WaitForValidation`
-- `Extension.WaitForInstallation`
+- `vsixPath`
+- `extensionMetadata`
+- `proposedVersion`
+- `currentVersion`
+- `published`
+- `shared`
+- `unshared`
+- `installed`
+- `waitForValidation`
+- `waitForInstallation`
 
 If your v5 pipeline referenced legacy output variable names, update those references to the v6 names.
 

@@ -134,13 +134,12 @@ async function runPackage(platform, tfxManager) {
         updateTasksVersion: platform.getBoolInput('update-tasks-version'),
         updateTasksId: platform.getBoolInput('update-tasks-id'),
         outputPath: platform.getInput('output-path'),
-        outputVariable: platform.getInput('output-variable'),
         bypassValidation: platform.getBoolInput('bypass-validation'),
         revVersion: platform.getBoolInput('rev-version'),
     };
     const result = await packageExtension(options, tfxManager, platform);
-    if (options.outputVariable && result.vsixPath) {
-        platform.setOutput(options.outputVariable, result.vsixPath);
+    if (result.vsixPath) {
+        platform.setOutput('vsix-path', result.vsixPath);
     }
 }
 async function runPublish(platform, tfxManager, auth) {
@@ -163,6 +162,9 @@ async function runPublish(platform, tfxManager, auth) {
         updateTasksVersion: platform.getBoolInput('update-tasks-version'),
         updateTasksId: platform.getBoolInput('update-tasks-id'),
     }, auth, tfxManager, platform);
+    if (result.vsixPath) {
+        platform.setOutput('vsix-path', result.vsixPath);
+    }
     platform.debug(`Published: ${JSON.stringify(result)}`);
 }
 async function runUnpublish(platform, tfxManager, auth) {
@@ -200,11 +202,10 @@ async function runShow(platform, tfxManager, auth) {
     const options = {
         publisherId: platform.getInput('publisher-id', true),
         extensionId: platform.getInput('extension-id', true),
-        outputVariable: platform.getInput('output-variable'),
     };
     const result = await showExtension(options, auth, tfxManager, platform);
-    if (options.outputVariable && result.metadata) {
-        platform.setOutput(options.outputVariable, JSON.stringify(result.metadata));
+    if (result.metadata) {
+        platform.setOutput('extension-metadata', JSON.stringify(result.metadata));
     }
 }
 async function runQueryVersion(platform, tfxManager, auth) {
@@ -213,7 +214,6 @@ async function runQueryVersion(platform, tfxManager, auth) {
         extensionId: platform.getInput('extension-id', true),
         versionAction: platform.getInput('version-action') ?? 'None',
         extensionVersionOverrideVariable: platform.getInput('extension-version-override'),
-        outputVariable: platform.getInput('output-variable'),
     }, auth, tfxManager, platform);
     platform.setOutput('proposed-version', result.proposedVersion);
     platform.setOutput('current-version', result.currentVersion);
