@@ -9,7 +9,7 @@ Unshare an Azure DevOps extension from specific organizations.
 ### Unshare from Single Organization
 
 ```yaml
-- uses: jessehouwing/azure-devops-extension-tasks/unshare@v6
+- uses: jessehouwing/azdo-marketplace/unshare@v6
   with:
     token: ${{ secrets.MARKETPLACE_TOKEN }}
     publisher-id: 'my-publisher'
@@ -20,7 +20,7 @@ Unshare an Azure DevOps extension from specific organizations.
 ### Unshare from Multiple Organizations
 
 ```yaml
-- uses: jessehouwing/azure-devops-extension-tasks/unshare@v6
+- uses: jessehouwing/azdo-marketplace/unshare@v6
   with:
     token: ${{ secrets.MARKETPLACE_TOKEN }}
     publisher-id: 'my-publisher'
@@ -40,7 +40,7 @@ Unshare an Azure DevOps extension from specific organizations.
     tenant-id: ${{ secrets.AZURE_TENANT_ID }}
     subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-- uses: jessehouwing/azure-devops-extension-tasks/unshare@v6
+- uses: jessehouwing/azdo-marketplace/unshare@v6
   with:
     auth-type: 'oidc'
     publisher-id: 'my-publisher'
@@ -92,7 +92,7 @@ jobs:
   unshare:
     runs-on: ubuntu-latest
     steps:
-      - uses: jessehouwing/azure-devops-extension-tasks/unshare@v6
+      - uses: jessehouwing/azdo-marketplace/unshare@v6
         with:
           token: ${{ secrets.MARKETPLACE_TOKEN }}
           publisher-id: 'my-publisher'

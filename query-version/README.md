@@ -5,7 +5,7 @@ Query an extension version from Visual Studio Marketplace and optionally increme
 ## Usage
 
 ```yaml
-- uses: jessehouwing/azure-devops-extension-tasks/query-version@v6
+- uses: jessehouwing/azdo-marketplace/query-version@v6
   id: query
   with:
     token: ${{ secrets.MARKETPLACE_TOKEN }}

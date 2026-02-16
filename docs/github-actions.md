@@ -2,14 +2,14 @@
 
 This repository ships a **unified JavaScript action** and **composite command wrappers**.
 
-- Unified action: `jessehouwing/azure-devops-extension-tasks@refactor/v6`
+- Unified action: `jessehouwing/azdo-marketplace@v6`
 - Main definition: `action.yml`
 - Entry point: `packages/github-action/src/main.ts`
 
 ## Minimal usage
 
 ```yaml
-- uses: jessehouwing/azure-devops-extension-tasks@refactor/v6
+- uses: jessehouwing/azdo-marketplace@v6
   with:
     operation: package
 ```
@@ -202,7 +202,7 @@ Use these when you prefer a dedicated command surface over setting `operation` m
 ### Example using a composite action
 
 ```yaml
-- uses: jessehouwing/azure-devops-extension-tasks/package@v6
+- uses: jessehouwing/azdo-marketplace/package@v6
   id: package
   with:
     root-folder: .
@@ -227,12 +227,12 @@ steps:
       subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
   - id: package
-    uses: jessehouwing/azure-devops-extension-tasks@refactor/v6
+    uses: jessehouwing/azdo-marketplace@v6
     with:
       operation: package
       root-folder: .
 
-  - uses: jessehouwing/azure-devops-extension-tasks@refactor/v6
+  - uses: jessehouwing/azdo-marketplace@v6
     with:
       operation: publish
       auth-type: oidc

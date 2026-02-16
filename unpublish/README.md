@@ -9,7 +9,7 @@ Remove an Azure DevOps extension from the Visual Studio Marketplace.
 ### Basic Example
 
 ```yaml
-- uses: jessehouwing/azure-devops-extension-tasks/unpublish@v6
+- uses: jessehouwing/azdo-marketplace/unpublish@v6
   with:
     token: ${{ secrets.MARKETPLACE_TOKEN }}
     publisher-id: 'my-publisher'
@@ -25,7 +25,7 @@ Remove an Azure DevOps extension from the Visual Studio Marketplace.
     tenant-id: ${{ secrets.AZURE_TENANT_ID }}
     subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-- uses: jessehouwing/azure-devops-extension-tasks/unpublish@v6
+- uses: jessehouwing/azdo-marketplace/unpublish@v6
   with:
     auth-type: 'oidc'
     publisher-id: 'my-publisher'
@@ -76,7 +76,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event.inputs.confirm == 'UNPUBLISH'
     steps:
-      - uses: jessehouwing/azure-devops-extension-tasks/unpublish@v6
+      - uses: jessehouwing/azdo-marketplace/unpublish@v6
         with:
           token: ${{ secrets.MARKETPLACE_TOKEN }}
           publisher-id: 'my-publisher'

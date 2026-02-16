@@ -121,7 +121,7 @@ outputs:
 
       **Example usage:**
       ```yaml
-      - uses: jessehouwing/azure-devops-extension-tasks@refactor/v6
+      - uses: jessehouwing/azdo-marketplace@v6
         id: show
         with:
           operation: show
@@ -135,7 +135,7 @@ runs:
   using: composite
   steps:
     - id: show
-      uses: jessehouwing/azure-devops-extension-tasks@refactor/v6
+      uses: jessehouwing/azdo-marketplace@v6
       with:
         operation: show
         auth-type: ${{ inputs.auth-type }}

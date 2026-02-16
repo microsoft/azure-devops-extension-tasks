@@ -7,7 +7,7 @@ Create a .vsix package file for an Azure DevOps extension from your extension ma
 ### Basic Example
 
 ```yaml
-- uses: jessehouwing/azure-devops-extension-tasks/package@v6
+- uses: jessehouwing/azdo-marketplace/package@v6
   with:
     root-folder: './my-extension'
     output-path: './dist'
@@ -16,7 +16,7 @@ Create a .vsix package file for an Azure DevOps extension from your extension ma
 ### With Version Override
 
 ```yaml
-- uses: jessehouwing/azure-devops-extension-tasks/package@v6
+- uses: jessehouwing/azdo-marketplace/package@v6
   with:
     root-folder: './my-extension'
     extension-version: '1.2.3'
@@ -26,7 +26,7 @@ Create a .vsix package file for an Azure DevOps extension from your extension ma
 ### With Task Version Updates
 
 ```yaml
-- uses: jessehouwing/azure-devops-extension-tasks/package@v6
+- uses: jessehouwing/azdo-marketplace/package@v6
   with:
     root-folder: './my-extension'
     extension-version: ${{ github.ref_name }}
@@ -97,7 +97,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: jessehouwing/azure-devops-extension-tasks/package@v6
+      - uses: jessehouwing/azdo-marketplace/package@v6
         id: package
         with:
           root-folder: './extension'

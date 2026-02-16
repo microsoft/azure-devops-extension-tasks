@@ -133,7 +133,7 @@ runs:
   using: composite
   steps:
     - id: share
-      uses: jessehouwing/azure-devops-extension-tasks@refactor/v6
+      uses: jessehouwing/azdo-marketplace@v6
       with:
         operation: share
         auth-type: ${{ inputs.auth-type }}

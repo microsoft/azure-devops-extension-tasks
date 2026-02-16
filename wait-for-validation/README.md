@@ -7,7 +7,7 @@ Validate that an Azure DevOps extension has been successfully processed by the m
 ### Basic Validation
 
 ```yaml
-- uses: jessehouwing/azure-devops-extension-tasks/wait-for-validation@v6
+- uses: jessehouwing/azdo-marketplace/wait-for-validation@v6
   with:
     token: ${{ secrets.MARKETPLACE_TOKEN }}
     publisher-id: 'my-publisher'
@@ -17,7 +17,7 @@ Validate that an Azure DevOps extension has been successfully processed by the m
 ### With Custom Retry Settings
 
 ```yaml
-- uses: jessehouwing/azure-devops-extension-tasks/wait-for-validation@v6
+- uses: jessehouwing/azdo-marketplace/wait-for-validation@v6
   with:
     token: ${{ secrets.MARKETPLACE_TOKEN }}
     publisher-id: 'my-publisher'
@@ -36,7 +36,7 @@ Validate that an Azure DevOps extension has been successfully processed by the m
     tenant-id: ${{ secrets.AZURE_TENANT_ID }}
     subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-- uses: jessehouwing/azure-devops-extension-tasks/wait-for-validation@v6
+- uses: jessehouwing/azdo-marketplace/wait-for-validation@v6
   with:
     auth-type: 'oidc'
     publisher-id: 'my-publisher'
@@ -92,13 +92,13 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Publish Extension
-        uses: jessehouwing/azure-devops-extension-tasks/publish@v6
+        uses: jessehouwing/azdo-marketplace/publish@v6
         with:
           token: ${{ secrets.MARKETPLACE_TOKEN }}
           root-folder: './extension'
 
       - name: Validate Extension
-        uses: jessehouwing/azure-devops-extension-tasks/wait-for-validation@v6
+        uses: jessehouwing/azdo-marketplace/wait-for-validation@v6
         with:
           token: ${{ secrets.MARKETPLACE_TOKEN }}
           publisher-id: 'my-publisher'

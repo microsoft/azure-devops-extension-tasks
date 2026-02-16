@@ -15,7 +15,7 @@ Verify that an Azure DevOps extension has been installed correctly and that all 
 ### Verify with Manifest
 
 ```yaml
-- uses: jessehouwing/azure-devops-extension-tasks/wait-for-installation@v6
+- uses: jessehouwing/azdo-marketplace/wait-for-installation@v6
   with:
     token: ${{ secrets.MARKETPLACE_TOKEN }}
     publisher-id: 'my-publisher'
@@ -27,7 +27,7 @@ Verify that an Azure DevOps extension has been installed correctly and that all 
 ### Verify with VSIX
 
 ```yaml
-- uses: jessehouwing/azure-devops-extension-tasks/wait-for-installation@v6
+- uses: jessehouwing/azdo-marketplace/wait-for-installation@v6
   with:
     token: ${{ secrets.MARKETPLACE_TOKEN }}
     accounts: 'myorg'
@@ -37,7 +37,7 @@ Verify that an Azure DevOps extension has been installed correctly and that all 
 ### Verify with Expected Tasks JSON
 
 ```yaml
-- uses: jessehouwing/azure-devops-extension-tasks/wait-for-installation@v6
+- uses: jessehouwing/azdo-marketplace/wait-for-installation@v6
   with:
     token: ${{ secrets.MARKETPLACE_TOKEN }}
     publisher-id: 'my-publisher'
@@ -53,7 +53,7 @@ Verify that an Azure DevOps extension has been installed correctly and that all 
 ### Verify Multiple Accounts
 
 ```yaml
-- uses: jessehouwing/azure-devops-extension-tasks/wait-for-installation@v6
+- uses: jessehouwing/azdo-marketplace/wait-for-installation@v6
   with:
     token: ${{ secrets.MARKETPLACE_TOKEN }}
     publisher-id: 'my-publisher'
@@ -68,7 +68,7 @@ Verify that an Azure DevOps extension has been installed correctly and that all 
 ### With Custom Timeout and Polling
 
 ```yaml
-- uses: jessehouwing/azure-devops-extension-tasks/wait-for-installation@v6
+- uses: jessehouwing/azdo-marketplace/wait-for-installation@v6
   with:
     token: ${{ secrets.MARKETPLACE_TOKEN }}
     publisher-id: 'my-publisher'
@@ -88,7 +88,7 @@ Verify that an Azure DevOps extension has been installed correctly and that all 
     tenant-id: ${{ secrets.AZURE_TENANT_ID }}
     subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-- uses: jessehouwing/azure-devops-extension-tasks/wait-for-installation@v6
+- uses: jessehouwing/azdo-marketplace/wait-for-installation@v6
   with:
     auth-type: 'oidc'
     publisher-id: 'my-publisher'
@@ -155,7 +155,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Package Extension
-        uses: jessehouwing/azure-devops-extension-tasks/package@v6
+        uses: jessehouwing/azdo-marketplace/package@v6
         id: package
         with:
           root-folder: './extension'
@@ -163,14 +163,14 @@ jobs:
           update-tasks-version: 'true'
 
       - name: Publish Extension
-        uses: jessehouwing/azure-devops-extension-tasks/publish@v6
+        uses: jessehouwing/azdo-marketplace/publish@v6
         with:
           token: ${{ secrets.MARKETPLACE_TOKEN }}
           publish-source: 'vsix'
           vsix-file: ${{ steps.package.outputs.vsix-path }}
 
       - name: Install to Production Org
-        uses: jessehouwing/azure-devops-extension-tasks/install@v6
+        uses: jessehouwing/azdo-marketplace/install@v6
         with:
           token: ${{ secrets.MARKETPLACE_TOKEN }}
           publisher-id: 'my-publisher'
@@ -178,7 +178,7 @@ jobs:
           accounts: 'production-org'
 
       - name: Verify Installation
-        uses: jessehouwing/azure-devops-extension-tasks/wait-for-installation@v6
+        uses: jessehouwing/azdo-marketplace/wait-for-installation@v6
         with:
           token: ${{ secrets.MARKETPLACE_TOKEN }}
           publisher-id: 'my-publisher'

@@ -7,7 +7,7 @@ Display metadata for an Azure DevOps extension from the Visual Studio Marketplac
 ### Basic Example
 
 ```yaml
-- uses: jessehouwing/azure-devops-extension-tasks/show@v6
+- uses: jessehouwing/azdo-marketplace/show@v6
   id: show
   with:
     token: ${{ secrets.MARKETPLACE_TOKEN }}
@@ -27,7 +27,7 @@ Display metadata for an Azure DevOps extension from the Visual Studio Marketplac
     tenant-id: ${{ secrets.AZURE_TENANT_ID }}
     subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-- uses: jessehouwing/azure-devops-extension-tasks/show@v6
+- uses: jessehouwing/azdo-marketplace/show@v6
   id: show
   with:
     auth-type: 'oidc'
@@ -74,7 +74,7 @@ jobs:
   check-version:
     runs-on: ubuntu-latest
     steps:
-      - uses: jessehouwing/azure-devops-extension-tasks/show@v6
+      - uses: jessehouwing/azdo-marketplace/show@v6
         id: show
         with:
           token: ${{ secrets.MARKETPLACE_TOKEN }}

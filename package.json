@@ -1,16 +1,17 @@
 {
-  "name": "azdo-extension-tasks",
+  "name": "azdo-marketplace",
   "version": "6.0.0-alpha.1",
-  "description": "Azure DevOps Extension Tasks",
+  "description": "AzDo Marketplace",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jessehouwing/azure-devops-extension-tasks.git"
+    "url": "https://github.com/jessehouwing/azdo-marketplace.git"
   },
   "keywords": [
     "azure-devops",
     "azure-pipelines",
-    "vsts",
-    "tfs"
+    "azure-devops-marketplace",
+    "tfs",
+    "azure-devops-server"
   ],
   "workspaces": [
     "packages/core",

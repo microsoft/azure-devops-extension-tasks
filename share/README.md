@@ -9,7 +9,7 @@ Share an Azure DevOps extension with specific organizations.
 ### Share with Single Organization
 
 ```yaml
-- uses: jessehouwing/azure-devops-extension-tasks/share@v6
+- uses: jessehouwing/azdo-marketplace/share@v6
   with:
     token: ${{ secrets.MARKETPLACE_TOKEN }}
     publisher-id: 'my-publisher'
@@ -20,7 +20,7 @@ Share an Azure DevOps extension with specific organizations.
 ### Share with Multiple Organizations
 
 ```yaml
-- uses: jessehouwing/azure-devops-extension-tasks/share@v6
+- uses: jessehouwing/azdo-marketplace/share@v6
   with:
     token: ${{ secrets.MARKETPLACE_TOKEN }}
     publisher-id: 'my-publisher'
@@ -40,7 +40,7 @@ Share an Azure DevOps extension with specific organizations.
     tenant-id: ${{ secrets.AZURE_TENANT_ID }}
     subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-- uses: jessehouwing/azure-devops-extension-tasks/share@v6
+- uses: jessehouwing/azdo-marketplace/share@v6
   with:
     auth-type: 'oidc'
     publisher-id: 'my-publisher'
@@ -89,7 +89,7 @@ jobs:
   share:
     runs-on: ubuntu-latest
     steps:
-      - uses: jessehouwing/azure-devops-extension-tasks/share@v6
+      - uses: jessehouwing/azdo-marketplace/share@v6
         with:
           token: ${{ secrets.MARKETPLACE_TOKEN }}
           publisher-id: 'my-publisher'

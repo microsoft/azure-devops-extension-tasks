@@ -15,7 +15,7 @@ Install an Azure DevOps extension to specific accounts/organizations.
 ### Install to Single Account
 
 ```yaml
-- uses: jessehouwing/azure-devops-extension-tasks/install@v6
+- uses: jessehouwing/azdo-marketplace/install@v6
   with:
     token: ${{ secrets.MARKETPLACE_TOKEN }}
     publisher-id: 'my-publisher'
@@ -26,7 +26,7 @@ Install an Azure DevOps extension to specific accounts/organizations.
 ### Install to Multiple Accounts
 
 ```yaml
-- uses: jessehouwing/azure-devops-extension-tasks/install@v6
+- uses: jessehouwing/azdo-marketplace/install@v6
   with:
     token: ${{ secrets.MARKETPLACE_TOKEN }}
     publisher-id: 'my-publisher'
@@ -46,7 +46,7 @@ Install an Azure DevOps extension to specific accounts/organizations.
     tenant-id: ${{ secrets.AZURE_TENANT_ID }}
     subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-- uses: jessehouwing/azure-devops-extension-tasks/install@v6
+- uses: jessehouwing/azdo-marketplace/install@v6
   with:
     auth-type: 'oidc'
     publisher-id: 'my-publisher'
@@ -98,14 +98,14 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Publish Extension
-        uses: jessehouwing/azure-devops-extension-tasks/publish@v6
+        uses: jessehouwing/azdo-marketplace/publish@v6
         with:
           token: ${{ secrets.MARKETPLACE_TOKEN }}
           root-folder: './extension'
           extension-version: '1.0.${{ github.run_number }}'
 
       - name: Install to Test Org
-        uses: jessehouwing/azure-devops-extension-tasks/install@v6
+        uses: jessehouwing/azdo-marketplace/install@v6
         with:
           token: ${{ secrets.MARKETPLACE_TOKEN }}
           publisher-id: 'my-publisher'

@@ -147,7 +147,7 @@ outputs:
 
       **Example usage:**
       ```yaml
-      - uses: jessehouwing/azure-devops-extension-tasks@refactor/v6
+      - uses: jessehouwing/azdo-marketplace@v6
         id: package
         with:
           operation: package
@@ -159,7 +159,7 @@ runs:
   using: composite
   steps:
     - id: package
-      uses: jessehouwing/azure-devops-extension-tasks@refactor/v6
+      uses: jessehouwing/azdo-marketplace@v6
       with:
         operation: package
         tfx-version: ${{ inputs.tfx-version }}

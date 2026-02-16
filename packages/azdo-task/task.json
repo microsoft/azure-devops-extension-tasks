@@ -4,7 +4,7 @@
   "name": "ExtensionTasks",
   "friendlyName": "Azure DevOps Extension Tasks",
   "description": "Package, publish, and manage Azure DevOps extensions and Visual Studio Marketplace extensions",
-  "helpMarkDown": "[More Information](https://github.com/jessehouwing/azure-devops-extension-tasks)",
+  "helpMarkDown": "[More Information](https://github.com/jessehouwing/azdo-marketplace)",
   "category": "Package",
   "author": "Jesse Houwing",
   "version": {

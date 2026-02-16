@@ -7,7 +7,7 @@ Publish an Azure DevOps extension to the Visual Studio Marketplace.
 ### Publish from Manifest
 
 ```yaml
-- uses: jessehouwing/azure-devops-extension-tasks/publish@v6
+- uses: jessehouwing/azdo-marketplace/publish@v6
   with:
     token: ${{ secrets.MARKETPLACE_TOKEN }}
     root-folder: './my-extension'
@@ -16,7 +16,7 @@ Publish an Azure DevOps extension to the Visual Studio Marketplace.
 ### Publish from VSIX
 
 ```yaml
-- uses: jessehouwing/azure-devops-extension-tasks/publish@v6
+- uses: jessehouwing/azdo-marketplace/publish@v6
   with:
     token: ${{ secrets.MARKETPLACE_TOKEN }}
     publish-source: 'vsix'
@@ -32,7 +32,7 @@ Publish an Azure DevOps extension to the Visual Studio Marketplace.
     tenant-id: ${{ secrets.AZURE_TENANT_ID }}
     subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-- uses: jessehouwing/azure-devops-extension-tasks/publish@v6
+- uses: jessehouwing/azdo-marketplace/publish@v6
   with:
     auth-type: 'oidc'
     root-folder: './my-extension'
@@ -41,7 +41,7 @@ Publish an Azure DevOps extension to the Visual Studio Marketplace.
 ### Publish with Basic Authentication (On-Premises)
 
 ```yaml
-- uses: jessehouwing/azure-devops-extension-tasks/publish@v6
+- uses: jessehouwing/azdo-marketplace/publish@v6
   with:
     auth-type: 'basic'
     username: ${{ secrets.TFS_USERNAME }}
@@ -53,7 +53,7 @@ Publish an Azure DevOps extension to the Visual Studio Marketplace.
 ### Publish with Version Override and Task Updates
 
 ```yaml
-- uses: jessehouwing/azure-devops-extension-tasks/publish@v6
+- uses: jessehouwing/azdo-marketplace/publish@v6
   with:
     token: ${{ secrets.MARKETPLACE_TOKEN }}
     publish-source: 'vsix'
@@ -137,7 +137,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Publish to Marketplace
-        uses: jessehouwing/azure-devops-extension-tasks/publish@v6
+        uses: jessehouwing/azdo-marketplace/publish@v6
         with:
           token: ${{ secrets.MARKETPLACE_TOKEN }}
           root-folder: './extension'

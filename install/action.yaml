@@ -115,7 +115,7 @@ runs:
   using: composite
   steps:
     - id: install
-      uses: jessehouwing/azure-devops-extension-tasks@refactor/v6
+      uses: jessehouwing/azdo-marketplace@v6
       with:
         operation: install
         auth-type: ${{ inputs.auth-type }}

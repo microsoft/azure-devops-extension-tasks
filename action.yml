@@ -426,9 +426,9 @@ inputs:
 
       **Recommendation:** 30-60 seconds is usually sufficient
 
-      **Default:** `30`
+      **Default:** `15`
     required: false
-    default: '30'
+    default: '15'
 
 outputs:
   vsix-path:
@@ -437,7 +437,7 @@ outputs:
 
       **Example usage:**
       ```yaml
-      - uses: jessehouwing/azure-devops-extension-tasks@refactor/v6
+      - uses: jessehouwing/azdo-marketplace@v6
         id: package
         with:
           operation: package
@@ -456,7 +456,7 @@ outputs:
 
       **Example usage:**
       ```yaml
-      - uses: jessehouwing/azure-devops-extension-tasks@refactor/v6
+      - uses: jessehouwing/azdo-marketplace@v6
         id: show
         with:
           operation: show
