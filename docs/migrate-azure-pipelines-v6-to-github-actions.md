@@ -35,7 +35,7 @@ Azure Pipelines uses:
 GitHub Actions uses:
 
 ```yaml
-- uses: jessehouwing/azure-devops-extension-tasks@v6
+- uses: jessehouwing/azure-devops-extension-tasks@refactor/v6
   with:
     operation: publish
 ```
@@ -65,7 +65,7 @@ env:
   EXTENSION_ID_SUFFIX: -dev
 
 steps:
-  - uses: jessehouwing/azure-devops-extension-tasks@v6
+  - uses: jessehouwing/azure-devops-extension-tasks@refactor/v6
     with:
       operation: publish
       extension-id: ${{ format('{0}{1}', env.EXTENSION_ID_BASE, env.EXTENSION_ID_SUFFIX) }}
@@ -177,12 +177,12 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - id: package
-        uses: jessehouwing/azure-devops-extension-tasks@v6
+        uses: jessehouwing/azure-devops-extension-tasks@refactor/v6
         with:
           operation: package
           root-folder: .
 
-      - uses: jessehouwing/azure-devops-extension-tasks@v6
+      - uses: jessehouwing/azure-devops-extension-tasks@refactor/v6
         with:
           operation: publish
           auth-type: oidc

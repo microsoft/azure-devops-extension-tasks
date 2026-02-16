@@ -55,7 +55,7 @@ env:
   EXTENSION_ID_SUFFIX: -dev
 
 steps:
-  - uses: jessehouwing/azure-devops-extension-tasks@v6
+  - uses: jessehouwing/azure-devops-extension-tasks@refactor/v6
     with:
       operation: publish
       extension-id: ${{ format('{0}{1}', env.EXTENSION_ID_BASE, env.EXTENSION_ID_SUFFIX) }}
@@ -91,7 +91,7 @@ If you are not ready for OIDC yet:
 - pass token from a repository/environment secret
 
 ```yaml
-- uses: jessehouwing/azure-devops-extension-tasks@v6
+- uses: jessehouwing/azure-devops-extension-tasks@refactor/v6
   with:
     operation: publish
     auth-type: pat
@@ -133,13 +133,13 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - id: package
-        uses: jessehouwing/azure-devops-extension-tasks@v6
+        uses: jessehouwing/azure-devops-extension-tasks@refactor/v6
         with:
           operation: package
           root-folder: .
 
       - id: publish
-        uses: jessehouwing/azure-devops-extension-tasks@v6
+        uses: jessehouwing/azure-devops-extension-tasks@refactor/v6
         with:
           operation: publish
           auth-type: oidc

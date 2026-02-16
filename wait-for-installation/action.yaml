@@ -23,9 +23,9 @@ inputs:
 
       - uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          client-id: $``{{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: $``{{ secrets.AZURE_TENANT_ID }}
+          subscription-id: $``{{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       Then use auth-type: oidc (no token needed)
 
@@ -187,7 +187,7 @@ runs:
   using: composite
   steps:
     - id: wait-for-installation
-      uses: jessehouwing/azure-devops-extension-tasks@v6
+      uses: jessehouwing/azure-devops-extension-tasks@refactor/v6
       with:
         operation: wait-for-installation
         auth-type: ${{ inputs.auth-type }}

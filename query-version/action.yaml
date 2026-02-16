@@ -21,11 +21,13 @@ inputs:
       OIDC Setup:
       Run azure/login action BEFORE this action:
 
+      ```yaml
       - uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          client-id: $``{{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: $``{{ secrets.AZURE_TENANT_ID }}
+          subscription-id: $``{{ secrets.AZURE_SUBSCRIPTION_ID }}
+      ```
 
       Then use auth-type: oidc (no token needed)
 
@@ -125,7 +127,7 @@ inputs:
 
       If set and the variable exists, that value is used instead of querying marketplace.
 
-      **Example:** `MY_VERSION` where `${{ env.MY_VERSION }}` is `2.1.0`
+      **Example:** `MY_VERSION` where `$``{{ env.MY_VERSION }}` is `2.1.0`
     required: false
   output-variable:
     description: |-
@@ -147,7 +149,7 @@ runs:
   using: composite
   steps:
     - id: query-version
-      uses: jessehouwing/azure-devops-extension-tasks@v6
+      uses: jessehouwing/azure-devops-extension-tasks@refactor/v6
       with:
         operation: query-version
         auth-type: ${{ inputs.auth-type }}

@@ -2,14 +2,14 @@
 
 This repository ships a **unified JavaScript action** and **composite command wrappers**.
 
-- Unified action: `jessehouwing/azure-devops-extension-tasks@v6`
+- Unified action: `jessehouwing/azure-devops-extension-tasks@refactor/v6`
 - Main definition: `action.yml`
 - Entry point: `packages/github-action/src/main.ts`
 
 ## Minimal usage
 
 ```yaml
-- uses: jessehouwing/azure-devops-extension-tasks@v6
+- uses: jessehouwing/azure-devops-extension-tasks@refactor/v6
   with:
     operation: package
 ```
@@ -217,12 +217,12 @@ steps:
       subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
   - id: package
-    uses: jessehouwing/azure-devops-extension-tasks@v6
+    uses: jessehouwing/azure-devops-extension-tasks@refactor/v6
     with:
       operation: package
       root-folder: .
 
-  - uses: jessehouwing/azure-devops-extension-tasks@v6
+  - uses: jessehouwing/azure-devops-extension-tasks@refactor/v6
     with:
       operation: publish
       auth-type: oidc

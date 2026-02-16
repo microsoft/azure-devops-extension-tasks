@@ -64,7 +64,7 @@ inputs:
       - Must follow semantic versioning: `major.minor.patch`
       - Useful for CI/CD pipelines to inject build numbers
 
-      **Examples:** `1.2.3`, `1.0.${{ github.run_number }}`
+      **Examples:** `1.2.3`, `1.0.$``{{ github.run_number }}`
     required: false
   extension-name:
     description: |-
@@ -156,19 +156,19 @@ outputs:
 
       **Example usage:**
       ```yaml
-      - uses: jessehouwing/azure-devops-extension-tasks@v6
+      - uses: jessehouwing/azure-devops-extension-tasks@refactor/v6
         id: package
         with:
           operation: package
 
-      - run: echo "VSIX at ${{ steps.package.outputs.vsix-path }}"
+      - run: echo "VSIX at $``{{ steps.package.outputs.vsix-path }}"
       ```
     value: ${{ steps.package.outputs.vsix-path }}
 runs:
   using: composite
   steps:
     - id: package
-      uses: jessehouwing/azure-devops-extension-tasks@v6
+      uses: jessehouwing/azure-devops-extension-tasks@refactor/v6
       with:
         operation: package
         tfx-version: ${{ inputs.tfx-version }}

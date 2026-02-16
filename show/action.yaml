@@ -23,9 +23,9 @@ inputs:
 
       - uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          client-id: $``{{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: $``{{ secrets.AZURE_TENANT_ID }}
+          subscription-id: $``{{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       Then use auth-type: oidc (no token needed)
 
@@ -129,21 +129,21 @@ outputs:
 
       **Example usage:**
       ```yaml
-      - uses: jessehouwing/azure-devops-extension-tasks@v6
+      - uses: jessehouwing/azure-devops-extension-tasks@refactor/v6
         id: show
         with:
           operation: show
           publisher-id: mycompany
           extension-id: my-extension
 
-      - run: echo '${{ steps.show.outputs.extension-metadata }}' | jq .
+      - run: echo '$``{{ steps.show.outputs.extension-metadata }}' | jq .
       ```
     value: ${{ steps.show.outputs.extension-metadata }}
 runs:
   using: composite
   steps:
     - id: show
-      uses: jessehouwing/azure-devops-extension-tasks@v6
+      uses: jessehouwing/azure-devops-extension-tasks@refactor/v6
       with:
         operation: show
         auth-type: ${{ inputs.auth-type }}
