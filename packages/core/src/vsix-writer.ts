@@ -9,9 +9,147 @@
 
 import { Buffer } from 'buffer';
 import { createWriteStream } from 'fs';
+import { XMLBuilder, XMLParser } from 'fast-xml-parser';
 import yazl from 'yazl';
 import type { ManifestEditor } from './manifest-editor.js';
 import type { ExtensionManifest, TaskManifest } from './manifest-reader.js';
+
+/**
+ * Source-of-truth reference for manifest split behavior:
+ * - https://github.com/microsoft/tfs-cli/blob/master/app/exec/extension/_lib/vsix-manifest-builder.ts
+ * - https://github.com/microsoft/tfs-cli/blob/master/app/exec/extension/_lib/targets/Microsoft.VisualStudio.Services/vso-manifest-builder.ts
+ *
+ * Routing rules intentionally followed here:
+ * - extension.vsixmanifest (XML): identity/display/packaging metadata
+ *   - id, publisher, version, name, description, galleryFlags
+ * - extension.vsomanifest (JSON): runtime contribution model
+ *   - contributions, scopes, repository, etc.
+ *
+ * Real-world sample manifests used to validate and document this split are copied in:
+ * - packages/core/src/__tests__/fixtures/real-world-manifest-samples.ts
+ */
+
+type XmlObject = Record<string, unknown>;
+
+const xmlParser = new XMLParser({
+  ignoreAttributes: false,
+  attributeNamePrefix: '@_',
+  trimValues: false,
+  parseTagValue: false,
+  parseAttributeValue: false,
+});
+
+const xmlBuilder = new XMLBuilder({
+  ignoreAttributes: false,
+  attributeNamePrefix: '@_',
+  format: true,
+  indentBy: '  ',
+  suppressEmptyNode: false,
+  suppressBooleanAttributes: false,
+});
+
+function ensureObject(value: unknown): XmlObject {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return {};
+  }
+
+  return value as XmlObject;
+}
+
+function ensureMetadataContainer(parsed: XmlObject): XmlObject {
+  const packageManifest = ensureObject(parsed.PackageManifest);
+  parsed.PackageManifest = packageManifest;
+
+  const metadata = ensureObject(packageManifest.Metadata);
+  packageManifest.Metadata = metadata;
+
+  return metadata;
+}
+
+function setIdentityAttribute(metadata: XmlObject, attrName: string, value: string): void {
+  const identity = ensureObject(metadata.Identity);
+  metadata.Identity = identity;
+
+  identity[`@_${attrName}`] = value;
+}
+
+function setMetadataTextTag(metadata: XmlObject, tagName: string, value: string): void {
+  const current = metadata[tagName];
+
+  if (current && typeof current === 'object' && !Array.isArray(current)) {
+    const currentObj = current as XmlObject;
+    const hasAttributes = Object.keys(currentObj).some((key) => key.startsWith('@_'));
+
+    if (hasAttributes) {
+      currentObj['#text'] = value;
+      metadata[tagName] = currentObj;
+      return;
+    }
+  }
+
+  metadata[tagName] = value;
+}
+
+function applyVsixManifestXmlMetadata(
+  xml: string,
+  manifestMods: Partial<ExtensionManifest>
+): string {
+  const parsed = ensureObject(xmlParser.parse(xml));
+  const metadata = ensureMetadataContainer(parsed);
+
+  if (manifestMods.id) {
+    setIdentityAttribute(metadata, 'Id', manifestMods.id);
+  }
+  if (manifestMods.publisher) {
+    setIdentityAttribute(metadata, 'Publisher', manifestMods.publisher);
+  }
+  if (manifestMods.version) {
+    setIdentityAttribute(metadata, 'Version', manifestMods.version);
+  }
+
+  if (manifestMods.name) {
+    setMetadataTextTag(metadata, 'DisplayName', manifestMods.name);
+  }
+
+  if (manifestMods.description) {
+    const currentDescription = ensureObject(metadata.Description);
+    if (!currentDescription['@_xml:space']) {
+      currentDescription['@_xml:space'] = 'preserve';
+    }
+    currentDescription['#text'] = manifestMods.description;
+    metadata.Description = currentDescription;
+  }
+
+  if (manifestMods.galleryFlags && manifestMods.galleryFlags.length > 0) {
+    setMetadataTextTag(metadata, 'GalleryFlags', manifestMods.galleryFlags.join(' '));
+  }
+
+  return xmlBuilder.build(parsed);
+}
+
+function splitJsonAndXmlManifestMods(manifestMods: Partial<ExtensionManifest>): {
+  jsonMods: Partial<ExtensionManifest>;
+  xmlMods: Partial<ExtensionManifest>;
+} {
+  const xmlMods: Partial<ExtensionManifest> = {
+    id: manifestMods.id,
+    publisher: manifestMods.publisher,
+    version: manifestMods.version,
+    name: manifestMods.name,
+    description: manifestMods.description,
+    galleryFlags: manifestMods.galleryFlags,
+  };
+
+  const jsonMods: Partial<ExtensionManifest> = { ...manifestMods };
+  delete jsonMods.id;
+  delete jsonMods.publisher;
+  delete jsonMods.version;
+  delete jsonMods.name;
+  delete jsonMods.description;
+  delete jsonMods.galleryFlags;
+
+  return { jsonMods, xmlMods };
+}
 
 /**
  * Validate that a path is safe for writing to ZIP
@@ -188,13 +326,38 @@ export class VsixWriter {
     taskManifestMods: Map<string, Partial<TaskManifest>>,
     addedFiles: Set<string>
   ): Promise<void> {
-    // Read and modify extension manifest
+    const hasVsixXmlManifest = await reader.fileExists('extension.vsixmanifest');
+    const shouldSplitMetadata = hasVsixXmlManifest;
+
+    const { jsonMods, xmlMods } = shouldSplitMetadata
+      ? splitJsonAndXmlManifestMods(manifestMods)
+      : { jsonMods: manifestMods, xmlMods: {} as Partial<ExtensionManifest> };
+
+    // Read and modify extension JSON manifest
     const manifest = await reader.readExtensionManifest();
-    Object.assign(manifest, manifestMods);
+    Object.assign(manifest, jsonMods);
 
     const manifestJson = JSON.stringify(manifest, null, 2);
     this.zipFile.addBuffer(Buffer.from(manifestJson, 'utf-8'), manifestPath);
     addedFiles.add(manifestPath);
+
+    // Update extension.vsixmanifest XML metadata when present
+    if (hasVsixXmlManifest) {
+      const hasXmlMods =
+        !!xmlMods.id ||
+        !!xmlMods.publisher ||
+        !!xmlMods.version ||
+        !!xmlMods.name ||
+        !!xmlMods.description;
+
+      if (hasXmlMods) {
+        const xmlBuffer = await reader.readFile('extension.vsixmanifest');
+        const xml = xmlBuffer.toString('utf-8');
+        const updatedXml = applyVsixManifestXmlMetadata(xml, xmlMods);
+        this.zipFile.addBuffer(Buffer.from(updatedXml, 'utf-8'), 'extension.vsixmanifest');
+        addedFiles.add('extension.vsixmanifest');
+      }
+    }
 
     // Modify task manifests if needed
     if (taskManifestMods.size > 0) {

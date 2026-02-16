@@ -13,6 +13,11 @@ import { ManifestEditor } from '../manifest-editor.js';
 import { VsixReader } from '../vsix-reader.js';
 import { VsixWriter } from '../vsix-writer.js';
 import { MockPlatformAdapter } from './helpers/mock-platform.js';
+import {
+  REAL_WORLD_EXTENSION_VSIXMANIFEST_XML,
+  REAL_WORLD_EXTENSION_VSOMANIFEST_JSON,
+  REAL_WORLD_VSS_EXTENSION_JSON,
+} from './fixtures/real-world-manifest-samples.js';
 
 describe('ManifestEditor', () => {
   let testVsixPath: string;
@@ -316,6 +321,182 @@ describe('VsixWriter', () => {
     const manifest = await outputReader.readExtensionManifest();
 
     expect(manifest.publisher).toBe('buffer-publisher');
+
+    await outputReader.close();
+  });
+
+  it('should update identity metadata in extension.vsixmanifest only', async () => {
+    const testDir = join(tmpdir(), `vsix-xml-routing-${Date.now()}`);
+    mkdirSync(testDir, { recursive: true });
+    const inputPath = join(testDir, 'input.vsix');
+    const outputPath = join(testDir, 'output.vsix');
+
+    const zipFile = new yazl.ZipFile();
+    const vsomanifest = {
+      manifestVersion: 1,
+      contributions: [
+        {
+          id: 'sample-task',
+          type: 'ms.vss-distributed-task.task',
+          targets: ['ms.vss-distributed-task.tasks'],
+          properties: { name: 'SampleTask' },
+        },
+      ],
+    };
+
+    const vsixmanifest = `<?xml version="1.0" encoding="utf-8"?>
+<PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
+  <Metadata>
+    <Identity Language="en-US" Id="old-id" Version="1.0.0" Publisher="old-publisher"/>
+    <DisplayName>Old Name</DisplayName>
+    <Description xml:space="preserve">Old Description</Description>
+  </Metadata>
+</PackageManifest>`;
+
+    zipFile.addBuffer(Buffer.from(JSON.stringify(vsomanifest, null, 2)), 'extension.vsomanifest');
+    zipFile.addBuffer(Buffer.from(vsixmanifest), 'extension.vsixmanifest');
+
+    await new Promise<void>((resolve, reject) => {
+      (zipFile.outputStream as any)
+        .pipe(createWriteStream(inputPath) as any)
+        .on('finish', resolve)
+        .on('error', reject);
+      zipFile.end();
+    });
+
+    const reader = await VsixReader.open(inputPath);
+    const writer = await ManifestEditor.fromReader(reader)
+      .setExtensionId('new-id')
+      .setPublisher('new-publisher')
+      .setVersion('2.3.4')
+      .setName('New Name')
+      .setDescription('New Description')
+      .toWriter();
+
+    await writer.writeToFile(outputPath);
+    await reader.close();
+
+    const outputReader = await VsixReader.open(outputPath);
+    const updatedVsixXml = (await outputReader.readFile('extension.vsixmanifest')).toString(
+      'utf-8'
+    );
+    const updatedVsoJson = JSON.parse(
+      (await outputReader.readFile('extension.vsomanifest')).toString('utf-8')
+    );
+
+    expect(updatedVsixXml).toContain('Id="new-id"');
+    expect(updatedVsixXml).toContain('Publisher="new-publisher"');
+    expect(updatedVsixXml).toContain('Version="2.3.4"');
+    expect(updatedVsixXml).toContain('<DisplayName>New Name</DisplayName>');
+    expect(updatedVsixXml).toContain(
+      '<Description xml:space="preserve">New Description</Description>'
+    );
+
+    expect(updatedVsoJson.id).toBeUndefined();
+    expect(updatedVsoJson.publisher).toBeUndefined();
+    expect(updatedVsoJson.version).toBeUndefined();
+    expect(updatedVsoJson.name).toBeUndefined();
+    expect(updatedVsoJson.description).toBeUndefined();
+
+    await outputReader.close();
+  });
+
+  it('should route updates correctly for real-world dual manifests', async () => {
+    const testDir = join(tmpdir(), `vsix-dual-manifest-${Date.now()}`);
+    mkdirSync(testDir, { recursive: true });
+    const inputPath = join(testDir, 'input.vsix');
+    const outputPath = join(testDir, 'output.vsix');
+
+    const zipFile = new yazl.ZipFile();
+
+    const vsomanifest = REAL_WORLD_EXTENSION_VSOMANIFEST_JSON;
+    const vsixmanifest = REAL_WORLD_EXTENSION_VSIXMANIFEST_XML;
+
+    const taskManifest = {
+      id: '11111111-1111-1111-1111-111111111111',
+      name: REAL_WORLD_VSS_EXTENSION_JSON.contributions[0].properties.name,
+      friendlyName: 'MSBuild Helper',
+      description: 'Helper',
+      version: {
+        Major: 1,
+        Minor: 0,
+        Patch: 0,
+      },
+    };
+
+    zipFile.addBuffer(Buffer.from(JSON.stringify(vsomanifest, null, 2)), 'extension.vsomanifest');
+    zipFile.addBuffer(Buffer.from(vsixmanifest), 'extension.vsixmanifest');
+    zipFile.addBuffer(
+      Buffer.from(JSON.stringify(taskManifest, null, 2)),
+      `${REAL_WORLD_VSS_EXTENSION_JSON.contributions[0].properties.name}/task.json`
+    );
+
+    await new Promise<void>((resolve, reject) => {
+      (zipFile.outputStream as any)
+        .pipe(createWriteStream(inputPath) as any)
+        .on('finish', resolve)
+        .on('error', reject);
+      zipFile.end();
+    });
+
+    const reader = await VsixReader.open(inputPath);
+    const writer = await ManifestEditor.fromReader(reader)
+      .setExtensionId('new-extension-id')
+      .setPublisher('new-publisher')
+      .setVersion('2.4.6')
+      .setName('New Display Name')
+      .setDescription('New Description')
+      .setVisibility('private_preview')
+      .setPricing('trial')
+      .updateTaskVersion(
+        REAL_WORLD_VSS_EXTENSION_JSON.contributions[0].properties.name,
+        '2.4.6',
+        'major'
+      )
+      .toWriter();
+
+    await writer.writeToFile(outputPath);
+    await reader.close();
+
+    const outputReader = await VsixReader.open(outputPath);
+    const xml = (await outputReader.readFile('extension.vsixmanifest')).toString('utf-8');
+    const vso = JSON.parse(
+      (await outputReader.readFile('extension.vsomanifest')).toString('utf-8')
+    );
+    const updatedTask = JSON.parse(
+      (
+        await outputReader.readFile(
+          `${REAL_WORLD_VSS_EXTENSION_JSON.contributions[0].properties.name}/task.json`
+        )
+      ).toString('utf-8')
+    );
+
+    expect(xml).toContain('Id="new-extension-id"');
+    expect(xml).toContain('Publisher="new-publisher"');
+    expect(xml).toContain('Version="2.4.6"');
+    expect(xml).toContain('<DisplayName>New Display Name</DisplayName>');
+    expect(xml).toContain('<Description xml:space="preserve">New Description</Description>');
+    expect(xml).toContain('<GalleryFlags>Private Preview Trial</GalleryFlags>');
+
+    expect(xml).toContain('<Categories>Azure Pipelines</Categories>');
+    expect(xml).toContain(
+      '<Tags>Extension,Build,Variable,Property,Code Analysis,Layer Validation,Template,xebia</Tags>'
+    );
+    expect(xml).toContain('Microsoft.VisualStudio.Services.Branding.Theme');
+
+    expect(vso.scope).toEqual(['vso.build']);
+    expect(vso.repository.uri).toBe(
+      'https://github.com/jessehouwing/azure-pipelines-msbuild-helper-task'
+    );
+    expect(vso.contributions[0].id).toBe('vsts-msbuild-helper');
+    expect(vso.id).toBeUndefined();
+    expect(vso.publisher).toBeUndefined();
+    expect(vso.version).toBeUndefined();
+    expect(vso.name).toBeUndefined();
+    expect(vso.description).toBeUndefined();
+    expect(vso.galleryFlags).toBeUndefined();
+
+    expect(updatedTask.version).toEqual({ Major: 2, Minor: 4, Patch: 6 });
 
     await outputReader.close();
   });

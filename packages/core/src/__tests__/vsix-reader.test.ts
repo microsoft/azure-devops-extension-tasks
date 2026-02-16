@@ -218,6 +218,24 @@ describe('VsixReader', () => {
 
       await reader.close();
     });
+
+    it('should fallback to extension.vsixmanifest identity metadata', async () => {
+      const xmlFallbackVsixPath = join(testDir, 'xml-fallback.vsix');
+      await createXmlFallbackTestVsix(xmlFallbackVsixPath);
+
+      const reader = await VsixReader.open(xmlFallbackVsixPath);
+      const metadata = await reader.getMetadata();
+
+      expect(metadata).toEqual({
+        publisher: 'jessehouwing',
+        extensionId: 'jessehouwing-vsts-msbuild-helper-task',
+        version: '1.0.0',
+        name: 'MsBuild Helper Tasks',
+        description: 'Task to help you set those pesky MsBuild Properties.',
+      });
+
+      await reader.close();
+    });
   });
 
   describe('getTasksInfo', () => {
@@ -354,6 +372,49 @@ async function createTestVsix(outputPath: string): Promise<void> {
   zip.end();
 
   // Write to file
+  await new Promise<void>((resolve, reject) => {
+    (zip.outputStream as any)
+      .pipe(createWriteStream(outputPath) as any)
+      .on('finish', resolve)
+      .on('error', reject);
+  });
+}
+
+async function createXmlFallbackTestVsix(outputPath: string): Promise<void> {
+  const zip = new yazl.ZipFile();
+
+  const vsomanifest = {
+    manifestVersion: 1,
+    contributions: [
+      {
+        id: 'vsts-msbuild-helper',
+        type: 'ms.vss-distributed-task.task',
+        targets: ['ms.vss-distributed-task.tasks'],
+        properties: {
+          name: 'vsts-msbuild-helper',
+        },
+      },
+    ],
+  };
+
+  const vsixmanifest = `<?xml version="1.0" encoding="utf-8"?>
+<PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
+  <Metadata>
+    <Identity Language="en-US" Id="jessehouwing-vsts-msbuild-helper-task" Version="1.0.0" Publisher="jessehouwing"/>
+    <DisplayName>MsBuild Helper Tasks</DisplayName>
+    <Description xml:space="preserve">Task to help you set those pesky MsBuild Properties.</Description>
+  </Metadata>
+</PackageManifest>`;
+
+  const options = { compress: true };
+  zip.addBuffer(
+    Buffer.from(JSON.stringify(vsomanifest, null, 2)),
+    'extension.vsomanifest',
+    options
+  );
+  zip.addBuffer(Buffer.from(vsixmanifest), 'extension.vsixmanifest', options);
+  zip.end();
+
   await new Promise<void>((resolve, reject) => {
     (zip.outputStream as any)
       .pipe(createWriteStream(outputPath) as any)

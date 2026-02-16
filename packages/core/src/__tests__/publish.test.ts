@@ -1,7 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { createWriteStream } from 'fs';
 import { promises as fs } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
+import yazl from 'yazl';
 import type { AuthCredentials } from '../auth.js';
 import type { PublishOptions } from '../commands/publish.js';
 import { publishExtension } from '../commands/publish.js';
@@ -287,6 +289,73 @@ describe('publishExtension', () => {
 
       expect(result.published).toBe(true);
       expect(result.vsixPath).toBe('/path/to/extension.vsix');
+    });
+
+    it('should read and log version from a real vsix when publish payload has no metadata', async () => {
+      const tempDir = await fs.mkdtemp(join(tmpdir(), 'publish-real-vsix-'));
+      const vsixPath = join(tempDir, 'workflow-test.vsix');
+
+      const zipFile = new yazl.ZipFile();
+      zipFile.addBuffer(
+        Buffer.from(
+          JSON.stringify(
+            {
+              manifestVersion: 1,
+              id: 'workflow-test',
+              publisher: 'jessehouwing',
+              version: '0.1.3',
+              name: 'Workflow Test',
+              files: [],
+            },
+            null,
+            2
+          )
+        ),
+        'vss-extension.json'
+      );
+
+      await new Promise<void>((resolve, reject) => {
+        zipFile.outputStream
+          .pipe(createWriteStream(vsixPath))
+          .on('finish', resolve)
+          .on('error', reject);
+        zipFile.end();
+      });
+
+      const mockExecute = jest.spyOn(tfxManager, 'execute');
+      mockExecute.mockResolvedValue({
+        exitCode: 0,
+        json: {
+          packaged: null,
+          published: true,
+          shared: null,
+        },
+        stdout: '',
+        stderr: '',
+      });
+
+      try {
+        const result = await publishExtension(
+          {
+            publishSource: 'vsix',
+            vsixFile: vsixPath,
+          },
+          auth,
+          tfxManager,
+          platform
+        );
+
+        expect(result.extensionId).toBe('workflow-test');
+        expect(result.extensionVersion).toBe('0.1.3');
+        expect(result.publisherId).toBe('jessehouwing');
+        expect(
+          platform.infoMessages.some((message) =>
+            message.includes('Published extension: workflow-test v0.1.3')
+          )
+        ).toBe(true);
+      } finally {
+        await fs.rm(tempDir, { recursive: true, force: true });
+      }
     });
   });
 

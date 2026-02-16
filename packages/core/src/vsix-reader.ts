@@ -10,7 +10,61 @@
 import { Buffer } from 'buffer';
 import { isAbsolute, normalize } from 'path';
 import yauzl from 'yauzl';
-import { ManifestReader, type ExtensionManifest, type TaskManifest } from './manifest-reader.js';
+import {
+  ManifestReader,
+  type ExtensionManifest,
+  type ManifestMetadata,
+  type TaskManifest,
+} from './manifest-reader.js';
+
+interface VsixXmlMetadata {
+  extensionId?: string;
+  publisher?: string;
+  version?: string;
+  name?: string;
+  description?: string;
+}
+
+function decodeXmlEntities(input: string): string {
+  return input
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, '&')
+    .trim();
+}
+
+function extractXmlTagValue(xml: string, tagName: string): string | undefined {
+  const regex = new RegExp(`<${tagName}[^>]*>([\\s\\S]*?)</${tagName}>`, 'i');
+  const match = xml.match(regex);
+  if (!match || !match[1]) {
+    return undefined;
+  }
+  return decodeXmlEntities(match[1]);
+}
+
+function extractIdentityAttribute(identityTag: string, name: string): string | undefined {
+  const regex = new RegExp(`\\b${name}\\s*=\\s*["']([^"']+)["']`, 'i');
+  const match = identityTag.match(regex);
+  if (!match || !match[1]) {
+    return undefined;
+  }
+  return decodeXmlEntities(match[1]);
+}
+
+function parseVsixManifestXml(xml: string): VsixXmlMetadata {
+  const identityMatch = xml.match(/<Identity\b[\s\S]*?\/>/i);
+  const identityTag = identityMatch?.[0];
+
+  return {
+    extensionId: identityTag ? extractIdentityAttribute(identityTag, 'Id') : undefined,
+    publisher: identityTag ? extractIdentityAttribute(identityTag, 'Publisher') : undefined,
+    version: identityTag ? extractIdentityAttribute(identityTag, 'Version') : undefined,
+    name: extractXmlTagValue(xml, 'DisplayName'),
+    description: extractXmlTagValue(xml, 'Description'),
+  };
+}
 
 /**
  * Validate that a path from a ZIP file is safe and doesn't escape the extraction directory
@@ -323,6 +377,41 @@ export class VsixReader extends ManifestReader {
     const taskJsonPath = `${taskPath}/task.json`.replace(/\\/g, '/');
     const buffer = await this.readFile(taskJsonPath);
     return JSON.parse(buffer.toString('utf-8'));
+  }
+
+  /**
+   * Get quick metadata with fallback to extension.vsixmanifest XML identity
+   */
+  async getMetadata(): Promise<ManifestMetadata> {
+    const manifest = await this.readExtensionManifest();
+
+    let metadata: ManifestMetadata = {
+      publisher: manifest.publisher,
+      extensionId: manifest.id,
+      version: manifest.version,
+      name: manifest.name,
+      description: manifest.description,
+    };
+
+    const needsXmlFallback = !metadata.publisher || !metadata.extensionId || !metadata.version;
+    if (needsXmlFallback && (await this.fileExists('extension.vsixmanifest'))) {
+      try {
+        const xml = (await this.readFile('extension.vsixmanifest')).toString('utf-8');
+        const xmlMetadata = parseVsixManifestXml(xml);
+
+        metadata = {
+          publisher: metadata.publisher || xmlMetadata.publisher || '',
+          extensionId: metadata.extensionId || xmlMetadata.extensionId || '',
+          version: metadata.version || xmlMetadata.version || '',
+          name: metadata.name || xmlMetadata.name,
+          description: metadata.description || xmlMetadata.description,
+        };
+      } catch {
+        // Ignore XML parsing issues and return best-effort metadata from JSON manifest
+      }
+    }
+
+    return metadata;
   }
 
   /**
