@@ -4,6 +4,7 @@
 
 import { ArgBuilder } from '../arg-builder.js';
 import type { AuthCredentials } from '../auth.js';
+import { normalizeAccountsToServiceUrls } from '../organization-utils.js';
 import type { IPlatformAdapter } from '../platform.js';
 import type { TfxManager } from '../tfx-manager.js';
 
@@ -15,7 +16,7 @@ export interface InstallOptions {
   publisherId: string;
   /** Extension ID */
   extensionId: string;
-  /** Target organization URLs to install to */
+  /** Target organization names or URLs to install to */
   accounts: string[];
   /**
    * Extension version input (not supported for install).
@@ -78,8 +79,10 @@ export async function installExtension(
     );
   }
 
+  const accountUrls = normalizeAccountsToServiceUrls(options.accounts);
+
   platform.info(
-    `Installing extension ${options.publisherId}.${options.extensionId} to ${options.accounts.length} organization(s)...`
+    `Installing extension ${options.publisherId}.${options.extensionId} to ${accountUrls.length} organization(s)...`
   );
 
   const extensionId = options.extensionId;
@@ -88,7 +91,7 @@ export async function installExtension(
   let overallExitCode = 0;
 
   // Install to each account
-  for (const account of options.accounts) {
+  for (const account of accountUrls) {
     platform.info(`Installing to ${account}...`);
 
     // Build tfx arguments for this account
@@ -173,7 +176,7 @@ export async function installExtension(
   const allSuccess = accountResults.every((r) => r.success);
   const successCount = accountResults.filter((r) => r.success).length;
 
-  platform.info(`Installation complete: ${successCount}/${options.accounts.length} succeeded`);
+  platform.info(`Installation complete: ${successCount}/${accountUrls.length} succeeded`);
 
   return {
     extensionId,

@@ -91,11 +91,12 @@ inputs:
     required: true
   accounts:
     description: |-
-      **Azure DevOps accounts/organizations** to install extension to (newline-separated).
+      **Azure DevOps accounts/organizations** (newline-separated).
 
+      - Required for command: install, wait-for-installation, share, unshare.
       - Format: Full organization URL or organization name
-      - Organizations must have access to the extension (shared if private)
-      - Requires organization administrator permissions
+      - For install/wait-for-installation: target organizations for installation checks
+      - For share/unshare: organizations to grant/remove extension access
 
       **Example:**
       ```

@@ -21,6 +21,7 @@ const validateExtensionIdMock = jest.fn();
 const validatePublisherIdMock = jest.fn();
 const validateVersionMock = jest.fn();
 const validateAccountUrlMock = jest.fn();
+const normalizeAccountToServiceUrlMock = jest.fn((value: string) => value);
 const validateNodeAvailableMock = jest.fn();
 const validateNpmAvailableMock = jest.fn();
 const validateTfxAvailableMock = jest.fn();
@@ -59,6 +60,7 @@ jest.unstable_mockModule('@extension-tasks/core', () => ({
   validatePublisherId: validatePublisherIdMock,
   validateVersion: validateVersionMock,
   validateAccountUrl: validateAccountUrlMock,
+  normalizeAccountToServiceUrl: normalizeAccountToServiceUrlMock,
   validateNodeAvailable: validateNodeAvailableMock,
   validateNpmAvailable: validateNpmAvailableMock,
   validateTfxAvailable: validateTfxAvailableMock,
@@ -103,9 +105,25 @@ async function importMainAndFlush(): Promise<void> {
   await new Promise<void>((resolve) => setImmediate(resolve));
 }
 
+function expectNoLegacyStatusOutputs(platform: ReturnType<typeof createPlatformMock>): void {
+  const legacyOutputs = [
+    'published',
+    'shared',
+    'unshared',
+    'installed',
+    'waitForValidation',
+    'waitForInstallation',
+  ];
+
+  for (const outputName of legacyOutputs) {
+    expect(platform.setOutput).not.toHaveBeenCalledWith(outputName, expect.anything());
+  }
+}
+
 describe('GitHub Action main entrypoint', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    normalizeAccountToServiceUrlMock.mockImplementation((value: string) => value);
     validateNodeAvailableMock.mockImplementation(async () => undefined);
     validateNpmAvailableMock.mockImplementation(async () => undefined);
     validateTfxAvailableMock.mockImplementation(async () => undefined);
@@ -247,6 +265,69 @@ describe('GitHub Action main entrypoint', () => {
       platform
     );
     expect(platform.setOutput).toHaveBeenCalledWith('vsix-path', '/tmp/temp-12345.vsix');
+    expectNoLegacyStatusOutputs(platform);
+  });
+
+  it('does not emit legacy status outputs for operation-only commands', async () => {
+    const cases: Array<{
+      operation: 'share' | 'unshare' | 'install' | 'wait-for-validation' | 'wait-for-installation';
+      delimitedInputs?: Record<string, string[]>;
+      inputs?: Record<string, string | undefined>;
+    }> = [
+      {
+        operation: 'share',
+        delimitedInputs: {
+          'accounts|\n': ['org1'],
+        },
+      },
+      {
+        operation: 'unshare',
+        delimitedInputs: {
+          'accounts|\n': ['org1'],
+        },
+      },
+      {
+        operation: 'install',
+        delimitedInputs: {
+          'accounts|;': ['https://dev.azure.com/org1'],
+          'accounts|\n': ['https://dev.azure.com/org1'],
+        },
+      },
+      {
+        operation: 'wait-for-validation',
+        delimitedInputs: {
+          'manifest-globs|\n': ['vss-extension.json'],
+        },
+      },
+      {
+        operation: 'wait-for-installation',
+        delimitedInputs: {
+          'accounts|;': ['https://dev.azure.com/org1'],
+          'accounts|\n': ['https://dev.azure.com/org1'],
+        },
+      },
+    ];
+
+    waitForValidationMock.mockImplementation(async () => ({ status: 'success' }));
+
+    for (const testCase of cases) {
+      const platform = createPlatformMock({
+        inputs: {
+          operation: testCase.operation,
+          'auth-type': 'pat',
+          'publisher-id': 'publisher',
+          'extension-id': 'extension',
+          ...testCase.inputs,
+        },
+        delimitedInputs: testCase.delimitedInputs,
+      });
+      githubAdapterCtorMock.mockReturnValue(platform);
+
+      await importMainAndFlush();
+
+      expect(setFailedMock).not.toHaveBeenCalled();
+      expectNoLegacyStatusOutputs(platform);
+    }
   });
 
   it('fails wait-for-installation when expected-tasks JSON is invalid', async () => {

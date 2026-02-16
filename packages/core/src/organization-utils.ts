@@ -63,3 +63,36 @@ export function normalizeOrganizationIdentifier(input: string): string {
 export function normalizeOrganizationIdentifiers(values: string[]): string[] {
   return values.map((value) => normalizeOrganizationIdentifier(value));
 }
+
+/**
+ * Normalize an Azure DevOps account identifier to a service URL.
+ *
+ * Supports:
+ * - Plain organization names: ORG -> https://dev.azure.com/ORG
+ * - Full URLs (including Azure DevOps Services and Server): returned as-is
+ */
+export function normalizeAccountToServiceUrl(input: string): string {
+  const value = input.trim();
+  if (!value) {
+    throw new Error('Account identifier cannot be empty');
+  }
+
+  if (/^https?:\/\//i.test(value)) {
+    return value;
+  }
+
+  if (/\s/.test(value) || /[/\\]/.test(value)) {
+    throw new Error(
+      `Invalid organization name: ${value}. Use a plain organization name like ORG or a full URL like https://dev.azure.com/ORG`
+    );
+  }
+
+  return `https://dev.azure.com/${value}`;
+}
+
+/**
+ * Normalize a list of account identifiers to service URLs while preserving order.
+ */
+export function normalizeAccountsToServiceUrls(values: string[]): string[] {
+  return values.map((value) => normalizeAccountToServiceUrl(value));
+}

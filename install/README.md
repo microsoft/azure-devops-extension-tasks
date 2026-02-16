@@ -6,6 +6,12 @@ Install an Azure DevOps extension to specific accounts/organizations.
 
 `install` does not take a `service-url` input. The action iterates each `accounts` entry and invokes `tfx extension install` with that account URL passed to `--service-url`.
 
+`accounts` input formats:
+
+- Azure DevOps Services org name: `ORG` (automatically expanded to `https://dev.azure.com/ORG`)
+- Azure DevOps Services URL: `https://dev.azure.com/ORG`
+- Azure DevOps Server/TFS: provide the full collection URL (for example `https://myserver/tfs/DefaultCollection`)
+
 ### Install to Single Account
 
 ```yaml

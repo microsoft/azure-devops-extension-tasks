@@ -4,7 +4,7 @@ Share an Azure DevOps extension with specific organizations.
 
 ## Usage
 
-`share-with` accepts organization names and the URL formats `https://dev.azure.com/ORG` and `https://ORG.visualstudio.com`. URL inputs are normalized to organization names before execution.
+`accounts` accepts organization names and the URL formats `https://dev.azure.com/ORG` and `https://ORG.visualstudio.com`. URL inputs are normalized to organization names before execution.
 
 ### Share with Single Organization
 
@@ -14,7 +14,7 @@ Share an Azure DevOps extension with specific organizations.
     token: ${{ secrets.MARKETPLACE_TOKEN }}
     publisher-id: 'my-publisher'
     extension-id: 'my-extension'
-    share-with: 'myorg'
+    accounts: 'myorg'
 ```
 
 ### Share with Multiple Organizations
@@ -25,7 +25,7 @@ Share an Azure DevOps extension with specific organizations.
     token: ${{ secrets.MARKETPLACE_TOKEN }}
     publisher-id: 'my-publisher'
     extension-id: 'my-extension'
-    share-with: |
+    accounts: |
       myorg1
       myorg2
       myorg3
@@ -45,7 +45,7 @@ Share an Azure DevOps extension with specific organizations.
     auth-type: 'oidc'
     publisher-id: 'my-publisher'
     extension-id: 'my-extension'
-    share-with: 'myorg'
+    accounts: 'myorg'
 ```
 
 ## Inputs
@@ -54,7 +54,7 @@ Share an Azure DevOps extension with specific organizations.
 
 - `publisher-id`: Publisher ID
 - `extension-id`: Extension ID
-- `share-with`: Organizations to share with (newline-separated)
+- `accounts`: Organizations to share with (newline-separated)
 - `token`: Personal Access Token (required when auth-type is `pat`)
 
 OR
@@ -94,7 +94,7 @@ jobs:
           token: ${{ secrets.MARKETPLACE_TOKEN }}
           publisher-id: 'my-publisher'
           extension-id: 'my-extension'
-          share-with: |
+          accounts: |
             customer-org-1
             customer-org-2
 ```

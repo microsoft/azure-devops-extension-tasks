@@ -19,6 +19,14 @@ This extension provides Azure Pipelines tasks to package, publish, and manage Az
 - **Wait for validation**: Wait for Marketplace validation to finish.
 - **Wait for installation**: Wait until extension tasks are available in target organizations.
 
+### Install and wait-for-installation account formats
+
+For `install` and `wait-for-installation`, the `accounts` input supports:
+
+- Azure DevOps Services org name: `ORG` (automatically expanded to `https://dev.azure.com/ORG`)
+- Azure DevOps Services URL: `https://dev.azure.com/ORG`
+- Azure DevOps Server/TFS: full collection URL (for example `https://myserver/tfs/DefaultCollection`)
+
 ### Required scopes
 
 When creating a PAT for pipeline automation, include at least the following scopes:

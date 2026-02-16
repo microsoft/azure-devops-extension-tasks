@@ -108,19 +108,25 @@ inputs:
 
       **Example:** `my-extension` or `azure-devops-tasks`
     required: true
-  unshare-with:
+  accounts:
     description: |-
-      **Organizations to unshare extension from** (newline-separated).
+      **Azure DevOps accounts/organizations** (newline-separated).
 
-      - Removes extension access from specified organizations
-      - Format: organization name OR URL
-      - Supported URLs: `https://dev.azure.com/ORG`, `https://ORG.visualstudio.com`
-      - URL inputs are normalized to organization name automatically
+      - Required for command: install, wait-for-installation, share, unshare.
+      - Format: Full organization URL or organization name
+      - For install/wait-for-installation: target organizations for installation checks
+      - For share/unshare: organizations to grant/remove extension access
 
       **Example:**
       ```
-      oldorg1
-      oldorg2
+      https://dev.azure.com/myorg1
+      https://dev.azure.com/myorg2
+      ```
+
+      Or just:
+      ```
+      myorg1
+      myorg2
       ```
     required: true
 runs:
@@ -138,4 +144,4 @@ runs:
         tfx-version: ${{ inputs.tfx-version }}
         publisher-id: ${{ inputs.publisher-id }}
         extension-id: ${{ inputs.extension-id }}
-        unshare-with: ${{ inputs.unshare-with }}
+        accounts: ${{ inputs.accounts }}

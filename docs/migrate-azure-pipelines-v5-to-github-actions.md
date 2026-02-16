@@ -42,6 +42,17 @@ Common conversions from Azure Pipelines-style names to GitHub Actions inputs:
 - `vsixFile` → `vsix-file`
 - `extensionVersion` → `extension-version`
 
+## Account input migration
+
+For account-targeted operations in GitHub Actions:
+
+- Use `accounts` for `install`, `wait-for-installation`, `share`, and `unshare`.
+- Do not use `service-url` for `install` or `wait-for-installation`.
+- Azure DevOps Services account values can be either:
+  - `ORG` (automatically expanded to `https://dev.azure.com/ORG`)
+  - `https://dev.azure.com/ORG`
+- Azure DevOps Server/TFS values must be full collection URLs (for example `https://myserver/tfs/DefaultCollection`).
+
 ## `extensionTag` in v6
 
 In v6, `extensionTag` is no longer supported. Supply the full `extension-id` value yourself.
@@ -62,17 +73,14 @@ steps:
 
 ## `outputVariable` / `output-variable` in v6
 
-    Custom output variable inputs are no longer supported in this v6 rebuild.
+Custom output variable inputs are no longer supported in this v6 rebuild.
 
-    - Azure Pipelines: `outputVariable` removed
-    - GitHub Actions: `output-variable` removed
+Use standard step outputs only:
 
-    Use standard step outputs only:
-
-    - package: `${{ steps.package.outputs.vsix-path }}`
-    - publish: `${{ steps.publish.outputs.vsix-path }}`
-    - show: `${{ steps.show.outputs.extension-metadata }}`
-    - query-version: `${{ steps.version.outputs.proposed-version }}`, `${{ steps.version.outputs.current-version }}`
+- package: `${{ steps.package.outputs.vsix-path }}`
+- publish: `${{ steps.publish.outputs.vsix-path }}`
+- show: `${{ steps.show.outputs.extension-metadata }}`
+- query-version: `${{ steps.version.outputs.proposed-version }}`, `${{ steps.version.outputs.current-version }}`
 
 ## Authentication migration
 

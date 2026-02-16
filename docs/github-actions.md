@@ -172,6 +172,16 @@ This repository ships a **unified JavaScript action** and **composite command wr
 - `proposed-version` (query-version)
 - `current-version` (query-version)
 
+## Status and control flow
+
+GitHub Actions does not use legacy task status outputs such as `published`, `shared`, `unshared`, `installed`, `waitForValidation`, or `waitForInstallation`.
+
+Use built-in status fields for both the unified action and composite wrappers:
+
+- `${{ steps.<step_id>.outcome }}` (`success`, `failure`, `cancelled`, `skipped`)
+- `${{ steps.<step_id>.conclusion }}` (especially useful with `continue-on-error`)
+- `if: success()`, `if: failure()`, `if: always()`, `if: cancelled()`
+
 ## Composite action availability
 
 The repo provides command-focused composite wrappers that internally call the unified action:

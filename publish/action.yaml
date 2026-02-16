@@ -179,21 +179,6 @@ inputs:
 
       **Note:** Private extensions must be explicitly shared with organizations
     required: false
-  share-with:
-    description: |-
-      **Organizations to share extension with** (newline-separated).
-
-      - Format: organization name OR URL
-      - Supported URLs: `https://dev.azure.com/ORG`, `https://ORG.visualstudio.com`
-      - URL inputs are normalized to organization name automatically
-
-      **Example:**
-      ```
-      myorg1
-      myorg2
-      contoso
-      ```
-    required: false
   no-wait-validation:
     description: |-
       **Do not wait for marketplace validation** after publishing.
@@ -264,7 +249,6 @@ runs:
         extension-version: ${{ inputs.extension-version }}
         extension-name: ${{ inputs.extension-name }}
         extension-visibility: ${{ inputs.extension-visibility }}
-        share-with: ${{ inputs.share-with }}
         no-wait-validation: ${{ inputs.no-wait-validation }}
         update-tasks-version: ${{ inputs.update-tasks-version }}
         update-tasks-id: ${{ inputs.update-tasks-id }}

@@ -50,18 +50,6 @@ Publish an Azure DevOps extension to the Visual Studio Marketplace.
     root-folder: './my-extension'
 ```
 
-### Publish with Sharing
-
-```yaml
-- uses: jessehouwing/azure-devops-extension-tasks/publish@v6
-  with:
-    token: ${{ secrets.MARKETPLACE_TOKEN }}
-    root-folder: './my-extension'
-    share-with: |
-      myorg1
-      myorg2
-```
-
 ### Publish with Version Override and Task Updates
 
 ```yaml
@@ -125,7 +113,6 @@ OR
 
 #### Publish Options
 
-- `share-with`: Organizations to share with, newline-separated
 - `no-wait-validation`: Don't wait for validation (default: `false`)
 - `update-tasks-version`: Update task versions to match extension version (default: `false`)
 - `update-tasks-id`: Generate deterministic task IDs (default: `false`)
@@ -163,5 +150,4 @@ jobs:
 
 - [Package](../package) - Create extension package
 - [Unpublish](../unpublish) - Remove extension from marketplace
-- [Share](../share) - Share extension with organizations
 - [Main Action](../) - All-in-one action with all commands

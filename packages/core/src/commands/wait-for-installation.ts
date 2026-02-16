@@ -3,6 +3,7 @@ import type { ITaskAgentApi } from 'azure-devops-node-api/TaskAgentApi.js';
 import type { TaskDefinition } from 'azure-devops-node-api/interfaces/TaskAgentInterfaces.js';
 import type { AuthCredentials } from '../auth.js';
 import { readManifest, resolveTaskManifestPaths } from '../manifest-utils.js';
+import { normalizeAccountsToServiceUrls } from '../organization-utils.js';
 import type { IPlatformAdapter } from '../platform.js';
 import { VsixReader } from '../vsix-reader.js';
 
@@ -14,7 +15,7 @@ export interface ExpectedTask {
 export interface WaitForInstallationOptions {
   publisherId: string;
   extensionId: string;
-  accounts: string[]; // Target org URLs
+  accounts: string[]; // Target organization names or URLs
   expectedTasks?: ExpectedTask[]; // Tasks with expected versions
   manifestPath?: string; // Path to extension manifest (vss-extension.json) to read task versions
   vsixPath?: string; // Path to VSIX file to read task versions from
@@ -132,12 +133,13 @@ export async function waitForInstallation(
   platform: IPlatformAdapter
 ): Promise<WaitForInstallationResult> {
   const fullExtensionId = options.extensionId;
+  const accountUrls = normalizeAccountsToServiceUrls(options.accounts);
 
   const timeoutMs = (options.timeoutMinutes ?? 10) * 60_000;
   const pollingIntervalMs = (options.pollingIntervalSeconds ?? 30) * 1000;
 
   platform.debug(
-    `Verifying installation of ${options.publisherId}.${fullExtensionId} in ${options.accounts.length} account(s)`
+    `Verifying installation of ${options.publisherId}.${fullExtensionId} in ${accountUrls.length} account(s)`
   );
 
   // Resolve expected tasks with versions
@@ -145,7 +147,7 @@ export async function waitForInstallation(
 
   const accountResults: WaitForInstallationResult['accountResults'] = [];
 
-  for (const accountUrl of options.accounts) {
+  for (const accountUrl of accountUrls) {
     platform.debug(`Checking account: ${accountUrl}`);
     platform.info(
       `Polling for task availability (timeout: ${options.timeoutMinutes ?? 10} minutes, interval: ${options.pollingIntervalSeconds ?? 30} seconds)`

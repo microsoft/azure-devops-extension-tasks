@@ -288,16 +288,7 @@
       "label": "Share With",
       "required": false,
       "helpMarkDown": "**Organizations to share the extension with** (one per line).\n\n- Required for private extensions\n- Format: organization name only (not full URL)\n- Organizations must exist in Azure DevOps\n\n**Examples**:\n```\nmyorg1\nmyorg2\ncontoso\n```\n\n**Note**: Extension must be private to use sharing",
-      "visibleRule": "(operation = publish && (extensionVisibility = private || extensionVisibility = private_preview || extensionVisibility = default)) || operation = share",
-      "groupName": "operationConfig"
-    },
-    {
-      "name": "unshareWith",
-      "type": "multiLine",
-      "label": "Unshare With",
-      "required": false,
-      "helpMarkDown": "**Organizations to unshare the extension from** (one per line).\n\n- Removes extension access from specified organizations\n- Format: organization name only (not full URL)\n- Organizations will no longer see or use the extension\n\n**Examples**:\n```\noldorg1\noldorg2\n```",
-      "visibleRule": "operation = unshare",
+      "visibleRule": "operation = publish && (extensionVisibility = private || extensionVisibility = private_preview || extensionVisibility = default)",
       "groupName": "operationConfig"
     },
     {
@@ -305,8 +296,8 @@
       "type": "multiLine",
       "label": "Accounts",
       "required": true,
-      "helpMarkDown": "**Azure DevOps accounts/organizations** to install extension to (one per line).\n\n- Format: Full organization URL or organization name\n- Organizations must have access to the extension (shared if private)\n- Requires organization administrator permissions\n\n**Examples**:\n```\nhttps://dev.azure.com/myorg1\nhttps://dev.azure.com/myorg2\n```\n\nOr just:\n```\nmyorg1\nmyorg2\n```",
-      "visibleRule": "operation = install || operation = wait-for-installation",
+      "helpMarkDown": "**Azure DevOps accounts/organizations** (one per line).\n\n- Format: Full organization URL or organization name\n- For install/wait-for-installation: target organizations for installation checks\n- For share/unshare: organizations to grant/remove extension access\n\n**Examples**:\n```\nhttps://dev.azure.com/myorg1\nhttps://dev.azure.com/myorg2\n```\n\nOr just:\n```\nmyorg1\nmyorg2\n```",
+      "visibleRule": "operation = install || operation = wait-for-installation || operation = share || operation = unshare",
       "groupName": "operationConfig"
     },
     {

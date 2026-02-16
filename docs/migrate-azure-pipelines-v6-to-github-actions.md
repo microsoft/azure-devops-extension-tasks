@@ -52,6 +52,17 @@ Common input mappings:
 - `vsixFile` → `vsix-file`
 - `extensionVersion` → `extension-version`
 
+## Account input mapping
+
+When moving account-targeted operations to GitHub Actions:
+
+- Use `accounts` for `install`, `wait-for-installation`, `share`, and `unshare`.
+- `install` and `wait-for-installation` do not use `service-url`.
+- Azure DevOps Services values may be either:
+  - `ORG` (automatically expanded to `https://dev.azure.com/ORG`)
+  - `https://dev.azure.com/ORG`
+- Azure DevOps Server/TFS values must be full collection URLs (for example `https://myserver/tfs/DefaultCollection`).
+
 ## `extensionTag` in v6
 
 In v6, `extensionTag` is no longer supported. Supply the full extension ID yourself on both platforms.
@@ -72,17 +83,17 @@ steps:
 
 ## `outputVariable` / `output-variable` in v6
 
-    Custom output variable inputs are no longer supported.
+Custom output variable inputs are no longer supported.
 
-    - Azure Pipelines: `outputVariable` removed
-    - GitHub Actions: `output-variable` removed
+- Azure Pipelines: `outputVariable` removed
+- GitHub Actions: `output-variable` removed
 
-    Use standard step outputs only:
+Use standard step outputs only:
 
-    - package: `vsix-path`
-    - publish: `vsix-path`
-    - show: `extension-metadata`
-    - query-version: `proposed-version`, `current-version`
+- package: `vsix-path`
+- publish: `vsix-path`
+- show: `extension-metadata`
+- query-version: `proposed-version`, `current-version`
 
 ## Authentication migration
 
@@ -141,6 +152,21 @@ Typical output mapping:
 - Azure Pipelines `Extension.Metadata` → GitHub Actions `extension-metadata`
 - Azure Pipelines `Extension.ProposedVersion` → GitHub Actions `proposed-version`
 - Azure Pipelines `Extension.CurrentVersion` → GitHub Actions `current-version`
+
+## Status mapping
+
+Legacy v5/v6 status-style task outputs are not used in GitHub Actions. Use built-in workflow status instead.
+
+| Azure Pipelines legacy output | GitHub Actions equivalent        |
+| ----------------------------- | -------------------------------- |
+| `published`                   | `${{ steps.<step_id>.outcome }}` |
+| `shared`                      | `${{ steps.<step_id>.outcome }}` |
+| `unshared`                    | `${{ steps.<step_id>.outcome }}` |
+| `installed`                   | `${{ steps.<step_id>.outcome }}` |
+| `waitForValidation`           | `${{ steps.<step_id>.outcome }}` |
+| `waitForInstallation`         | `${{ steps.<step_id>.outcome }}` |
+
+Use `${{ steps.<step_id>.conclusion }}` when `continue-on-error: true` is involved and you need post-step branching based on final conclusion semantics.
 
 ## End-to-end example
 

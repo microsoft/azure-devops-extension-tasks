@@ -363,4 +363,32 @@ describe('waitForInstallation', () => {
 
     expect(result.success).toBe(true);
   });
+
+  it('expands plain organization names to dev.azure.com URLs', async () => {
+    getTaskDefinitionsMock.mockResolvedValue([
+      {
+        name: 'Task1',
+        id: 'task-1',
+        version: { major: 1, minor: 0, patch: 0 },
+      },
+    ]);
+
+    const result = await waitForInstallation(
+      {
+        publisherId: 'pub',
+        extensionId: 'ext',
+        accounts: ['org1'],
+        expectedTasks: [{ name: 'Task1', versions: ['1.0.0'] }],
+      },
+      {
+        authType: 'pat',
+        serviceUrl: 'https://marketplace.visualstudio.com',
+        token: 'test-token',
+      },
+      platform
+    );
+
+    expect(result.success).toBe(true);
+    expect(webApiCtorMock).toHaveBeenCalledWith('https://dev.azure.com/org1', expect.anything());
+  });
 });

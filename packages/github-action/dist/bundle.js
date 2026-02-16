@@ -4496,6 +4496,60 @@ function getTaskContributions(manifest) {
   return manifest.contributions.filter((c) => c.type === "ms.vss-distributed-task.task" && c.properties && c.properties.name);
 }
 
+// packages/core/dist/organization-utils.js
+function normalizeOrganizationIdentifier(input) {
+  const value = input.trim();
+  if (!value) {
+    throw new Error("Organization identifier cannot be empty");
+  }
+  const maybeUrl = /^https?:\/\//i.test(value);
+  if (!maybeUrl) {
+    return value;
+  }
+  let parsed;
+  try {
+    parsed = new URL(value);
+  } catch {
+    throw new Error(`Invalid organization URL: ${value}. Supported formats are https://dev.azure.com/ORG and https://ORG.visualstudio.com`);
+  }
+  const host = parsed.hostname.toLowerCase();
+  if (host === "dev.azure.com") {
+    const segments = parsed.pathname.split("/").filter(Boolean);
+    const org = segments[0];
+    if (!org) {
+      throw new Error(`Invalid organization URL: ${value}. Expected format https://dev.azure.com/ORG`);
+    }
+    return org;
+  }
+  if (host.endsWith(".visualstudio.com")) {
+    const org = parsed.hostname.split(".")[0];
+    if (!org) {
+      throw new Error(`Invalid organization URL: ${value}. Expected format https://ORG.visualstudio.com`);
+    }
+    return org;
+  }
+  throw new Error(`Unsupported organization URL: ${value}. Supported formats are https://dev.azure.com/ORG and https://ORG.visualstudio.com`);
+}
+function normalizeOrganizationIdentifiers(values) {
+  return values.map((value) => normalizeOrganizationIdentifier(value));
+}
+function normalizeAccountToServiceUrl(input) {
+  const value = input.trim();
+  if (!value) {
+    throw new Error("Account identifier cannot be empty");
+  }
+  if (/^https?:\/\//i.test(value)) {
+    return value;
+  }
+  if (/\s/.test(value) || /[\/\\]/.test(value)) {
+    throw new Error(`Invalid organization name: ${value}. Use a plain organization name like ORG or a full URL like https://dev.azure.com/ORG`);
+  }
+  return `https://dev.azure.com/${value}`;
+}
+function normalizeAccountsToServiceUrls(values) {
+  return values.map((value) => normalizeAccountToServiceUrl(value));
+}
+
 // packages/core/dist/tfx-manager.js
 import fs from "fs/promises";
 import path2 from "path";
@@ -5225,44 +5279,6 @@ async function unpublishExtension(options, auth, tfx, platform) {
   };
 }
 
-// packages/core/dist/organization-utils.js
-function normalizeOrganizationIdentifier(input) {
-  const value = input.trim();
-  if (!value) {
-    throw new Error("Organization identifier cannot be empty");
-  }
-  const maybeUrl = /^https?:\/\//i.test(value);
-  if (!maybeUrl) {
-    return value;
-  }
-  let parsed;
-  try {
-    parsed = new URL(value);
-  } catch {
-    throw new Error(`Invalid organization URL: ${value}. Supported formats are https://dev.azure.com/ORG and https://ORG.visualstudio.com`);
-  }
-  const host = parsed.hostname.toLowerCase();
-  if (host === "dev.azure.com") {
-    const segments = parsed.pathname.split("/").filter(Boolean);
-    const org = segments[0];
-    if (!org) {
-      throw new Error(`Invalid organization URL: ${value}. Expected format https://dev.azure.com/ORG`);
-    }
-    return org;
-  }
-  if (host.endsWith(".visualstudio.com")) {
-    const org = parsed.hostname.split(".")[0];
-    if (!org) {
-      throw new Error(`Invalid organization URL: ${value}. Expected format https://ORG.visualstudio.com`);
-    }
-    return org;
-  }
-  throw new Error(`Unsupported organization URL: ${value}. Supported formats are https://dev.azure.com/ORG and https://ORG.visualstudio.com`);
-}
-function normalizeOrganizationIdentifiers(values) {
-  return values.map((value) => normalizeOrganizationIdentifier(value));
-}
-
 // packages/core/dist/commands/share.js
 async function shareExtension(options, auth, tfx, platform) {
   if (!options.shareWith || options.shareWith.length === 0) {
@@ -5343,11 +5359,12 @@ async function installExtension(options, auth, tfx, platform) {
   if (options.extensionVersion) {
     throw new Error("install does not support extension-version. Remove this input and install from marketplace latest, or provide a VSIX path when you need a specific package version.");
   }
-  platform.info(`Installing extension ${options.publisherId}.${options.extensionId} to ${options.accounts.length} organization(s)...`);
+  const accountUrls = normalizeAccountsToServiceUrls(options.accounts);
+  platform.info(`Installing extension ${options.publisherId}.${options.extensionId} to ${accountUrls.length} organization(s)...`);
   const extensionId = options.extensionId;
   const accountResults = [];
   let overallExitCode = 0;
-  for (const account of options.accounts) {
+  for (const account of accountUrls) {
     platform.info(`Installing to ${account}...`);
     const args = new ArgBuilder().arg(["extension", "install"]).flag("--json").flag("--no-color").option("--publisher", options.publisherId).option("--extension-id", extensionId).option("--service-url", account);
     args.option("--auth-type", auth.authType);
@@ -5412,7 +5429,7 @@ async function installExtension(options, auth, tfx, platform) {
   }
   const allSuccess = accountResults.every((r) => r.success);
   const successCount = accountResults.filter((r) => r.success).length;
-  platform.info(`Installation complete: ${successCount}/${options.accounts.length} succeeded`);
+  platform.info(`Installation complete: ${successCount}/${accountUrls.length} succeeded`);
   return {
     extensionId,
     publisherId: options.publisherId,
@@ -5686,12 +5703,13 @@ async function resolveExpectedTasks(options, platform) {
 }
 async function waitForInstallation(options, auth, platform) {
   const fullExtensionId = options.extensionId;
+  const accountUrls = normalizeAccountsToServiceUrls(options.accounts);
   const timeoutMs = (options.timeoutMinutes ?? 10) * 6e4;
   const pollingIntervalMs = (options.pollingIntervalSeconds ?? 30) * 1e3;
-  platform.debug(`Verifying installation of ${options.publisherId}.${fullExtensionId} in ${options.accounts.length} account(s)`);
+  platform.debug(`Verifying installation of ${options.publisherId}.${fullExtensionId} in ${accountUrls.length} account(s)`);
   const expectedTasks = await resolveExpectedTasks(options, platform);
   const accountResults = [];
-  for (const accountUrl of options.accounts) {
+  for (const accountUrl of accountUrls) {
     platform.debug(`Checking account: ${accountUrl}`);
     platform.info(`Polling for task availability (timeout: ${options.timeoutMinutes ?? 10} minutes, interval: ${options.pollingIntervalSeconds ?? 30} seconds)`);
     try {
@@ -6897,7 +6915,7 @@ async function run() {
       const accounts = platform.getDelimitedInput("accounts", ";", false);
       accounts.forEach((account) => {
         if (account) {
-          validateAccountUrl(account);
+          validateAccountUrl(normalizeAccountToServiceUrl(account));
         }
       });
     }
@@ -7006,7 +7024,7 @@ async function runShare(platform, tfxManager, auth) {
     {
       publisherId: platform.getInput("publisher-id", true),
       extensionId: platform.getInput("extension-id", true),
-      shareWith: platform.getDelimitedInput("share-with", "\n", true)
+      shareWith: platform.getDelimitedInput("accounts", "\n", true)
     },
     auth,
     tfxManager,
@@ -7018,7 +7036,7 @@ async function runUnshare(platform, tfxManager, auth) {
     {
       publisherId: platform.getInput("publisher-id", true),
       extensionId: platform.getInput("extension-id", true),
-      unshareWith: platform.getDelimitedInput("unshare-with", "\n", true)
+      unshareWith: platform.getDelimitedInput("accounts", "\n", true)
     },
     auth,
     tfxManager,

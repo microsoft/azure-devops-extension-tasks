@@ -4,7 +4,7 @@ Unshare an Azure DevOps extension from specific organizations.
 
 ## Usage
 
-`unshare-with` accepts organization names and the URL formats `https://dev.azure.com/ORG` and `https://ORG.visualstudio.com`. URL inputs are normalized to organization names before execution.
+`accounts` accepts organization names and the URL formats `https://dev.azure.com/ORG` and `https://ORG.visualstudio.com`. URL inputs are normalized to organization names before execution.
 
 ### Unshare from Single Organization
 
@@ -14,7 +14,7 @@ Unshare an Azure DevOps extension from specific organizations.
     token: ${{ secrets.MARKETPLACE_TOKEN }}
     publisher-id: 'my-publisher'
     extension-id: 'my-extension'
-    unshare-with: 'old-org'
+    accounts: 'old-org'
 ```
 
 ### Unshare from Multiple Organizations
@@ -25,7 +25,7 @@ Unshare an Azure DevOps extension from specific organizations.
     token: ${{ secrets.MARKETPLACE_TOKEN }}
     publisher-id: 'my-publisher'
     extension-id: 'my-extension'
-    unshare-with: |
+    accounts: |
       old-org-1
       old-org-2
       old-org-3
@@ -45,7 +45,7 @@ Unshare an Azure DevOps extension from specific organizations.
     auth-type: 'oidc'
     publisher-id: 'my-publisher'
     extension-id: 'my-extension'
-    unshare-with: 'old-org'
+    accounts: 'old-org'
 ```
 
 ## Inputs
@@ -54,7 +54,7 @@ Unshare an Azure DevOps extension from specific organizations.
 
 - `publisher-id`: Publisher ID
 - `extension-id`: Extension ID
-- `unshare-with`: Organizations to unshare from (newline-separated)
+- `accounts`: Organizations to unshare from (newline-separated)
 - `token`: Personal Access Token (required when auth-type is `pat`)
 
 OR
@@ -97,7 +97,7 @@ jobs:
           token: ${{ secrets.MARKETPLACE_TOKEN }}
           publisher-id: 'my-publisher'
           extension-id: 'my-extension'
-          unshare-with: ${{ github.event.inputs.organization }}
+          accounts: ${{ github.event.inputs.organization }}
 ```
 
 ## See Also

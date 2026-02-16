@@ -4,6 +4,12 @@ Verify that an Azure DevOps extension has been installed correctly and that all 
 
 `wait-for-installation` does not take a `service-url` input. The action iterates each `accounts` entry and verifies task availability against that account URL.
 
+`accounts` input formats:
+
+- Azure DevOps Services org name: `ORG` (automatically expanded to `https://dev.azure.com/ORG`)
+- Azure DevOps Services URL: `https://dev.azure.com/ORG`
+- Azure DevOps Server/TFS: provide the full collection URL (for example `https://myserver/tfs/DefaultCollection`)
+
 ## Usage
 
 ### Verify with Manifest

@@ -23,6 +23,7 @@ const validateExtensionIdMock = jest.fn();
 const validatePublisherIdMock = jest.fn();
 const validateVersionMock = jest.fn();
 const validateAccountUrlMock = jest.fn();
+const normalizeAccountToServiceUrlMock = jest.fn((value: string) => value);
 const validateNodeAvailableMock = jest.fn();
 const validateNpmAvailableMock = jest.fn();
 const validateTfxAvailableMock = jest.fn();
@@ -66,6 +67,7 @@ jest.unstable_mockModule('@extension-tasks/core', () => ({
   validatePublisherId: validatePublisherIdMock,
   validateVersion: validateVersionMock,
   validateAccountUrl: validateAccountUrlMock,
+  normalizeAccountToServiceUrl: normalizeAccountToServiceUrlMock,
   validateNodeAvailable: validateNodeAvailableMock,
   validateNpmAvailable: validateNpmAvailableMock,
   validateTfxAvailable: validateTfxAvailableMock,
@@ -112,6 +114,7 @@ async function importMainAndFlush(): Promise<void> {
 describe('Azure DevOps main entrypoint', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    normalizeAccountToServiceUrlMock.mockImplementation((value: string) => value);
     validateNodeAvailableMock.mockImplementation(async () => undefined);
     validateNpmAvailableMock.mockImplementation(async () => undefined);
     validateTfxAvailableMock.mockImplementation(async () => undefined);
@@ -310,7 +313,7 @@ describe('Azure DevOps main entrypoint', () => {
         extensionId: 'extension',
       },
       delimitedInputs: {
-        'shareWith|\n': ['org1'],
+        'accounts|\n': ['org1'],
       },
     });
     azdoAdapterCtorMock.mockReturnValue(platform);
@@ -330,7 +333,7 @@ describe('Azure DevOps main entrypoint', () => {
         extensionId: 'extension',
       },
       delimitedInputs: {
-        'unshareWith|\n': ['org1'],
+        'accounts|\n': ['org1'],
       },
     });
     azdoAdapterCtorMock.mockReturnValue(platform);

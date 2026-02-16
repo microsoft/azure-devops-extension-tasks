@@ -20,6 +20,7 @@ import {
   validateVersion,
   waitForInstallation,
   waitForValidation,
+  normalizeAccountToServiceUrl,
 } from '@extension-tasks/core';
 import { AuthType, getAuth } from './auth/index.js';
 import { GitHubAdapter } from './github-adapter.js';
@@ -118,7 +119,7 @@ async function run(): Promise<void> {
       const accounts = platform.getDelimitedInput('accounts', ';', false);
       accounts.forEach((account) => {
         if (account) {
-          validateAccountUrl(account);
+          validateAccountUrl(normalizeAccountToServiceUrl(account));
         }
       });
     }
@@ -260,7 +261,7 @@ async function runShare(platform: GitHubAdapter, tfxManager: TfxManager, auth: a
     {
       publisherId: platform.getInput('publisher-id', true),
       extensionId: platform.getInput('extension-id', true),
-      shareWith: platform.getDelimitedInput('share-with', '\n', true),
+      shareWith: platform.getDelimitedInput('accounts', '\n', true),
     },
     auth,
     tfxManager,
@@ -277,7 +278,7 @@ async function runUnshare(
     {
       publisherId: platform.getInput('publisher-id', true),
       extensionId: platform.getInput('extension-id', true),
-      unshareWith: platform.getDelimitedInput('unshare-with', '\n', true),
+      unshareWith: platform.getDelimitedInput('accounts', '\n', true),
     },
     auth,
     tfxManager,

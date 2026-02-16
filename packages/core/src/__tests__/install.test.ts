@@ -310,6 +310,31 @@ describe('installExtension', () => {
     expect(platform.isSecret('pass')).toBe(true);
   });
 
+  it('should expand plain organization names to dev.azure.com service URLs', async () => {
+    const mockExecute = jest.spyOn(tfxManager, 'execute');
+    mockExecute.mockResolvedValue({
+      exitCode: 0,
+      json: {},
+      stdout: '',
+      stderr: '',
+    });
+
+    await installExtension(
+      {
+        publisherId: 'pub',
+        extensionId: 'ext',
+        accounts: ['org1'],
+      },
+      auth,
+      tfxManager,
+      platform
+    );
+
+    const callArgs = mockExecute.mock.calls[0][0];
+    expect(callArgs).toContain('--service-url');
+    expect(callArgs).toContain('https://dev.azure.com/org1');
+  });
+
   it('should handle execution exception and continue with failed account result', async () => {
     const mockExecute = jest.spyOn(tfxManager, 'execute');
     mockExecute.mockRejectedValueOnce(new Error('network failure'));

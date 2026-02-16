@@ -18,6 +18,7 @@ import {
   validateVersion,
   waitForInstallation,
   waitForValidation,
+  normalizeAccountToServiceUrl,
 } from '@extension-tasks/core';
 import * as tl from 'azure-pipelines-task-lib/task.js';
 import { ConnectionType, getAuth } from './auth/index.js';
@@ -103,7 +104,7 @@ async function run(): Promise<void> {
       const accounts = platform.getDelimitedInput('accounts', ';', false);
       accounts.forEach((account) => {
         if (account) {
-          validateAccountUrl(account);
+          validateAccountUrl(normalizeAccountToServiceUrl(account));
         }
       });
     }
@@ -253,7 +254,7 @@ async function runShare(platform: AzdoAdapter, tfxManager: TfxManager, auth: any
     {
       publisherId: platform.getInput('publisherId', true),
       extensionId: platform.getInput('extensionId', true),
-      shareWith: platform.getDelimitedInput('shareWith', '\n', true),
+      shareWith: platform.getDelimitedInput('accounts', '\n', true),
     },
     auth,
     tfxManager,
@@ -268,7 +269,7 @@ async function runUnshare(platform: AzdoAdapter, tfxManager: TfxManager, auth: a
     {
       publisherId: platform.getInput('publisherId', true),
       extensionId: platform.getInput('extensionId', true),
-      unshareWith: platform.getDelimitedInput('unshareWith', '\n', true),
+      unshareWith: platform.getDelimitedInput('accounts', '\n', true),
     },
     auth,
     tfxManager,

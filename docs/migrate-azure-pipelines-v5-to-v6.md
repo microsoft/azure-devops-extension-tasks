@@ -59,6 +59,18 @@ Additional commands now available in v6:
 - `show`
 - `wait-for-installation`
 
+## Input contract changes
+
+When migrating to v6, update account-related inputs as follows:
+
+- `install` and `wait-for-installation` no longer use `service-url`.
+- Use `accounts` (multi-line) for target organizations/collections.
+- For Azure DevOps Services, `accounts` supports org names and URLs:
+  - `ORG` (automatically expanded to `https://dev.azure.com/ORG`)
+  - `https://dev.azure.com/ORG`
+- For Azure DevOps Server/TFS, provide the full collection URL in `accounts` (for example `https://myserver/tfs/DefaultCollection`).
+- `share` and `unshare` also use the `accounts` input in v6 for consistency.
+
 ## `extensionTag` in v6
 
 In v6, `extensionTag` is no longer supported. Supply the full `extensionId` value yourself.
@@ -125,9 +137,9 @@ For OIDC setup and Entra workload federation details, see:
 - [Authentication and OIDC](./authentication-and-oidc.md)
 - [Azure Pipelines usage](./azure-pipelines.md)
 
-## Output variables in v6
+## Output variables in v6 (Azure Pipelines)
 
-Common v6 outputs:
+Azure Pipelines v6 task outputs:
 
 - `vsixPath`
 - `extensionMetadata`

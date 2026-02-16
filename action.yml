@@ -249,7 +249,7 @@ inputs:
     description: |
       **Organizations to share extension with** (newline-separated).
 
-      - Required for command: share.
+      - Optional for command: publish.
       - Format: organization name OR URL
       - Supported URLs: `https://dev.azure.com/ORG`, `https://ORG.visualstudio.com`
       - URL inputs are normalized to organization name automatically
@@ -295,33 +295,15 @@ inputs:
     required: false
     default: 'false'
 
-  # Share/Unshare Options
-  unshare-with:
-    description: |
-      **Organizations to unshare extension from** (newline-separated).
-
-      - Required for command: unshare.
-      - Removes extension access from specified organizations
-      - Format: organization name OR URL
-      - Supported URLs: `https://dev.azure.com/ORG`, `https://ORG.visualstudio.com`
-      - URL inputs are normalized to organization name automatically
-
-      **Example:**
-      ```
-      oldorg1
-      oldorg2
-      ```
-    required: false
-
   # Install Options
   accounts:
     description: |
-      **Azure DevOps accounts/organizations** to install extension to (newline-separated).
+      **Azure DevOps accounts/organizations** (newline-separated).
 
-      - Required for command: install, wait-for-installation.
+      - Required for command: install, wait-for-installation, share, unshare.
       - Format: Full organization URL or organization name
-      - Organizations must have access to the extension (shared if private)
-      - Requires organization administrator permissions
+      - For install/wait-for-installation: target organizations for installation checks
+      - For share/unshare: organizations to grant/remove extension access
 
       **Example:**
       ```
