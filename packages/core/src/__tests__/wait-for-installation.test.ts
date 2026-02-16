@@ -309,26 +309,35 @@ describe('waitForInstallation', () => {
     );
   });
 
-  it('fails when service-url is marketplace endpoint', async () => {
-    await expect(
-      waitForInstallation(
-        {
-          publisherId: 'pub',
-          extensionId: 'ext',
-          accounts: ['https://dev.azure.com/org1'],
-          expectedTasks: [{ name: 'Task1', versions: ['1.0.0'] }],
-        },
-        {
-          authType: 'pat',
-          serviceUrl: 'https://marketplace.visualstudio.com',
-          token: 'test-token',
-        },
-        platform
-      )
-    ).rejects.toThrow('wait-for-installation cannot use the default marketplace endpoint');
+  it('does not require auth.serviceUrl and uses account URLs instead', async () => {
+    getTaskDefinitionsMock.mockResolvedValue([
+      {
+        name: 'Task1',
+        id: 'task-1',
+        version: { major: 1, minor: 0, patch: 0 },
+      },
+    ]);
+
+    const result = await waitForInstallation(
+      {
+        publisherId: 'pub',
+        extensionId: 'ext',
+        accounts: ['https://dev.azure.com/org1'],
+        expectedTasks: [{ name: 'Task1', versions: ['1.0.0'] }],
+      },
+      {
+        authType: 'pat',
+        serviceUrl: 'https://marketplace.visualstudio.com',
+        token: 'test-token',
+      },
+      platform
+    );
+
+    expect(result.success).toBe(true);
+    expect(webApiCtorMock).toHaveBeenCalledWith('https://dev.azure.com/org1', expect.anything());
   });
 
-  it('allows non-dev.azure.com service-url for Azure DevOps Server installations', async () => {
+  it('allows Azure DevOps Server account URLs in accounts list', async () => {
     getTaskDefinitionsMock.mockResolvedValue([
       {
         name: 'Task1',
@@ -346,7 +355,7 @@ describe('waitForInstallation', () => {
       },
       {
         authType: 'pat',
-        serviceUrl: 'https://myserver.local/tfs/DefaultCollection',
+        serviceUrl: 'https://marketplace.visualstudio.com',
         token: 'test-token',
       },
       platform

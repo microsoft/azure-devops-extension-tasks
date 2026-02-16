@@ -59,24 +59,6 @@ inputs:
 
       Use for on-premises TFS or Azure DevOps Server deployments
     required: false
-  service-url:
-    description: |-
-      Azure DevOps service URL (optional)
-
-      - Defaults to marketplace URL for cloud operations
-      - For wait-for-installation, this is required and must point to an Azure DevOps organization/server endpoint
-      - Recommended cloud format: https://dev.azure.com/<organization>
-      - Azure DevOps Server/TFS URLs are also supported
-      - Specify custom URL for on-premises Azure DevOps Server
-      - Must be HTTPS and valid Azure DevOps domain
-
-      Examples:
-      - https://marketplace.visualstudio.com (default)
-      - https://dev.azure.com/myorg
-      - https://myserver.com/Collection
-      - https://myserver.com/tfs/Collection
-    required: false
-
   tfx-version:
     description: |-
       **Version of tfx-cli to use:**
@@ -194,7 +176,6 @@ runs:
         token: ${{ inputs.token }}
         username: ${{ inputs.username }}
         password: ${{ inputs.password }}
-        service-url: ${{ inputs.service-url }}
         tfx-version: ${{ inputs.tfx-version }}
         publisher-id: ${{ inputs.publisher-id }}
         extension-id: ${{ inputs.extension-id }}

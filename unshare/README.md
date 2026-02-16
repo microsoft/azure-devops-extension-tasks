@@ -4,6 +4,8 @@ Unshare an Azure DevOps extension from specific organizations.
 
 ## Usage
 
+`unshare-with` accepts organization names and the URL formats `https://dev.azure.com/ORG` and `https://ORG.visualstudio.com`. URL inputs are normalized to organization names before execution.
+
 ### Unshare from Single Organization
 
 ```yaml

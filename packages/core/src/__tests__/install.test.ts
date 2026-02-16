@@ -162,20 +162,35 @@ describe('installExtension', () => {
     expect(callArgs).toContain('ext');
   });
 
-  it('should include version if specified', async () => {
+  it('should reject extensionVersion for install', async () => {
+    await expect(
+      installExtension(
+        {
+          publisherId: 'pub',
+          extensionId: 'ext',
+          extensionVersion: '1.2.3',
+          accounts: ['https://dev.azure.com/org1'],
+        },
+        auth,
+        tfxManager,
+        platform
+      )
+    ).rejects.toThrow('install does not support extension-version');
+  });
+
+  it('should fail when tfx returns exit 0 without JSON output', async () => {
     const mockExecute = jest.spyOn(tfxManager, 'execute');
     mockExecute.mockResolvedValue({
       exitCode: 0,
-      json: {},
+      json: undefined,
       stdout: '',
       stderr: '',
     });
 
-    await installExtension(
+    const result = await installExtension(
       {
         publisherId: 'pub',
         extensionId: 'ext',
-        extensionVersion: '1.2.3',
         accounts: ['https://dev.azure.com/org1'],
       },
       auth,
@@ -183,9 +198,10 @@ describe('installExtension', () => {
       platform
     );
 
-    const callArgs = mockExecute.mock.calls[0][0];
-    expect(callArgs).toContain('--extension-version');
-    expect(callArgs).toContain('1.2.3');
+    expect(result.allSuccess).toBe(false);
+    expect(result.exitCode).toBe(1);
+    expect(result.accountResults[0].success).toBe(false);
+    expect(result.accountResults[0].error).toContain('no JSON output');
   });
 
   it('should use PAT authentication', async () => {

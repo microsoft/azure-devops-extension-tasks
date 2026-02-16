@@ -267,6 +267,12 @@ describe('GitHub Action main entrypoint', () => {
 
     await importMainAndFlush();
 
+    expect(getAuthMock).toHaveBeenCalledWith('pat', platform, {
+      token: undefined,
+      username: undefined,
+      password: undefined,
+      serviceUrl: undefined,
+    });
     expect(waitForInstallationMock).not.toHaveBeenCalled();
     expect(setFailedMock).toHaveBeenCalled();
     expect(String(setFailedMock.mock.calls[0][0])).toContain('Failed to parse expected-tasks');

@@ -52,6 +52,9 @@ async function run(): Promise<void> {
 
     const extensionVersion = platform.getInput('extension-version');
     if (extensionVersion) {
+      if (operation === 'install') {
+        throw new Error('install does not support extension-version');
+      }
       validateVersion(extensionVersion);
     }
 
@@ -83,7 +86,10 @@ async function run(): Promise<void> {
       const token = platform.getInput('token');
       const username = platform.getInput('username');
       const password = platform.getInput('password');
-      const serviceUrl = platform.getInput('service-url');
+      const serviceUrl =
+        operation === 'install' || operation === 'wait-for-installation'
+          ? undefined
+          : platform.getInput('service-url');
 
       auth = await getAuth(authType, platform, {
         token,
@@ -102,7 +108,7 @@ async function run(): Promise<void> {
       }
 
       // Validate service URL if present
-      if (auth.serviceUrl) {
+      if (operation !== 'install' && operation !== 'wait-for-installation' && auth.serviceUrl) {
         validateAccountUrl(auth.serviceUrl);
       }
     }
@@ -289,7 +295,6 @@ async function runInstall(
       publisherId: platform.getInput('publisher-id', true),
       extensionId: platform.getInput('extension-id', true),
       accounts: platform.getDelimitedInput('accounts', '\n', true),
-      extensionVersion: platform.getInput('extension-version'),
     },
     auth,
     tfxManager,

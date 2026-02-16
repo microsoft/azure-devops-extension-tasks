@@ -83,7 +83,6 @@ inputs:
       Azure DevOps service URL (optional)
 
       - Defaults to marketplace URL for cloud operations
-      - For `wait-for-installation`, this is required and must point to an Azure DevOps organization/server endpoint
       - Recommended cloud format: `https://dev.azure.com/<organization>`
       - Azure DevOps Server/TFS URLs are also supported
       - Specify custom URL for on-premises Azure DevOps Server
@@ -94,6 +93,8 @@ inputs:
       - https://dev.azure.com/myorg
       - https://myserver.com/Collection
       - https://myserver.com/tfs/Collection
+
+      Optional for: publish, share, unshare, show, query-version, wait-for-validation
     required: false
 
   # TFX Configuration
@@ -249,7 +250,9 @@ inputs:
       **Organizations to share extension with** (newline-separated).
 
       - Required for command: share.
-      - Format: organization name only (not full URL)
+      - Format: organization name OR URL
+      - Supported URLs: `https://dev.azure.com/ORG`, `https://ORG.visualstudio.com`
+      - URL inputs are normalized to organization name automatically
 
       **Example:**
       ```
@@ -299,7 +302,9 @@ inputs:
 
       - Required for command: unshare.
       - Removes extension access from specified organizations
-      - Format: organization name only (not full URL)
+      - Format: organization name OR URL
+      - Supported URLs: `https://dev.azure.com/ORG`, `https://ORG.visualstudio.com`
+      - URL inputs are normalized to organization name automatically
 
       **Example:**
       ```

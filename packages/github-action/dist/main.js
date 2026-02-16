@@ -24,6 +24,9 @@ async function run() {
         }
         const extensionVersion = platform.getInput('extension-version');
         if (extensionVersion) {
+            if (operation === 'install') {
+                throw new Error('install does not support extension-version');
+            }
             validateVersion(extensionVersion);
         }
         // Create TfxManager
@@ -50,7 +53,9 @@ async function run() {
             const token = platform.getInput('token');
             const username = platform.getInput('username');
             const password = platform.getInput('password');
-            const serviceUrl = platform.getInput('service-url');
+            const serviceUrl = operation === 'install' || operation === 'wait-for-installation'
+                ? undefined
+                : platform.getInput('service-url');
             auth = await getAuth(authType, platform, {
                 token,
                 username,
@@ -66,7 +71,7 @@ async function run() {
                 platform.setSecret(auth.password);
             }
             // Validate service URL if present
-            if (auth.serviceUrl) {
+            if (operation !== 'install' && operation !== 'wait-for-installation' && auth.serviceUrl) {
                 validateAccountUrl(auth.serviceUrl);
             }
         }
@@ -192,7 +197,6 @@ async function runInstall(platform, tfxManager, auth) {
         publisherId: platform.getInput('publisher-id', true),
         extensionId: platform.getInput('extension-id', true),
         accounts: platform.getDelimitedInput('accounts', '\n', true),
-        extensionVersion: platform.getInput('extension-version'),
     }, auth, tfxManager, platform);
     if (!result.allSuccess) {
         throw new Error(`Some accounts failed to install the extension`);

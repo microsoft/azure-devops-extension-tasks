@@ -17,7 +17,10 @@ export interface InstallOptions {
   extensionId: string;
   /** Target organization URLs to install to */
   accounts: string[];
-  /** Extension version to install (optional) */
+  /**
+   * Extension version input (not supported for install).
+   * Kept for backward compatibility so we can emit a clear error.
+   */
   extensionVersion?: string;
 }
 
@@ -69,6 +72,12 @@ export async function installExtension(
     throw new Error('accounts must contain at least one organization URL');
   }
 
+  if (options.extensionVersion) {
+    throw new Error(
+      'install does not support extension-version. Remove this input and install from marketplace latest, or provide a VSIX path when you need a specific package version.'
+    );
+  }
+
   platform.info(
     `Installing extension ${options.publisherId}.${options.extensionId} to ${options.accounts.length} organization(s)...`
   );
@@ -91,11 +100,6 @@ export async function installExtension(
       .option('--extension-id', extensionId)
       .option('--service-url', account);
 
-    // Version if specified
-    if (options.extensionVersion) {
-      args.option('--extension-version', options.extensionVersion);
-    }
-
     // Authentication (using marketplace auth, not account-specific)
     args.option('--auth-type', auth.authType);
 
@@ -112,13 +116,25 @@ export async function installExtension(
       // Execute tfx
       const result = await tfx.execute(args.build(), { captureJson: true });
 
-      if (result.exitCode === 0) {
+      if (result.exitCode === 0 && result.json !== undefined) {
         accountResults.push({
           account,
           success: true,
           alreadyInstalled: false,
         });
         platform.info(`✓ Successfully installed to ${account}`);
+      } else if (result.exitCode === 0 && result.json === undefined) {
+        const message =
+          'tfx returned exit code 0 but no JSON output for install; command likely showed help or invalid arguments';
+
+        accountResults.push({
+          account,
+          success: false,
+          alreadyInstalled: false,
+          error: message,
+        });
+        platform.error(`✗ Failed to install to ${account}: ${message}`);
+        overallExitCode = 1;
       } else {
         // Check if error is "already installed" (TF1590010)
         const stderr = result.stderr || '';

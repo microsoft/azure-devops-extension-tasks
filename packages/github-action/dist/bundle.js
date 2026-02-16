@@ -2571,7 +2571,7 @@ var init_vsix_writer = __esm({
       attributeNamePrefix: "@_",
       format: true,
       indentBy: "  ",
-      suppressEmptyNode: true,
+      suppressEmptyNode: false,
       suppressBooleanAttributes: false
     });
     VsixWriter = class _VsixWriter {
@@ -5225,6 +5225,44 @@ async function unpublishExtension(options, auth, tfx, platform) {
   };
 }
 
+// packages/core/dist/organization-utils.js
+function normalizeOrganizationIdentifier(input) {
+  const value = input.trim();
+  if (!value) {
+    throw new Error("Organization identifier cannot be empty");
+  }
+  const maybeUrl = /^https?:\/\//i.test(value);
+  if (!maybeUrl) {
+    return value;
+  }
+  let parsed;
+  try {
+    parsed = new URL(value);
+  } catch {
+    throw new Error(`Invalid organization URL: ${value}. Supported formats are https://dev.azure.com/ORG and https://ORG.visualstudio.com`);
+  }
+  const host = parsed.hostname.toLowerCase();
+  if (host === "dev.azure.com") {
+    const segments = parsed.pathname.split("/").filter(Boolean);
+    const org = segments[0];
+    if (!org) {
+      throw new Error(`Invalid organization URL: ${value}. Expected format https://dev.azure.com/ORG`);
+    }
+    return org;
+  }
+  if (host.endsWith(".visualstudio.com")) {
+    const org = parsed.hostname.split(".")[0];
+    if (!org) {
+      throw new Error(`Invalid organization URL: ${value}. Expected format https://ORG.visualstudio.com`);
+    }
+    return org;
+  }
+  throw new Error(`Unsupported organization URL: ${value}. Supported formats are https://dev.azure.com/ORG and https://ORG.visualstudio.com`);
+}
+function normalizeOrganizationIdentifiers(values) {
+  return values.map((value) => normalizeOrganizationIdentifier(value));
+}
+
 // packages/core/dist/commands/share.js
 async function shareExtension(options, auth, tfx, platform) {
   if (!options.shareWith || options.shareWith.length === 0) {
@@ -5232,8 +5270,9 @@ async function shareExtension(options, auth, tfx, platform) {
   }
   platform.info(`Sharing extension ${options.publisherId}.${options.extensionId} with ${options.shareWith.length} organization(s)...`);
   const extensionId = options.extensionId;
+  const normalizedOrganizations = normalizeOrganizationIdentifiers(options.shareWith);
   const args = new ArgBuilder().arg(["extension", "share"]).flag("--json").flag("--no-color").option("--publisher", options.publisherId).option("--extension-id", extensionId).flag("--share-with");
-  options.shareWith.forEach((org) => args.arg(org));
+  normalizedOrganizations.forEach((org) => args.arg(org));
   args.option("--service-url", auth.serviceUrl);
   if (auth.authType === "pat") {
     args.option("--auth-type", "pat");
@@ -5250,12 +5289,12 @@ async function shareExtension(options, auth, tfx, platform) {
     platform.error(`tfx exited with code ${result.exitCode}`);
     throw new Error(`tfx extension share failed with exit code ${result.exitCode}`);
   }
-  platform.info(`Successfully shared extension with: ${options.shareWith.join(", ")}`);
+  platform.info(`Successfully shared extension with: ${normalizedOrganizations.join(", ")}`);
   return {
     success: true,
     extensionId,
     publisherId: options.publisherId,
-    sharedWith: options.shareWith,
+    sharedWith: normalizedOrganizations,
     exitCode: result.exitCode
   };
 }
@@ -5267,8 +5306,9 @@ async function unshareExtension(options, auth, tfx, platform) {
   }
   platform.info(`Unsharing extension ${options.publisherId}.${options.extensionId} from ${options.unshareWith.length} organization(s)...`);
   const extensionId = options.extensionId;
+  const normalizedOrganizations = normalizeOrganizationIdentifiers(options.unshareWith);
   const args = new ArgBuilder().arg(["extension", "unshare"]).flag("--json").flag("--no-color").option("--publisher", options.publisherId).option("--extension-id", extensionId).flag("--unshare-with");
-  options.unshareWith.forEach((org) => args.arg(org));
+  normalizedOrganizations.forEach((org) => args.arg(org));
   args.option("--service-url", auth.serviceUrl);
   if (auth.authType === "pat") {
     args.option("--auth-type", "pat");
@@ -5285,12 +5325,12 @@ async function unshareExtension(options, auth, tfx, platform) {
     platform.error(`tfx exited with code ${result.exitCode}`);
     throw new Error(`tfx extension unshare failed with exit code ${result.exitCode}`);
   }
-  platform.info(`Successfully unshared extension from: ${options.unshareWith.join(", ")}`);
+  platform.info(`Successfully unshared extension from: ${normalizedOrganizations.join(", ")}`);
   return {
     success: true,
     extensionId,
     publisherId: options.publisherId,
-    unsharedFrom: options.unshareWith,
+    unsharedFrom: normalizedOrganizations,
     exitCode: result.exitCode
   };
 }
@@ -5300,6 +5340,9 @@ async function installExtension(options, auth, tfx, platform) {
   if (!options.accounts || options.accounts.length === 0) {
     throw new Error("accounts must contain at least one organization URL");
   }
+  if (options.extensionVersion) {
+    throw new Error("install does not support extension-version. Remove this input and install from marketplace latest, or provide a VSIX path when you need a specific package version.");
+  }
   platform.info(`Installing extension ${options.publisherId}.${options.extensionId} to ${options.accounts.length} organization(s)...`);
   const extensionId = options.extensionId;
   const accountResults = [];
@@ -5307,9 +5350,6 @@ async function installExtension(options, auth, tfx, platform) {
   for (const account of options.accounts) {
     platform.info(`Installing to ${account}...`);
     const args = new ArgBuilder().arg(["extension", "install"]).flag("--json").flag("--no-color").option("--publisher", options.publisherId).option("--extension-id", extensionId).option("--service-url", account);
-    if (options.extensionVersion) {
-      args.option("--extension-version", options.extensionVersion);
-    }
     args.option("--auth-type", auth.authType);
     if (auth.authType === "pat") {
       args.option("--token", auth.token);
@@ -5321,13 +5361,23 @@ async function installExtension(options, auth, tfx, platform) {
     }
     try {
       const result = await tfx.execute(args.build(), { captureJson: true });
-      if (result.exitCode === 0) {
+      if (result.exitCode === 0 && result.json !== void 0) {
         accountResults.push({
           account,
           success: true,
           alreadyInstalled: false
         });
         platform.info(`\u2713 Successfully installed to ${account}`);
+      } else if (result.exitCode === 0 && result.json === void 0) {
+        const message = "tfx returned exit code 0 but no JSON output for install; command likely showed help or invalid arguments";
+        accountResults.push({
+          account,
+          success: false,
+          alreadyInstalled: false,
+          error: message
+        });
+        platform.error(`\u2717 Failed to install to ${account}: ${message}`);
+        overallExitCode = 1;
       } else {
         const stderr = result.stderr || "";
         const alreadyInstalled = stderr.includes("TF1590010");
@@ -5579,24 +5629,6 @@ function sleep(ms) {
 // packages/core/dist/commands/wait-for-installation.js
 import { WebApi, getPersonalAccessTokenHandler } from "azure-devops-node-api";
 init_vsix_reader();
-function validateWaitForInstallationServiceUrl(serviceUrl) {
-  if (!serviceUrl) {
-    throw new Error("wait-for-installation requires service-url to be set to an Azure DevOps organization/server endpoint (not marketplace)");
-  }
-  let parsedUrl;
-  try {
-    parsedUrl = new URL(serviceUrl);
-  } catch {
-    throw new Error("wait-for-installation requires service-url to be a valid HTTPS Azure DevOps organization/server URL");
-  }
-  const hostname = parsedUrl.hostname.toLowerCase();
-  if (hostname === "marketplace.visualstudio.com") {
-    throw new Error("wait-for-installation cannot use the default marketplace endpoint. Set service-url to https://dev.azure.com/<organization>");
-  }
-  if (parsedUrl.protocol !== "https:") {
-    throw new Error("wait-for-installation requires service-url to be a valid HTTPS Azure DevOps organization/server URL");
-  }
-}
 async function resolveExpectedTasks(options, platform) {
   if (options.expectedTasks && options.expectedTasks.length > 0) {
     platform.debug(`Using ${options.expectedTasks.length} expected tasks from options`);
@@ -5653,7 +5685,6 @@ async function resolveExpectedTasks(options, platform) {
   return [];
 }
 async function waitForInstallation(options, auth, platform) {
-  validateWaitForInstallationServiceUrl(auth.serviceUrl);
   const fullExtensionId = options.extensionId;
   const timeoutMs = (options.timeoutMinutes ?? 10) * 6e4;
   const pollingIntervalMs = (options.pollingIntervalSeconds ?? 30) * 1e3;
@@ -6824,6 +6855,9 @@ async function run() {
     }
     const extensionVersion = platform.getInput("extension-version");
     if (extensionVersion) {
+      if (operation === "install") {
+        throw new Error("install does not support extension-version");
+      }
       validateVersion(extensionVersion);
     }
     const tfxVersion = platform.getInput("tfx-version") || "built-in";
@@ -6842,7 +6876,7 @@ async function run() {
       const token = platform.getInput("token");
       const username = platform.getInput("username");
       const password = platform.getInput("password");
-      const serviceUrl = platform.getInput("service-url");
+      const serviceUrl = operation === "install" || operation === "wait-for-installation" ? void 0 : platform.getInput("service-url");
       auth = await getAuth(authType, platform, {
         token,
         username,
@@ -6855,7 +6889,7 @@ async function run() {
       if (auth.password) {
         platform.setSecret(auth.password);
       }
-      if (auth.serviceUrl) {
+      if (operation !== "install" && operation !== "wait-for-installation" && auth.serviceUrl) {
         validateAccountUrl(auth.serviceUrl);
       }
     }
@@ -6996,8 +7030,7 @@ async function runInstall(platform, tfxManager, auth) {
     {
       publisherId: platform.getInput("publisher-id", true),
       extensionId: platform.getInput("extension-id", true),
-      accounts: platform.getDelimitedInput("accounts", "\n", true),
-      extensionVersion: platform.getInput("extension-version")
+      accounts: platform.getDelimitedInput("accounts", "\n", true)
     },
     auth,
     tfxManager,

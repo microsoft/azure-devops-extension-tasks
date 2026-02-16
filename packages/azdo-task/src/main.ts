@@ -51,6 +51,9 @@ async function run(): Promise<void> {
 
     const extensionVersion = platform.getInput('extensionVersion');
     if (extensionVersion) {
+      if (operation === 'install') {
+        throw new Error('install does not support extensionVersion');
+      }
       validateVersion(extensionVersion);
     }
 
@@ -90,7 +93,7 @@ async function run(): Promise<void> {
       auth = await getAuth(connectionType, connectionName, platform);
 
       // Validate service URL if present
-      if (auth.serviceUrl) {
+      if (operation !== 'install' && operation !== 'wait-for-installation' && auth.serviceUrl) {
         validateAccountUrl(auth.serviceUrl);
       }
     }
@@ -281,7 +284,6 @@ async function runInstall(platform: AzdoAdapter, tfxManager: TfxManager, auth: a
       publisherId: platform.getInput('publisherId', true),
       extensionId: platform.getInput('extensionId', true),
       accounts: platform.getDelimitedInput('accounts', '\n', true),
-      extensionVersion: platform.getInput('extensionVersion'),
     },
     auth,
     tfxManager,

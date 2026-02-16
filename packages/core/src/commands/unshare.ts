@@ -6,6 +6,7 @@ import type { IPlatformAdapter } from '../platform.js';
 import type { TfxManager } from '../tfx-manager.js';
 import type { AuthCredentials } from '../auth.js';
 import { ArgBuilder } from '../arg-builder.js';
+import { normalizeOrganizationIdentifiers } from '../organization-utils.js';
 
 /**
  * Options for unshare command
@@ -58,6 +59,7 @@ export async function unshareExtension(
   );
 
   const extensionId = options.extensionId;
+  const normalizedOrganizations = normalizeOrganizationIdentifiers(options.unshareWith);
 
   // Build tfx arguments
   const args = new ArgBuilder()
@@ -69,7 +71,7 @@ export async function unshareExtension(
     .flag('--unshare-with');
 
   // Add each organization
-  options.unshareWith.forEach((org) => args.arg(org));
+  normalizedOrganizations.forEach((org) => args.arg(org));
 
   // Authentication
   args.option('--service-url', auth.serviceUrl);
@@ -93,13 +95,13 @@ export async function unshareExtension(
     throw new Error(`tfx extension unshare failed with exit code ${result.exitCode}`);
   }
 
-  platform.info(`Successfully unshared extension from: ${options.unshareWith.join(', ')}`);
+  platform.info(`Successfully unshared extension from: ${normalizedOrganizations.join(', ')}`);
 
   return {
     success: true,
     extensionId,
     publisherId: options.publisherId,
-    unsharedFrom: options.unshareWith,
+    unsharedFrom: normalizedOrganizations,
     exitCode: result.exitCode,
   };
 }

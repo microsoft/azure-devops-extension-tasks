@@ -4,6 +4,8 @@ Install an Azure DevOps extension to specific accounts/organizations.
 
 ## Usage
 
+`install` does not take a `service-url` input. The action iterates each `accounts` entry and invokes `tfx extension install` with that account URL passed to `--service-url`.
+
 ### Install to Single Account
 
 ```yaml
@@ -27,18 +29,6 @@ Install an Azure DevOps extension to specific accounts/organizations.
       myorg1
       myorg2
       myorg3
-```
-
-### Install Specific Version
-
-```yaml
-- uses: jessehouwing/azure-devops-extension-tasks/install@v6
-  with:
-    token: ${{ secrets.MARKETPLACE_TOKEN }}
-    publisher-id: 'my-publisher'
-    extension-id: 'my-extension'
-    extension-version: '1.2.3'
-    accounts: 'myorg'
 ```
 
 ### With OIDC Authentication
@@ -81,10 +71,6 @@ OR
 #### TFX Configuration
 
 - `tfx-version`: Version of tfx-cli to use (default: `built-in`)
-
-#### Extension Options
-
-- `extension-version`: Specific version to install (default: latest)
 
 ## Outputs
 

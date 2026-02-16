@@ -422,6 +422,11 @@ describe('Azure DevOps main entrypoint', () => {
   });
 
   it('sets waitForInstallation output when verification succeeds', async () => {
+    getAuthMock.mockImplementationOnce(async () => ({
+      token: 'token',
+      serviceUrl: 'https://marketplace.visualstudio.com',
+    }));
+
     const platform = createPlatformMock({
       inputs: {
         operation: 'wait-for-installation',
@@ -440,6 +445,8 @@ describe('Azure DevOps main entrypoint', () => {
     await importMainAndFlush();
 
     expect(platform.setOutput).toHaveBeenCalledWith('waitForInstallation', 'true');
+    expect(validateAccountUrlMock).not.toHaveBeenCalledWith('https://marketplace.visualstudio.com');
+    expect(validateAccountUrlMock).toHaveBeenCalledWith('https://dev.azure.com/org1');
   });
 
   it('fails wait-for-validation when status is not success', async () => {

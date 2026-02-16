@@ -128,4 +128,50 @@ describe('shareExtension', () => {
       )
     ).rejects.toThrow('tfx extension share failed with exit code 1');
   });
+
+  it('normalizes organization URLs to org names', async () => {
+    const executeSpy = jest.spyOn(tfxManager, 'execute').mockResolvedValue({
+      exitCode: 0,
+      json: {},
+      stdout: '',
+      stderr: '',
+    });
+
+    const result = await shareExtension(
+      {
+        publisherId: 'pub',
+        extensionId: 'ext',
+        shareWith: [
+          'https://dev.azure.com/org-from-devazure',
+          'https://org-from-visualstudio.visualstudio.com',
+          'plain-org',
+        ],
+      },
+      patAuth,
+      tfxManager,
+      platform
+    );
+
+    expect(result.sharedWith).toEqual(['org-from-devazure', 'org-from-visualstudio', 'plain-org']);
+
+    const callArgs = executeSpy.mock.calls[0][0];
+    expect(callArgs).toContain('org-from-devazure');
+    expect(callArgs).toContain('org-from-visualstudio');
+    expect(callArgs).toContain('plain-org');
+  });
+
+  it('throws for unsupported organization URL formats', async () => {
+    await expect(
+      shareExtension(
+        {
+          publisherId: 'pub',
+          extensionId: 'ext',
+          shareWith: ['https://example.com/org'],
+        },
+        patAuth,
+        tfxManager,
+        platform
+      )
+    ).rejects.toThrow('Unsupported organization URL');
+  });
 });

@@ -4,6 +4,8 @@ Share an Azure DevOps extension with specific organizations.
 
 ## Usage
 
+`share-with` accepts organization names and the URL formats `https://dev.azure.com/ORG` and `https://ORG.visualstudio.com`. URL inputs are normalized to organization names before execution.
+
 ### Share with Single Organization
 
 ```yaml

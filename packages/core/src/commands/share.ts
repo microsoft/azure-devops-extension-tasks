@@ -6,6 +6,7 @@ import type { IPlatformAdapter } from '../platform.js';
 import type { TfxManager } from '../tfx-manager.js';
 import type { AuthCredentials } from '../auth.js';
 import { ArgBuilder } from '../arg-builder.js';
+import { normalizeOrganizationIdentifiers } from '../organization-utils.js';
 
 /**
  * Options for share command
@@ -58,6 +59,7 @@ export async function shareExtension(
   );
 
   const extensionId = options.extensionId;
+  const normalizedOrganizations = normalizeOrganizationIdentifiers(options.shareWith);
 
   // Build tfx arguments
   const args = new ArgBuilder()
@@ -69,7 +71,7 @@ export async function shareExtension(
     .flag('--share-with');
 
   // Add each organization
-  options.shareWith.forEach((org) => args.arg(org));
+  normalizedOrganizations.forEach((org) => args.arg(org));
 
   // Authentication
   args.option('--service-url', auth.serviceUrl);
@@ -93,13 +95,13 @@ export async function shareExtension(
     throw new Error(`tfx extension share failed with exit code ${result.exitCode}`);
   }
 
-  platform.info(`Successfully shared extension with: ${options.shareWith.join(', ')}`);
+  platform.info(`Successfully shared extension with: ${normalizedOrganizations.join(', ')}`);
 
   return {
     success: true,
     extensionId,
     publisherId: options.publisherId,
-    sharedWith: options.shareWith,
+    sharedWith: normalizedOrganizations,
     exitCode: result.exitCode,
   };
 }

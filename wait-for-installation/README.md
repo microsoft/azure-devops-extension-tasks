@@ -2,6 +2,8 @@
 
 Verify that an Azure DevOps extension has been installed correctly and that all expected tasks are available in the specified accounts.
 
+`wait-for-installation` does not take a `service-url` input. The action iterates each `accounts` entry and verifies task availability against that account URL.
+
 ## Usage
 
 ### Verify with Manifest
