@@ -254,7 +254,7 @@ function extractIdentityAttribute(identityTag, name) {
   return decodeXmlEntities(match2[1]);
 }
 function parseVsixManifestXml(xml) {
-  const identityMatch = xml.match(/<Identity\b[\s\S]*?\/>/i);
+  const identityMatch = xml.match(/<Identity\b[^>]*>/i);
   const identityTag = identityMatch?.[0];
   return {
     extensionId: identityTag ? extractIdentityAttribute(identityTag, "Id") : void 0,
@@ -2571,7 +2571,7 @@ var init_vsix_writer = __esm({
       attributeNamePrefix: "@_",
       format: true,
       indentBy: "  ",
-      suppressEmptyNode: false,
+      suppressEmptyNode: true,
       suppressBooleanAttributes: false
     });
     VsixWriter = class _VsixWriter {

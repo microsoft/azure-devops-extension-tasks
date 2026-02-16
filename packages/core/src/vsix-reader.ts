@@ -54,7 +54,7 @@ function extractIdentityAttribute(identityTag: string, name: string): string | u
 }
 
 function parseVsixManifestXml(xml: string): VsixXmlMetadata {
-  const identityMatch = xml.match(/<Identity\b[\s\S]*?\/>/i);
+  const identityMatch = xml.match(/<Identity\b[^>]*>/i);
   const identityTag = identityMatch?.[0];
 
   return {
