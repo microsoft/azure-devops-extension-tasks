@@ -478,16 +478,23 @@ export class ManifestEditor {
   async toWriter(): Promise<any> {
     // Dynamically import based on reader type
     const readerConstructorName = this.reader.constructor.name;
+    const { VsixReader } = await import('./vsix-reader.js');
+    const { FilesystemManifestReader } = await import('./filesystem-manifest-reader.js');
 
-    if (readerConstructorName === 'VsixReader') {
+    if (this.reader instanceof VsixReader || readerConstructorName === 'VsixReader') {
       const { VsixWriter } = await import('./vsix-writer.js');
       return VsixWriter.fromEditor(this);
-    } else if (readerConstructorName === 'FilesystemManifestReader') {
+    }
+
+    if (
+      this.reader instanceof FilesystemManifestReader ||
+      readerConstructorName === 'FilesystemManifestReader'
+    ) {
       const { FilesystemManifestWriter } = await import('./filesystem-manifest-writer.js');
       return FilesystemManifestWriter.fromEditor(this);
-    } else {
-      throw new Error(`Unsupported reader type: ${readerConstructorName}`);
     }
+
+    throw new Error(`Unsupported reader type: ${readerConstructorName}`);
   }
 
   /**

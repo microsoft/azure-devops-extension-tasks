@@ -226,15 +226,496 @@ var init_dist_node = __esm({
   }
 });
 
+// packages/core/dist/vsix-reader.js
+var vsix_reader_exports = {};
+__export(vsix_reader_exports, {
+  VsixReader: () => VsixReader
+});
+import { Buffer as Buffer2 } from "buffer";
+import { isAbsolute, normalize } from "path";
+import yauzl from "yauzl";
+function validateZipPath(filePath) {
+  const normalizedPath = normalize(filePath);
+  if (isAbsolute(normalizedPath)) {
+    throw new Error(`Security: Absolute paths are not allowed in VSIX files: ${filePath}`);
+  }
+  if (normalizedPath.startsWith("..") || normalizedPath.includes(`${normalize("../")}`)) {
+    throw new Error(`Security: Path traversal detected in VSIX file: ${filePath}`);
+  }
+  const suspiciousPatterns = [
+    /\.\.[/\\]/,
+    // Parent directory references
+    /^[/\\]/,
+    // Root references
+    /[<>:"|?*]/
+    // Windows invalid filename characters (except for paths)
+  ];
+  for (const pattern of suspiciousPatterns) {
+    if (pattern.test(filePath)) {
+      throw new Error(`Security: Suspicious pattern detected in path: ${filePath}`);
+    }
+  }
+  if (filePath.includes("\0")) {
+    throw new Error(`Security: Null byte detected in path: ${filePath}`);
+  }
+}
+var VsixReader;
+var init_vsix_reader = __esm({
+  "packages/core/dist/vsix-reader.js"() {
+    "use strict";
+    init_manifest_reader();
+    VsixReader = class _VsixReader extends ManifestReader {
+      zipFile = null;
+      vsixPath;
+      fileCache = /* @__PURE__ */ new Map();
+      entriesCache = null;
+      constructor(vsixPath) {
+        super();
+        this.vsixPath = vsixPath;
+      }
+      /**
+       * Open a VSIX file for reading
+       * @param vsixPath Path to the VSIX file
+       * @returns VsixReader instance
+       */
+      static async open(vsixPath) {
+        const reader = new _VsixReader(vsixPath);
+        await reader.openZip();
+        return reader;
+      }
+      /**
+       * Open the ZIP file
+       */
+      async openZip() {
+        return new Promise((resolve, reject) => {
+          yauzl.open(this.vsixPath, {
+            lazyEntries: true,
+            strictFileNames: false,
+            validateEntrySizes: false,
+            autoClose: false
+            // Keep file open for multiple read operations
+          }, (err, zipFile) => {
+            if (err) {
+              reject(new Error(`Failed to open VSIX file: ${err.message}`));
+              return;
+            }
+            this.zipFile = zipFile;
+            resolve();
+          });
+        });
+      }
+      /**
+       * Read all entries from the ZIP file
+       * Validates all paths for security (zip slip protection)
+       */
+      async readEntries() {
+        if (this.entriesCache) {
+          return this.entriesCache;
+        }
+        if (!this.zipFile) {
+          throw new Error("VSIX file is not open");
+        }
+        return new Promise((resolve, reject) => {
+          const entries = [];
+          const onEntry = (entry) => {
+            try {
+              validateZipPath(entry.fileName);
+              entries.push(entry);
+            } catch (err) {
+              this.zipFile.removeListener("entry", onEntry);
+              this.zipFile.removeListener("end", onEnd);
+              this.zipFile.removeListener("error", onError);
+              reject(err);
+              return;
+            }
+            this.zipFile.readEntry();
+          };
+          const onEnd = () => {
+            this.zipFile.removeListener("entry", onEntry);
+            this.zipFile.removeListener("end", onEnd);
+            this.zipFile.removeListener("error", onError);
+            this.entriesCache = entries;
+            resolve(entries);
+          };
+          const onError = (err) => {
+            this.zipFile.removeListener("entry", onEntry);
+            this.zipFile.removeListener("end", onEnd);
+            this.zipFile.removeListener("error", onError);
+            reject(new Error(`Error reading VSIX entries: ${err.message}`));
+          };
+          this.zipFile.on("entry", onEntry);
+          this.zipFile.on("end", onEnd);
+          this.zipFile.on("error", onError);
+          this.zipFile.readEntry();
+        });
+      }
+      /**
+       * Read a specific file from the VSIX
+       * @param filePath Path to the file within the VSIX
+       * @returns File contents as Buffer
+       */
+      async readFile(filePath) {
+        validateZipPath(filePath);
+        const normalizedPath = filePath.replace(/\\/g, "/");
+        if (this.fileCache.has(normalizedPath)) {
+          return this.fileCache.get(normalizedPath);
+        }
+        if (!this.zipFile) {
+          throw new Error("VSIX file is not open");
+        }
+        const entries = await this.readEntries();
+        const entry = entries.find((e) => e.fileName === normalizedPath);
+        if (!entry) {
+          throw new Error(`File not found in VSIX: ${filePath}`);
+        }
+        return new Promise((resolve, reject) => {
+          this.zipFile.openReadStream(entry, (err, readStream) => {
+            if (err || !readStream) {
+              reject(new Error(`Failed to read file ${filePath}: ${err?.message || "No stream"}`));
+              return;
+            }
+            const chunks = [];
+            readStream.on("data", (chunk) => chunks.push(chunk));
+            readStream.on("end", () => {
+              const buffer = Buffer2.concat(chunks);
+              this.fileCache.set(normalizedPath, buffer);
+              resolve(buffer);
+            });
+            readStream.on("error", (streamErr) => {
+              reject(new Error(`Error reading file ${filePath}: ${streamErr.message}`));
+            });
+          });
+        });
+      }
+      /**
+       * Check if a file exists in the VSIX
+       * @param filePath Path to check
+       * @returns True if file exists
+       */
+      async fileExists(filePath) {
+        const normalizedPath = filePath.replace(/\\/g, "/");
+        const entries = await this.readEntries();
+        return entries.some((e) => e.fileName === normalizedPath);
+      }
+      /**
+       * List all files in the VSIX
+       * @returns Array of file information
+       */
+      async listFiles() {
+        const entries = await this.readEntries();
+        return entries.filter((e) => !e.fileName.endsWith("/")).map((e) => ({
+          path: e.fileName,
+          size: e.uncompressedSize,
+          compressedSize: e.compressedSize
+        }));
+      }
+      /**
+       * Read the extension manifest (vss-extension.json or extension.vsixmanifest)
+       * @returns Parsed extension manifest
+       */
+      async readExtensionManifest() {
+        if (await this.fileExists("extension.vsomanifest")) {
+          const buffer = await this.readFile("extension.vsomanifest");
+          return JSON.parse(buffer.toString("utf-8"));
+        }
+        if (await this.fileExists("vss-extension.json")) {
+          const buffer = await this.readFile("vss-extension.json");
+          return JSON.parse(buffer.toString("utf-8"));
+        }
+        throw new Error("Extension manifest not found in VSIX (expected vss-extension.json or extension.vsomanifest)");
+      }
+      /**
+       * Find task directories from the extension manifest
+       * @returns Array of task directory paths
+       */
+      async findTaskPaths() {
+        const manifest = await this.readExtensionManifest();
+        const taskPathsSet = /* @__PURE__ */ new Set();
+        if (manifest.contributions) {
+          for (const contribution of manifest.contributions) {
+            if (contribution.type === "ms.vss-distributed-task.task" && contribution.properties) {
+              const name = contribution.properties.name;
+              if (name) {
+                taskPathsSet.add(name);
+              }
+            }
+          }
+        }
+        if (taskPathsSet.size === 0 && manifest.files) {
+          const entries = await this.readEntries();
+          for (const file of manifest.files) {
+            const taskJsonPath = `${file.path}/task.json`.replace(/\\/g, "/");
+            if (entries.some((e) => e.fileName === taskJsonPath)) {
+              taskPathsSet.add(file.path);
+            }
+          }
+        }
+        return Array.from(taskPathsSet);
+      }
+      /**
+       * Read a task manifest (task.json)
+       * @param taskPath Path to the task directory
+       * @returns Parsed task manifest
+       */
+      async readTaskManifest(taskPath) {
+        const taskJsonPath = `${taskPath}/task.json`.replace(/\\/g, "/");
+        const buffer = await this.readFile(taskJsonPath);
+        return JSON.parse(buffer.toString("utf-8"));
+      }
+      /**
+       * Close the VSIX file and clean up resources
+       */
+      async close() {
+        const zipFile = this.zipFile;
+        this.zipFile = null;
+        if (zipFile) {
+          await new Promise((resolve) => {
+            let settled = false;
+            const complete = () => {
+              if (!settled) {
+                settled = true;
+                resolve();
+              }
+            };
+            const onClose = () => {
+              zipFile.removeListener("error", onError);
+              complete();
+            };
+            const onError = () => {
+              zipFile.removeListener("close", onClose);
+              complete();
+            };
+            zipFile.once("close", onClose);
+            zipFile.once("error", onError);
+            try {
+              zipFile.close();
+            } catch {
+              zipFile.removeListener("close", onClose);
+              zipFile.removeListener("error", onError);
+              complete();
+              return;
+            }
+            setTimeout(() => {
+              zipFile.removeListener("close", onClose);
+              zipFile.removeListener("error", onError);
+              complete();
+            }, 200);
+          });
+        }
+        this.fileCache.clear();
+        this.entriesCache = null;
+      }
+      /**
+       * Get the path to the VSIX file
+       */
+      getPath() {
+        return this.vsixPath;
+      }
+    };
+  }
+});
+
+// packages/core/dist/filesystem-manifest-reader.js
+var filesystem_manifest_reader_exports = {};
+__export(filesystem_manifest_reader_exports, {
+  FilesystemManifestReader: () => FilesystemManifestReader
+});
+import { readFile } from "fs/promises";
+import path3 from "path";
+var FilesystemManifestReader;
+var init_filesystem_manifest_reader = __esm({
+  "packages/core/dist/filesystem-manifest-reader.js"() {
+    "use strict";
+    init_manifest_reader();
+    FilesystemManifestReader = class extends ManifestReader {
+      rootFolder;
+      manifestGlobs;
+      platform;
+      manifestPath = null;
+      manifestPaths = null;
+      extensionManifest = null;
+      // Map of packagePath (task name) to actual source path
+      packagePathMap = null;
+      constructor(options) {
+        super();
+        this.rootFolder = options.rootFolder;
+        this.manifestGlobs = options.manifestGlobs || ["vss-extension.json"];
+        this.platform = options.platform;
+      }
+      /**
+       * Find and resolve all extension manifest file paths
+       */
+      async resolveManifestPaths() {
+        if (this.manifestPaths) {
+          return this.manifestPaths;
+        }
+        const matches = await this.platform.findMatch(this.rootFolder, this.manifestGlobs);
+        if (matches.length === 0) {
+          const commonNames = ["vss-extension.json", "extension.vsomanifest"];
+          for (const name of commonNames) {
+            const candidate = path3.join(this.rootFolder, name);
+            if (await this.platform.fileExists(candidate)) {
+              this.manifestPaths = [candidate];
+              this.manifestPath = candidate;
+              return this.manifestPaths;
+            }
+          }
+          throw new Error(`Extension manifest not found in ${this.rootFolder}. Tried patterns: ${this.manifestGlobs.join(", ")}`);
+        }
+        if (matches.length > 1) {
+          this.platform.warning(`Multiple manifest files found: ${matches.join(", ")}. Using first match as primary.`);
+        }
+        this.manifestPaths = matches;
+        this.manifestPath = matches[0];
+        return this.manifestPaths;
+      }
+      /**
+       * Find and resolve the extension manifest file path
+       */
+      async resolveManifestPath() {
+        const paths = await this.resolveManifestPaths();
+        return paths[0];
+      }
+      /**
+       * Read the extension manifest from filesystem
+       * @returns Parsed extension manifest
+       */
+      async readExtensionManifest() {
+        if (this.extensionManifest) {
+          return this.extensionManifest;
+        }
+        const manifestPath = await this.resolveManifestPath();
+        const content = (await readFile(manifestPath)).toString("utf8");
+        this.extensionManifest = JSON.parse(content);
+        return this.extensionManifest;
+      }
+      /**
+       * Build a map of packagePath to actual source path from files array
+       * This handles cases where task.json is in a different directory than the final package path
+       * @returns Map of packagePath to source path
+       */
+      async buildPackagePathMap() {
+        if (this.packagePathMap) {
+          return this.packagePathMap;
+        }
+        this.packagePathMap = /* @__PURE__ */ new Map();
+        const manifest = await this.readExtensionManifest();
+        if (manifest.files) {
+          for (const file of manifest.files) {
+            if (file.packagePath) {
+              this.packagePathMap.set(file.packagePath, file.path);
+              this.platform.debug(`Mapped packagePath '${file.packagePath}' to source path '${file.path}'`);
+            }
+          }
+        }
+        return this.packagePathMap;
+      }
+      /**
+       * Find task paths from the extension manifest
+       * @returns Array of task directory paths (relative to rootFolder)
+       */
+      async findTaskPaths() {
+        const manifest = await this.readExtensionManifest();
+        const taskPaths = [];
+        if (manifest.contributions) {
+          for (const contribution of manifest.contributions) {
+            if (contribution.type === "ms.vss-distributed-task.task" && contribution.properties) {
+              const name = contribution.properties.name;
+              if (name) {
+                taskPaths.push(name);
+              }
+            }
+          }
+        }
+        if (taskPaths.length === 0 && manifest.files) {
+          for (const file of manifest.files) {
+            const taskJsonPath = path3.join(this.rootFolder, file.path, "task.json");
+            if (await this.platform.fileExists(taskJsonPath)) {
+              taskPaths.push(file.path);
+            }
+          }
+        }
+        return taskPaths;
+      }
+      /**
+       * Read a task manifest from filesystem
+       * @param taskPath Path to the task directory (relative to rootFolder) or packagePath
+       * @returns Parsed task manifest
+       */
+      async readTaskManifest(taskPath) {
+        const packagePathMap = await this.buildPackagePathMap();
+        let actualPath = taskPath;
+        const normalizedTaskPath = taskPath.replace(/\\/g, "/");
+        for (const [pkgPath, sourcePath] of packagePathMap.entries()) {
+          const normalizedPkgPath = pkgPath.replace(/\\/g, "/");
+          if (normalizedTaskPath === normalizedPkgPath) {
+            actualPath = sourcePath;
+            break;
+          } else if (normalizedTaskPath.startsWith(normalizedPkgPath + "/")) {
+            const remainder = normalizedTaskPath.substring(normalizedPkgPath.length + 1);
+            actualPath = path3.join(sourcePath, remainder);
+            break;
+          }
+        }
+        this.platform.debug(`Reading task manifest: taskPath='${taskPath}', actualPath='${actualPath}'`);
+        const absoluteTaskPath = path3.isAbsolute(actualPath) ? actualPath : path3.join(this.rootFolder, actualPath);
+        const taskJsonPath = path3.join(absoluteTaskPath, "task.json");
+        if (!await this.platform.fileExists(taskJsonPath)) {
+          throw new Error(`Task manifest not found: ${taskJsonPath}`);
+        }
+        const content = (await readFile(taskJsonPath)).toString("utf8");
+        return JSON.parse(content);
+      }
+      /**
+       * Close and clean up resources
+       * No-op for filesystem reader as there are no persistent resources
+       */
+      async close() {
+        this.extensionManifest = null;
+        this.manifestPath = null;
+        this.manifestPaths = null;
+        this.packagePathMap = null;
+      }
+      /**
+       * Read all extension manifests matched by manifest globs
+       */
+      async readAllExtensionManifests() {
+        const paths = await this.resolveManifestPaths();
+        const manifests = [];
+        for (const manifestPath of paths) {
+          const content = (await readFile(manifestPath)).toString("utf8");
+          manifests.push({
+            path: manifestPath,
+            manifest: JSON.parse(content)
+          });
+        }
+        return manifests;
+      }
+      /**
+       * Get the root folder path
+       */
+      getRootFolder() {
+        return this.rootFolder;
+      }
+      /**
+       * Get the resolved manifest path (if already resolved)
+       */
+      getManifestPath() {
+        return this.manifestPath;
+      }
+    };
+  }
+});
+
 // packages/core/dist/vsix-writer.js
 var vsix_writer_exports = {};
 __export(vsix_writer_exports, {
   VsixWriter: () => VsixWriter
 });
-import { Buffer as Buffer2 } from "buffer";
+import { Buffer as Buffer3 } from "buffer";
 import { createWriteStream } from "fs";
 import yazl from "yazl";
-function validateZipPath(filePath) {
+function validateZipPath2(filePath) {
   const normalizedPath = filePath.replace(/\\/g, "/");
   if (normalizedPath.startsWith("/") || /^[A-Z]:/i.test(normalizedPath)) {
     throw new Error(`Security: Absolute paths are not allowed: ${filePath}`);
@@ -285,7 +766,7 @@ var init_vsix_writer = __esm({
           await this.applyManifestModifications(reader, manifestPath, manifestMods, taskManifestMods, addedFiles);
         }
         for (const [path10, mod] of modifications) {
-          validateZipPath(path10);
+          validateZipPath2(path10);
           if (mod.type === "remove") {
             addedFiles.add(path10);
           } else if (mod.type === "modify" && mod.content) {
@@ -312,7 +793,7 @@ var init_vsix_writer = __esm({
           await this.applyManifestModifications(reader, manifestPath, manifestMods, taskManifestMods, addedFiles);
         }
         for (const [path10, mod] of modifications) {
-          validateZipPath(path10);
+          validateZipPath2(path10);
           if (mod.type === "remove") {
             addedFiles.add(path10);
           } else if (mod.type === "modify" && mod.content) {
@@ -342,7 +823,7 @@ var init_vsix_writer = __esm({
         const manifest = await reader.readExtensionManifest();
         Object.assign(manifest, manifestMods);
         const manifestJson = JSON.stringify(manifest, null, 2);
-        this.zipFile.addBuffer(Buffer2.from(manifestJson, "utf-8"), manifestPath);
+        this.zipFile.addBuffer(Buffer3.from(manifestJson, "utf-8"), manifestPath);
         addedFiles.add(manifestPath);
         if (taskManifestMods.size > 0) {
           const taskManifests = await reader.readTaskManifests();
@@ -352,7 +833,7 @@ var init_vsix_writer = __esm({
               Object.assign(taskManifest.manifest, mods);
               const taskJson = JSON.stringify(taskManifest.manifest, null, 2);
               const taskPath = `${taskManifest.path}/task.json`;
-              this.zipFile.addBuffer(Buffer2.from(taskJson, "utf-8"), taskPath);
+              this.zipFile.addBuffer(Buffer3.from(taskJson, "utf-8"), taskPath);
               addedFiles.add(taskPath);
             }
           }
@@ -411,7 +892,7 @@ var init_vsix_writer = __esm({
             chunks.push(chunk);
           });
           this.zipFile.outputStream.on("end", () => {
-            resolve(Buffer2.concat(chunks));
+            resolve(Buffer3.concat(chunks));
           });
           this.zipFile.outputStream.on("error", (err) => {
             reject(new Error(`Failed to create VSIX buffer: ${err.message}`));
@@ -434,8 +915,8 @@ var filesystem_manifest_writer_exports = {};
 __export(filesystem_manifest_writer_exports, {
   FilesystemManifestWriter: () => FilesystemManifestWriter
 });
-import { mkdir, readFile, readdir, writeFile } from "fs/promises";
-import path3 from "path";
+import { mkdir, readFile as readFile2, readdir, writeFile } from "fs/promises";
+import path4 from "path";
 var FilesystemManifestWriter;
 var init_filesystem_manifest_writer = __esm({
   "packages/core/dist/filesystem-manifest-writer.js"() {
@@ -490,7 +971,7 @@ var init_filesystem_manifest_writer = __esm({
         }
         for (const [filePath, mod] of fileMods) {
           if (mod.type === "modify" && mod.content) {
-            const absolutePath = path3.isAbsolute(filePath) ? filePath : path3.join(rootFolder, filePath);
+            const absolutePath = path4.isAbsolute(filePath) ? filePath : path4.join(rootFolder, filePath);
             this.platform.debug(`Writing file: ${absolutePath}`);
             await writeFile(absolutePath, new Uint8Array(mod.content));
           }
@@ -519,13 +1000,13 @@ var init_filesystem_manifest_writer = __esm({
                 break;
               } else if (normalizedTaskPath.startsWith(normalizedPkgPath + "/")) {
                 const remainder = normalizedTaskPath.substring(normalizedPkgPath.length + 1);
-                actualPath = path3.join(sourcePath, remainder);
+                actualPath = path4.join(sourcePath, remainder);
                 break;
               }
             }
             this.platform.debug(`Writing task manifest: taskPath='${taskPath}', actualPath='${actualPath}'`);
-            const absoluteTaskPath = path3.isAbsolute(actualPath) ? actualPath : path3.join(rootFolder, actualPath);
-            const taskJsonPath = path3.join(absoluteTaskPath, "task.json");
+            const absoluteTaskPath = path4.isAbsolute(actualPath) ? actualPath : path4.join(rootFolder, actualPath);
+            const taskJsonPath = path4.join(absoluteTaskPath, "task.json");
             this.platform.debug(`Writing to file: ${taskJsonPath}`);
             const manifestJson = JSON.stringify(manifest, null, 2) + "\n";
             await writeFile(taskJsonPath, manifestJson, "utf-8");
@@ -540,8 +1021,8 @@ var init_filesystem_manifest_writer = __esm({
             this.platform.debug(`No task.json found for task '${taskName}' during fallback write`);
             continue;
           }
-          const taskJsonPath = path3.join(fallbackTaskDir, "task.json");
-          const content = (await readFile(taskJsonPath)).toString("utf8");
+          const taskJsonPath = path4.join(fallbackTaskDir, "task.json");
+          const content = (await readFile2(taskJsonPath)).toString("utf8");
           const manifest = JSON.parse(content);
           Object.assign(manifest, mods);
           this.platform.debug(`Fallback writing task manifest: ${taskJsonPath}`);
@@ -562,7 +1043,7 @@ var init_filesystem_manifest_writer = __esm({
             continue;
           }
           for (const entry of entries) {
-            const absolutePath = path3.join(current, entry.name);
+            const absolutePath = path4.join(current, entry.name);
             if (entry.isDirectory()) {
               stack.push(absolutePath);
               continue;
@@ -571,10 +1052,10 @@ var init_filesystem_manifest_writer = __esm({
               continue;
             }
             try {
-              const content = (await readFile(absolutePath)).toString("utf8");
+              const content = (await readFile2(absolutePath)).toString("utf8");
               const manifest = JSON.parse(content);
               if (manifest.name === taskName) {
-                return path3.dirname(absolutePath);
+                return path4.dirname(absolutePath);
               }
             } catch {
             }
@@ -650,11 +1131,11 @@ var init_filesystem_manifest_writer = __esm({
           for (const scanRoot of scanRoots) {
             const files = await this.collectFilesRecursive(scanRoot.absolutePath);
             for (const absoluteFilePath of files) {
-              const fileName = path3.basename(absoluteFilePath);
+              const fileName = path4.basename(absoluteFilePath);
               if (!this.isExtensionlessFileName(fileName)) {
                 continue;
               }
-              const relativeInsideRoot = this.toPosixPath(path3.relative(scanRoot.absolutePath, absoluteFilePath));
+              const relativeInsideRoot = this.toPosixPath(path4.relative(scanRoot.absolutePath, absoluteFilePath));
               const filePath = this.joinManifestPath(scanRoot.manifestPathPrefix, relativeInsideRoot);
               const packagePath = scanRoot.packagePathPrefix ? this.joinManifestPath(scanRoot.packagePathPrefix, relativeInsideRoot) : void 0;
               const key = this.getManifestEntryKey(filePath, packagePath);
@@ -688,7 +1169,7 @@ var init_filesystem_manifest_writer = __esm({
           if (!entry.path) {
             continue;
           }
-          const absolutePath = path3.isAbsolute(entry.path) ? entry.path : path3.join(rootFolder, entry.path.replace(/\//g, path3.sep));
+          const absolutePath = path4.isAbsolute(entry.path) ? entry.path : path4.join(rootFolder, entry.path.replace(/\//g, path4.sep));
           let stats;
           try {
             stats = await readdir(absolutePath, { withFileTypes: true });
@@ -709,7 +1190,7 @@ var init_filesystem_manifest_writer = __esm({
         const files = [];
         const entries = await readdir(directory, { withFileTypes: true });
         for (const entry of entries) {
-          const absolutePath = path3.join(directory, entry.name);
+          const absolutePath = path4.join(directory, entry.name);
           if (entry.isDirectory()) {
             const nestedFiles = await this.collectFilesRecursive(absolutePath);
             files.push(...nestedFiles);
@@ -770,7 +1251,7 @@ var init_filesystem_manifest_writer = __esm({
         }
         const tempDir = this.platform.getTempDir();
         await mkdir(tempDir, { recursive: true });
-        this.overridesPath = path3.join(tempDir, `overrides-${Date.now()}.json`);
+        this.overridesPath = path4.join(tempDir, `overrides-${Date.now()}.json`);
         this.platform.debug(`Writing overrides file: ${this.overridesPath}`);
         const overridesJson = JSON.stringify(overrides, null, 2) + "\n";
         await writeFile(this.overridesPath, overridesJson, "utf-8");
@@ -798,7 +1279,7 @@ var manifest_editor_exports = {};
 __export(manifest_editor_exports, {
   ManifestEditor: () => ManifestEditor
 });
-import { Buffer as Buffer3 } from "buffer";
+import { Buffer as Buffer4 } from "buffer";
 var ManifestEditor;
 var init_manifest_editor = __esm({
   "packages/core/dist/manifest-editor.js"() {
@@ -1094,7 +1575,7 @@ var init_manifest_editor = __esm({
        * @returns This editor for chaining
        */
       setFile(path10, content) {
-        const buffer = Buffer3.isBuffer(content) ? content : Buffer3.from(content, "utf-8");
+        const buffer = Buffer4.isBuffer(content) ? content : Buffer4.from(content, "utf-8");
         const normalizedPath = path10.replace(/\\/g, "/");
         this.modifications.set(normalizedPath, {
           type: "modify",
@@ -1123,15 +1604,17 @@ var init_manifest_editor = __esm({
        */
       async toWriter() {
         const readerConstructorName = this.reader.constructor.name;
-        if (readerConstructorName === "VsixReader") {
+        const { VsixReader: VsixReader2 } = await Promise.resolve().then(() => (init_vsix_reader(), vsix_reader_exports));
+        const { FilesystemManifestReader: FilesystemManifestReader2 } = await Promise.resolve().then(() => (init_filesystem_manifest_reader(), filesystem_manifest_reader_exports));
+        if (this.reader instanceof VsixReader2 || readerConstructorName === "VsixReader") {
           const { VsixWriter: VsixWriter2 } = await Promise.resolve().then(() => (init_vsix_writer(), vsix_writer_exports));
           return VsixWriter2.fromEditor(this);
-        } else if (readerConstructorName === "FilesystemManifestReader") {
+        }
+        if (this.reader instanceof FilesystemManifestReader2 || readerConstructorName === "FilesystemManifestReader") {
           const { FilesystemManifestWriter: FilesystemManifestWriter2 } = await Promise.resolve().then(() => (init_filesystem_manifest_writer(), filesystem_manifest_writer_exports));
           return FilesystemManifestWriter2.fromEditor(this);
-        } else {
-          throw new Error(`Unsupported reader type: ${readerConstructorName}`);
         }
+        throw new Error(`Unsupported reader type: ${readerConstructorName}`);
       }
       /**
        * Get the source reader
@@ -1174,198 +1657,6 @@ var init_manifest_editor = __esm({
        */
       shouldSynchronizeBinaryFileEntries() {
         return this.synchronizeBinaryFileEntries;
-      }
-    };
-  }
-});
-
-// packages/core/dist/filesystem-manifest-reader.js
-var filesystem_manifest_reader_exports = {};
-__export(filesystem_manifest_reader_exports, {
-  FilesystemManifestReader: () => FilesystemManifestReader
-});
-import { readFile as readFile2 } from "fs/promises";
-import path4 from "path";
-var FilesystemManifestReader;
-var init_filesystem_manifest_reader = __esm({
-  "packages/core/dist/filesystem-manifest-reader.js"() {
-    "use strict";
-    init_manifest_reader();
-    FilesystemManifestReader = class extends ManifestReader {
-      rootFolder;
-      manifestGlobs;
-      platform;
-      manifestPath = null;
-      manifestPaths = null;
-      extensionManifest = null;
-      // Map of packagePath (task name) to actual source path
-      packagePathMap = null;
-      constructor(options) {
-        super();
-        this.rootFolder = options.rootFolder;
-        this.manifestGlobs = options.manifestGlobs || ["vss-extension.json"];
-        this.platform = options.platform;
-      }
-      /**
-       * Find and resolve all extension manifest file paths
-       */
-      async resolveManifestPaths() {
-        if (this.manifestPaths) {
-          return this.manifestPaths;
-        }
-        const matches = await this.platform.findMatch(this.rootFolder, this.manifestGlobs);
-        if (matches.length === 0) {
-          const commonNames = ["vss-extension.json", "extension.vsomanifest"];
-          for (const name of commonNames) {
-            const candidate = path4.join(this.rootFolder, name);
-            if (await this.platform.fileExists(candidate)) {
-              this.manifestPaths = [candidate];
-              this.manifestPath = candidate;
-              return this.manifestPaths;
-            }
-          }
-          throw new Error(`Extension manifest not found in ${this.rootFolder}. Tried patterns: ${this.manifestGlobs.join(", ")}`);
-        }
-        if (matches.length > 1) {
-          this.platform.warning(`Multiple manifest files found: ${matches.join(", ")}. Using first match as primary.`);
-        }
-        this.manifestPaths = matches;
-        this.manifestPath = matches[0];
-        return this.manifestPaths;
-      }
-      /**
-       * Find and resolve the extension manifest file path
-       */
-      async resolveManifestPath() {
-        const paths = await this.resolveManifestPaths();
-        return paths[0];
-      }
-      /**
-       * Read the extension manifest from filesystem
-       * @returns Parsed extension manifest
-       */
-      async readExtensionManifest() {
-        if (this.extensionManifest) {
-          return this.extensionManifest;
-        }
-        const manifestPath = await this.resolveManifestPath();
-        const content = (await readFile2(manifestPath)).toString("utf8");
-        this.extensionManifest = JSON.parse(content);
-        return this.extensionManifest;
-      }
-      /**
-       * Build a map of packagePath to actual source path from files array
-       * This handles cases where task.json is in a different directory than the final package path
-       * @returns Map of packagePath to source path
-       */
-      async buildPackagePathMap() {
-        if (this.packagePathMap) {
-          return this.packagePathMap;
-        }
-        this.packagePathMap = /* @__PURE__ */ new Map();
-        const manifest = await this.readExtensionManifest();
-        if (manifest.files) {
-          for (const file of manifest.files) {
-            if (file.packagePath) {
-              this.packagePathMap.set(file.packagePath, file.path);
-              this.platform.debug(`Mapped packagePath '${file.packagePath}' to source path '${file.path}'`);
-            }
-          }
-        }
-        return this.packagePathMap;
-      }
-      /**
-       * Find task paths from the extension manifest
-       * @returns Array of task directory paths (relative to rootFolder)
-       */
-      async findTaskPaths() {
-        const manifest = await this.readExtensionManifest();
-        const taskPaths = [];
-        if (manifest.contributions) {
-          for (const contribution of manifest.contributions) {
-            if (contribution.type === "ms.vss-distributed-task.task" && contribution.properties) {
-              const name = contribution.properties.name;
-              if (name) {
-                taskPaths.push(name);
-              }
-            }
-          }
-        }
-        if (taskPaths.length === 0 && manifest.files) {
-          for (const file of manifest.files) {
-            const taskJsonPath = path4.join(this.rootFolder, file.path, "task.json");
-            if (await this.platform.fileExists(taskJsonPath)) {
-              taskPaths.push(file.path);
-            }
-          }
-        }
-        return taskPaths;
-      }
-      /**
-       * Read a task manifest from filesystem
-       * @param taskPath Path to the task directory (relative to rootFolder) or packagePath
-       * @returns Parsed task manifest
-       */
-      async readTaskManifest(taskPath) {
-        const packagePathMap = await this.buildPackagePathMap();
-        let actualPath = taskPath;
-        const normalizedTaskPath = taskPath.replace(/\\/g, "/");
-        for (const [pkgPath, sourcePath] of packagePathMap.entries()) {
-          const normalizedPkgPath = pkgPath.replace(/\\/g, "/");
-          if (normalizedTaskPath === normalizedPkgPath) {
-            actualPath = sourcePath;
-            break;
-          } else if (normalizedTaskPath.startsWith(normalizedPkgPath + "/")) {
-            const remainder = normalizedTaskPath.substring(normalizedPkgPath.length + 1);
-            actualPath = path4.join(sourcePath, remainder);
-            break;
-          }
-        }
-        this.platform.debug(`Reading task manifest: taskPath='${taskPath}', actualPath='${actualPath}'`);
-        const absoluteTaskPath = path4.isAbsolute(actualPath) ? actualPath : path4.join(this.rootFolder, actualPath);
-        const taskJsonPath = path4.join(absoluteTaskPath, "task.json");
-        if (!await this.platform.fileExists(taskJsonPath)) {
-          throw new Error(`Task manifest not found: ${taskJsonPath}`);
-        }
-        const content = (await readFile2(taskJsonPath)).toString("utf8");
-        return JSON.parse(content);
-      }
-      /**
-       * Close and clean up resources
-       * No-op for filesystem reader as there are no persistent resources
-       */
-      async close() {
-        this.extensionManifest = null;
-        this.manifestPath = null;
-        this.manifestPaths = null;
-        this.packagePathMap = null;
-      }
-      /**
-       * Read all extension manifests matched by manifest globs
-       */
-      async readAllExtensionManifests() {
-        const paths = await this.resolveManifestPaths();
-        const manifests = [];
-        for (const manifestPath of paths) {
-          const content = (await readFile2(manifestPath)).toString("utf8");
-          manifests.push({
-            path: manifestPath,
-            manifest: JSON.parse(content)
-          });
-        }
-        return manifests;
-      }
-      /**
-       * Get the root folder path
-       */
-      getRootFolder() {
-        return this.rootFolder;
-      }
-      /**
-       * Get the resolved manifest path (if already resolved)
-       */
-      getManifestPath() {
-        return this.manifestPath;
       }
     };
   }
@@ -2595,287 +2886,7 @@ var TfxManager = class {
 // packages/core/dist/index.js
 init_manifest_reader();
 init_manifest_editor();
-
-// packages/core/dist/vsix-reader.js
-init_manifest_reader();
-import { Buffer as Buffer4 } from "buffer";
-import { isAbsolute, normalize } from "path";
-import yauzl from "yauzl";
-function validateZipPath2(filePath) {
-  const normalizedPath = normalize(filePath);
-  if (isAbsolute(normalizedPath)) {
-    throw new Error(`Security: Absolute paths are not allowed in VSIX files: ${filePath}`);
-  }
-  if (normalizedPath.startsWith("..") || normalizedPath.includes(`${normalize("../")}`)) {
-    throw new Error(`Security: Path traversal detected in VSIX file: ${filePath}`);
-  }
-  const suspiciousPatterns = [
-    /\.\.[/\\]/,
-    // Parent directory references
-    /^[/\\]/,
-    // Root references
-    /[<>:"|?*]/
-    // Windows invalid filename characters (except for paths)
-  ];
-  for (const pattern of suspiciousPatterns) {
-    if (pattern.test(filePath)) {
-      throw new Error(`Security: Suspicious pattern detected in path: ${filePath}`);
-    }
-  }
-  if (filePath.includes("\0")) {
-    throw new Error(`Security: Null byte detected in path: ${filePath}`);
-  }
-}
-var VsixReader = class _VsixReader extends ManifestReader {
-  zipFile = null;
-  vsixPath;
-  fileCache = /* @__PURE__ */ new Map();
-  entriesCache = null;
-  constructor(vsixPath) {
-    super();
-    this.vsixPath = vsixPath;
-  }
-  /**
-   * Open a VSIX file for reading
-   * @param vsixPath Path to the VSIX file
-   * @returns VsixReader instance
-   */
-  static async open(vsixPath) {
-    const reader = new _VsixReader(vsixPath);
-    await reader.openZip();
-    return reader;
-  }
-  /**
-   * Open the ZIP file
-   */
-  async openZip() {
-    return new Promise((resolve, reject) => {
-      yauzl.open(this.vsixPath, {
-        lazyEntries: true,
-        strictFileNames: false,
-        validateEntrySizes: false,
-        autoClose: false
-        // Keep file open for multiple read operations
-      }, (err, zipFile) => {
-        if (err) {
-          reject(new Error(`Failed to open VSIX file: ${err.message}`));
-          return;
-        }
-        this.zipFile = zipFile;
-        resolve();
-      });
-    });
-  }
-  /**
-   * Read all entries from the ZIP file
-   * Validates all paths for security (zip slip protection)
-   */
-  async readEntries() {
-    if (this.entriesCache) {
-      return this.entriesCache;
-    }
-    if (!this.zipFile) {
-      throw new Error("VSIX file is not open");
-    }
-    return new Promise((resolve, reject) => {
-      const entries = [];
-      const onEntry = (entry) => {
-        try {
-          validateZipPath2(entry.fileName);
-          entries.push(entry);
-        } catch (err) {
-          this.zipFile.removeListener("entry", onEntry);
-          this.zipFile.removeListener("end", onEnd);
-          this.zipFile.removeListener("error", onError);
-          reject(err);
-          return;
-        }
-        this.zipFile.readEntry();
-      };
-      const onEnd = () => {
-        this.zipFile.removeListener("entry", onEntry);
-        this.zipFile.removeListener("end", onEnd);
-        this.zipFile.removeListener("error", onError);
-        this.entriesCache = entries;
-        resolve(entries);
-      };
-      const onError = (err) => {
-        this.zipFile.removeListener("entry", onEntry);
-        this.zipFile.removeListener("end", onEnd);
-        this.zipFile.removeListener("error", onError);
-        reject(new Error(`Error reading VSIX entries: ${err.message}`));
-      };
-      this.zipFile.on("entry", onEntry);
-      this.zipFile.on("end", onEnd);
-      this.zipFile.on("error", onError);
-      this.zipFile.readEntry();
-    });
-  }
-  /**
-   * Read a specific file from the VSIX
-   * @param filePath Path to the file within the VSIX
-   * @returns File contents as Buffer
-   */
-  async readFile(filePath) {
-    validateZipPath2(filePath);
-    const normalizedPath = filePath.replace(/\\/g, "/");
-    if (this.fileCache.has(normalizedPath)) {
-      return this.fileCache.get(normalizedPath);
-    }
-    if (!this.zipFile) {
-      throw new Error("VSIX file is not open");
-    }
-    const entries = await this.readEntries();
-    const entry = entries.find((e) => e.fileName === normalizedPath);
-    if (!entry) {
-      throw new Error(`File not found in VSIX: ${filePath}`);
-    }
-    return new Promise((resolve, reject) => {
-      this.zipFile.openReadStream(entry, (err, readStream) => {
-        if (err || !readStream) {
-          reject(new Error(`Failed to read file ${filePath}: ${err?.message || "No stream"}`));
-          return;
-        }
-        const chunks = [];
-        readStream.on("data", (chunk) => chunks.push(chunk));
-        readStream.on("end", () => {
-          const buffer = Buffer4.concat(chunks);
-          this.fileCache.set(normalizedPath, buffer);
-          resolve(buffer);
-        });
-        readStream.on("error", (streamErr) => {
-          reject(new Error(`Error reading file ${filePath}: ${streamErr.message}`));
-        });
-      });
-    });
-  }
-  /**
-   * Check if a file exists in the VSIX
-   * @param filePath Path to check
-   * @returns True if file exists
-   */
-  async fileExists(filePath) {
-    const normalizedPath = filePath.replace(/\\/g, "/");
-    const entries = await this.readEntries();
-    return entries.some((e) => e.fileName === normalizedPath);
-  }
-  /**
-   * List all files in the VSIX
-   * @returns Array of file information
-   */
-  async listFiles() {
-    const entries = await this.readEntries();
-    return entries.filter((e) => !e.fileName.endsWith("/")).map((e) => ({
-      path: e.fileName,
-      size: e.uncompressedSize,
-      compressedSize: e.compressedSize
-    }));
-  }
-  /**
-   * Read the extension manifest (vss-extension.json or extension.vsixmanifest)
-   * @returns Parsed extension manifest
-   */
-  async readExtensionManifest() {
-    if (await this.fileExists("extension.vsomanifest")) {
-      const buffer = await this.readFile("extension.vsomanifest");
-      return JSON.parse(buffer.toString("utf-8"));
-    }
-    if (await this.fileExists("vss-extension.json")) {
-      const buffer = await this.readFile("vss-extension.json");
-      return JSON.parse(buffer.toString("utf-8"));
-    }
-    throw new Error("Extension manifest not found in VSIX (expected vss-extension.json or extension.vsomanifest)");
-  }
-  /**
-   * Find task directories from the extension manifest
-   * @returns Array of task directory paths
-   */
-  async findTaskPaths() {
-    const manifest = await this.readExtensionManifest();
-    const taskPathsSet = /* @__PURE__ */ new Set();
-    if (manifest.contributions) {
-      for (const contribution of manifest.contributions) {
-        if (contribution.type === "ms.vss-distributed-task.task" && contribution.properties) {
-          const name = contribution.properties.name;
-          if (name) {
-            taskPathsSet.add(name);
-          }
-        }
-      }
-    }
-    if (taskPathsSet.size === 0 && manifest.files) {
-      const entries = await this.readEntries();
-      for (const file of manifest.files) {
-        const taskJsonPath = `${file.path}/task.json`.replace(/\\/g, "/");
-        if (entries.some((e) => e.fileName === taskJsonPath)) {
-          taskPathsSet.add(file.path);
-        }
-      }
-    }
-    return Array.from(taskPathsSet);
-  }
-  /**
-   * Read a task manifest (task.json)
-   * @param taskPath Path to the task directory
-   * @returns Parsed task manifest
-   */
-  async readTaskManifest(taskPath) {
-    const taskJsonPath = `${taskPath}/task.json`.replace(/\\/g, "/");
-    const buffer = await this.readFile(taskJsonPath);
-    return JSON.parse(buffer.toString("utf-8"));
-  }
-  /**
-   * Close the VSIX file and clean up resources
-   */
-  async close() {
-    const zipFile = this.zipFile;
-    this.zipFile = null;
-    if (zipFile) {
-      await new Promise((resolve) => {
-        let settled = false;
-        const complete = () => {
-          if (!settled) {
-            settled = true;
-            resolve();
-          }
-        };
-        const onClose = () => {
-          zipFile.removeListener("error", onError);
-          complete();
-        };
-        const onError = () => {
-          zipFile.removeListener("close", onClose);
-          complete();
-        };
-        zipFile.once("close", onClose);
-        zipFile.once("error", onError);
-        try {
-          zipFile.close();
-        } catch {
-          zipFile.removeListener("close", onClose);
-          zipFile.removeListener("error", onError);
-          complete();
-          return;
-        }
-        setTimeout(() => {
-          zipFile.removeListener("close", onClose);
-          zipFile.removeListener("error", onError);
-          complete();
-        }, 200);
-      });
-    }
-    this.fileCache.clear();
-    this.entriesCache = null;
-  }
-  /**
-   * Get the path to the VSIX file
-   */
-  getPath() {
-    return this.vsixPath;
-  }
-};
-
-// packages/core/dist/index.js
+init_vsix_reader();
 init_vsix_writer();
 init_filesystem_manifest_reader();
 init_filesystem_manifest_writer();
@@ -3124,6 +3135,7 @@ async function packageExtension(options, tfx, platform) {
 
 // packages/core/dist/commands/publish.js
 init_manifest_editor();
+init_vsix_reader();
 async function executeTfxPublish(tfx, args, platform, options, publishedVsixPath) {
   if (options.shareWith && options.shareWith.length > 0) {
     const isPublic = options.extensionVisibility === "public" || options.extensionVisibility === "public_preview";
@@ -3683,6 +3695,7 @@ function sleep(ms) {
 
 // packages/core/dist/commands/wait-for-installation.js
 import { WebApi, getPersonalAccessTokenHandler } from "azure-devops-node-api";
+init_vsix_reader();
 function validateWaitForInstallationServiceUrl(serviceUrl) {
   if (!serviceUrl) {
     throw new Error("wait-for-installation requires service-url to be set to an Azure DevOps organization/server endpoint (not marketplace)");
