@@ -20,6 +20,8 @@ const resolveTaskManifestPathsMock = jest.fn<() => string[]>();
 const vsixReaderCloseMock = jest.fn<() => Promise<void>>();
 const vsixReaderGetTasksInfoMock =
   jest.fn<() => Promise<Array<{ name: string; version: string }>>>();
+const vsixReaderGetMetadataMock =
+  jest.fn<() => Promise<{ publisher: string; extensionId: string; version: string }>>();
 const vsixReaderOpenMock = jest.fn<(path: string) => Promise<any>>();
 
 jest.unstable_mockModule('azure-devops-node-api', () => ({
@@ -59,7 +61,13 @@ describe('waitForInstallation', () => {
 
     vsixReaderOpenMock.mockResolvedValue({
       getTasksInfo: vsixReaderGetTasksInfoMock,
+      getMetadata: vsixReaderGetMetadataMock,
       close: vsixReaderCloseMock,
+    });
+    vsixReaderGetMetadataMock.mockResolvedValue({
+      publisher: 'vsix-publisher',
+      extensionId: 'vsix-extension',
+      version: '1.0.0',
     });
   });
 
@@ -158,6 +166,71 @@ describe('waitForInstallation', () => {
     expect(result.success).toBe(true);
     expect(vsixReaderOpenMock).toHaveBeenCalledWith('extension.vsix');
     expect(vsixReaderCloseMock).toHaveBeenCalled();
+  });
+
+  it('falls back to VSIX metadata when publisherId is omitted', async () => {
+    vsixReaderGetTasksInfoMock.mockResolvedValue([{ name: 'TaskFromVsix', version: '2.1.0' }]);
+    getTaskDefinitionsMock.mockResolvedValue([
+      {
+        name: 'TaskFromVsix',
+        id: 'task-vsix',
+        version: { major: 2, minor: 1, patch: 0 },
+      },
+    ]);
+
+    const result = await waitForInstallation(
+      {
+        extensionId: 'explicit-extension',
+        accounts: ['https://dev.azure.com/org1'],
+        vsixPath: 'extension.vsix',
+      },
+      auth,
+      platform
+    );
+
+    expect(result.success).toBe(true);
+    expect(
+      platform.debugMessages.some((m) => m.includes('vsix-publisher.explicit-extension'))
+    ).toBe(true);
+  });
+
+  it('falls back to VSIX metadata when extensionId is omitted', async () => {
+    vsixReaderGetTasksInfoMock.mockResolvedValue([{ name: 'TaskFromVsix', version: '2.1.0' }]);
+    getTaskDefinitionsMock.mockResolvedValue([
+      {
+        name: 'TaskFromVsix',
+        id: 'task-vsix',
+        version: { major: 2, minor: 1, patch: 0 },
+      },
+    ]);
+
+    const result = await waitForInstallation(
+      {
+        publisherId: 'explicit-publisher',
+        accounts: ['https://dev.azure.com/org1'],
+        vsixPath: 'extension.vsix',
+      },
+      auth,
+      platform
+    );
+
+    expect(result.success).toBe(true);
+    expect(
+      platform.debugMessages.some((m) => m.includes('explicit-publisher.vsix-extension'))
+    ).toBe(true);
+  });
+
+  it('fails when identity is missing and no vsixPath is provided', async () => {
+    await expect(
+      waitForInstallation(
+        {
+          accounts: ['https://dev.azure.com/org1'],
+          expectedTasks: [{ name: 'Task1', versions: ['1.0.0'] }],
+        },
+        auth,
+        platform
+      )
+    ).rejects.toThrow('publisherId and extensionId are required for wait-for-installation');
   });
 
   it('returns unavailable when token is missing', async () => {

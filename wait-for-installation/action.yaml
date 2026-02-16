@@ -78,7 +78,7 @@ inputs:
       - Alphanumeric with hyphens, dots, underscores only
 
       **Example:** `mycompany` or `my-publisher-id`
-    required: true
+    required: false
   extension-id:
     description: |-
       **Extension ID** - unique identifier within the publisher namespace.
@@ -88,7 +88,7 @@ inputs:
       - Alphanumeric with hyphens, dots, underscores only
 
       **Example:** `my-extension` or `azure-devops-tasks`
-    required: true
+    required: false
   accounts:
     description: |-
       **Azure DevOps accounts/organizations** (newline-separated).

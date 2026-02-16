@@ -13,14 +13,43 @@ export interface ExpectedTask {
 }
 
 export interface WaitForInstallationOptions {
-  publisherId: string;
-  extensionId: string;
+  publisherId?: string;
+  extensionId?: string;
   accounts: string[]; // Target organization names or URLs
   expectedTasks?: ExpectedTask[]; // Tasks with expected versions
   manifestPath?: string; // Path to extension manifest (vss-extension.json) to read task versions
   vsixPath?: string; // Path to VSIX file to read task versions from
   timeoutMinutes?: number; // Default: 10
   pollingIntervalSeconds?: number; // Default: 30
+}
+
+async function resolveExtensionIdentity(
+  options: WaitForInstallationOptions,
+  platform: IPlatformAdapter
+): Promise<{ publisherId: string; extensionId: string }> {
+  let publisherId = options.publisherId;
+  let extensionId = options.extensionId;
+
+  if ((!publisherId || !extensionId) && options.vsixPath) {
+    platform.debug(`Reading extension identity from VSIX: ${options.vsixPath}`);
+
+    const reader = await VsixReader.open(options.vsixPath);
+    try {
+      const metadata = await reader.getMetadata();
+      publisherId = publisherId || metadata.publisher;
+      extensionId = extensionId || metadata.extensionId;
+    } finally {
+      await reader.close();
+    }
+  }
+
+  if (!publisherId || !extensionId) {
+    throw new Error(
+      'publisherId and extensionId are required for wait-for-installation. Provide them directly, or provide vsixPath so they can be inferred from VSIX metadata.'
+    );
+  }
+
+  return { publisherId, extensionId };
 }
 
 export interface InstalledTask {
@@ -132,14 +161,14 @@ export async function waitForInstallation(
   auth: AuthCredentials,
   platform: IPlatformAdapter
 ): Promise<WaitForInstallationResult> {
-  const fullExtensionId = options.extensionId;
+  const identity = await resolveExtensionIdentity(options, platform);
   const accountUrls = normalizeAccountsToServiceUrls(options.accounts);
 
   const timeoutMs = (options.timeoutMinutes ?? 10) * 60_000;
   const pollingIntervalMs = (options.pollingIntervalSeconds ?? 30) * 1000;
 
   platform.debug(
-    `Verifying installation of ${options.publisherId}.${fullExtensionId} in ${accountUrls.length} account(s)`
+    `Verifying installation of ${identity.publisherId}.${identity.extensionId} in ${accountUrls.length} account(s)`
   );
 
   // Resolve expected tasks with versions

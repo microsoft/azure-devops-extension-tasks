@@ -30,8 +30,6 @@ Verify that an Azure DevOps extension has been installed correctly and that all 
 - uses: jessehouwing/azure-devops-extension-tasks/wait-for-installation@v6
   with:
     token: ${{ secrets.MARKETPLACE_TOKEN }}
-    publisher-id: 'my-publisher'
-    extension-id: 'my-extension'
     accounts: 'myorg'
     vsix-path: './dist/extension.vsix'
 ```
@@ -103,10 +101,13 @@ Verify that an Azure DevOps extension has been installed correctly and that all 
 
 ### Required Inputs
 
-- `publisher-id`: Publisher ID
-- `extension-id`: Extension ID
 - `accounts`: Azure DevOps accounts/organizations (newline-separated)
 - `token`: Personal Access Token (required when auth-type is `pat`)
+
+Identity inputs:
+
+- `publisher-id`: Publisher ID (optional when `vsix-path` is provided)
+- `extension-id`: Extension ID (optional when `vsix-path` is provided)
 
 **Plus one of:**
 

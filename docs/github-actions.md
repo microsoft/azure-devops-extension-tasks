@@ -158,10 +158,10 @@ This repository ships a **unified JavaScript action** and **composite command wr
 - Required:
   - `operation: wait-for-installation`
   - auth inputs
-  - `service-url: https://dev.azure.com/<organization>` (marketplace URL is rejected)
-  - `publisher-id`, `extension-id`
   - `accounts`
 - Optional:
+  - `publisher-id` (if omitted, inferred from `vsix-path` when provided)
+  - `extension-id` (if omitted, inferred from `vsix-path` when provided)
   - one of `expected-tasks`, `manifest-path`, `vsix-path`
   - `timeout-minutes`, `polling-interval-seconds`
 

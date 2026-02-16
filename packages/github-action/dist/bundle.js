@@ -4541,7 +4541,7 @@ function normalizeAccountToServiceUrl(input) {
   if (/^https?:\/\//i.test(value)) {
     return value;
   }
-  if (/\s/.test(value) || /[\/\\]/.test(value)) {
+  if (/\s/.test(value) || /[/\\]/.test(value)) {
     throw new Error(`Invalid organization name: ${value}. Use a plain organization name like ORG or a full URL like https://dev.azure.com/ORG`);
   }
   return `https://dev.azure.com/${value}`;
@@ -5646,6 +5646,25 @@ function sleep(ms) {
 // packages/core/dist/commands/wait-for-installation.js
 import { WebApi, getPersonalAccessTokenHandler } from "azure-devops-node-api";
 init_vsix_reader();
+async function resolveExtensionIdentity(options, platform) {
+  let publisherId = options.publisherId;
+  let extensionId = options.extensionId;
+  if ((!publisherId || !extensionId) && options.vsixPath) {
+    platform.debug(`Reading extension identity from VSIX: ${options.vsixPath}`);
+    const reader = await VsixReader.open(options.vsixPath);
+    try {
+      const metadata = await reader.getMetadata();
+      publisherId = publisherId || metadata.publisher;
+      extensionId = extensionId || metadata.extensionId;
+    } finally {
+      await reader.close();
+    }
+  }
+  if (!publisherId || !extensionId) {
+    throw new Error("publisherId and extensionId are required for wait-for-installation. Provide them directly, or provide vsixPath so they can be inferred from VSIX metadata.");
+  }
+  return { publisherId, extensionId };
+}
 async function resolveExpectedTasks(options, platform) {
   if (options.expectedTasks && options.expectedTasks.length > 0) {
     platform.debug(`Using ${options.expectedTasks.length} expected tasks from options`);
@@ -5702,11 +5721,11 @@ async function resolveExpectedTasks(options, platform) {
   return [];
 }
 async function waitForInstallation(options, auth, platform) {
-  const fullExtensionId = options.extensionId;
+  const identity = await resolveExtensionIdentity(options, platform);
   const accountUrls = normalizeAccountsToServiceUrls(options.accounts);
   const timeoutMs = (options.timeoutMinutes ?? 10) * 6e4;
   const pollingIntervalMs = (options.pollingIntervalSeconds ?? 30) * 1e3;
-  platform.debug(`Verifying installation of ${options.publisherId}.${fullExtensionId} in ${accountUrls.length} account(s)`);
+  platform.debug(`Verifying installation of ${identity.publisherId}.${identity.extensionId} in ${accountUrls.length} account(s)`);
   const expectedTasks = await resolveExpectedTasks(options, platform);
   const accountResults = [];
   for (const accountUrl of accountUrls) {
@@ -7114,8 +7133,8 @@ async function runWaitForInstallation(platform, auth) {
   }
   const result = await waitForInstallation(
     {
-      publisherId: platform.getInput("publisher-id", true),
-      extensionId: platform.getInput("extension-id", true),
+      publisherId: platform.getInput("publisher-id"),
+      extensionId: platform.getInput("extension-id"),
       accounts: platform.getDelimitedInput("accounts", "\n", true),
       expectedTasks,
       manifestPath: platform.getInput("manifest-path"),

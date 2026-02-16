@@ -394,8 +394,8 @@ async function runWaitForInstallation(platform: AzdoAdapter, auth: any): Promise
 
   const result = await waitForInstallation(
     {
-      publisherId: platform.getInput('publisherId', true),
-      extensionId: platform.getInput('extensionId', true),
+      publisherId: platform.getInput('publisherId'),
+      extensionId: platform.getInput('extensionId'),
       accounts: platform.getDelimitedInput('accounts', '\n', true),
       expectedTasks,
       manifestPath: platform.getInput('manifestPath'),

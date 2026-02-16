@@ -248,8 +248,8 @@ async function runWaitForInstallation(platform, auth) {
         }
     }
     const result = await waitForInstallation({
-        publisherId: platform.getInput('publisher-id', true),
-        extensionId: platform.getInput('extension-id', true),
+        publisherId: platform.getInput('publisher-id'),
+        extensionId: platform.getInput('extension-id'),
         accounts: platform.getDelimitedInput('accounts', '\n', true),
         expectedTasks,
         manifestPath: platform.getInput('manifest-path'),
