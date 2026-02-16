@@ -231,9 +231,9 @@ var vsix_writer_exports = {};
 __export(vsix_writer_exports, {
   VsixWriter: () => VsixWriter
 });
-import yazl from "yazl";
 import { Buffer as Buffer2 } from "buffer";
 import { createWriteStream } from "fs";
+import yazl from "yazl";
 function validateZipPath(filePath) {
   const normalizedPath = filePath.replace(/\\/g, "/");
   if (normalizedPath.startsWith("/") || /^[A-Z]:/i.test(normalizedPath)) {
@@ -617,7 +617,7 @@ var init_filesystem_manifest_writer = __esm({
       /**
        * Synchronize extension manifest file entries for extensionless files.
        *
-      * Behavior ported from the legacy manifest-fix workflow:
+       * Behavior ported from the legacy manifest-fix workflow:
        * 1) Remove all explicit application/octet-stream file entries
        * 2) Re-scan manifest-referenced directories
        * 3) Add extensionless files back as application/octet-stream
@@ -2598,9 +2598,9 @@ init_manifest_editor();
 
 // packages/core/dist/vsix-reader.js
 init_manifest_reader();
-import yauzl from "yauzl";
 import { Buffer as Buffer4 } from "buffer";
-import { normalize, isAbsolute } from "path";
+import { isAbsolute, normalize } from "path";
+import yauzl from "yauzl";
 function validateZipPath2(filePath) {
   const normalizedPath = normalize(filePath);
   if (isAbsolute(normalizedPath)) {
@@ -2828,9 +2828,41 @@ var VsixReader = class _VsixReader extends ManifestReader {
    * Close the VSIX file and clean up resources
    */
   async close() {
-    if (this.zipFile) {
-      this.zipFile.close();
-      this.zipFile = null;
+    const zipFile = this.zipFile;
+    this.zipFile = null;
+    if (zipFile) {
+      await new Promise((resolve) => {
+        let settled = false;
+        const complete = () => {
+          if (!settled) {
+            settled = true;
+            resolve();
+          }
+        };
+        const onClose = () => {
+          zipFile.removeListener("error", onError);
+          complete();
+        };
+        const onError = () => {
+          zipFile.removeListener("close", onClose);
+          complete();
+        };
+        zipFile.once("close", onClose);
+        zipFile.once("error", onError);
+        try {
+          zipFile.close();
+        } catch {
+          zipFile.removeListener("close", onClose);
+          zipFile.removeListener("error", onError);
+          complete();
+          return;
+        }
+        setTimeout(() => {
+          zipFile.removeListener("close", onClose);
+          zipFile.removeListener("error", onError);
+          complete();
+        }, 200);
+      });
     }
     this.fileCache.clear();
     this.entriesCache = null;
@@ -5001,13 +5033,12 @@ async function runPackage(platform, tfxManager) {
     updateTasksVersion: platform.getBoolInput("update-tasks-version"),
     updateTasksId: platform.getBoolInput("update-tasks-id"),
     outputPath: platform.getInput("output-path"),
-    outputVariable: platform.getInput("output-variable"),
     bypassValidation: platform.getBoolInput("bypass-validation"),
     revVersion: platform.getBoolInput("rev-version")
   };
   const result = await packageExtension(options, tfxManager, platform);
-  if (options.outputVariable && result.vsixPath) {
-    platform.setOutput(options.outputVariable, result.vsixPath);
+  if (result.vsixPath) {
+    platform.setOutput("vsix-path", result.vsixPath);
   }
 }
 async function runPublish(platform, tfxManager, auth) {
@@ -5033,6 +5064,9 @@ async function runPublish(platform, tfxManager, auth) {
     tfxManager,
     platform
   );
+  if (result.vsixPath) {
+    platform.setOutput("vsix-path", result.vsixPath);
+  }
   platform.debug(`Published: ${JSON.stringify(result)}`);
 }
 async function runUnpublish(platform, tfxManager, auth) {
@@ -5089,12 +5123,11 @@ async function runInstall(platform, tfxManager, auth) {
 async function runShow(platform, tfxManager, auth) {
   const options = {
     publisherId: platform.getInput("publisher-id", true),
-    extensionId: platform.getInput("extension-id", true),
-    outputVariable: platform.getInput("output-variable")
+    extensionId: platform.getInput("extension-id", true)
   };
   const result = await showExtension(options, auth, tfxManager, platform);
-  if (options.outputVariable && result.metadata) {
-    platform.setOutput(options.outputVariable, JSON.stringify(result.metadata));
+  if (result.metadata) {
+    platform.setOutput("extension-metadata", JSON.stringify(result.metadata));
   }
 }
 async function runQueryVersion(platform, tfxManager, auth) {
@@ -5103,8 +5136,7 @@ async function runQueryVersion(platform, tfxManager, auth) {
       publisherId: platform.getInput("publisher-id", true),
       extensionId: platform.getInput("extension-id", true),
       versionAction: platform.getInput("version-action") ?? "None",
-      extensionVersionOverrideVariable: platform.getInput("extension-version-override"),
-      outputVariable: platform.getInput("output-variable")
+      extensionVersionOverrideVariable: platform.getInput("extension-version-override")
     },
     auth,
     tfxManager,

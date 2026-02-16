@@ -51,7 +51,6 @@ Common input mappings:
 - `publishSource` → `publish-source`
 - `vsixFile` → `vsix-file`
 - `extensionVersion` → `extension-version`
-- `outputVariable` → `output-variable`
 
 ## `extensionTag` in v6
 
@@ -70,6 +69,20 @@ steps:
       operation: publish
       extension-id: ${{ format('{0}{1}', env.EXTENSION_ID_BASE, env.EXTENSION_ID_SUFFIX) }}
 ```
+
+## `outputVariable` / `output-variable` in v6
+
+    Custom output variable inputs are no longer supported.
+
+    - Azure Pipelines: `outputVariable` removed
+    - GitHub Actions: `output-variable` removed
+
+    Use standard step outputs only:
+
+    - package: `vsix-path`
+    - publish: `vsix-path`
+    - show: `extension-metadata`
+    - query-version: `proposed-version`, `current-version`
 
 ## Authentication migration
 

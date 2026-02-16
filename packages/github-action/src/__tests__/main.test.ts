@@ -126,7 +126,6 @@ describe('GitHub Action main entrypoint', () => {
       inputs: {
         operation: 'package',
         'tfx-version': 'built-in',
-        'output-variable': 'vsix-output',
       },
       delimitedInputs: {
         'manifest-globs|\n': ['vss-extension.json'],
@@ -138,7 +137,7 @@ describe('GitHub Action main entrypoint', () => {
 
     expect(validateNodeAvailableMock).toHaveBeenCalledWith(platform);
     expect(packageExtensionMock).toHaveBeenCalled();
-    expect(platform.setOutput).toHaveBeenCalledWith('vsix-output', '/tmp/ext.vsix');
+    expect(platform.setOutput).toHaveBeenCalledWith('vsix-path', '/tmp/ext.vsix');
     expect(getAuthMock).not.toHaveBeenCalled();
     expect(platform.setResult).toHaveBeenCalledWith('Succeeded', 'package completed successfully');
   });
@@ -188,6 +187,8 @@ describe('GitHub Action main entrypoint', () => {
   });
 
   it('executes publish operation with oidc auth and version-spec tfx', async () => {
+    publishExtensionMock.mockImplementation(async () => ({ vsixPath: '/tmp/published.vsix' }));
+
     const platform = createPlatformMock({
       inputs: {
         operation: 'publish',
@@ -215,6 +216,37 @@ describe('GitHub Action main entrypoint', () => {
     expect(platform.setSecret).toHaveBeenCalledWith('password');
     expect(validateAccountUrlMock).toHaveBeenCalledWith('https://dev.azure.com/org');
     expect(publishExtensionMock).toHaveBeenCalled();
+    expect(platform.setOutput).toHaveBeenCalledWith('vsix-path', '/tmp/published.vsix');
+  });
+
+  it('executes publish from vsix and emits modified vsix path output', async () => {
+    publishExtensionMock.mockImplementation(async () => ({
+      vsixPath: '/tmp/temp-12345.vsix',
+    }));
+
+    const platform = createPlatformMock({
+      inputs: {
+        operation: 'publish',
+        'tfx-version': 'built-in',
+        'auth-type': 'pat',
+        'publish-source': 'vsix',
+        'vsix-file': '/repo/original.vsix',
+      },
+    });
+    githubAdapterCtorMock.mockReturnValue(platform);
+
+    await importMainAndFlush();
+
+    expect(publishExtensionMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        publishSource: 'vsix',
+        vsixFile: '/repo/original.vsix',
+      }),
+      expect.anything(),
+      expect.anything(),
+      platform
+    );
+    expect(platform.setOutput).toHaveBeenCalledWith('vsix-path', '/tmp/temp-12345.vsix');
   });
 
   it('fails wait-for-installation when expected-tasks JSON is invalid', async () => {
@@ -276,6 +308,30 @@ describe('GitHub Action main entrypoint', () => {
     expect(queryVersionMock).toHaveBeenCalled();
     expect(platform.setOutput).toHaveBeenCalledWith('proposed-version', '2.0.0');
     expect(platform.setOutput).toHaveBeenCalledWith('current-version', '1.0.0');
+  });
+
+  it('executes show and sets extension metadata output', async () => {
+    const metadata = {
+      id: 'extension',
+      publisher: 'publisher',
+      version: '1.2.3',
+    };
+    showExtensionMock.mockImplementation(async () => ({ metadata }));
+
+    const platform = createPlatformMock({
+      inputs: {
+        operation: 'show',
+        'auth-type': 'pat',
+        'publisher-id': 'publisher',
+        'extension-id': 'extension',
+      },
+    });
+    githubAdapterCtorMock.mockReturnValue(platform);
+
+    await importMainAndFlush();
+
+    expect(showExtensionMock).toHaveBeenCalled();
+    expect(platform.setOutput).toHaveBeenCalledWith('extension-metadata', JSON.stringify(metadata));
   });
 
   it('fails wait-for-validation when status is not success', async () => {

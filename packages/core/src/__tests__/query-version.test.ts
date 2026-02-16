@@ -129,7 +129,7 @@ describe('queryVersion', () => {
     expect(executeSpy).not.toHaveBeenCalled();
   });
 
-  it('sets output variable when override variable is used', async () => {
+  it('sets Extension.Version output when override variable is used', async () => {
     platform.setVariableValue('OVERRIDE_VERSION', '9.9.9');
 
     await queryVersion(
@@ -137,7 +137,6 @@ describe('queryVersion', () => {
         publisherId: 'pub',
         extensionId: 'ext',
         extensionVersionOverrideVariable: 'OVERRIDE_VERSION',
-        outputVariable: 'VERSION_OUT',
       },
       auth,
       tfxManager,
@@ -145,10 +144,10 @@ describe('queryVersion', () => {
     );
 
     const outputs = platform.getOutputs();
-    expect(outputs.get('VERSION_OUT')).toBe('9.9.9');
+    expect(outputs.get('Extension.Version')).toBe('9.9.9');
   });
 
-  it('sets output variable when marketplace version is used', async () => {
+  it('sets Extension.Version output when marketplace version is used', async () => {
     jest.spyOn(tfxManager, 'execute').mockResolvedValue({
       exitCode: 0,
       json: { extensionId: 'ext', publisher: 'pub', version: '1.2.3' },
@@ -161,7 +160,6 @@ describe('queryVersion', () => {
         publisherId: 'pub',
         extensionId: 'ext',
         versionAction: 'Patch',
-        outputVariable: 'VERSION_OUT',
       },
       auth,
       tfxManager,
@@ -169,7 +167,7 @@ describe('queryVersion', () => {
     );
 
     const outputs = platform.getOutputs();
-    expect(outputs.get('VERSION_OUT')).toBe('1.2.4');
+    expect(outputs.get('Extension.Version')).toBe('1.2.4');
   });
 
   it('throws for invalid marketplace semantic version when action increments', async () => {

@@ -79,7 +79,7 @@ Creates a VSIX from manifest files.
   - `rootFolder`, `manifestGlobs`, `localizationRoot`
   - `publisherId`, `extensionId`
   - `extensionVersion`, `extensionName`, `extensionVisibility`, `extensionPricing`
-  - `outputPath`, `outputVariable`
+  - `outputPath`
   - `bypassValidation`, `revVersion`
   - `updateTasksVersion`, `updateTasksVersionType`, `updateTasksId`
   - `tfxVersion`
@@ -159,7 +159,7 @@ Fetches extension metadata.
   - `connectionType` + matching connection input
   - `publisherId`, `extensionId`
 - Optional:
-  - `outputVariable`
+  - none
   - `tfxVersion`
 
 ### `QueryVersion`
@@ -174,7 +174,6 @@ Queries current Marketplace version and optionally increments it.
   - `versionAction` (`None`, `Major`, `Minor`, `Patch`)
   - `extensionVersionOverride` (variable name)
   - `setBuildNumber`
-  - `outputVariable`
   - `tfxVersion`
 
 ### `waitForValidation`
@@ -211,16 +210,21 @@ Verifies tasks are available after install.
 
 The task exposes output variables including:
 
+- `extension.outputPath`
+- `extension.metadata`
+- `extension.proposedVersion`
+- `extension.currentVersion`
+- `extension.published`
+- `extension.shared`
+- `extension.unshared`
+- `extension.installed`
+- `extension.waitForValidation`
+- `extension.waitForInstallation`
+
+Compatibility outputs still set by core commands:
+
 - `Extension.OutputPath`
-- `Extension.Metadata`
-- `Extension.ProposedVersion`
-- `Extension.CurrentVersion`
-- `Extension.Published`
-- `Extension.Shared`
-- `Extension.Unshared`
-- `Extension.Installed`
-- `Extension.WaitForValidation`
-- `Extension.WaitForInstallation`
+- `Extension.Version`
 
 ## Example: package + publish
 

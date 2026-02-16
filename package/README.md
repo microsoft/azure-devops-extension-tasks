@@ -21,7 +21,6 @@ Create a .vsix package file for an Azure DevOps extension from your extension ma
     root-folder: './my-extension'
     extension-version: '1.2.3'
     output-path: './dist'
-    output-variable: 'VSIX_PATH'
 ```
 
 ### With Task Version Updates
@@ -74,7 +73,6 @@ None - all inputs are optional with sensible defaults.
 #### Package Options
 
 - `output-path`: Output directory for .vsix file
-- `output-variable`: Name of output variable to store result path
 - `bypass-validation`: Skip extension validation (default: `false`)
 - `rev-version`: Auto-increment patch version (default: `false`)
 - `update-tasks-version`: Update task versions to match extension version (default: `false`)

@@ -108,34 +108,6 @@ describe('showExtension', () => {
     expect(callArgs).toContain('ext');
   });
 
-  it('should set output variable when specified', async () => {
-    const mockExecute = jest.spyOn(tfxManager, 'execute');
-    mockExecute.mockResolvedValue({
-      exitCode: 0,
-      json: { id: 'ext', publisher: 'pub', version: '1.0.0' },
-      stdout: '',
-      stderr: '',
-    });
-
-    await showExtension(
-      {
-        publisherId: 'pub',
-        extensionId: 'ext',
-        outputVariable: 'EXT_DATA',
-      },
-      auth,
-      tfxManager,
-      platform
-    );
-
-    const outputs = platform.getOutputs();
-    const outputData = outputs.get('EXT_DATA');
-    expect(outputData).toBeDefined();
-
-    const parsed = JSON.parse(outputData!);
-    expect(parsed.id).toBe('ext');
-  });
-
   it('should handle authentication', async () => {
     const mockExecute = jest.spyOn(tfxManager, 'execute');
     mockExecute.mockResolvedValue({

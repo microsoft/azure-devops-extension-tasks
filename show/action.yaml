@@ -107,15 +107,6 @@ inputs:
 
       **Example:** `my-extension` or `azure-devops-tasks`
     required: true
-  output-variable:
-    description: |-
-      **Name to use for storing output** (deprecated - use outputs instead).
-
-      **Package:** Stores path to generated .vsix file
-      **Show:** Stores JSON metadata about the extension
-
-      **Note:** Prefer using action outputs (`steps.<id>.outputs.vsix-path`)
-    required: false
 outputs:
   extension-metadata:
     description: |-
@@ -154,4 +145,3 @@ runs:
         tfx-version: ${{ inputs.tfx-version }}
         publisher-id: ${{ inputs.publisher-id }}
         extension-id: ${{ inputs.extension-id }}
-        output-variable: ${{ inputs.output-variable }}

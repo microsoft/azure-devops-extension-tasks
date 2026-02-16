@@ -48,7 +48,7 @@ This repository ships a **unified JavaScript action** and **composite command wr
 - `publish-source` (`manifest` or `vsix`)
 - `vsix-file`
 - `extension-version`, `extension-name`, `extension-visibility`
-- `output-path`, `output-variable`
+- `output-path`
 - `bypass-validation`, `rev-version`
 - `share-with`, `unshare-with`
 - `no-wait-validation`
@@ -72,7 +72,7 @@ This repository ships a **unified JavaScript action** and **composite command wr
   - `publisher-id`, `extension-id`
   - `root-folder`, `manifest-globs`
   - `extension-version`, `extension-name`, `extension-visibility`
-  - `output-path`, `output-variable`
+  - `output-path`
   - `bypass-validation`, `rev-version`, `update-tasks-version`, `update-tasks-id`
   - auth/tooling inputs
 
@@ -131,7 +131,7 @@ This repository ships a **unified JavaScript action** and **composite command wr
   - auth inputs
   - `publisher-id`, `extension-id`
 - Optional:
-  - `output-variable`
+  - none
 
 ### `query-version`
 
@@ -142,7 +142,7 @@ This repository ships a **unified JavaScript action** and **composite command wr
 - Optional:
   - `version-action`
   - `extension-version-override`
-  - `output-variable`
+  - none
 
 ### `wait-for-validation`
 

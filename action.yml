@@ -220,15 +220,6 @@ inputs:
 
       **Output:** Full path stored in `vsix-path` output
     required: false
-  output-variable:
-    description: |
-      **Name to use for storing output** (deprecated - use outputs instead).
-
-      **Package:** Stores path to generated .vsix file
-      **Show:** Stores JSON metadata about the extension
-
-      **Note:** Prefer using action outputs (`steps.<id>.outputs.vsix-path`)
-    required: false
   bypass-validation:
     description: |
       **Skip extension validation checks** during package/publish.

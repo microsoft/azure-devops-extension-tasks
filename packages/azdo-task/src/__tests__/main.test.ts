@@ -120,7 +120,10 @@ describe('Azure DevOps main entrypoint', () => {
       serviceUrl: 'https://dev.azure.com/org',
     }));
     packageExtensionMock.mockImplementation(async () => ({ vsixPath: '/tmp/ext.vsix' }));
-    publishExtensionMock.mockImplementation(async () => ({}));
+    publishExtensionMock.mockImplementation(async () => ({
+      published: true,
+      vsixPath: '/tmp/publish.vsix',
+    }));
     installExtensionMock.mockImplementation(async () => ({ allSuccess: true }));
     waitForInstallationMock.mockImplementation(async () => ({ success: true }));
   });
@@ -130,7 +133,6 @@ describe('Azure DevOps main entrypoint', () => {
       inputs: {
         operation: 'package',
         tfxVersion: 'built-in',
-        outputVariable: 'vsixOutput',
       },
       delimitedInputs: {
         'manifestGlobs|\n': ['vss-extension.json'],
@@ -142,7 +144,7 @@ describe('Azure DevOps main entrypoint', () => {
 
     expect(validateNodeAvailableMock).toHaveBeenCalledWith(platform);
     expect(packageExtensionMock).toHaveBeenCalled();
-    expect(platform.setOutput).toHaveBeenCalledWith('vsixOutput', '/tmp/ext.vsix');
+    expect(platform.setOutput).toHaveBeenCalledWith('extension.outputPath', '/tmp/ext.vsix');
     expect(getAuthMock).not.toHaveBeenCalled();
     expect(platform.setResult).toHaveBeenCalledWith('Succeeded', 'package completed successfully');
   });
@@ -212,7 +214,49 @@ describe('Azure DevOps main entrypoint', () => {
     expect(getAuthMock).toHaveBeenCalledWith('connectedService:VsTeam', 'svc-connection', platform);
     expect(validateAccountUrlMock).toHaveBeenCalledWith('https://dev.azure.com/org');
     expect(publishExtensionMock).toHaveBeenCalled();
+    expect(platform.setOutput).toHaveBeenCalledWith('extension.published', 'true');
     expect(platform.setResult).toHaveBeenCalledWith('Succeeded', 'publish completed successfully');
+  });
+
+  it('executes show operation and emits extension metadata output', async () => {
+    const metadata = { id: 'extension', version: '1.0.0' };
+    showExtensionMock.mockImplementation(async () => ({ metadata }));
+
+    const platform = createPlatformMock({
+      inputs: {
+        operation: 'show',
+        connectionType: 'connectedService:VsTeam',
+        connectionName: 'svc-connection',
+        publisherId: 'publisher',
+        extensionId: 'extension',
+      },
+    });
+    azdoAdapterCtorMock.mockReturnValue(platform);
+
+    await importMainAndFlush();
+
+    expect(platform.setOutput).toHaveBeenCalledWith('extension.metadata', JSON.stringify(metadata));
+  });
+
+  it('sets extension.installed output when install succeeds', async () => {
+    const platform = createPlatformMock({
+      inputs: {
+        operation: 'install',
+        connectionType: 'connectedService:VsTeam',
+        connectionName: 'svc-connection',
+        publisherId: 'publisher',
+        extensionId: 'extension',
+      },
+      delimitedInputs: {
+        'accounts|;': ['https://dev.azure.com/org1'],
+        'accounts|\n': ['https://dev.azure.com/org1'],
+      },
+    });
+    azdoAdapterCtorMock.mockReturnValue(platform);
+
+    await importMainAndFlush();
+
+    expect(platform.setOutput).toHaveBeenCalledWith('extension.installed', 'true');
   });
 
   it('forwards publish manifest editor options', async () => {
@@ -254,6 +298,46 @@ describe('Azure DevOps main entrypoint', () => {
       expect.anything(),
       platform
     );
+  });
+
+  it('sets extension.shared output when share succeeds', async () => {
+    const platform = createPlatformMock({
+      inputs: {
+        operation: 'share',
+        connectionType: 'connectedService:VsTeam',
+        connectionName: 'svc-connection',
+        publisherId: 'publisher',
+        extensionId: 'extension',
+      },
+      delimitedInputs: {
+        'shareWith|\n': ['org1'],
+      },
+    });
+    azdoAdapterCtorMock.mockReturnValue(platform);
+
+    await importMainAndFlush();
+
+    expect(platform.setOutput).toHaveBeenCalledWith('extension.shared', 'true');
+  });
+
+  it('sets extension.unshared output when unshare succeeds', async () => {
+    const platform = createPlatformMock({
+      inputs: {
+        operation: 'unshare',
+        connectionType: 'connectedService:VsTeam',
+        connectionName: 'svc-connection',
+        publisherId: 'publisher',
+        extensionId: 'extension',
+      },
+      delimitedInputs: {
+        'unshareWith|\n': ['org1'],
+      },
+    });
+    azdoAdapterCtorMock.mockReturnValue(platform);
+
+    await importMainAndFlush();
+
+    expect(platform.setOutput).toHaveBeenCalledWith('extension.unshared', 'true');
   });
 
   it('fails install operation when not all accounts succeed', async () => {
@@ -337,6 +421,27 @@ describe('Azure DevOps main entrypoint', () => {
     expect(platform.setOutput).toHaveBeenCalledWith('extension.currentVersion', '1.0.0');
   });
 
+  it('sets extension.waitForInstallation output when verification succeeds', async () => {
+    const platform = createPlatformMock({
+      inputs: {
+        operation: 'wait-for-installation',
+        connectionType: 'connectedService:VsTeam',
+        connectionName: 'svc-connection',
+        publisherId: 'publisher',
+        extensionId: 'extension',
+      },
+      delimitedInputs: {
+        'accounts|;': ['https://dev.azure.com/org1'],
+        'accounts|\n': ['https://dev.azure.com/org1'],
+      },
+    });
+    azdoAdapterCtorMock.mockReturnValue(platform);
+
+    await importMainAndFlush();
+
+    expect(platform.setOutput).toHaveBeenCalledWith('extension.waitForInstallation', 'true');
+  });
+
   it('fails wait-for-validation when status is not success', async () => {
     waitForValidationMock.mockImplementation(async () => ({ status: 'failed' }));
 
@@ -358,5 +463,27 @@ describe('Azure DevOps main entrypoint', () => {
 
     expect(waitForValidationMock).toHaveBeenCalled();
     expect(tlSetResultMock).toHaveBeenCalledWith('Failed', 'Validation failed with status: failed');
+  });
+
+  it('sets extension.waitForValidation output when validation succeeds', async () => {
+    waitForValidationMock.mockImplementation(async () => ({ status: 'success' }));
+
+    const platform = createPlatformMock({
+      inputs: {
+        operation: 'wait-for-validation',
+        connectionType: 'connectedService:VsTeam',
+        connectionName: 'svc-connection',
+        publisherId: 'publisher',
+        extensionId: 'extension',
+      },
+      delimitedInputs: {
+        'manifestGlobs|\n': ['vss-extension.json'],
+      },
+    });
+    azdoAdapterCtorMock.mockReturnValue(platform);
+
+    await importMainAndFlush();
+
+    expect(platform.setOutput).toHaveBeenCalledWith('extension.waitForValidation', 'true');
   });
 });

@@ -32,7 +32,6 @@ export interface PackageOptions {
 
   // Output
   outputPath?: string;
-  outputVariable?: string;
 
   // Behavior
   bypassValidation?: boolean;
@@ -190,11 +189,6 @@ export async function packageExtension(
     const json = result.json as any;
     if (!json || !json.path) {
       throw new Error('tfx did not return expected JSON output with path');
-    }
-
-    // Set output variable if specified
-    if (options.outputVariable) {
-      platform.setVariable(options.outputVariable, json.path, false, true);
     }
 
     // Always set Extension.OutputPath for compatibility

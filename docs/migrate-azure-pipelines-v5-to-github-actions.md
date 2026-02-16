@@ -41,7 +41,6 @@ Common conversions from Azure Pipelines-style names to GitHub Actions inputs:
 - `publishSource` → `publish-source`
 - `vsixFile` → `vsix-file`
 - `extensionVersion` → `extension-version`
-- `outputVariable` → `output-variable`
 
 ## `extensionTag` in v6
 
@@ -60,6 +59,20 @@ steps:
       operation: publish
       extension-id: ${{ format('{0}{1}', env.EXTENSION_ID_BASE, env.EXTENSION_ID_SUFFIX) }}
 ```
+
+## `outputVariable` / `output-variable` in v6
+
+    Custom output variable inputs are no longer supported in this v6 rebuild.
+
+    - Azure Pipelines: `outputVariable` removed
+    - GitHub Actions: `output-variable` removed
+
+    Use standard step outputs only:
+
+    - package: `${{ steps.package.outputs.vsix-path }}`
+    - publish: `${{ steps.publish.outputs.vsix-path }}`
+    - show: `${{ steps.show.outputs.extension-metadata }}`
+    - query-version: `${{ steps.version.outputs.proposed-version }}`, `${{ steps.version.outputs.current-version }}`
 
 ## Authentication migration
 

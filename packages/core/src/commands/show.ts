@@ -15,8 +15,6 @@ export interface ShowOptions {
   publisherId: string;
   /** Extension ID */
   extensionId: string;
-  /** Output variable name to store extension data (optional) */
-  outputVariable?: string;
 }
 
 /**
@@ -115,11 +113,6 @@ export async function showExtension(
     tags: json.tags,
     ...json, // Include all other fields
   };
-
-  // Set output variable if specified
-  if (options.outputVariable) {
-    platform.setVariable(options.outputVariable, JSON.stringify(metadata), false, true);
-  }
 
   platform.info(`Extension: ${metadata.name || metadata.id} v${metadata.version}`);
   if (metadata.description) {

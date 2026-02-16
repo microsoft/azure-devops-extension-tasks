@@ -10,7 +10,6 @@ export interface QueryVersionOptions {
   extensionId: string;
   versionAction?: VersionAction;
   extensionVersionOverrideVariable?: string;
-  outputVariable?: string;
 }
 
 export interface QueryVersionResult {
@@ -64,11 +63,7 @@ export async function queryVersion(
       platform.info(
         `Ignoring marketplace version and using supplied override: ${overrideVersion}.`
       );
-      platform.setVariable('Extension.Version', overrideVersion, false, false);
       platform.setVariable('Extension.Version', overrideVersion, false, true);
-      if (options.outputVariable) {
-        platform.setVariable(options.outputVariable, overrideVersion, false, true);
-      }
       return {
         currentVersion: overrideVersion,
         proposedVersion: overrideVersion,
@@ -101,11 +96,7 @@ export async function queryVersion(
     platform.info(`Updated to       : ${updatedVersion}.`);
   }
 
-  platform.setVariable('Extension.Version', updatedVersion, false, false);
   platform.setVariable('Extension.Version', updatedVersion, false, true);
-  if (options.outputVariable) {
-    platform.setVariable(options.outputVariable, updatedVersion, false, true);
-  }
 
   return {
     currentVersion: marketplaceVersion,

@@ -183,15 +183,14 @@ async function runPackage(platform: GitHubAdapter, tfxManager: TfxManager): Prom
     updateTasksVersion: platform.getBoolInput('update-tasks-version'),
     updateTasksId: platform.getBoolInput('update-tasks-id'),
     outputPath: platform.getInput('output-path'),
-    outputVariable: platform.getInput('output-variable'),
     bypassValidation: platform.getBoolInput('bypass-validation'),
     revVersion: platform.getBoolInput('rev-version'),
   };
 
   const result = await packageExtension(options, tfxManager, platform);
 
-  if (options.outputVariable && result.vsixPath) {
-    platform.setOutput(options.outputVariable, result.vsixPath);
+  if (result.vsixPath) {
+    platform.setOutput('vsix-path', result.vsixPath);
   }
 }
 
@@ -226,6 +225,10 @@ async function runPublish(
     tfxManager,
     platform
   );
+
+  if (result.vsixPath) {
+    platform.setOutput('vsix-path', result.vsixPath);
+  }
 
   platform.debug(`Published: ${JSON.stringify(result)}`);
 }
@@ -302,13 +305,12 @@ async function runShow(platform: GitHubAdapter, tfxManager: TfxManager, auth: an
   const options = {
     publisherId: platform.getInput('publisher-id', true),
     extensionId: platform.getInput('extension-id', true),
-    outputVariable: platform.getInput('output-variable'),
   };
 
   const result = await showExtension(options, auth, tfxManager, platform);
 
-  if (options.outputVariable && result.metadata) {
-    platform.setOutput(options.outputVariable, JSON.stringify(result.metadata));
+  if (result.metadata) {
+    platform.setOutput('extension-metadata', JSON.stringify(result.metadata));
   }
 }
 
@@ -324,7 +326,6 @@ async function runQueryVersion(
       versionAction:
         (platform.getInput('version-action') as 'None' | 'Major' | 'Minor' | 'Patch') ?? 'None',
       extensionVersionOverrideVariable: platform.getInput('extension-version-override'),
-      outputVariable: platform.getInput('output-variable'),
     },
     auth,
     tfxManager,

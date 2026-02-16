@@ -129,6 +129,37 @@ function runCommand(command, args, cwd) {
   });
 }
 
+function runCommandCapture(command, args, cwd) {
+  return new Promise((resolve, reject) => {
+    let stdout = '';
+    let stderr = '';
+
+    const child = spawn(`${command} ${args.join(' ')}`, {
+      cwd,
+      stdio: ['ignore', 'pipe', 'pipe'],
+      shell: true,
+    });
+
+    child.stdout?.on('data', (chunk) => {
+      stdout += chunk.toString();
+    });
+
+    child.stderr?.on('data', (chunk) => {
+      stderr += chunk.toString();
+    });
+
+    child.on('error', reject);
+    child.on('close', (code) => {
+      if (code === 0) {
+        resolve(stdout);
+        return;
+      }
+
+      reject(new Error(`Command failed (${code}): ${command} ${args.join(' ')}\n${stderr}`));
+    });
+  });
+}
+
 async function installRuntimeDependencies(target) {
   const distDir = path.join(rootDir, target.packageDir, 'dist');
   const nodeModulesDir = path.join(distDir, 'node_modules');
@@ -164,6 +195,66 @@ async function installRuntimeDependencies(target) {
   await runCommand(npmCommand, installArgs, distDir);
 }
 
+async function ensureExecutableBinScripts(target) {
+  const binDir = path.join(rootDir, target.packageDir, 'dist', 'node_modules', '.bin');
+
+  try {
+    await fs.access(binDir);
+  } catch {
+    return;
+  }
+
+  const entries = await fs.readdir(binDir, { withFileTypes: true });
+  const extensionlessScripts = entries
+    .filter((entry) => entry.isFile() && path.extname(entry.name) === '')
+    .map((entry) => entry.name);
+
+  if (extensionlessScripts.length === 0) {
+    return;
+  }
+
+  for (const scriptName of extensionlessScripts) {
+    const scriptPath = path.join(binDir, scriptName);
+    try {
+      await fs.chmod(scriptPath, 0o755);
+    } catch {
+      // Best effort; Windows may not apply POSIX execute bits on disk.
+    }
+  }
+
+  const relativePaths = extensionlessScripts.map((scriptName) =>
+    path.posix.join(target.packageDir, 'dist', 'node_modules', '.bin', scriptName)
+  );
+
+  try {
+    const trackedOutput = await runCommandCapture(
+      'git',
+      ['ls-files', '--', ...relativePaths],
+      rootDir
+    );
+    const trackedPaths = new Set(
+      trackedOutput
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter(Boolean)
+    );
+    const trackedExtensionlessScripts = relativePaths.filter((scriptPath) =>
+      trackedPaths.has(scriptPath)
+    );
+
+    if (trackedExtensionlessScripts.length > 0) {
+      await runCommand(
+        'git',
+        ['update-index', '--chmod=+x', '--', ...trackedExtensionlessScripts],
+        rootDir
+      );
+      console.log(`Set executable bit on tracked .bin scripts for ${target.name}`);
+    }
+  } catch (error) {
+    console.warn(`Unable to update git executable bits for ${target.name}: ${error.message}`);
+  }
+}
+
 async function bundle() {
   for (const target of targets) {
     console.log(`Bundling ${target.name}...`);
@@ -180,6 +271,7 @@ async function bundle() {
 
     await writeRuntimeDependencyManifest(target);
     await installRuntimeDependencies(target);
+    await ensureExecutableBinScripts(target);
     console.log(`✓ ${target.name} bundled`);
   }
 }

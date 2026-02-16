@@ -186,11 +186,10 @@ describe('Package Command Integration Test', () => {
     await reader.close();
   }, 60000);
 
-  it('should handle custom output variable', async () => {
+  it('should set Extension.OutputPath output variable', async () => {
     if (!canRunTfx) return;
     // Arrange
     const outputPath = path.join(outputDir, 'custom-var-test.vsix');
-    const outputVariable = 'CustomVsixPath';
     const tfx = new TfxManager({
       tfxVersion: 'built-in',
       platform,
@@ -203,7 +202,6 @@ describe('Package Command Integration Test', () => {
           rootFolder: fixturesDir,
           manifestGlobs: ['vss-extension.json'],
           outputPath,
-          outputVariable,
           bypassValidation: true,
         },
         tfx,
@@ -215,8 +213,7 @@ describe('Package Command Integration Test', () => {
     }
 
     // Assert - Check output was set via setVariable
-    // The command should set the variable as output
-    const outputValue = platform.getVariable(outputVariable);
+    const outputValue = platform.getVariable('Extension.OutputPath');
     expect(outputValue).toBe(outputPath);
   }, 60000);
 });

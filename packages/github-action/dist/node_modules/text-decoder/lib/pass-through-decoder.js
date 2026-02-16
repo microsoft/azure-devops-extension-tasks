@@ -9,8 +9,8 @@ module.exports = class PassThroughDecoder {
     return 0
   }
 
-  decode(tail) {
-    return b4a.toString(tail, this.encoding)
+  decode(data) {
+    return b4a.toString(data, this.encoding)
   }
 
   flush() {

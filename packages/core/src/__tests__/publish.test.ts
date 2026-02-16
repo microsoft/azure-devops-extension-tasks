@@ -78,6 +78,23 @@ describe('publishExtension', () => {
       expect(platform.isSecret('test-token-123')).toBe(true);
     });
 
+    it('should return packaged vsix path when publishing from manifest', async () => {
+      const mockExecute = jest.spyOn(tfxManager, 'execute');
+      mockExecute.mockResolvedValue({
+        exitCode: 0,
+        json: {
+          published: true,
+          packaged: '/out/generated-manifest.vsix',
+        },
+        stdout: '',
+        stderr: '',
+      });
+
+      const result = await publishExtension(withManifestDefaults(), auth, tfxManager, platform);
+
+      expect(result.vsixPath).toBe('/out/generated-manifest.vsix');
+    });
+
     it('should publish from manifest with basic auth', async () => {
       const basicAuth: AuthCredentials = {
         authType: 'basic',
@@ -370,28 +387,6 @@ describe('publishExtension', () => {
     });
   });
 
-  it('should set output variable when specified', async () => {
-    const mockExecute = jest.spyOn(tfxManager, 'execute');
-    mockExecute.mockResolvedValue({
-      exitCode: 0,
-      json: { published: true, packaged: '/out/ext.vsix' },
-      stdout: '',
-      stderr: '',
-    });
-
-    await publishExtension(
-      withManifestDefaults({
-        outputVariable: 'PUBLISHED_VSIX',
-      }),
-      auth,
-      tfxManager,
-      platform
-    );
-
-    const outputs = platform.getOutputs();
-    expect(outputs.get('PUBLISHED_VSIX')).toBe('/out/ext.vsix');
-  });
-
   it('should update manifest tasks before publishing when requested', async () => {
     const root = await fs.mkdtemp(join(tmpdir(), 'publish-cmd-'));
     const taskDir = join(root, 'task1');
@@ -487,7 +482,7 @@ describe('publishExtension', () => {
       stderr: '',
     });
 
-    await publishExtension(
+    const result = await publishExtension(
       {
         publishSource: 'vsix',
         vsixFile: '/path/to/extension.vsix',
@@ -502,6 +497,7 @@ describe('publishExtension', () => {
     const vsixArgIndex = callArgs.indexOf('--vsix');
     expect(vsixArgIndex).toBeGreaterThan(-1);
     expect(callArgs[vsixArgIndex + 1]).toContain('temp-');
+    expect(result.vsixPath).toBe(callArgs[vsixArgIndex + 1]);
     expect(writeToFileMock).toHaveBeenCalled();
     expect(writerCloseMock).toHaveBeenCalled();
     expect(readerCloseMock).toHaveBeenCalled();

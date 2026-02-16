@@ -129,15 +129,6 @@ inputs:
 
       **Example:** `MY_VERSION` where `$``{{ env.MY_VERSION }}` is `2.1.0`
     required: false
-  output-variable:
-    description: |-
-      **Name to use for storing output** (deprecated - use outputs instead).
-
-      **Package:** Stores path to generated .vsix file
-      **Show:** Stores JSON metadata about the extension
-
-      **Note:** Prefer using action outputs (`steps.<id>.outputs.vsix-path`)
-    required: false
 outputs:
   proposed-version:
     description: '**Proposed extension version** after applying version action (query-version operation only).'
@@ -162,4 +153,3 @@ runs:
         extension-id: ${{ inputs.extension-id }}
         version-action: ${{ inputs.version-action }}
         extension-version-override: ${{ inputs.extension-version-override }}
-        output-variable: ${{ inputs.output-variable }}

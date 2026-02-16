@@ -228,15 +228,6 @@
       "groupName": "operationConfig"
     },
     {
-      "name": "outputVariable",
-      "type": "string",
-      "label": "Output Variable",
-      "required": false,
-      "helpMarkDown": "**Name of pipeline variable** to store operation result.\n\n**Package operation**: Stores path to generated .vsix file\n**Show operation**: Stores JSON metadata about the extension\n\n**Usage example**:\n```yaml\n- task: ExtensionTasks@6\n  name: PackageStep\n  inputs:\n    operation: package\n    outputVariable: VsixPath\n\n- script: echo $(VsixPath)\n```",
-      "visibleRule": "operation = package || operation = show || operation = query-version",
-      "groupName": "operationConfig"
-    },
-    {
       "name": "versionAction",
       "type": "pickList",
       "label": "Version Action",

@@ -224,6 +224,21 @@ inputs:
       **Default:** `false`
     required: false
     default: 'false'
+outputs:
+  vsix-path:
+    description: |-
+      **Path to generated .vsix file** (package operation only).
+
+      **Example usage:**
+      ```yaml
+      - uses: jessehouwing/azure-devops-extension-tasks@refactor/v6
+        id: package
+        with:
+          operation: package
+
+      - run: echo "VSIX at $``{{ steps.package.outputs.vsix-path }}"
+      ```
+    value: ${{ steps.publish.outputs.vsix-path }}
 runs:
   using: composite
   steps:

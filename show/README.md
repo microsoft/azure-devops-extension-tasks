@@ -18,17 +18,6 @@ Display metadata for an Azure DevOps extension from the Visual Studio Marketplac
   run: echo '${{ steps.show.outputs.extension-metadata }}'
 ```
 
-### With Output Variable
-
-```yaml
-- uses: jessehouwing/azure-devops-extension-tasks/show@v6
-  with:
-    token: ${{ secrets.MARKETPLACE_TOKEN }}
-    publisher-id: 'my-publisher'
-    extension-id: 'my-extension'
-    output-variable: 'EXTENSION_INFO'
-```
-
 ### With OIDC Authentication
 
 ```yaml
@@ -68,10 +57,6 @@ OR
 #### TFX Configuration
 
 - `tfx-version`: Version of tfx-cli to use (default: `built-in`)
-
-#### Output Options
-
-- `output-variable`: Name of output variable to store metadata JSON
 
 ## Outputs
 

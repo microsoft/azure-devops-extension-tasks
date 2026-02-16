@@ -48,7 +48,6 @@ export interface PublishOptions {
   // Behavior
   noWaitValidation?: boolean;
   bypassValidation?: boolean;
-  outputVariable?: string;
 }
 
 /**
@@ -76,7 +75,8 @@ async function executeTfxPublish(
   tfx: TfxManager,
   args: ArgBuilder,
   platform: IPlatformAdapter,
-  options: PublishOptions
+  options: PublishOptions,
+  publishedVsixPath?: string
 ): Promise<PublishResult> {
   // Sharing
   if (options.shareWith && options.shareWith.length > 0) {
@@ -120,12 +120,7 @@ async function executeTfxPublish(
   if (options.publishSource === 'manifest') {
     vsixPath = json.packaged || '';
   } else {
-    vsixPath = options.vsixFile || '';
-  }
-
-  // Set output variable if specified
-  if (options.outputVariable && vsixPath) {
-    platform.setVariable(options.outputVariable, vsixPath, false, true);
+    vsixPath = publishedVsixPath || options.vsixFile || '';
   }
 
   platform.info(`Published extension: ${json.id} v${json.version}`);
@@ -316,6 +311,8 @@ export async function publishExtension(
       options.updateTasksVersion ||
       options.updateTasksId;
 
+    let vsixPathToPublish = options.vsixFile;
+
     if (needsModification) {
       platform.info('Modifying VSIX before publishing...');
 
@@ -347,6 +344,7 @@ export async function publishExtension(
       await reader.close();
 
       // Use the modified VSIX for publishing
+      vsixPathToPublish = tempVsixPath;
       args.option('--vsix', tempVsixPath);
 
       platform.info('VSIX modifications applied successfully');
@@ -354,6 +352,8 @@ export async function publishExtension(
       // No modifications needed - publish as-is
       args.option('--vsix', options.vsixFile);
     }
+
+    return executeTfxPublish(tfx, args, platform, options, vsixPathToPublish);
   }
 
   // Execute tfx using the helper function
