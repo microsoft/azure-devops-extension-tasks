@@ -75,6 +75,9 @@ export class GitHubAdapter {
     error(message) {
         core.error(message);
     }
+    isDebugEnabled() {
+        return core.isDebug() || process.env.ACTIONS_STEP_DEBUG === 'true';
+    }
     // ===== Execution =====
     async which(tool, check) {
         const result = await io.which(tool, check);

@@ -2862,13 +2862,15 @@ var TfxManager = class {
       }
       jsonStream = new JsonOutputStream((msg) => this.platform.debug(msg));
     }
+    const defaultSilent = options?.captureJson ? true : !this.platform.isDebugEnabled();
     const execOptions = {
       cwd: options?.cwd,
       env: options?.env,
+      silent: options?.silent ?? defaultSilent,
       outStream: jsonStream,
       errStream: void 0
     };
-    this.platform.info(`Executing: ${tfxPath} ${finalArgs.join(" ")}`);
+    this.platform.debug(`Executing: ${tfxPath} ${finalArgs.join(" ")}`);
     const exitCode = await this.platform.exec(tfxPath, finalArgs, execOptions);
     let parsedJson;
     if (jsonStream) {
@@ -4828,7 +4830,7 @@ var GitHubAdapter = class {
     core5.error(message);
   }
   isDebugEnabled() {
-    return core5.isDebug() || process.env.ACTIONS_STEP_DEBUG === "true" || process.env.ACTIONS_RUNNER_DEBUG === "true";
+    return core5.isDebug() || process.env.ACTIONS_STEP_DEBUG === "true";
   }
   // ===== Execution =====
   async which(tool, check) {

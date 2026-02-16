@@ -243,6 +243,18 @@ describe('TfxManager', () => {
       expect(platform.execCalls[0].options?.silent).toBe(false);
     });
 
+    it('should keep captureJson executions silent in debug mode by default', async () => {
+      platform.debugEnabled = true;
+      const manager = new TfxManager({
+        tfxVersion: 'path',
+        platform,
+      });
+
+      await manager.execute(['extension', 'show'], { captureJson: true });
+
+      expect(platform.execCalls[0].options?.silent).toBe(true);
+    });
+
     it('should honor explicit silent override', async () => {
       platform.debugEnabled = true;
       const manager = new TfxManager({

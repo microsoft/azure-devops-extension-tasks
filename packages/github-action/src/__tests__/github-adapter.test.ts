@@ -44,7 +44,7 @@ describe('GitHubAdapter', () => {
 
     process.env.ACTIONS_STEP_DEBUG = 'false';
     process.env.ACTIONS_RUNNER_DEBUG = 'true';
-    expect(adapter.isDebugEnabled()).toBe(true);
+    expect(adapter.isDebugEnabled()).toBe(false);
 
     process.env.ACTIONS_STEP_DEBUG = 'false';
     process.env.ACTIONS_RUNNER_DEBUG = 'false';

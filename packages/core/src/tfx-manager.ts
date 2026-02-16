@@ -368,10 +368,11 @@ export class TfxManager {
     }
 
     // Build exec options
+    const defaultSilent = options?.captureJson ? true : !this.platform.isDebugEnabled();
     const execOptions = {
       cwd: options?.cwd,
       env: options?.env,
-      silent: options?.silent ?? !this.platform.isDebugEnabled(),
+      silent: options?.silent ?? defaultSilent,
       outStream: jsonStream,
       errStream: undefined as NodeJS.WritableStream | undefined,
     };
