@@ -1,9 +1,9 @@
-import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
-import { AzdoAdapter } from '../azdo-adapter.js';
 import { TaskResult } from '@extension-tasks/core';
+import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { promises as fs } from 'fs';
-import { join } from 'path';
 import { tmpdir } from 'os';
+import { join } from 'path';
+import { AzdoAdapter } from '../azdo-adapter.js';
 
 describe('AzdoAdapter', () => {
   let adapter: AzdoAdapter;
@@ -11,6 +11,7 @@ describe('AzdoAdapter', () => {
   let originalInputMyFlag: string | undefined;
   let originalInputItems: string | undefined;
   let originalToken: string | undefined;
+  let originalSystemDebug: string | undefined;
 
   beforeEach(() => {
     adapter = new AzdoAdapter();
@@ -18,6 +19,7 @@ describe('AzdoAdapter', () => {
     originalInputMyFlag = process.env.INPUT_MYFLAG;
     originalInputItems = process.env.INPUT_ITEMS;
     originalToken = process.env.TOKEN;
+    originalSystemDebug = process.env.SYSTEM_DEBUG;
   });
 
   afterEach(() => {
@@ -25,6 +27,15 @@ describe('AzdoAdapter', () => {
     process.env.INPUT_MYFLAG = originalInputMyFlag;
     process.env.INPUT_ITEMS = originalInputItems;
     process.env.TOKEN = originalToken;
+    process.env.SYSTEM_DEBUG = originalSystemDebug;
+  });
+
+  it('detects debug mode from system.debug variable', () => {
+    process.env.SYSTEM_DEBUG = 'true';
+    expect(adapter.isDebugEnabled()).toBe(true);
+
+    process.env.SYSTEM_DEBUG = 'false';
+    expect(adapter.isDebugEnabled()).toBe(false);
   });
 
   it('sets variables through task-lib', () => {

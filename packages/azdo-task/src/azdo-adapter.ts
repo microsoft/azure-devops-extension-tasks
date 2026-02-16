@@ -1,7 +1,7 @@
+import { ExecOptions, IPlatformAdapter, TaskResult } from '@extension-tasks/core';
 import * as tl from 'azure-pipelines-task-lib/task.js';
 import * as tr from 'azure-pipelines-task-lib/toolrunner.js';
 import * as ttl from 'azure-pipelines-tool-lib/tool.js';
-import { IPlatformAdapter, TaskResult, ExecOptions } from '@extension-tasks/core';
 import { promises as fs } from 'fs';
 
 /**
@@ -63,6 +63,11 @@ export class AzdoAdapter implements IPlatformAdapter {
 
   error(message: string): void {
     tl.error(message);
+  }
+
+  isDebugEnabled(): boolean {
+    const systemDebug = tl.getVariable('system.debug');
+    return (systemDebug ?? '').toLowerCase() === 'true';
   }
 
   // ===== Execution =====

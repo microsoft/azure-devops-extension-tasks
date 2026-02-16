@@ -13,6 +13,8 @@ describe('GitHubAdapter', () => {
   let originalInputBypassValidation: string | undefined;
   let originalToken: string | undefined;
   let originalExitCode: string | number | undefined;
+  let originalActionsStepDebug: string | undefined;
+  let originalActionsRunnerDebug: string | undefined;
 
   beforeEach(() => {
     adapter = new GitHubAdapter();
@@ -21,6 +23,8 @@ describe('GitHubAdapter', () => {
     originalInputBypassValidation = process.env['INPUT_BYPASS-VALIDATION'];
     originalToken = process.env.TOKEN;
     originalExitCode = process.exitCode;
+    originalActionsStepDebug = process.env.ACTIONS_STEP_DEBUG;
+    originalActionsRunnerDebug = process.env.ACTIONS_RUNNER_DEBUG;
   });
 
   afterEach(() => {
@@ -29,6 +33,22 @@ describe('GitHubAdapter', () => {
     process.env['INPUT_BYPASS-VALIDATION'] = originalInputBypassValidation;
     process.env.TOKEN = originalToken;
     process.exitCode = originalExitCode;
+    process.env.ACTIONS_STEP_DEBUG = originalActionsStepDebug;
+    process.env.ACTIONS_RUNNER_DEBUG = originalActionsRunnerDebug;
+  });
+
+  it('detects debug mode from GitHub debug environment variables', () => {
+    process.env.ACTIONS_STEP_DEBUG = 'true';
+    process.env.ACTIONS_RUNNER_DEBUG = 'false';
+    expect(adapter.isDebugEnabled()).toBe(true);
+
+    process.env.ACTIONS_STEP_DEBUG = 'false';
+    process.env.ACTIONS_RUNNER_DEBUG = 'true';
+    expect(adapter.isDebugEnabled()).toBe(true);
+
+    process.env.ACTIONS_STEP_DEBUG = 'false';
+    process.env.ACTIONS_RUNNER_DEBUG = 'false';
+    expect(adapter.isDebugEnabled()).toBe(false);
   });
 
   it('reads string input values', () => {

@@ -220,7 +220,43 @@ describe('TfxManager', () => {
       expect(platform.execCalls[0].options?.env).toEqual(env);
     });
 
-    it('should log execution command', async () => {
+    it('should default to silent when debug is disabled', async () => {
+      const manager = new TfxManager({
+        tfxVersion: 'path',
+        platform,
+      });
+
+      await manager.execute(['extension', 'create']);
+
+      expect(platform.execCalls[0].options?.silent).toBe(true);
+    });
+
+    it('should disable silent when debug is enabled', async () => {
+      platform.debugEnabled = true;
+      const manager = new TfxManager({
+        tfxVersion: 'path',
+        platform,
+      });
+
+      await manager.execute(['extension', 'create']);
+
+      expect(platform.execCalls[0].options?.silent).toBe(false);
+    });
+
+    it('should honor explicit silent override', async () => {
+      platform.debugEnabled = true;
+      const manager = new TfxManager({
+        tfxVersion: 'path',
+        platform,
+      });
+
+      await manager.execute(['extension', 'create'], { silent: true });
+
+      expect(platform.execCalls[0].options?.silent).toBe(true);
+    });
+
+    it('should log execution details', async () => {
+      platform.debugEnabled = true;
       const manager = new TfxManager({
         tfxVersion: 'path',
         platform,
@@ -229,8 +265,8 @@ describe('TfxManager', () => {
       await manager.execute(['extension', 'create']);
 
       expect(
-        platform.infoMessages.some((m) =>
-          m.includes('Executing: /usr/local/bin/tfx extension create')
+        platform.debugMessages.some(
+          (m) => m.includes('Executing:') && m.includes('tfx') && m.includes('extension create')
         )
       ).toBe(true);
     });

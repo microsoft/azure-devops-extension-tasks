@@ -32,6 +32,8 @@ export interface TfxExecOptions {
   env?: Record<string, string>;
   /** Capture JSON output (adds --json and --debug-log-stream stderr flags) */
   captureJson?: boolean;
+  /** Override command silence behavior */
+  silent?: boolean;
 }
 
 /**
@@ -369,12 +371,13 @@ export class TfxManager {
     const execOptions = {
       cwd: options?.cwd,
       env: options?.env,
+      silent: options?.silent ?? !this.platform.isDebugEnabled(),
       outStream: jsonStream,
       errStream: undefined as NodeJS.WritableStream | undefined,
     };
 
     // Execute tfx
-    this.platform.info(`Executing: ${tfxPath} ${finalArgs.join(' ')}`);
+    this.platform.debug(`Executing: ${tfxPath} ${finalArgs.join(' ')}`);
     const exitCode = await this.platform.exec(tfxPath, finalArgs, execOptions);
 
     // Parse JSON if captured

@@ -3,11 +3,11 @@
  * Provides in-memory implementation of IPlatformAdapter
  */
 
-import type { IPlatformAdapter, TaskResult, ExecOptions } from '../../platform.js';
-import fs from 'fs/promises';
-import path, { dirname } from 'path';
 import { statSync } from 'fs';
+import fs from 'fs/promises';
 import { tmpdir } from 'os';
+import path, { dirname } from 'path';
+import type { ExecOptions, IPlatformAdapter, TaskResult } from '../../platform.js';
 
 /**
  * Mock platform adapter for testing
@@ -31,6 +31,7 @@ export class MockPlatformAdapter implements IPlatformAdapter {
   public errorMessages: string[] = [];
   public execCalls: Array<{ tool: string; args: string[]; options?: ExecOptions }> = [];
   public result?: { result: TaskResult; message: string };
+  public debugEnabled = false;
 
   // ===== Input =====
   getInput(name: string, required?: boolean): string | undefined {
@@ -95,6 +96,10 @@ export class MockPlatformAdapter implements IPlatformAdapter {
 
   error(message: string): void {
     this.errorMessages.push(message);
+  }
+
+  isDebugEnabled(): boolean {
+    return this.debugEnabled;
   }
 
   // ===== Execution =====
@@ -333,6 +338,7 @@ export class MockPlatformAdapter implements IPlatformAdapter {
     this.errorMessages = [];
     this.execCalls = [];
     this.result = undefined;
+    this.debugEnabled = false;
   }
 
   /**

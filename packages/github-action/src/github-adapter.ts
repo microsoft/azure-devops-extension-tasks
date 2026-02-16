@@ -87,6 +87,14 @@ export class GitHubAdapter implements IPlatformAdapter {
     core.error(message);
   }
 
+  isDebugEnabled(): boolean {
+    return (
+      core.isDebug() ||
+      process.env.ACTIONS_STEP_DEBUG === 'true' ||
+      process.env.ACTIONS_RUNNER_DEBUG === 'true'
+    );
+  }
+
   // ===== Execution =====
 
   async which(tool: string, check?: boolean): Promise<string> {

@@ -46,6 +46,7 @@ export interface IPlatformAdapter {
   info(message: string): void;
   warning(message: string): void;
   error(message: string): void;
+  isDebugEnabled(): boolean;
 
   // ===== Execution =====
   which(tool: string, check?: boolean): Promise<string>;
