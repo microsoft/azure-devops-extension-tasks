@@ -21,7 +21,7 @@ jobs:
       - uses: jessehouwing/actions-dependency-submission@4dc7b7fe66b1f347c027dc0e07587bac5a43bd07 # 1.0.8
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-      - uses: actions/dependency-review-action@3c4e3dcb1aa7874d2c16be7d79418e9b7efd6261 # 4.8.2
+      - uses: actions/dependency-review-action@05fe4576374b728f0c523d6a13d64c25081e0803 # 4.8.3
         if: github.event_name == 'pull_request'
         with:
           retry-on-snapshot-warnings: true
