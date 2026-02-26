@@ -461,7 +461,7 @@ async function getManifest(path: string): Promise<unknown> {
     try {
         return JSON.parse(data);
     } catch (jsonError) {
-        throw new Error(`Error parsing task manifest: ${path} - ${jsonError}`);
+        throw new Error(`Error parsing task manifest: ${path} - ${jsonError}`, { cause: jsonError });
     }
 }
 
