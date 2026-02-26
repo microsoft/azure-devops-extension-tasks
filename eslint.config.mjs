@@ -1,46 +1,33 @@
-import typescriptEslint from "@typescript-eslint/eslint-plugin";
 import globals from "globals";
-import tsParser from "@typescript-eslint/parser";
+import js from "@eslint/js";
+import tseslint from "typescript-eslint";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import js from "@eslint/js";
-import { FlatCompat } from "@eslint/eslintrc";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const compat = new FlatCompat({
-    baseDirectory: __dirname,
-    recommendedConfig: js.configs.recommended,
-    allConfig: js.configs.all
-});
 
 export default [
-    ...compat.extends("eslint:recommended", "plugin:@typescript-eslint/recommended"),
     {
-        
-        plugins: {
-            "@typescript-eslint": typescriptEslint,
-        },
         ignores: ["**/*.js"],
+    },
+    js.configs.recommended,
+    ...tseslint.configs.recommended,
+    ...tseslint.configs.recommendedTypeChecked,
+    {
         files: ["**/*.ts", "**/*.tsx"],
-
         languageOptions: {
             globals: {
                 ...globals.browser,
                 ...globals.commonjs,
             },
-
-            parser: tsParser,
+            parser: tseslint.parser,
             parserOptions: {
+                project: true,
                 tsconfigRootDir: __dirname,
-                sourceType: "module",
             },
-            ecmaVersion: 11
         },
-
         rules: {
-            ...typescriptEslint.configs.recommended.rules,
-            ...typescriptEslint.configs["recommended-requiring-type-checking"].rules,
             "@typescript-eslint/await-thenable": "error",
             "@typescript-eslint/no-floating-promises": "error",
             "@typescript-eslint/explicit-module-boundary-types": "warn",
@@ -58,8 +45,7 @@ export default [
             "@typescript-eslint/no-require-imports": "warn",
             "@typescript-eslint/prefer-promise-reject-errors": "warn",
             "@typescript-eslint/only-throw-error": "warn",
-            "@typescript-eslint/require-await": "warn"
-
+            "@typescript-eslint/require-await": "warn",
         },
     },
 ];
