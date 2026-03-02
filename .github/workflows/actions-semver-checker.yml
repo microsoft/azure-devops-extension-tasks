@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: jessehouwing/actions-semver-checker@61389c4ad2dc839619704980a06ed5768850e5be # v2.0.5
+      - uses: jessehouwing/actions-semver-checker@137abf7f17b0685d85c5511bc94acc944e717408 # v2.0.6
         with:
           floating-versions-use: tags
           check-minor-version: error
