@@ -275,13 +275,13 @@ export class ManifestEditor {
 
   /**
    * Update a specific task's version
-   * @param taskName Name of the task
+   * @param taskPath Path to the task (used as modification key)
    * @param extensionVersion Extension version to apply (e.g., "1.2.3")
    * @param versionType How to apply the version: 'major', 'minor', or 'patch'
    * @returns This editor for chaining
    */
   updateTaskVersion(
-    taskName: string,
+    taskPath: string,
     extensionVersion: string,
     versionType: 'major' | 'minor' | 'patch' = 'major'
   ): this {
@@ -297,11 +297,11 @@ export class ManifestEditor {
       patch: parseInt(versionParts[2], 10) || 0,
     };
 
-    if (!this.taskManifestModifications.has(taskName)) {
-      this.taskManifestModifications.set(taskName, {});
+    if (!this.taskManifestModifications.has(taskPath)) {
+      this.taskManifestModifications.set(taskPath, {});
     }
 
-    const taskMods = this.taskManifestModifications.get(taskName);
+    const taskMods = this.taskManifestModifications.get(taskPath);
 
     // Get existing version from modifications or we'll read it when applying
     const existingVersion = taskMods.version || { Major: 0, Minor: 0, Patch: 0 };
@@ -336,23 +336,24 @@ export class ManifestEditor {
 
   /**
    * Update a specific task's ID (UUID) using v5 namespacing
-   * @param taskName Name of the task
+   * @param taskPath Path to the task (used as modification key)
+   * @param taskName Name of the task (used for deterministic UUID generation)
    * @param publisherId Publisher ID (for UUID generation)
    * @param extensionId Extension ID (for UUID generation)
    * @returns This editor for chaining
    */
-  updateTaskId(taskName: string, publisherId: string, extensionId: string): this {
+  updateTaskId(taskPath: string, taskName: string, publisherId: string, extensionId: string): this {
     // Generate deterministic UUID v5 based on publisher, extension, and task name
     // This matches v5 implementation exactly
     const marketplaceNamespace = uuidv5('https://marketplace.visualstudio.com/vsts', uuidv5.URL);
     const taskNamespace = `${publisherId}.${extensionId}.${taskName}`;
     const newId = uuidv5(taskNamespace, marketplaceNamespace);
 
-    if (!this.taskManifestModifications.has(taskName)) {
-      this.taskManifestModifications.set(taskName, {});
+    if (!this.taskManifestModifications.has(taskPath)) {
+      this.taskManifestModifications.set(taskPath, {});
     }
 
-    const taskMods = this.taskManifestModifications.get(taskName);
+    const taskMods = this.taskManifestModifications.get(taskPath);
 
     // Store old ID for updating extension manifest references later
     // We'll read the old ID when applying modifications
@@ -388,11 +389,11 @@ export class ManifestEditor {
         Patch: parseInt(existingParts[2], 10) || 0,
       };
 
-      if (!this.taskManifestModifications.has(task.name)) {
-        this.taskManifestModifications.set(task.name, {});
+      if (!this.taskManifestModifications.has(task.path)) {
+        this.taskManifestModifications.set(task.path, {});
       }
 
-      const taskMods = this.taskManifestModifications.get(task.name);
+      const taskMods = this.taskManifestModifications.get(task.path);
 
       switch (versionType) {
         case 'major':
@@ -435,7 +436,7 @@ export class ManifestEditor {
     const tasks = await this.reader.getTasksInfo();
 
     for (const task of tasks) {
-      this.updateTaskId(task.name, publisherId, extensionId);
+      this.updateTaskId(task.path, task.name, publisherId, extensionId);
     }
 
     return this;

@@ -126,15 +126,13 @@ export class FilesystemManifestWriter {
     taskManifestMods: Map<string, Partial<TaskManifest>>
   ): Promise<void> {
     const tasks = await reader.readTaskManifests();
-    const appliedTaskNames = new Set<string>();
 
     // Get packagePath map to resolve actual source paths
     const packagePathMap = (await (reader as any).buildPackagePathMap()) as Map<string, string>;
 
     for (const { path: taskPath, manifest } of tasks) {
-      const mods = taskManifestMods.get(manifest.name);
+      const mods = taskManifestMods.get(taskPath);
       if (mods) {
-        appliedTaskNames.add(manifest.name);
         // Apply modifications
         Object.assign(manifest, mods);
 
@@ -175,73 +173,6 @@ export class FilesystemManifestWriter {
         await writeFile(taskJsonPath, manifestJson, 'utf-8');
       }
     }
-
-    // Fallback: apply modifications for tasks not discoverable via contribution paths
-    for (const [taskName, mods] of taskManifestMods.entries()) {
-      if (appliedTaskNames.has(taskName)) {
-        continue;
-      }
-
-      const fallbackTaskDir = await this.findTaskDirectoryByName(rootFolder, taskName);
-      if (!fallbackTaskDir) {
-        this.platform.debug(`No task.json found for task '${taskName}' during fallback write`);
-        continue;
-      }
-
-      const taskJsonPath = path.join(fallbackTaskDir, 'task.json');
-      const content = (await readFile(taskJsonPath)).toString('utf8');
-      const manifest = JSON.parse(content) as TaskManifest;
-      Object.assign(manifest, mods);
-
-      this.platform.debug(`Fallback writing task manifest: ${taskJsonPath}`);
-      await writeFile(taskJsonPath, JSON.stringify(manifest, null, 2) + '\n', 'utf-8');
-    }
-  }
-
-  /**
-   * Recursively find a task directory by task manifest name
-   */
-  private async findTaskDirectoryByName(
-    rootFolder: string,
-    taskName: string
-  ): Promise<string | null> {
-    const stack: string[] = [rootFolder];
-
-    while (stack.length > 0) {
-      const current = stack.pop();
-      let entries;
-
-      try {
-        entries = await readdir(current, { withFileTypes: true });
-      } catch {
-        continue;
-      }
-
-      for (const entry of entries) {
-        const absolutePath = path.join(current, entry.name);
-
-        if (entry.isDirectory()) {
-          stack.push(absolutePath);
-          continue;
-        }
-
-        if (!entry.isFile() || entry.name !== 'task.json') {
-          continue;
-        }
-
-        try {
-          const content = (await readFile(absolutePath)).toString('utf8');
-          const manifest = JSON.parse(content) as TaskManifest;
-          if (manifest.name === taskName) {
-            return path.dirname(absolutePath);
-          }
-        } catch {
-          // ignore unreadable/invalid task manifests during search
-        }
-      }
-    }
-
-    return null;
   }
 
   /**

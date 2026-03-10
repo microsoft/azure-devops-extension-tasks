@@ -334,12 +334,15 @@ export class VsixReader extends ManifestReader {
   }
 
   /**
-   * Find task directories from the extension manifest
+   * Find task directories from the extension manifest.
+   * Supports both single-version tasks (task.json directly in the contribution folder)
+   * and multi-version tasks (task.json in subdirectories like v1/, v2/, v3/).
    * @returns Array of task directory paths
    */
   async findTaskPaths(): Promise<string[]> {
     const manifest = await this.readExtensionManifest();
     const taskPathsSet = new Set<string>();
+    const entries = await this.readEntries();
 
     // Look for task contributions
     if (manifest.contributions) {
@@ -347,7 +350,25 @@ export class VsixReader extends ManifestReader {
         if (contribution.type === 'ms.vss-distributed-task.task' && contribution.properties) {
           const name = contribution.properties.name as string;
           if (name) {
-            taskPathsSet.add(name);
+            const directTaskJson = `${name}/task.json`.replace(/\\/g, '/');
+            if (entries.some((e) => e.fileName === directTaskJson)) {
+              // Single-version: task.json directly in the contribution folder
+              taskPathsSet.add(name);
+            } else {
+              // Multi-version: find subdirectories with task.json
+              const prefix = `${name}/`.replace(/\\/g, '/');
+              for (const entry of entries) {
+                if (entry.fileName.startsWith(prefix) && entry.fileName.endsWith('/task.json')) {
+                  // Extract the subdirectory path (e.g., "MyTask/v1" from "MyTask/v1/task.json")
+                  const taskDir = entry.fileName.slice(0, -'/task.json'.length);
+                  // Only include direct subdirectories (one level deep under the contribution)
+                  const remainder = taskDir.slice(prefix.length);
+                  if (remainder && !remainder.includes('/')) {
+                    taskPathsSet.add(taskDir);
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -355,7 +376,6 @@ export class VsixReader extends ManifestReader {
 
     // Look for files array (only if no contributions found)
     if (taskPathsSet.size === 0 && manifest.files) {
-      const entries = await this.readEntries();
       for (const file of manifest.files) {
         // Task directories typically contain task.json
         const taskJsonPath = `${file.path}/task.json`.replace(/\\/g, '/');

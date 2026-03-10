@@ -181,7 +181,7 @@ describe('ManifestEditor', () => {
     const reader = await VsixReader.open(testVsixPath);
     const editor = ManifestEditor.fromReader(reader);
 
-    editor.updateTaskId('TestTask', 'test-publisher', 'test-extension');
+    editor.updateTaskId('TestTask', 'TestTask', 'test-publisher', 'test-extension');
 
     const taskMods = editor.getTaskManifestModifications();
     expect(taskMods.get('TestTask')?.id).toBeTruthy();

@@ -183,6 +183,7 @@ export async function packageExtension(
           const tasks = await reader.getTasksInfo();
           for (const task of tasks) {
             editor.updateTaskId(
+              task.path,
               task.name,
               resolvedTaskUpdateOptions.publisherId,
               resolvedTaskUpdateOptions.extensionId

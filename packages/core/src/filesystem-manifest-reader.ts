@@ -5,7 +5,7 @@
  * and task manifests directly from source directories.
  */
 
-import { readFile } from 'fs/promises';
+import { readFile, readdir } from 'fs/promises';
 import path from 'path';
 import { ManifestReader, type ExtensionManifest, type TaskManifest } from './manifest-reader.js';
 import type { IPlatformAdapter } from './platform.js';
@@ -140,11 +140,14 @@ export class FilesystemManifestReader extends ManifestReader {
 
   /**
    * Find task paths from the extension manifest
+   * Supports both single-version tasks (task.json directly in the contribution folder)
+   * and multi-version tasks (task.json in subdirectories like v1/, v2/, v3/).
    * @returns Array of task directory paths (relative to rootFolder)
    */
   async findTaskPaths(): Promise<string[]> {
     const manifest = await this.readExtensionManifest();
     const taskPaths: string[] = [];
+    const packagePathMap = await this.buildPackagePathMap();
 
     // Look for task contributions
     if (manifest.contributions) {
@@ -152,7 +155,43 @@ export class FilesystemManifestReader extends ManifestReader {
         if (contribution.type === 'ms.vss-distributed-task.task' && contribution.properties) {
           const name = contribution.properties.name as string;
           if (name) {
-            taskPaths.push(name);
+            // Resolve contribution name to actual filesystem path
+            let actualPath = name;
+            for (const [pkgPath, sourcePath] of packagePathMap.entries()) {
+              if (name === pkgPath) {
+                actualPath = sourcePath;
+                break;
+              }
+            }
+
+            const absolutePath = path.isAbsolute(actualPath)
+              ? actualPath
+              : path.join(this.rootFolder, actualPath);
+
+            const taskJsonPath = path.join(absolutePath, 'task.json');
+
+            if (await this.platform.fileExists(taskJsonPath)) {
+              // Single-version task: task.json directly in the contribution folder
+              taskPaths.push(name);
+            } else {
+              // Multi-version task: scan subdirectories for task.json
+              const expanded = await this.findMultiVersionTaskPaths(absolutePath, name);
+              if (expanded.length > 0) {
+                taskPaths.push(...expanded);
+              } else {
+                // Multi-version via per-version packagePath mappings
+                // (e.g., MyTask/v1 → build/legacy, MyTask/v2 → dist/current)
+                const prefixMatches = await this.findPackagePathPrefixMatches(name, packagePathMap);
+                if (prefixMatches.length > 0) {
+                  taskPaths.push(...prefixMatches);
+                } else {
+                  this.platform.warning(
+                    `No task.json found for contribution '${name}'. ` +
+                      `Searched '${actualPath}' and its immediate subdirectories.`
+                  );
+                }
+              }
+            }
           }
         }
       }
@@ -169,6 +208,80 @@ export class FilesystemManifestReader extends ManifestReader {
     }
 
     return taskPaths;
+  }
+
+  /**
+   * Find task.json files in subdirectories of a multi-version task contribution.
+   * Multi-version tasks have subdirectories (e.g., v1/, v2/, v3/) each containing
+   * their own task.json. Subdirectories without task.json are ignored.
+   * @param absoluteBasePath Absolute path to the contribution folder on disk
+   * @param contributionName The contribution name (used as path prefix in results)
+   * @returns Array of expanded task paths (e.g., ['MyTask/v1', 'MyTask/v2'])
+   */
+  private async findMultiVersionTaskPaths(
+    absoluteBasePath: string,
+    contributionName: string
+  ): Promise<string[]> {
+    const taskPaths: string[] = [];
+
+    try {
+      const entries = await readdir(absoluteBasePath, { withFileTypes: true });
+      for (const entry of entries) {
+        if (entry.isDirectory()) {
+          const subTaskJsonPath = path.join(absoluteBasePath, entry.name, 'task.json');
+          if (await this.platform.fileExists(subTaskJsonPath)) {
+            taskPaths.push(`${contributionName}/${entry.name}`);
+          }
+        }
+      }
+    } catch {
+      // Directory doesn't exist or can't be read
+    }
+
+    if (taskPaths.length > 0) {
+      this.platform.debug(
+        `Found multi-version task '${contributionName}' with ${taskPaths.length} version(s): ${taskPaths.join(', ')}`
+      );
+    }
+
+    return taskPaths;
+  }
+
+  /**
+   * Find task paths from packagePath entries that are prefixed with the contribution name.
+   * Handles cases where each version is mapped from a separate source directory
+   * (e.g., MyTask/v1 → build/legacy, MyTask/v2 → dist/current).
+   * Only includes entries whose mapped source paths actually contain a task.json.
+   * @param contributionName The contribution name to match as prefix
+   * @param packagePathMap Map of packagePath to source path
+   * @returns Array of packagePath entries that matched (e.g., ['MyTask/v1', 'MyTask/v2'])
+   */
+  private async findPackagePathPrefixMatches(
+    contributionName: string,
+    packagePathMap: Map<string, string>
+  ): Promise<string[]> {
+    const prefix = contributionName + '/';
+    const matches: string[] = [];
+
+    for (const [pkgPath, sourcePath] of packagePathMap.entries()) {
+      if (pkgPath.startsWith(prefix)) {
+        const absoluteSourcePath = path.isAbsolute(sourcePath)
+          ? sourcePath
+          : path.join(this.rootFolder, sourcePath);
+        const taskJsonPath = path.join(absoluteSourcePath, 'task.json');
+        if (await this.platform.fileExists(taskJsonPath)) {
+          matches.push(pkgPath);
+        }
+      }
+    }
+
+    if (matches.length > 0) {
+      this.platform.debug(
+        `Found multi-version task '${contributionName}' via packagePath mappings: ${matches.join(', ')}`
+      );
+    }
+
+    return matches;
   }
 
   /**

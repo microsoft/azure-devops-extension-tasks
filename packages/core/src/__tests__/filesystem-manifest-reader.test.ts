@@ -119,6 +119,18 @@ describe('FilesystemManifestReader', () => {
 
       writeFileSync(join(testDir, 'vss-extension.json'), JSON.stringify(manifest));
 
+      // Create task.json files so findTaskPaths can discover them
+      mkdirSync(join(testDir, 'Task1'), { recursive: true });
+      writeFileSync(
+        join(testDir, 'Task1', 'task.json'),
+        JSON.stringify({ id: 'id1', name: 'Task1', version: { Major: 1, Minor: 0, Patch: 0 } })
+      );
+      mkdirSync(join(testDir, 'Task2'), { recursive: true });
+      writeFileSync(
+        join(testDir, 'Task2', 'task.json'),
+        JSON.stringify({ id: 'id2', name: 'Task2', version: { Major: 1, Minor: 0, Patch: 0 } })
+      );
+
       const reader = new FilesystemManifestReader({
         rootFolder: testDir,
         platform: mockPlatform,
@@ -148,6 +160,285 @@ describe('FilesystemManifestReader', () => {
       const taskPaths = await reader.findTaskPaths();
 
       expect(taskPaths).toEqual([]);
+
+      await reader.close();
+    });
+
+    it('should discover multi-version tasks from subdirectories', async () => {
+      const manifest = {
+        id: 'test-ext',
+        publisher: 'test-pub',
+        version: '1.0.0',
+        contributions: [
+          {
+            id: 'task1',
+            type: 'ms.vss-distributed-task.task',
+            properties: { name: 'MyTask' },
+          },
+        ],
+      };
+
+      writeFileSync(join(testDir, 'vss-extension.json'), JSON.stringify(manifest));
+
+      // No task.json at root MyTask/, but subdirectories have task.json
+      mkdirSync(join(testDir, 'MyTask', 'v1'), { recursive: true });
+      writeFileSync(
+        join(testDir, 'MyTask', 'v1', 'task.json'),
+        JSON.stringify({ id: 'id-v1', name: 'MyTask', version: { Major: 1, Minor: 0, Patch: 0 } })
+      );
+      mkdirSync(join(testDir, 'MyTask', 'v2'), { recursive: true });
+      writeFileSync(
+        join(testDir, 'MyTask', 'v2', 'task.json'),
+        JSON.stringify({ id: 'id-v2', name: 'MyTask', version: { Major: 2, Minor: 0, Patch: 0 } })
+      );
+
+      const reader = new FilesystemManifestReader({
+        rootFolder: testDir,
+        platform: mockPlatform,
+      });
+
+      const taskPaths = await reader.findTaskPaths();
+
+      expect(taskPaths).toContain('MyTask/v1');
+      expect(taskPaths).toContain('MyTask/v2');
+      expect(taskPaths).toHaveLength(2);
+
+      await reader.close();
+    });
+
+    it('should ignore subdirectories without task.json in multi-version scan', async () => {
+      const manifest = {
+        id: 'test-ext',
+        publisher: 'test-pub',
+        version: '1.0.0',
+        contributions: [
+          {
+            id: 'task1',
+            type: 'ms.vss-distributed-task.task',
+            properties: { name: 'MyTask' },
+          },
+        ],
+      };
+
+      writeFileSync(join(testDir, 'vss-extension.json'), JSON.stringify(manifest));
+
+      mkdirSync(join(testDir, 'MyTask', 'v1'), { recursive: true });
+      writeFileSync(
+        join(testDir, 'MyTask', 'v1', 'task.json'),
+        JSON.stringify({ id: 'id-v1', name: 'MyTask', version: { Major: 1, Minor: 0, Patch: 0 } })
+      );
+      // v2 has no task.json — should be ignored
+      mkdirSync(join(testDir, 'MyTask', 'v2'), { recursive: true });
+      writeFileSync(join(testDir, 'MyTask', 'v2', 'README.md'), 'not a task');
+
+      const reader = new FilesystemManifestReader({
+        rootFolder: testDir,
+        platform: mockPlatform,
+      });
+
+      const taskPaths = await reader.findTaskPaths();
+
+      expect(taskPaths).toEqual(['MyTask/v1']);
+
+      await reader.close();
+    });
+
+    it('should mix single-version and multi-version contributions', async () => {
+      const manifest = {
+        id: 'test-ext',
+        publisher: 'test-pub',
+        version: '1.0.0',
+        contributions: [
+          {
+            id: 'single',
+            type: 'ms.vss-distributed-task.task',
+            properties: { name: 'SingleTask' },
+          },
+          {
+            id: 'multi',
+            type: 'ms.vss-distributed-task.task',
+            properties: { name: 'MultiTask' },
+          },
+        ],
+      };
+
+      writeFileSync(join(testDir, 'vss-extension.json'), JSON.stringify(manifest));
+
+      // SingleTask has task.json directly
+      mkdirSync(join(testDir, 'SingleTask'), { recursive: true });
+      writeFileSync(
+        join(testDir, 'SingleTask', 'task.json'),
+        JSON.stringify({
+          id: 'single-id',
+          name: 'SingleTask',
+          version: { Major: 1, Minor: 0, Patch: 0 },
+        })
+      );
+
+      // MultiTask has subdirectories only
+      mkdirSync(join(testDir, 'MultiTask', 'v1'), { recursive: true });
+      writeFileSync(
+        join(testDir, 'MultiTask', 'v1', 'task.json'),
+        JSON.stringify({
+          id: 'multi-v1',
+          name: 'MultiTask',
+          version: { Major: 1, Minor: 0, Patch: 0 },
+        })
+      );
+      mkdirSync(join(testDir, 'MultiTask', 'v2'), { recursive: true });
+      writeFileSync(
+        join(testDir, 'MultiTask', 'v2', 'task.json'),
+        JSON.stringify({
+          id: 'multi-v2',
+          name: 'MultiTask',
+          version: { Major: 2, Minor: 0, Patch: 0 },
+        })
+      );
+
+      const reader = new FilesystemManifestReader({
+        rootFolder: testDir,
+        platform: mockPlatform,
+      });
+
+      const taskPaths = await reader.findTaskPaths();
+
+      expect(taskPaths).toContain('SingleTask');
+      expect(taskPaths).toContain('MultiTask/v1');
+      expect(taskPaths).toContain('MultiTask/v2');
+      expect(taskPaths).toHaveLength(3);
+
+      await reader.close();
+    });
+
+    it('should discover multi-version tasks with packagePath mapping', async () => {
+      const manifest = {
+        id: 'test-ext',
+        publisher: 'test-pub',
+        version: '1.0.0',
+        files: [{ path: 'compiled/cli', packagePath: 'CLI' }],
+        contributions: [
+          {
+            id: 'task1',
+            type: 'ms.vss-distributed-task.task',
+            properties: { name: 'CLI' },
+          },
+        ],
+      };
+
+      writeFileSync(join(testDir, 'vss-extension.json'), JSON.stringify(manifest));
+
+      // No task.json at compiled/cli/, but subdirectories have task.json
+      mkdirSync(join(testDir, 'compiled', 'cli', 'v1'), { recursive: true });
+      writeFileSync(
+        join(testDir, 'compiled', 'cli', 'v1', 'task.json'),
+        JSON.stringify({
+          id: 'cli-v1',
+          name: 'CLI-v1',
+          version: { Major: 1, Minor: 0, Patch: 0 },
+        })
+      );
+      mkdirSync(join(testDir, 'compiled', 'cli', 'v2'), { recursive: true });
+      writeFileSync(
+        join(testDir, 'compiled', 'cli', 'v2', 'task.json'),
+        JSON.stringify({
+          id: 'cli-v2',
+          name: 'CLI-v2',
+          version: { Major: 2, Minor: 0, Patch: 0 },
+        })
+      );
+
+      const reader = new FilesystemManifestReader({
+        rootFolder: testDir,
+        platform: mockPlatform,
+      });
+
+      const taskPaths = await reader.findTaskPaths();
+
+      expect(taskPaths).toContain('CLI/v1');
+      expect(taskPaths).toContain('CLI/v2');
+      expect(taskPaths).toHaveLength(2);
+
+      await reader.close();
+    });
+
+    it('should return empty when contribution folder does not exist', async () => {
+      const manifest = {
+        id: 'test-ext',
+        publisher: 'test-pub',
+        version: '1.0.0',
+        contributions: [
+          {
+            id: 'task1',
+            type: 'ms.vss-distributed-task.task',
+            properties: { name: 'NonexistentTask' },
+          },
+        ],
+      };
+
+      writeFileSync(join(testDir, 'vss-extension.json'), JSON.stringify(manifest));
+
+      const reader = new FilesystemManifestReader({
+        rootFolder: testDir,
+        platform: mockPlatform,
+      });
+
+      const taskPaths = await reader.findTaskPaths();
+
+      expect(taskPaths).toEqual([]);
+
+      await reader.close();
+    });
+
+    it('should discover multi-version tasks with per-version packagePath mappings', async () => {
+      const manifest = {
+        id: 'test-ext',
+        publisher: 'test-pub',
+        version: '1.0.0',
+        files: [
+          { path: 'build/legacy', packagePath: 'MyTask/v1' },
+          { path: 'dist/current', packagePath: 'MyTask/v2' },
+        ],
+        contributions: [
+          {
+            id: 'task1',
+            type: 'ms.vss-distributed-task.task',
+            properties: { name: 'MyTask' },
+          },
+        ],
+      };
+
+      writeFileSync(join(testDir, 'vss-extension.json'), JSON.stringify(manifest));
+
+      // Each version comes from its own source directory
+      mkdirSync(join(testDir, 'build', 'legacy'), { recursive: true });
+      writeFileSync(
+        join(testDir, 'build', 'legacy', 'task.json'),
+        JSON.stringify({
+          id: 'task-v1',
+          name: 'MyTask',
+          version: { Major: 1, Minor: 0, Patch: 0 },
+        })
+      );
+      mkdirSync(join(testDir, 'dist', 'current'), { recursive: true });
+      writeFileSync(
+        join(testDir, 'dist', 'current', 'task.json'),
+        JSON.stringify({
+          id: 'task-v2',
+          name: 'MyTask',
+          version: { Major: 2, Minor: 0, Patch: 0 },
+        })
+      );
+
+      const reader = new FilesystemManifestReader({
+        rootFolder: testDir,
+        platform: mockPlatform,
+      });
+
+      const taskPaths = await reader.findTaskPaths();
+
+      expect(taskPaths).toContain('MyTask/v1');
+      expect(taskPaths).toContain('MyTask/v2');
+      expect(taskPaths).toHaveLength(2);
 
       await reader.close();
     });
@@ -218,6 +509,173 @@ describe('FilesystemManifestReader', () => {
       });
 
       await expect(reader.readTaskManifest('NonexistentTask')).rejects.toThrow(/not found/);
+
+      await reader.close();
+    });
+
+    it('should read multi-version task manifests by path', async () => {
+      const extManifest = {
+        id: 'test-ext',
+        publisher: 'test-pub',
+        version: '1.0.0',
+        contributions: [
+          {
+            id: 'task1',
+            type: 'ms.vss-distributed-task.task',
+            properties: { name: 'MyTask' },
+          },
+        ],
+      };
+
+      writeFileSync(join(testDir, 'vss-extension.json'), JSON.stringify(extManifest));
+
+      mkdirSync(join(testDir, 'MyTask', 'v1'), { recursive: true });
+      writeFileSync(
+        join(testDir, 'MyTask', 'v1', 'task.json'),
+        JSON.stringify({
+          id: 'task-v1',
+          name: 'MyTask',
+          friendlyName: 'My Task V1',
+          version: { Major: 1, Minor: 0, Patch: 0 },
+        })
+      );
+
+      mkdirSync(join(testDir, 'MyTask', 'v2'), { recursive: true });
+      writeFileSync(
+        join(testDir, 'MyTask', 'v2', 'task.json'),
+        JSON.stringify({
+          id: 'task-v2',
+          name: 'MyTaskV2',
+          friendlyName: 'My Task V2',
+          version: { Major: 2, Minor: 0, Patch: 0 },
+        })
+      );
+
+      const reader = new FilesystemManifestReader({
+        rootFolder: testDir,
+        platform: mockPlatform,
+      });
+
+      const v1 = await reader.readTaskManifest('MyTask/v1');
+      expect(v1.id).toBe('task-v1');
+      expect(v1.name).toBe('MyTask');
+      expect(v1.version.Major).toBe(1);
+
+      const v2 = await reader.readTaskManifest('MyTask/v2');
+      expect(v2.id).toBe('task-v2');
+      expect(v2.name).toBe('MyTaskV2');
+      expect(v2.version.Major).toBe(2);
+
+      await reader.close();
+    });
+
+    it('should read multi-version task manifests with packagePath mapping', async () => {
+      const extManifest = {
+        id: 'test-ext',
+        publisher: 'test-pub',
+        version: '1.0.0',
+        files: [{ path: 'compiled/cli', packagePath: 'CLI' }],
+        contributions: [
+          {
+            id: 'task1',
+            type: 'ms.vss-distributed-task.task',
+            properties: { name: 'CLI' },
+          },
+        ],
+      };
+
+      writeFileSync(join(testDir, 'vss-extension.json'), JSON.stringify(extManifest));
+
+      mkdirSync(join(testDir, 'compiled', 'cli', 'v1'), { recursive: true });
+      writeFileSync(
+        join(testDir, 'compiled', 'cli', 'v1', 'task.json'),
+        JSON.stringify({
+          id: 'cli-v1',
+          name: 'CLI-v1',
+          version: { Major: 1, Minor: 0, Patch: 0 },
+        })
+      );
+
+      mkdirSync(join(testDir, 'compiled', 'cli', 'v2'), { recursive: true });
+      writeFileSync(
+        join(testDir, 'compiled', 'cli', 'v2', 'task.json'),
+        JSON.stringify({
+          id: 'cli-v2',
+          name: 'CLI-v2',
+          version: { Major: 2, Minor: 0, Patch: 0 },
+        })
+      );
+
+      const reader = new FilesystemManifestReader({
+        rootFolder: testDir,
+        platform: mockPlatform,
+      });
+
+      // CLI/v1 → compiled/cli/v1
+      const v1 = await reader.readTaskManifest('CLI/v1');
+      expect(v1.name).toBe('CLI-v1');
+
+      // CLI/v2 → compiled/cli/v2
+      const v2 = await reader.readTaskManifest('CLI/v2');
+      expect(v2.name).toBe('CLI-v2');
+
+      await reader.close();
+    });
+
+    it('should read multi-version task manifests with per-version packagePath mappings', async () => {
+      const extManifest = {
+        id: 'test-ext',
+        publisher: 'test-pub',
+        version: '1.0.0',
+        files: [
+          { path: 'build/legacy', packagePath: 'MyTask/v1' },
+          { path: 'dist/current', packagePath: 'MyTask/v2' },
+        ],
+        contributions: [
+          {
+            id: 'task1',
+            type: 'ms.vss-distributed-task.task',
+            properties: { name: 'MyTask' },
+          },
+        ],
+      };
+
+      writeFileSync(join(testDir, 'vss-extension.json'), JSON.stringify(extManifest));
+
+      mkdirSync(join(testDir, 'build', 'legacy'), { recursive: true });
+      writeFileSync(
+        join(testDir, 'build', 'legacy', 'task.json'),
+        JSON.stringify({
+          id: 'task-v1',
+          name: 'MyTask',
+          version: { Major: 1, Minor: 0, Patch: 0 },
+        })
+      );
+
+      mkdirSync(join(testDir, 'dist', 'current'), { recursive: true });
+      writeFileSync(
+        join(testDir, 'dist', 'current', 'task.json'),
+        JSON.stringify({
+          id: 'task-v2',
+          name: 'MyTask',
+          version: { Major: 2, Minor: 0, Patch: 0 },
+        })
+      );
+
+      const reader = new FilesystemManifestReader({
+        rootFolder: testDir,
+        platform: mockPlatform,
+      });
+
+      // MyTask/v1 → build/legacy
+      const v1 = await reader.readTaskManifest('MyTask/v1');
+      expect(v1.name).toBe('MyTask');
+      expect(v1.version).toEqual({ Major: 1, Minor: 0, Patch: 0 });
+
+      // MyTask/v2 → dist/current
+      const v2 = await reader.readTaskManifest('MyTask/v2');
+      expect(v2.name).toBe('MyTask');
+      expect(v2.version).toEqual({ Major: 2, Minor: 0, Patch: 0 });
 
       await reader.close();
     });
@@ -312,6 +770,66 @@ describe('FilesystemManifestReader', () => {
       expect(tasksInfo[1].name).toBe('Task2');
       expect(tasksInfo[1].friendlyName).toBe('Second Task');
       expect(tasksInfo[1].version).toBe('2.1.3');
+
+      await reader.close();
+    });
+
+    it('should return info for multi-version tasks with correct paths', async () => {
+      const extManifest = {
+        id: 'test-ext',
+        publisher: 'test-pub',
+        version: '1.0.0',
+        contributions: [
+          {
+            id: 'task1',
+            type: 'ms.vss-distributed-task.task',
+            properties: { name: 'MyTask' },
+          },
+        ],
+      };
+
+      writeFileSync(join(testDir, 'vss-extension.json'), JSON.stringify(extManifest));
+
+      mkdirSync(join(testDir, 'MyTask', 'v1'), { recursive: true });
+      writeFileSync(
+        join(testDir, 'MyTask', 'v1', 'task.json'),
+        JSON.stringify({
+          id: 'id-v1',
+          name: 'MyTask',
+          friendlyName: 'My Task V1',
+          version: { Major: 1, Minor: 0, Patch: 0 },
+        })
+      );
+
+      mkdirSync(join(testDir, 'MyTask', 'v2'), { recursive: true });
+      writeFileSync(
+        join(testDir, 'MyTask', 'v2', 'task.json'),
+        JSON.stringify({
+          id: 'id-v2',
+          name: 'MyTaskV2',
+          friendlyName: 'My Task V2',
+          version: { Major: 2, Minor: 3, Patch: 1 },
+        })
+      );
+
+      const reader = new FilesystemManifestReader({
+        rootFolder: testDir,
+        platform: mockPlatform,
+      });
+
+      const tasksInfo = await reader.getTasksInfo();
+
+      expect(tasksInfo).toHaveLength(2);
+
+      const v1 = tasksInfo.find((t) => t.path === 'MyTask/v1');
+      expect(v1).toBeDefined();
+      expect(v1.name).toBe('MyTask');
+      expect(v1.version).toBe('1.0.0');
+
+      const v2 = tasksInfo.find((t) => t.path === 'MyTask/v2');
+      expect(v2).toBeDefined();
+      expect(v2.name).toBe('MyTaskV2');
+      expect(v2.version).toBe('2.3.1');
 
       await reader.close();
     });
@@ -543,7 +1061,7 @@ describe('FilesystemManifestReader', () => {
       await reader.close();
     });
 
-    it('should support packagePath prefix matching for nested subdirectories', async () => {
+    it('should support packagePath prefix matching for subdirectories', async () => {
       const manifest = {
         id: 'test-ext',
         publisher: 'test-pub',
@@ -560,10 +1078,10 @@ describe('FilesystemManifestReader', () => {
 
       writeFileSync(join(testDir, 'vss-extension.json'), JSON.stringify(manifest));
 
-      // Create task in nested subdirectory: build/tasks/installer/v3/task.json
-      mkdirSync(join(testDir, 'build', 'tasks', 'installer', 'v3'), { recursive: true });
+      // Create task in subdirectory (1 level deep): build/tasks/v3/task.json
+      mkdirSync(join(testDir, 'build', 'tasks', 'v3'), { recursive: true });
       writeFileSync(
-        join(testDir, 'build', 'tasks', 'installer', 'v3', 'task.json'),
+        join(testDir, 'build', 'tasks', 'v3', 'task.json'),
         JSON.stringify({
           id: 'installer-v3',
           name: 'Installer-v3',
@@ -576,8 +1094,8 @@ describe('FilesystemManifestReader', () => {
         platform: mockPlatform,
       });
 
-      // When reading 'Tasks/installer/v3', should map to 'build/tasks/installer/v3'
-      const task = await reader.readTaskManifest('Tasks/installer/v3');
+      // When reading 'Tasks/v3', should map to 'build/tasks/v3'
+      const task = await reader.readTaskManifest('Tasks/v3');
       expect(task.name).toBe('Installer-v3');
       expect(task.version).toEqual({ Major: 3, Minor: 5, Patch: 1 });
 

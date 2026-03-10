@@ -364,7 +364,7 @@ export class VsixWriter {
       const taskManifests = await reader.readTaskManifests();
 
       for (const taskManifest of taskManifests) {
-        const mods = taskManifestMods.get(taskManifest.manifest.name);
+        const mods = taskManifestMods.get(taskManifest.path);
         if (mods) {
           // Apply modifications to the manifest object
           Object.assign(taskManifest.manifest, mods);
