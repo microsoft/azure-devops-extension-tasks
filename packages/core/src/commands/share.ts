@@ -19,6 +19,10 @@ export interface ShareOptions {
   extensionId?: string;
   /** Path to VSIX file to infer publisher/extension identity */
   vsixPath?: string;
+  /** Manifest globs to infer publisher/extension identity */
+  manifestGlobs?: string[];
+  /** Root folder for manifest discovery */
+  rootFolder?: string;
   /** Array of organization names to share with */
   shareWith: string[];
 }

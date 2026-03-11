@@ -92,14 +92,14 @@
       "type": "string",
       "label": "Publisher ID",
       "required": false,
-      "helpMarkDown": "**Publisher ID** that owns the extension.\n\n- Must match publisher in manifest (or override it)\n- Optional when `vsixFile` is supplied for operations that support VSIX identity fallback\n- Required for `show`\n- Optional for `queryVersion`: falls back to value from `manifestFile` when not specified\n- Alphanumeric with hyphens, dots, underscores only\n\n**Example**: `mycompany` or `my-publisher-id`"
+      "helpMarkDown": "**Publisher ID** that owns the extension.\n\n- Must match publisher in manifest (or override it)\n- Required for `show`\n- Optional for install/share/unpublish/unshare/waitForValidation/queryVersion:\n  falls back to `manifestFile` or `vsixFile` when not specified\n- Alphanumeric with hyphens, dots, underscores only\n\n**Example**: `mycompany` or `my-publisher-id`"
     },
     {
       "name": "extensionId",
       "type": "string",
       "label": "Extension ID",
       "required": false,
-      "helpMarkDown": "**Extension ID** - unique identifier within the publisher namespace.\n\n- Must match ID in manifest (or override it)\n- Combined with Publisher ID forms full extension identifier: `publisherId.extensionId`\n- Optional when `vsixFile` is supplied for operations that support VSIX identity fallback\n- Required for `show`\n- Optional for `queryVersion`: falls back to value from `manifestFile` when not specified\n- Alphanumeric with hyphens, dots, underscores only\n\n**Example**: `my-extension` or `azure-devops-tasks`"
+      "helpMarkDown": "**Extension ID** - unique identifier within the publisher namespace.\n\n- Must match ID in manifest (or override it)\n- Combined with Publisher ID forms full extension identifier: `publisherId.extensionId`\n- Required for `show`\n- Optional for install/share/unpublish/unshare/waitForValidation/queryVersion:\n  falls back to `manifestFile` or `vsixFile` when not specified\n- Alphanumeric with hyphens, dots, underscores only\n\n**Example**: `my-extension` or `azure-devops-tasks`"
     },
     {
       "name": "use",
@@ -127,8 +127,8 @@
       "type": "multiLine",
       "label": "Manifest File(s)",
       "required": false,
-      "helpMarkDown": "**Manifest file path(s)** (one per line).\n\n- Defaults to `vss-extension.json` if not specified\n- Supports multiple manifest files\n- Paths are relative to the current working directory\n- For `queryVersion`: used as fallback source for Publisher ID and Extension ID when not specified\n\n**Examples**:\n- `vss-extension.json`\n- `manifests/dev/vss-extension.json`\n- `manifests/prod/vss-extension.json`",
-      "visibleRule": "use = manifest"
+      "helpMarkDown": "**Manifest file path(s)** (one per line).\n\n- Defaults to `vss-extension.json` if not specified\n- Supports multiple manifest files\n- Paths are relative to the current working directory\n- For install/share/unpublish/unshare/waitForValidation/queryVersion:\n  used as fallback source for Publisher ID and Extension ID when not specified\n\n**Examples**:\n- `vss-extension.json`\n- `manifests/dev/vss-extension.json`\n- `manifests/prod/vss-extension.json`",
+      "visibleRule": "use = manifest || operation = unpublish || operation = share || operation = unshare || operation = install || operation = waitForValidation"
     },
     {
       "name": "manifestFileJs",
@@ -151,7 +151,7 @@
       "type": "filePath",
       "label": "VSIX File",
       "required": false,
-      "helpMarkDown": "**Path to .vsix file** used for VSIX mode and VSIX identity fallback.\n\n- For publish: required when `use = vsix`\n- For queryVersion: reads publisher/extension identity from VSIX when IDs are omitted\n- For install/share/unshare/unpublish/waitForValidation: reads publisher/extension identity from VSIX when IDs are omitted\n- For waitForInstallation: extracts task.json files from VSIX package\n\n**Example**: `$(Build.ArtifactStagingDirectory)/my-extension.vsix`\n\n**Note**: For waitForInstallation, use this OR expectedTasks/manifestFile, not multiple options",
+      "helpMarkDown": "**Path to .vsix file** used for VSIX mode and VSIX identity fallback.\n\n- For publish: required when `use = vsix`\n- For install/share/unshare/unpublish/waitForValidation/queryVersion:\n  reads publisher/extension identity from VSIX when IDs are omitted\n- For waitForInstallation: extracts task.json files from VSIX package\n\n**Example**: `$(Build.ArtifactStagingDirectory)/my-extension.vsix`\n\n**Note**: For waitForInstallation, use this OR expectedTasks/manifestFile, not multiple options",
       "visibleRule": "use = vsix || operation = unpublish || operation = share || operation = unshare || operation = install || operation = waitForValidation || operation = waitForInstallation"
     },
     {

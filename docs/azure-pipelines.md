@@ -108,8 +108,9 @@ Removes an extension from Marketplace.
 - Required:
   - `operation: unpublish`
   - `connectionType` + matching connection input
-  - `publisherId`, `extensionId`
 - Optional:
+  - `publisherId`, `extensionId` (can be inferred from `manifestFile` or `vsixFile`)
+  - `manifestFile`, `vsixFile`
   - `tfxVersion`
 
 ### `share`
@@ -119,9 +120,10 @@ Shares a private extension with organizations.
 - Required:
   - `operation: share`
   - `connectionType` + matching connection input
-  - `publisherId`, `extensionId`
   - `accounts` (newline-separated)
 - Optional:
+  - `publisherId`, `extensionId` (can be inferred from `manifestFile` or `vsixFile`)
+  - `manifestFile`, `vsixFile`
   - `tfxVersion`
 
 ### `unshare`
@@ -131,9 +133,10 @@ Revokes sharing from organizations.
 - Required:
   - `operation: unshare`
   - `connectionType` + matching connection input
-  - `publisherId`, `extensionId`
   - `accounts` (newline-separated)
 - Optional:
+  - `publisherId`, `extensionId` (can be inferred from `manifestFile` or `vsixFile`)
+  - `manifestFile`, `vsixFile`
   - `tfxVersion`
 
 ### `install`
@@ -144,8 +147,9 @@ Installs extension to one or more Azure DevOps organizations.
   - `operation: install`
   - `connectionType` + matching connection input
   - `accounts` (newline-separated)
-  - `publisherId`, `extensionId`
 - Optional:
+  - `publisherId`, `extensionId` (can be inferred from `manifestFile` or `vsixFile`)
+  - `manifestFile`, `vsixFile`
   - `extensionVersion`
   - `tfxVersion`
 
@@ -182,9 +186,9 @@ Polls Marketplace validation result.
 - Required:
   - `operation: waitForValidation`
   - `connectionType` + matching connection input
-  - `publisherId`, `extensionId`
 - Optional:
-  - `vsixFile`
+  - `publisherId`, `extensionId` (can be inferred from `manifestFile` or `vsixFile`)
+  - `manifestFile`, `vsixFile`
   - `maxRetries`, `minTimeout`, `maxTimeout`
   - `tfxVersion`
 

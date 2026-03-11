@@ -67,9 +67,9 @@ When creating a PAT for pipeline automation, include at least the following scop
 - `username`: Provides the username when `auth-type` is `basic`.
 - `service-url`: Overrides the Azure DevOps/Marketplace endpoint for supported operations.
 - `tfx-version`: Selects the `tfx-cli` source (`built-in`, `path`, or npm version spec); `built-in` uses the bundled JS entrypoint, while `path` uses `tfx` from PATH.
-- `publisher-id`: Sets or overrides the extension publisher identifier.
-- `extension-id`: Sets or overrides the extension identifier inside the publisher namespace.
-- `manifest-file`: Points to one or more manifest files used for manifest-based operations.
+- `publisher-id`: Sets or overrides the extension publisher identifier (required for `show`, optional for `install`/`share`/`unshare`/`unpublish`/`wait-for-validation`/`query-version` when inferred from manifest or VSIX inputs).
+- `extension-id`: Sets or overrides the extension identifier inside the publisher namespace (required for `show`, optional for `install`/`share`/`unshare`/`unpublish`/`wait-for-validation`/`query-version` when inferred from manifest or VSIX inputs).
+- `manifest-file`: Points to one or more manifest files used for manifest-based operations and identity fallback in install/share/unshare/unpublish/wait-for-validation/query-version.
 - `manifest-file-js`: Points to a JS manifest module for `tfx --manifest-js`.
 - `overrides-file`: Points to an overrides JSON file merged into manifest packaging/publishing.
 - `vsix-file`: Points to a pre-built VSIX file when publishing from VSIX source.
@@ -134,8 +134,7 @@ When creating a PAT for pipeline automation, include at least the following scop
 - uses: jessehouwing/azdo-marketplace/install@v6
   with:
     token: ${{ secrets.MARKETPLACE_TOKEN }}
-    publisher-id: my-publisher
-    extension-id: my-extension
+    manifest-file: vss-extension.json
     accounts: myorg
 ```
 
@@ -145,8 +144,7 @@ When creating a PAT for pipeline automation, include at least the following scop
 - uses: jessehouwing/azdo-marketplace/share@v6
   with:
     token: ${{ secrets.MARKETPLACE_TOKEN }}
-    publisher-id: my-publisher
-    extension-id: my-extension
+    manifest-file: vss-extension.json
     accounts: customer-org
 ```
 
@@ -156,8 +154,7 @@ When creating a PAT for pipeline automation, include at least the following scop
 - uses: jessehouwing/azdo-marketplace/unshare@v6
   with:
     token: ${{ secrets.MARKETPLACE_TOKEN }}
-    publisher-id: my-publisher
-    extension-id: my-extension
+    manifest-file: vss-extension.json
     accounts: old-customer-org
 ```
 
@@ -167,8 +164,7 @@ When creating a PAT for pipeline automation, include at least the following scop
 - uses: jessehouwing/azdo-marketplace/unpublish@v6
   with:
     token: ${{ secrets.MARKETPLACE_TOKEN }}
-    publisher-id: my-publisher
-    extension-id: my-extension
+    manifest-file: vss-extension.json
 ```
 
 ### show
@@ -204,8 +200,7 @@ When creating a PAT for pipeline automation, include at least the following scop
 - uses: jessehouwing/azdo-marketplace/wait-for-validation@v6
   with:
     token: ${{ secrets.MARKETPLACE_TOKEN }}
-    publisher-id: my-publisher
-    extension-id: my-extension
+    manifest-file: vss-extension.json
     max-retries: '10'
 ```
 

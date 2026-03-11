@@ -37,5 +37,11 @@ inputs:
   extension-id:
     type: identifier
 
+  manifest-file:
+    type: string
+    separators: newline
+    items:
+      type: string
+
   vsix-path:
     type: string

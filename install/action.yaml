@@ -88,8 +88,9 @@ inputs:
       Default: none
 
       - Must match publisher in manifest (or override it)
-      - Required for command: install, share, show, unpublish, unshare, wait-for-validation.
-      - Optional for query-version: falls back to value from manifest-file when not specified.
+      - Required for command: show.
+      - Optional for install/share/unpublish/unshare/wait-for-validation/query-version:
+        falls back to value from manifest-file or vsix-path/vsix-file when not specified.
       - Alphanumeric with hyphens, dots, underscores only
 
       **Example:** `mycompany` or `my-publisher-id`
@@ -104,11 +105,33 @@ inputs:
 
       - Must match ID in manifest (or override it)
       - Combined with Publisher ID forms full identifier: `publisherId.extensionId`
-      - Required for command: install, share, show, unpublish, unshare, wait-for-validation.
-      - Optional for query-version: falls back to value from manifest-file when not specified.
+      - Required for command: show.
+      - Optional for install/share/unpublish/unshare/wait-for-validation/query-version:
+        falls back to value from manifest-file or vsix-path/vsix-file when not specified.
       - Alphanumeric with hyphens, dots, underscores only
 
       **Example:** `my-extension` or `azure-devops-tasks`
+    required: false
+  manifest-file:
+    description: |-
+      **Manifest file path(s)** (newline-separated).
+
+      Available for: install, package, publish, query-version, share, unpublish, unshare, wait-for-installation, wait-for-validation.
+      Required for: none.
+      Default: none
+
+      - Defaults to `vss-extension.json` if not specified
+      - Can specify multiple manifest files
+      - Patterns are relative to the current working directory
+      - For install/share/unpublish/unshare/wait-for-validation/query-version:
+        used as fallback source for publisher-id and extension-id when not specified
+
+      **Example:**
+      ```
+      vss-extension.json
+      manifests/dev/vss-extension.json
+      manifests/prod/vss-extension.json
+      ```
     required: false
   vsix-path:
     description: |-
@@ -118,7 +141,8 @@ inputs:
       Required for: none.
       Default: none
 
-      - Extracts task.json files from VSIX package
+      - Reads extension identity (publisher-id and extension-id) when not specified
+      - For wait-for-installation: extracts task.json files from VSIX package
       - Most convenient when verifying immediately after packaging
 
       **Note:** Use this OR expected-tasks/manifest-file, not multiple
@@ -161,5 +185,6 @@ runs:
         tfx-version: ${{ inputs.tfx-version }}
         publisher-id: ${{ inputs.publisher-id }}
         extension-id: ${{ inputs.extension-id }}
+        manifest-file: ${{ inputs.manifest-file }}
         vsix-path: ${{ inputs.vsix-path }}
         accounts: ${{ inputs.accounts }}

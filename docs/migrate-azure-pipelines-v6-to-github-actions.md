@@ -58,7 +58,7 @@ Common input mappings:
 
 - Use `accounts` for `install`, `share`, `unshare`, and wait operations on both platforms.
 - Do not map any publish sharing input; publish-time sharing was removed. Use a dedicated `share` step with `accounts`.
-- Azure Pipelines `waitForValidation` uses VSIX input (`vsixFile`) instead of manifest selection.
+- For `install`, `share`, `unshare`, `unpublish`, and `waitForValidation`/`wait-for-validation`, identity can be inferred from either manifest (`manifestFile`/`manifest-file`) or VSIX (`vsixFile`/`vsix-path`) inputs.
 
 ## Account input mapping
 

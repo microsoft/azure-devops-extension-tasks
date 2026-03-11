@@ -745,6 +745,33 @@ describe('Azure DevOps main entrypoint', () => {
     );
   });
 
+  it('forwards manifestFile for identity fallback in install', async () => {
+    const platform = createPlatformMock({
+      inputs: {
+        operation: 'install',
+        connectionType: 'PAT',
+        connectionNamePAT: 'svc-connection',
+      },
+      delimitedInputs: {
+        'manifestFile|\n': ['vss-extension.json'],
+        'accounts|;': ['https://dev.azure.com/org1'],
+        'accounts|\n': ['https://dev.azure.com/org1'],
+      },
+    });
+    azdoAdapterCtorMock.mockReturnValue(platform);
+
+    await importMainAndFlush();
+
+    expect(installExtensionMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        manifestGlobs: ['vss-extension.json'],
+      }),
+      expect.anything(),
+      expect.anything(),
+      platform
+    );
+  });
+
   it('fails waitForValidation when status is not success', async () => {
     waitForValidationMock.mockImplementation(async () => ({ status: 'failed' }));
 

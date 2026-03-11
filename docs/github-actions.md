@@ -96,8 +96,9 @@ This repository ships a **unified JavaScript action** and **composite command wr
 - Required:
   - `operation: unpublish`
   - auth inputs
-  - `publisher-id`, `extension-id`
 - Optional:
+  - `publisher-id`, `extension-id` (can be inferred from `manifest-file` or `vsix-path`)
+  - `manifest-file`, `vsix-path`
   - tooling/service URL overrides
 
 ### `share`
@@ -105,25 +106,30 @@ This repository ships a **unified JavaScript action** and **composite command wr
 - Required:
   - `operation: share`
   - auth inputs
-  - `publisher-id`, `extension-id`
   - `share-with`
+- Optional:
+  - `publisher-id`, `extension-id` (can be inferred from `manifest-file` or `vsix-path`)
+  - `manifest-file`, `vsix-path`
 
 ### `unshare`
 
 - Required:
   - `operation: unshare`
   - auth inputs
-  - `publisher-id`, `extension-id`
   - `unshare-with`
+- Optional:
+  - `publisher-id`, `extension-id` (can be inferred from `manifest-file` or `vsix-path`)
+  - `manifest-file`, `vsix-path`
 
 ### `install`
 
 - Required:
   - `operation: install`
   - auth inputs
-  - `publisher-id`, `extension-id`
   - `accounts`
 - Optional:
+  - `publisher-id`, `extension-id` (can be inferred from `manifest-file` or `vsix-path`)
+  - `manifest-file`, `vsix-path`
   - `extension-version`
 
 ### `show`
@@ -151,8 +157,9 @@ This repository ships a **unified JavaScript action** and **composite command wr
 - Required:
   - `operation: wait-for-validation`
   - auth inputs
-  - `publisher-id`, `extension-id`
 - Optional:
+  - `publisher-id`, `extension-id` (can be inferred from `manifest-file` or `vsix-path`)
+  - `manifest-file`, `vsix-path`
   - `max-retries`, `min-timeout`, `max-timeout`
 
 ### `wait-for-installation`

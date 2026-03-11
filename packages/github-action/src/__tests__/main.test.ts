@@ -518,6 +518,32 @@ describe('GitHub Action main entrypoint', () => {
     );
   });
 
+  it('forwards manifest-file for identity fallback in install', async () => {
+    const platform = createPlatformMock({
+      inputs: {
+        operation: 'install',
+        'auth-type': 'pat',
+      },
+      delimitedInputs: {
+        'manifest-file|\n': ['vss-extension.json'],
+        'accounts|\n': ['org1'],
+        'accounts|;': ['org1'],
+      },
+    });
+    githubAdapterCtorMock.mockReturnValue(platform);
+
+    await importMainAndFlush();
+
+    expect(installExtensionMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        manifestGlobs: ['vss-extension.json'],
+      }),
+      expect.anything(),
+      expect.anything(),
+      platform
+    );
+  });
+
   it('executes query-version and sets outputs', async () => {
     queryVersionMock.mockImplementation(async () => ({
       proposedVersion: '2.0.0',

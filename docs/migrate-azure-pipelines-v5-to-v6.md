@@ -88,7 +88,7 @@ Use this mapping carefully when updating YAML:
 Additional source selection behavior in v6:
 
 - `use` is shown for `package`, `publish`, and `waitForInstallation`.
-- `waitForValidation` is VSIX-based; provide `vsixFile` when inferring identity from package metadata.
+- `install`, `share`, `unshare`, `unpublish`, and `waitForValidation` can infer identity from either `manifestFile` or `vsixFile`.
 
 Additional v6 package/publish inputs:
 

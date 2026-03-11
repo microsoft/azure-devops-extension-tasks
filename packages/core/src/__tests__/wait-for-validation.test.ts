@@ -1,4 +1,7 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { mkdtemp, rm, writeFile } from 'fs/promises';
+import { tmpdir } from 'os';
+import { join } from 'path';
 import type { AuthCredentials } from '../auth.js';
 import { waitForValidation } from '../commands/wait-for-validation.js';
 import { TfxManager } from '../tfx-manager.js';
@@ -328,6 +331,49 @@ describe('waitForValidation', () => {
       expect(callArgs).toContain('extension-from-vsix');
     } finally {
       await vsix.cleanup();
+    }
+  });
+
+  it('should resolve publisher and extension from manifestGlobs', async () => {
+    const testDir = await mkdtemp(join(tmpdir(), 'wait-validation-manifest-'));
+    const manifestPath = join(testDir, 'vss-extension.json');
+    await writeFile(
+      manifestPath,
+      JSON.stringify({
+        publisher: 'publisher-from-manifest',
+        id: 'extension-from-manifest',
+        version: '1.0.0',
+        name: 'test',
+      }),
+      'utf-8'
+    );
+
+    try {
+      const mockExecute = jest.spyOn(tfxManager, 'execute');
+      mockExecute.mockResolvedValue({
+        exitCode: 0,
+        json: { status: 'success' },
+        stdout: '',
+        stderr: '',
+      });
+
+      await waitForValidation(
+        {
+          rootFolder: testDir,
+          manifestGlobs: ['vss-extension.json'],
+        },
+        auth,
+        tfxManager,
+        platform
+      );
+
+      const callArgs = mockExecute.mock.calls[0][0];
+      expect(callArgs).toContain('--publisher');
+      expect(callArgs).toContain('publisher-from-manifest');
+      expect(callArgs).toContain('--extension-id');
+      expect(callArgs).toContain('extension-from-manifest');
+    } finally {
+      await rm(testDir, { recursive: true, force: true });
     }
   });
 

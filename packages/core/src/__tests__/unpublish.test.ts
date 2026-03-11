@@ -1,4 +1,7 @@
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
+import { mkdtemp, rm, writeFile } from 'fs/promises';
+import { tmpdir } from 'os';
+import { join } from 'path';
 import { unpublishExtension } from '../commands/unpublish.js';
 import { TfxManager } from '../tfx-manager.js';
 import { MockPlatformAdapter } from './helpers/mock-platform.js';
@@ -121,6 +124,48 @@ describe('unpublishExtension', () => {
       expect(callArgs).toContain('extension-from-vsix');
     } finally {
       await vsix.cleanup();
+    }
+  });
+
+  it('resolves identity from manifestGlobs', async () => {
+    const testDir = await mkdtemp(join(tmpdir(), 'unpublish-manifest-'));
+    const manifestPath = join(testDir, 'vss-extension.json');
+    await writeFile(
+      manifestPath,
+      JSON.stringify({
+        publisher: 'publisher-from-manifest',
+        id: 'extension-from-manifest',
+        version: '1.0.0',
+        name: 'test',
+      }),
+      'utf-8'
+    );
+
+    try {
+      const executeSpy = jest.spyOn(tfxManager, 'execute').mockResolvedValue({
+        exitCode: 0,
+        json: {},
+        stdout: '',
+        stderr: '',
+      });
+
+      await unpublishExtension(
+        {
+          rootFolder: testDir,
+          manifestGlobs: ['vss-extension.json'],
+        },
+        patAuth,
+        tfxManager,
+        platform
+      );
+
+      const callArgs = executeSpy.mock.calls[0][0];
+      expect(callArgs).toContain('--publisher');
+      expect(callArgs).toContain('publisher-from-manifest');
+      expect(callArgs).toContain('--extension-id');
+      expect(callArgs).toContain('extension-from-manifest');
+    } finally {
+      await rm(testDir, { recursive: true, force: true });
     }
   });
 
