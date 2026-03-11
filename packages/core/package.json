@@ -20,7 +20,8 @@
   "dependencies": {
     "@types/uuid": "^11.0.0",
     "azure-devops-node-api": "^15.1.2",
-    "fast-xml-parser": "^5.4.1",
+    "fast-xml-parser": "^5.5.1",
+    "fast-xml-builder": "^1.1.0",
     "tfx-cli": "^0.23.1",
     "uuid": "^13.0.0"
   },
