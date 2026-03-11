@@ -100,12 +100,14 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+        continue-on-error: true
 
       - name: Install pre-commit hooks
         run: python3 -m pre_commit install --install-hooks
 
       - name: Build v6 packages
         run: npm run build
+        continue-on-error: true
 
       - name: Setup summary
         env:
