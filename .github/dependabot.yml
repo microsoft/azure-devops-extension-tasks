@@ -27,7 +27,7 @@ updates:
           - typescript-eslint
       rollup:
         patterns:
-          - @rollup/*
+          - '@rollup/*'
       npm-development:
         dependency-type: development
         update-types:
