@@ -61,7 +61,7 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.57.0",
-    "yauzl": "^3.2.0",
+    "yauzl": "^3.2.1",
     "yazl": "^3.3.1"
   },
   "optionalDependencies": {
