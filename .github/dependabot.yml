@@ -9,18 +9,11 @@ updates:
     directory: '/'
     schedule:
       interval: 'weekly'
-  - package-ecosystem: 'npm'
-    directory: '/packages/azdo-task'
-    schedule:
-      interval: 'weekly'
-  - package-ecosystem: 'npm'
-    directory: '/packages/core'
-    schedule:
-      interval: 'weekly'
-  - package-ecosystem: 'npm'
-    directory: '/packages/github-action'
-    schedule:
-      interval: 'weekly'
+    groups:
+      actions-minor:
+        update-types:
+          - minor
+          - patch
   - package-ecosystem: 'npm'
     directory: '/'
     schedule:
@@ -28,8 +21,19 @@ updates:
     groups:
       ESLint:
         patterns:
-          - esbuild
           - eslint
           - '@typescript-eslint/*'
           - '@eslint/*'
           - typescript-eslint
+      rollup:
+        patterns:
+          - @rollup/*
+      npm-development:
+        dependency-type: development
+        update-types:
+          - minor
+          - patch
+      npm-production:
+        dependency-type: production
+        update-types:
+          - patch
