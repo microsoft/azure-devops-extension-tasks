@@ -51,6 +51,18 @@ inputs:
   extension-version-override:
     type: string
 
+  manifest-file:
+    type: string
+
+  use:
+    type: choice
+    options:
+      - manifest
+      - vsix
+
+  vsix-file:
+    type: string
+
 # Validate outputs
 outputs:
   current-version:
