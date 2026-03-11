@@ -1272,4 +1272,261 @@ describe('FilesystemManifestReader', () => {
       await reader.close();
     });
   });
+
+  describe('multiple manifest merging', () => {
+    it('should merge scalar values from multiple manifests (later file wins)', async () => {
+      // Primary manifest
+      writeFileSync(
+        join(testDir, 'vss-extension.json'),
+        JSON.stringify({
+          id: 'base-id',
+          publisher: 'base-publisher',
+          version: '1.0.0',
+          name: 'Base Name',
+        })
+      );
+
+      // Override manifest - overrides id, version, name but not publisher
+      writeFileSync(
+        join(testDir, 'overrides.json'),
+        JSON.stringify({
+          id: 'override-id',
+          version: '2.0.0',
+          name: 'Override Name',
+        })
+      );
+
+      const reader = new FilesystemManifestReader({
+        rootFolder: testDir,
+        manifestGlobs: ['vss-extension.json', 'overrides.json'],
+        platform: mockPlatform,
+      });
+
+      const result = await reader.readExtensionManifest();
+
+      // Scalar values from later manifest override earlier ones
+      expect(result.id).toBe('override-id');
+      expect(result.version).toBe('2.0.0');
+      expect(result.name).toBe('Override Name');
+      // Values not in later manifest are kept from earlier manifest
+      expect(result.publisher).toBe('base-publisher');
+
+      await reader.close();
+    });
+
+    it('should merge array values from multiple manifests (arrays are concatenated)', async () => {
+      writeFileSync(
+        join(testDir, 'vss-extension.json'),
+        JSON.stringify({
+          id: 'my-ext',
+          publisher: 'my-pub',
+          version: '1.0.0',
+          categories: ['Azure Pipelines'],
+          tags: ['ci'],
+          contributions: [
+            {
+              id: 'contrib-1',
+              type: 'ms.vss-distributed-task.task',
+              properties: { name: 'Task1' },
+            },
+          ],
+          files: [{ path: 'Task1' }],
+        })
+      );
+
+      writeFileSync(
+        join(testDir, 'more-contributions.json'),
+        JSON.stringify({
+          categories: ['Build'],
+          tags: ['cd'],
+          contributions: [
+            {
+              id: 'contrib-2',
+              type: 'ms.vss-distributed-task.task',
+              properties: { name: 'Task2' },
+            },
+          ],
+          files: [{ path: 'Task2' }],
+        })
+      );
+
+      const reader = new FilesystemManifestReader({
+        rootFolder: testDir,
+        manifestGlobs: ['vss-extension.json', 'more-contributions.json'],
+        platform: mockPlatform,
+      });
+
+      const result = await reader.readExtensionManifest();
+
+      // Arrays are concatenated
+      expect(result.categories).toEqual(['Azure Pipelines', 'Build']);
+      expect(result.tags).toEqual(['ci', 'cd']);
+      expect(result.contributions).toHaveLength(2);
+      expect(result.contributions![0].id).toBe('contrib-1');
+      expect(result.contributions![1].id).toBe('contrib-2');
+      expect(result.files).toHaveLength(2);
+
+      await reader.close();
+    });
+
+    it('should return merged result from cache on subsequent reads', async () => {
+      writeFileSync(
+        join(testDir, 'vss-extension.json'),
+        JSON.stringify({ id: 'base', publisher: 'pub', version: '1.0.0' })
+      );
+      writeFileSync(join(testDir, 'extra.json'), JSON.stringify({ version: '2.0.0' }));
+
+      const reader = new FilesystemManifestReader({
+        rootFolder: testDir,
+        manifestGlobs: ['vss-extension.json', 'extra.json'],
+        platform: mockPlatform,
+      });
+
+      const result1 = await reader.readExtensionManifest();
+      const result2 = await reader.readExtensionManifest();
+
+      // Should return same cached object
+      expect(result1).toBe(result2);
+      // Merged result
+      expect(result1.version).toBe('2.0.0');
+      expect(result1.publisher).toBe('pub');
+
+      await reader.close();
+    });
+
+    it('should merge three or more manifests in order', async () => {
+      writeFileSync(
+        join(testDir, 'a.json'),
+        JSON.stringify({ id: 'a', publisher: 'pub', version: '1.0.0', name: 'A', tags: ['tag-a'] })
+      );
+      writeFileSync(
+        join(testDir, 'b.json'),
+        JSON.stringify({ id: 'b', version: '2.0.0', tags: ['tag-b'] })
+      );
+      writeFileSync(join(testDir, 'c.json'), JSON.stringify({ id: 'c', tags: ['tag-c'] }));
+
+      const reader = new FilesystemManifestReader({
+        rootFolder: testDir,
+        manifestGlobs: ['a.json', 'b.json', 'c.json'],
+        platform: mockPlatform,
+      });
+
+      const result = await reader.readExtensionManifest();
+
+      // Last file wins for scalars
+      expect(result.id).toBe('c');
+      // Intermediate wins where last doesn't set it
+      expect(result.version).toBe('2.0.0');
+      // First file kept where others don't override
+      expect(result.publisher).toBe('pub');
+      expect(result.name).toBe('A');
+      // Arrays concatenated in order
+      expect(result.tags).toEqual(['tag-a', 'tag-b', 'tag-c']);
+
+      await reader.close();
+    });
+
+    it('should not log a warning when multiple manifests are found (expected behavior)', async () => {
+      writeFileSync(
+        join(testDir, 'vss-extension.json'),
+        JSON.stringify({ id: 'ext', publisher: 'pub', version: '1.0.0' })
+      );
+      writeFileSync(join(testDir, 'extra.json'), JSON.stringify({ name: 'Extra' }));
+
+      const reader = new FilesystemManifestReader({
+        rootFolder: testDir,
+        manifestGlobs: ['vss-extension.json', 'extra.json'],
+        platform: mockPlatform,
+      });
+
+      await reader.readExtensionManifest();
+
+      // Multiple manifests is expected behavior, not a warning
+      expect(mockPlatform.warningMessages).toHaveLength(0);
+
+      await reader.close();
+    });
+
+    it('should handle single manifest file correctly (no merging needed)', async () => {
+      writeFileSync(
+        join(testDir, 'vss-extension.json'),
+        JSON.stringify({
+          id: 'single-ext',
+          publisher: 'single-pub',
+          version: '1.0.0',
+          name: 'Single Extension',
+        })
+      );
+
+      const reader = new FilesystemManifestReader({
+        rootFolder: testDir,
+        manifestGlobs: ['vss-extension.json'],
+        platform: mockPlatform,
+      });
+
+      const result = await reader.readExtensionManifest();
+
+      expect(result.id).toBe('single-ext');
+      expect(result.publisher).toBe('single-pub');
+      expect(result.version).toBe('1.0.0');
+      expect(result.name).toBe('Single Extension');
+
+      await reader.close();
+    });
+
+    it('should deep merge nested objects from multiple manifests', async () => {
+      writeFileSync(
+        join(testDir, 'vss-extension.json'),
+        JSON.stringify({
+          id: 'my-ext',
+          publisher: 'my-pub',
+          version: '1.0.0',
+          content: {
+            details: { path: 'overview.md' },
+            license: { path: 'license.md' },
+          },
+        })
+      );
+
+      writeFileSync(
+        join(testDir, 'icons.json'),
+        JSON.stringify({
+          icons: { default: 'icon.png' },
+          content: {
+            details: { path: 'OVERRIDE.md' },
+            changelog: { path: 'changelog.md' },
+          },
+        })
+      );
+
+      const reader = new FilesystemManifestReader({
+        rootFolder: testDir,
+        manifestGlobs: ['vss-extension.json', 'icons.json'],
+        platform: mockPlatform,
+      });
+
+      const result = await reader.readExtensionManifest();
+
+      // Icons from second manifest are present
+      expect(result.icons).toBeDefined();
+      expect(result.icons!['default']).toBe('icon.png');
+
+      // content is recursively merged: later file wins on conflicts, earlier file kept otherwise
+      expect(result.content).toBeDefined();
+      // details.path overridden by icons.json (later file wins)
+      expect((result.content as Record<string, unknown>)['details']).toEqual({
+        path: 'OVERRIDE.md',
+      });
+      // license.path from vss-extension.json is preserved (not overridden)
+      expect((result.content as Record<string, unknown>)['license']).toEqual({
+        path: 'license.md',
+      });
+      // changelog.path from icons.json is added
+      expect((result.content as Record<string, unknown>)['changelog']).toEqual({
+        path: 'changelog.md',
+      });
+
+      await reader.close();
+    });
+  });
 });

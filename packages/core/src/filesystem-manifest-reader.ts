@@ -76,8 +76,8 @@ export class FilesystemManifestReader extends ManifestReader {
     }
 
     if (matches.length > 1) {
-      this.platform.warning(
-        `Multiple manifest files found: ${matches.join(', ')}. Using first match as primary.`
+      this.platform.debug(
+        `Multiple manifest files found: ${matches.join(', ')}. They will be merged into a single manifest.`
       );
     }
 
@@ -87,26 +87,116 @@ export class FilesystemManifestReader extends ManifestReader {
   }
 
   /**
-   * Find and resolve the extension manifest file path
-   */
-  private async resolveManifestPath(): Promise<string> {
-    const paths = await this.resolveManifestPaths();
-    return paths[0];
-  }
-
-  /**
-   * Read the extension manifest from filesystem
-   * @returns Parsed extension manifest
+   * Read the extension manifest from filesystem.
+   * When multiple manifest files match the globs, they are deep-merged in order:
+   * - Scalar values: later files override earlier ones
+   * - Array values: concatenated across all files
+   * - Object values: recursively merged
+   * @returns Merged extension manifest
    */
   async readExtensionManifest(): Promise<ExtensionManifest> {
     if (this.extensionManifest) {
       return this.extensionManifest;
     }
 
-    const manifestPath = await this.resolveManifestPath();
-    const content = (await readFile(manifestPath)).toString('utf8');
-    this.extensionManifest = JSON.parse(content);
+    const paths = await this.resolveManifestPaths();
+
+    if (paths.length === 1) {
+      const content = (await readFile(paths[0])).toString('utf8');
+      this.extensionManifest = JSON.parse(content);
+    } else {
+      // Merge all matched manifest files in order
+      const manifests: ExtensionManifest[] = [];
+      for (const manifestPath of paths) {
+        const content = (await readFile(manifestPath)).toString('utf8');
+        manifests.push(JSON.parse(content) as ExtensionManifest);
+      }
+      this.extensionManifest = this.deepMergeManifests(manifests);
+    }
+
     return this.extensionManifest;
+  }
+
+  /**
+   * Deep-merge an ordered list of extension manifests into one.
+   * - Scalar values: later manifest wins
+   * - Array values: concatenated in order
+   * - Object values: recursively merged (later manifest properties win on conflicts)
+   */
+  private deepMergeManifests(manifests: ExtensionManifest[]): ExtensionManifest {
+    const result: Record<string, unknown> = {};
+
+    for (const manifest of manifests) {
+      for (const [key, value] of Object.entries(manifest)) {
+        if (value === null || value === undefined) {
+          continue;
+        }
+
+        if (Array.isArray(value)) {
+          // Concatenate arrays
+          const existing = result[key];
+          result[key] = Array.isArray(existing) ? [...existing, ...value] : [...value];
+        } else if (typeof value === 'object') {
+          // Recursively deep merge objects
+          const existing = result[key];
+          result[key] =
+            existing !== null &&
+            existing !== undefined &&
+            typeof existing === 'object' &&
+            !Array.isArray(existing)
+              ? this.deepMergeObjects(
+                  existing as Record<string, unknown>,
+                  value as Record<string, unknown>
+                )
+              : { ...(value as Record<string, unknown>) };
+        } else {
+          // Scalar: later manifest wins
+          result[key] = value;
+        }
+      }
+    }
+
+    return result as unknown as ExtensionManifest;
+  }
+
+  /**
+   * Recursively deep-merge two plain objects.
+   * - Arrays: concatenated (base then override)
+   * - Objects: recursively merged
+   * - Scalars: override wins
+   */
+  private deepMergeObjects(
+    base: Record<string, unknown>,
+    override: Record<string, unknown>
+  ): Record<string, unknown> {
+    const result: Record<string, unknown> = { ...base };
+
+    for (const [key, value] of Object.entries(override)) {
+      if (value === null || value === undefined) {
+        continue;
+      }
+
+      if (Array.isArray(value)) {
+        const existing = result[key];
+        result[key] = Array.isArray(existing) ? [...existing, ...value] : [...value];
+      } else if (typeof value === 'object') {
+        const existing = result[key];
+        result[key] =
+          existing !== null &&
+          existing !== undefined &&
+          typeof existing === 'object' &&
+          !Array.isArray(existing)
+            ? this.deepMergeObjects(
+                existing as Record<string, unknown>,
+                value as Record<string, unknown>
+              )
+            : { ...(value as Record<string, unknown>) };
+      } else {
+        result[key] = value;
+      }
+    }
+
+    return result;
   }
 
   /**
