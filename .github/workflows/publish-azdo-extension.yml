@@ -74,6 +74,9 @@ jobs:
           publisher-id: ${{ env.PUBLISHER_ID }}
           extension-id: ${{ inputs.extension_id }}
           marketplace-version-action: Patch
+          version-source: |
+            manifest
+            marketplace
 
       - id: version
         name: Resolve version (query or initial)
