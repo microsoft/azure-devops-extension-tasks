@@ -56,9 +56,13 @@ This repository ships a **unified JavaScript action** and **composite command wr
 - `no-wait-validation`
 - `update-tasks-version`, `update-tasks-id`
 
-### Query and wait operations
+### Version resolution (query-version)
 
-- `version-action`, `extension-version-override`
+- `version-source` (newline-separated list of sources: `marketplace`, `manifest`, `vsix`, or semver literals; highest wins)
+- `marketplace-version-action` (`None`, `Major`, `Minor`, `Patch`; applies only to the marketplace source)
+
+### Wait operations
+
 - `max-retries`, `min-timeout`, `max-timeout`
 - `accounts`
 - `expected-tasks`, `manifest-file`, `vsix-path`
@@ -143,14 +147,17 @@ This repository ships a **unified JavaScript action** and **composite command wr
 
 ### `query-version`
 
+Resolves the proposed extension version from one or more sources. The highest valid semver wins.
+
 - Required:
   - `operation: query-version`
-  - auth inputs
-  - `publisher-id`, `extension-id`
+  - `publisher-id`, `extension-id` (or inferred from manifest/VSIX)
+- Conditionally required:
+  - auth inputs — only when `marketplace` is in `version-source` (default)
 - Optional:
-  - `version-action`
-  - `extension-version-override`
-  - none
+  - `version-source` (default: `marketplace`; newline-separated list of `marketplace`, `manifest`, `vsix`, or semver literals)
+  - `marketplace-version-action` (`None`, `Major`, `Minor`, `Patch`; only applies to the marketplace source)
+  - `use`, `vsix-file`, `manifest-file`
 
 ### `wait-for-validation`
 
@@ -178,8 +185,9 @@ This repository ships a **unified JavaScript action** and **composite command wr
 
 - `vsix-path` (package)
 - `metadata` (show)
-- `proposed-version` (query-version)
-- `current-version` (query-version)
+- `proposed-version` (query-version) — highest version from all sources
+- `current-version` (query-version) — resolved version before increment (from the winning `version-source`)
+- `version-source` (query-version) — which source won: `marketplace`, `manifest`, `vsix`, or `literal`
 
 ## Status and control flow
 
@@ -244,6 +252,78 @@ steps:
       auth-type: oidc
       use: vsix
       vsix-file: ${{ steps.package.outputs.vsix-path }}
+```
+
+## Query-version examples
+
+### Auto-increment marketplace version (default)
+
+```yaml
+- id: version
+  uses: jessehouwing/azdo-marketplace@v6
+  with:
+    operation: query-version
+    auth-type: pat
+    token: ${{ secrets.MARKETPLACE_PAT }}
+    marketplace-version-action: Patch
+```
+
+### First publish with fallback (marketplace + literal)
+
+```yaml
+- id: version
+  uses: jessehouwing/azdo-marketplace@v6
+  with:
+    operation: query-version
+    auth-type: pat
+    token: ${{ secrets.MARKETPLACE_PAT }}
+    marketplace-version-action: Patch
+    version-source: |
+      marketplace
+      1.0.0
+```
+
+### Use version from manifest only (no auth required)
+
+```yaml
+- id: version
+  uses: jessehouwing/azdo-marketplace@v6
+  with:
+    operation: query-version
+    version-source: manifest
+```
+
+### GitVersion or external tool integration (no auth required)
+
+```yaml
+- id: version
+  uses: jessehouwing/azdo-marketplace@v6
+  with:
+    operation: query-version
+    version-source: |
+      ${{ steps.gitversion.outputs.semVer }}
+```
+
+### Highest-wins across multiple sources
+
+```yaml
+- id: version
+  uses: jessehouwing/azdo-marketplace@v6
+  with:
+    operation: query-version
+    auth-type: pat
+    token: ${{ secrets.MARKETPLACE_PAT }}
+    marketplace-version-action: Patch
+    version-source: |
+      marketplace
+      ${{ steps.gitversion.outputs.semVer }}
+      manifest
+```
+
+Use the output for subsequent steps:
+
+```yaml
+- run: echo "Proposed version: ${{ steps.version.outputs.proposed-version }} (from ${{ steps.version.outputs.version-source }})"
 ```
 
 ## OIDC note for GitHub Actions

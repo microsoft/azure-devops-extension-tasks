@@ -27,6 +27,7 @@ const normalizeAccountToServiceUrlMock = jest.fn((value: string) => value);
 const validateNodeAvailableMock = jest.fn();
 const validateNpmAvailableMock = jest.fn();
 const validateTfxAvailableMock = jest.fn();
+const versionSourceNeedsMarketplaceMock = jest.fn((_s?: string[]) => true);
 
 jest.unstable_mockModule('azure-pipelines-task-lib/task.js', () => ({
   error: tlErrorMock,
@@ -70,6 +71,7 @@ jest.unstable_mockModule('@extension-tasks/core', () => ({
   validateNodeAvailable: validateNodeAvailableMock,
   validateNpmAvailable: validateNpmAvailableMock,
   validateTfxAvailable: validateTfxAvailableMock,
+  versionSourceNeedsMarketplace: versionSourceNeedsMarketplaceMock,
 }));
 
 type PlatformConfig = {
@@ -635,7 +637,7 @@ describe('Azure DevOps main entrypoint', () => {
 
     expect(queryVersionMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        versionAction: 'Major',
+        marketplaceVersionAction: 'Major',
       }),
       expect.anything(),
       expect.anything(),
@@ -644,6 +646,42 @@ describe('Azure DevOps main entrypoint', () => {
     expect(tlCommandMock).toHaveBeenCalledWith('build.updatebuildnumber', undefined, '2.0.0');
     expect(platform.setOutput).toHaveBeenCalledWith('proposedVersion', '2.0.0');
     expect(platform.setOutput).toHaveBeenCalledWith('currentVersion', '1.0.0');
+  });
+
+  it('skips auth when queryVersion versionSource excludes marketplace', async () => {
+    versionSourceNeedsMarketplaceMock.mockReturnValue(false);
+    queryVersionMock.mockImplementation(async () => ({
+      proposedVersion: '3.0.0',
+      currentVersion: '3.0.0',
+    }));
+
+    const platform = createPlatformMock({
+      inputs: {
+        operation: 'queryVersion',
+        publisherId: 'publisher',
+        extensionId: 'extension',
+      },
+      delimitedInputs: {
+        'versionSource|\n': ['manifest'],
+      },
+    });
+    azdoAdapterCtorMock.mockReturnValue(platform);
+
+    await importMainAndFlush();
+
+    expect(versionSourceNeedsMarketplaceMock).toHaveBeenCalledWith(['manifest']);
+    expect(getAuthMock).not.toHaveBeenCalled();
+    expect(queryVersionMock).toHaveBeenCalledWith(
+      expect.anything(),
+      undefined,
+      expect.anything(),
+      platform
+    );
+    expect(platform.setOutput).toHaveBeenCalledWith('proposedVersion', '3.0.0');
+    expect(platform.setResult).toHaveBeenCalledWith(
+      'Succeeded',
+      'queryVersion completed successfully'
+    );
   });
 
   it('initializes queryVersion outputs before query execution and keeps them empty on failure', async () => {

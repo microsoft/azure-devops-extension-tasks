@@ -58,6 +58,13 @@ npm run build
 npm run test
 ```
 
+To run a subset of tests, use `--testPathPatterns` (not the deprecated `--testPathPattern`):
+
+```bash
+npm test -- --testPathPatterns='query-version'
+npm test -- --testPathPatterns='packages/core'
+```
+
 1. Lint and format:
 
 ```bash
@@ -78,8 +85,16 @@ npm run bundle
 - Run focused tests for the changed area, for example:
 
 ```bash
+npm test -- --testPathPatterns='query-version'
+```
+
+Or run a specific test file directly:
+
+```bash
 $env:NODE_OPTIONS='--experimental-vm-modules'; npx jest packages/core/src/__tests__/query-version.test.ts --runInBand
 ```
+
+> **Note:** Use `--testPathPatterns` (plural). The older `--testPathPattern` is deprecated and no longer works.
 
 - Use the mock platform adapter test helpers in `packages/core/src/__tests__/helpers` to isolate behavior.
 

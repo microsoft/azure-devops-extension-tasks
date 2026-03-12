@@ -207,12 +207,22 @@
       "visibleRule": "operation = package || operation = publish"
     },
     {
-      "name": "versionAction",
+      "name": "versionSource",
+      "type": "multiLine",
+      "label": "Version Source",
+      "required": false,
+      "defaultValue": "marketplace",
+      "helpMarkDown": "**Version sources** to consider (one per line). Highest valid semver wins.\n\nEach line is one of:\n- `marketplace`: Query marketplace version (applies Marketplace Version Action)\n- `manifest`: Read version from vss-extension.json\n- `vsix`: Read version from VSIX file\n- A semver literal (e.g. `1.0.0`)\n- Anything else is skipped (handles unresolved variables)\n\nThe highest valid version across all sources wins.\nWhen `marketplace` is not listed, authentication is not required.\n\n**Examples**:\n- `marketplace` (default)\n- `marketplace\\n1.0.0` (first publish fallback)\n- `$(GitVersion.SemVer)\\nmarketplace` (GitVersion integration)",
+      "visibleRule": "operation = queryVersion"
+    },
+    {
+      "name": "marketplaceVersionAction",
       "type": "pickList",
-      "label": "Version Action",
+      "label": "Marketplace Version Action",
       "required": false,
       "defaultValue": "none",
-      "helpMarkDown": "**Action to apply to the marketplace version**.\n\n- **None**: Use the current latest marketplace version\n- **Major**: Increment major and reset minor/patch\n- **Minor**: Increment minor and reset patch\n- **Patch**: Increment patch\n\n**Example**: If latest is `1.2.3` and action is `Minor`, result is `1.3.0`",
+      "aliases": ["versionAction"],
+      "helpMarkDown": "**Action to apply to the marketplace version**.\n\nOnly applies when `marketplace` is listed in Version Source.\n\n- **None**: Use the current latest marketplace version as-is\n- **Major**: Increment major and reset minor/patch\n- **Minor**: Increment minor and reset patch\n- **Patch**: Increment patch\n\n**Example**: If latest is `1.2.3` and action is `Minor`, result is `1.3.0`",
       "visibleRule": "operation = queryVersion",
       "options": {
         "none": "None - Keep current version",
@@ -224,9 +234,9 @@
     {
       "name": "extensionVersionOverride",
       "type": "string",
-      "label": "Version Override Variable",
+      "label": "Version Override Variable (deprecated)",
       "required": false,
-      "helpMarkDown": "**Variable name containing a version override**.\n\nIf set and the variable exists, that value is used instead of querying marketplace.\n\n**Example**: `MyVersionVar` (where `$(MyVersionVar)` resolves to `2.1.0`)",
+      "helpMarkDown": "**Deprecated**: Use Version Source with a literal version value instead.\n\nVariable name containing a version override. If set and the variable exists, that value is used instead of querying marketplace.",
       "visibleRule": "operation = queryVersion"
     },
     {
@@ -368,11 +378,15 @@
     },
     {
       "name": "proposedVersion",
-      "description": "Proposed extension version after applying version action (queryVersion operation only)"
+      "description": "Proposed extension version — highest version from all sources (queryVersion operation only)"
     },
     {
       "name": "currentVersion",
-      "description": "Current marketplace version before applying version action (queryVersion operation only)"
+      "description": "Current extension version before applying version action (queryVersion operation only)."
+    },
+    {
+      "name": "versionSource",
+      "description": "Source that provided the winning version: marketplace, manifest, vsix, or literal (queryVersion operation only)"
     }
   ],
   "execution": {

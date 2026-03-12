@@ -167,16 +167,19 @@ Fetches extension metadata.
 
 ### `queryVersion`
 
-Queries current Marketplace version and optionally increments it.
+Resolves the proposed extension version from one or more sources. The highest valid semver wins.
 
 - Required:
   - `operation: queryVersion`
-  - `connectionType` + matching connection input
-  - `publisherId`, `extensionId`
+  - `publisherId`, `extensionId` (or inferred from manifest/VSIX)
+- Conditionally required:
+  - `connectionType` + matching connection input — only when `marketplace` is in `versionSource` (default)
 - Optional:
-  - `versionAction` (`None`, `Major`, `Minor`, `Patch`)
-  - `extensionVersionOverride` (variable name)
+  - `versionSource` (default: `marketplace`; newline-separated list of `marketplace`, `manifest`, `vsix`, or semver literals)
+  - `marketplaceVersionAction` (`None`, `Major`, `Minor`, `Patch`; only applies to the marketplace source; alias: `versionAction`)
+  - `extensionVersionOverride` (deprecated — use `versionSource` with a literal instead)
   - `setBuildNumber`
+  - `use`, `vsixFile`, `manifestFile`
   - `tfxVersion`
 
 ### `waitForValidation`
@@ -215,10 +218,82 @@ Declared task output variables (from `task.json`):
 
 - `vsixPath`
 - `extensionMetadata`
-- `proposedVersion`
-- `currentVersion`
+- `proposedVersion` — highest version from all sources
+- `currentVersion` — resolved version before increment; when marketplace is queried this is the marketplace version, otherwise it falls back to the selected source version
+- `versionSource` — which source won: `marketplace`, `manifest`, `vsix`, or `literal`
 
 These are referenced as step outputs, for example `$(packageExt.vsixPath)`.
+
+## queryVersion examples
+
+### Auto-increment marketplace version (default)
+
+```yaml
+- task: azdo-marketplace@6
+  name: version
+  inputs:
+    operation: queryVersion
+    connectionType: PAT
+    connectionNamePAT: MyMarketplaceConnection
+    marketplaceVersionAction: patch
+```
+
+### First publish with fallback (marketplace + literal)
+
+```yaml
+- task: azdo-marketplace@6
+  name: version
+  inputs:
+    operation: queryVersion
+    connectionType: PAT
+    connectionNamePAT: MyMarketplaceConnection
+    marketplaceVersionAction: patch
+    versionSource: |
+      marketplace
+      1.0.0
+```
+
+### Use version from manifest only (no auth required)
+
+```yaml
+- task: azdo-marketplace@6
+  name: version
+  inputs:
+    operation: queryVersion
+    versionSource: manifest
+```
+
+### GitVersion or external tool integration (no auth required)
+
+```yaml
+- task: azdo-marketplace@6
+  name: version
+  inputs:
+    operation: queryVersion
+    versionSource: $(GitVersion.SemVer)
+```
+
+### Highest-wins across multiple sources
+
+```yaml
+- task: azdo-marketplace@6
+  name: version
+  inputs:
+    operation: queryVersion
+    connectionType: PAT
+    connectionNamePAT: MyMarketplaceConnection
+    marketplaceVersionAction: patch
+    versionSource: |
+      marketplace
+      $(GitVersion.SemVer)
+      manifest
+```
+
+Use the output for subsequent steps:
+
+```yaml
+- script: echo "Proposed version: $(version.proposedVersion) (from $(version.versionSource))"
+```
 
 ## Example: package + publish
 

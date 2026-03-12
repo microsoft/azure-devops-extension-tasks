@@ -49,6 +49,8 @@ Common conversions from Azure Pipelines-style names to GitHub Actions inputs:
 | `updateTasksVersion` (boolean) + `updateTasksVersionType` | `update-tasks-version` (`none`\|`major`\|`minor`\|`patch`) | `none` is the disabled mode.                                                               |
 | `serviceUrl` for install/wait-install style flows         | `accounts`                                                 | `install` and `wait-for-installation` use `accounts` instead of `service-url`.             |
 | `extensionTag`                                            | _(removed)_                                                | Compose full `extension-id` yourself.                                                      |
+| `versionAction`                                           | `marketplace-version-action`                               | Renamed. Old name `version-action` deprecated.                                             |
+| `extensionVersionOverride`                                | `version-source`                                           | Use `version-source` with semver literals instead of a variable name.                      |
 
 Package/publish metadata inputs available in v6:
 
@@ -131,6 +133,55 @@ If you are not ready for OIDC yet:
     operation: publish
     auth-type: pat
     token: ${{ secrets.AZDO_MARKETPLACE_PAT }}
+```
+
+## Version resolution changes (query-version)
+
+In v6, `query-version` introduces multi-source version resolution:
+
+- **New input `version-source`** (default: `marketplace`) — a newline-separated list of sources. The highest valid semver wins.
+- **Renamed `version-action` → `marketplace-version-action`** — applies only to the marketplace source.
+- **Deprecated `extension-version-override`** — use `version-source` with a semver literal instead.
+- **Auth is optional** — when `marketplace` is not in `version-source`, no token is required.
+- **New output `version-source`** — indicates which source provided the winning version.
+
+### query-version examples
+
+Auto-increment marketplace:
+
+```yaml
+- id: version
+  uses: jessehouwing/azdo-marketplace@v6
+  with:
+    operation: query-version
+    auth-type: pat
+    token: ${{ secrets.MARKETPLACE_PAT }}
+    marketplace-version-action: Patch
+```
+
+Manifest-only (no auth):
+
+```yaml
+- id: version
+  uses: jessehouwing/azdo-marketplace@v6
+  with:
+    operation: query-version
+    version-source: manifest
+```
+
+Highest-wins with fallback:
+
+```yaml
+- id: version
+  uses: jessehouwing/azdo-marketplace@v6
+  with:
+    operation: query-version
+    auth-type: pat
+    token: ${{ secrets.MARKETPLACE_PAT }}
+    marketplace-version-action: Patch
+    version-source: |
+      marketplace
+      1.0.0
 ```
 
 ## Output and variable migration

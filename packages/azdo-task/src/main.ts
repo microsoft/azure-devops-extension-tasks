@@ -18,6 +18,7 @@ import {
   validatePublisherId,
   validateTfxAvailable,
   validateVersion,
+  versionSourceNeedsMarketplace,
   waitForInstallation,
   waitForValidation,
 } from '@extension-tasks/core';
@@ -121,9 +122,22 @@ async function run(): Promise<void> {
 
     const tfxManager = new TfxManager({ tfxVersion: tfxVersion, platform });
 
-    // Get authentication if needed (not required for package)
-    let auth;
-    if (operation !== 'package') {
+    // Get authentication if needed (not required for package; conditional for queryVersion)
+    let auth: AuthCredentials | undefined;
+    const needsAuth = (() => {
+      if (operation === 'package') {
+        return false;
+      }
+      if (operation === 'queryVersion') {
+        const versionSourceLines = platform.getDelimitedInput('versionSource', '\n', false);
+        return versionSourceNeedsMarketplace(
+          versionSourceLines.length > 0 ? versionSourceLines : undefined
+        );
+      }
+      return true;
+    })();
+
+    if (needsAuth) {
       const connectionType = platform.getInput('connectionType', true);
       const normalizedConnectionType = connectionType.trim().toLowerCase();
 
@@ -412,10 +426,15 @@ async function runShow(
 async function runQueryVersion(
   platform: AzdoAdapter,
   tfxManager: TfxManager,
-  auth: any
+  auth: AuthCredentials | undefined
 ): Promise<void> {
+  // Support both new marketplaceVersionAction and legacy versionAction
+  const newActionInput = platform.getInput('marketplaceVersionAction');
+  const legacyActionInput = platform.getInput('versionAction');
+  const versionActionRaw = newActionInput || legacyActionInput;
+
   const normalizedVersionAction = (() => {
-    const input = (platform.getInput('versionAction') ?? 'none').trim().toLowerCase();
+    const input = (versionActionRaw ?? 'none').trim().toLowerCase();
     if (input === 'major') {
       return 'Major' as const;
     }
@@ -428,12 +447,17 @@ async function runQueryVersion(
     return 'None' as const;
   })();
 
+  // Parse version-source (newline-separated)
+  const versionSourceLines = platform.getDelimitedInput('versionSource', '\n', false);
+  const versionSource = versionSourceLines.length > 0 ? versionSourceLines : undefined;
+
   const result = await queryVersion(
     {
       publisherId: platform.getInput('publisherId') || undefined,
       extensionId: platform.getInput('extensionId') || undefined,
-      versionAction: normalizedVersionAction,
-      extensionVersionOverrideVariable: platform.getInput('extensionVersionOverride'),
+      marketplaceVersionAction: normalizedVersionAction,
+      versionSource,
+      extensionVersionOverrideVariable: platform.getInput('extensionVersionOverride') || undefined,
       use: (platform.getInput('use') || 'manifest') as 'manifest' | 'vsix',
       vsixFile: platform.getPathInput('vsixFile') || undefined,
       manifestGlobs: platform.getDelimitedInput('manifestFile', '\n'),
@@ -449,6 +473,7 @@ async function runQueryVersion(
 
   platform.setOutput('proposedVersion', result.proposedVersion);
   platform.setOutput('currentVersion', result.currentVersion);
+  platform.setOutput('versionSource', result.source);
 }
 
 async function runWaitForValidation(

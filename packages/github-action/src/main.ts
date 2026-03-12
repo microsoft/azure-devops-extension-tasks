@@ -20,6 +20,7 @@ import {
   validatePublisherId,
   validateTfxAvailable,
   validateVersion,
+  versionSourceNeedsMarketplace,
   waitForInstallation,
   waitForValidation,
 } from '@extension-tasks/core';
@@ -98,9 +99,22 @@ async function run(): Promise<void> {
 
     const tfxManager = new TfxManager({ tfxVersion: tfxVersion, platform });
 
-    // Get authentication if needed (not required for package)
-    let auth;
-    if (operation !== 'package') {
+    // Get authentication if needed (not required for package; conditional for query-version)
+    let auth: AuthCredentials | undefined;
+    const needsAuth = (() => {
+      if (operation === 'package') {
+        return false;
+      }
+      if (operation === 'query-version') {
+        const versionSourceLines = platform.getDelimitedInput('version-source', '\n', false);
+        return versionSourceNeedsMarketplace(
+          versionSourceLines.length > 0 ? versionSourceLines : undefined
+        );
+      }
+      return true;
+    })();
+
+    if (needsAuth) {
       const authType = (platform.getInput('auth-type') || 'pat') as AuthType;
 
       // For OIDC auth, validate Azure CLI is available
@@ -401,10 +415,28 @@ async function runShow(
 async function runQueryVersion(
   platform: GitHubAdapter,
   tfxManager: TfxManager,
-  auth: any
+  auth: AuthCredentials | undefined
 ): Promise<void> {
+  // Handle deprecated version-action → marketplace-version-action rename
+  const newInput = platform.getInput('marketplace-version-action');
+  const legacyInput = platform.getInput('version-action');
+
+  if (legacyInput && newInput && legacyInput !== newInput) {
+    throw new Error(
+      "Both 'version-action' and 'marketplace-version-action' are set with different values. " +
+        "Use only 'marketplace-version-action'."
+    );
+  }
+  if (legacyInput && !newInput) {
+    platform.warning(
+      "Input 'version-action' is deprecated. Use 'marketplace-version-action' instead."
+    );
+  }
+
+  const versionActionRaw = newInput || legacyInput;
+
   const normalizedVersionAction = (() => {
-    const input = (platform.getInput('version-action') ?? 'none').trim().toLowerCase();
+    const input = (versionActionRaw ?? 'none').trim().toLowerCase();
     if (input === 'major') {
       return 'Major' as const;
     }
@@ -417,12 +449,25 @@ async function runQueryVersion(
     return 'None' as const;
   })();
 
+  // Parse version-source (newline-separated)
+  const versionSourceLines = platform.getDelimitedInput('version-source', '\n', false);
+  const versionSource = versionSourceLines.length > 0 ? versionSourceLines : undefined;
+
+  // Handle deprecated extension-version-override
+  const extensionVersionOverride = platform.getInput('extension-version-override');
+  if (extensionVersionOverride) {
+    platform.warning(
+      "Input 'extension-version-override' is deprecated. Use 'version-source' with a version value instead."
+    );
+  }
+
   const result = await queryVersion(
     {
       publisherId: platform.getInput('publisher-id') || undefined,
       extensionId: platform.getInput('extension-id') || undefined,
-      versionAction: normalizedVersionAction,
-      extensionVersionOverrideVariable: platform.getInput('extension-version-override'),
+      marketplaceVersionAction: normalizedVersionAction,
+      versionSource,
+      extensionVersionOverrideVariable: extensionVersionOverride || undefined,
       use: (platform.getInput('use') || 'manifest') as 'manifest' | 'vsix',
       vsixFile: platform.getInput('vsix-file') || undefined,
       manifestGlobs: platform.getDelimitedInput('manifest-file', '\n'),
@@ -434,6 +479,7 @@ async function runQueryVersion(
 
   platform.setOutput('proposed-version', result.proposedVersion);
   platform.setOutput('current-version', result.currentVersion);
+  platform.setOutput('version-source', result.source);
 }
 
 async function runWaitForValidation(

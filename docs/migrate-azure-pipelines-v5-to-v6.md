@@ -84,6 +84,8 @@ Use this mapping carefully when updating YAML:
 | `serviceUrl` for install/wait-install style flows            | `accounts`                                               | `install` and `waitForInstallation` no longer take `serviceUrl`; each account resolves to service URL. |
 | `extensionTag`                                               | _(removed)_                                              | Compose full value into `extensionId` yourself.                                                        |
 | `outputVariable` custom name settings                        | _(removed)_                                              | Use built-in task output variables instead.                                                            |
+| `versionAction`                                              | `marketplaceVersionAction`                               | Renamed. Old name supported as alias.                                                                  |
+| `extensionVersionOverride`                                   | `versionSource`                                          | Use `versionSource` with semver literals instead of a variable name.                                   |
 
 Additional source selection behavior in v6:
 
@@ -167,6 +169,64 @@ For OIDC setup and Entra workload federation details, see:
 - `rootFolder` is removed in v6 Azure Pipelines task configuration.
 - Unrooted file operations now resolve from the current working directory.
 - Keep `manifestFile` and `localizationRoot` paths relative to the working directory.
+
+## Version resolution changes (queryVersion)
+
+In v6, `queryVersion` introduces multi-source version resolution:
+
+- **New input `versionSource`** (default: `marketplace`) — a newline-separated list of sources to consider. The highest valid semver wins.
+- **Renamed `versionAction` → `marketplaceVersionAction`** — applies only to the marketplace source (alias `versionAction` still works).
+- **Deprecated `extensionVersionOverride`** — use `versionSource` with a semver literal instead of a pipeline variable name.
+- **Auth is optional** — when `marketplace` is not in `versionSource`, no service connection is required.
+- **New output `versionSource`** — indicates which source provided the winning version.
+
+### Before (v5-style queryVersion)
+
+```yaml
+- task: QueryVersion@5
+  name: version
+  inputs:
+    connectTo: VsTeam
+    connectedServiceName: MyMarketplaceConnection
+    versionAction: Patch
+```
+
+### After (v6 queryVersion — marketplace auto-increment)
+
+```yaml
+- task: azdo-marketplace@6
+  name: version
+  inputs:
+    operation: queryVersion
+    connectionType: PAT
+    connectionNamePAT: MyMarketplaceConnection
+    marketplaceVersionAction: patch
+```
+
+### After (v6 queryVersion — manifest-only, no auth)
+
+```yaml
+- task: azdo-marketplace@6
+  name: version
+  inputs:
+    operation: queryVersion
+    versionSource: manifest
+```
+
+### After (v6 queryVersion — highest-wins with fallback)
+
+```yaml
+- task: azdo-marketplace@6
+  name: version
+  inputs:
+    operation: queryVersion
+    connectionType: PAT
+    connectionNamePAT: MyMarketplaceConnection
+    marketplaceVersionAction: patch
+    versionSource: |
+      marketplace
+      1.0.0
+```
 
 ## Output variables in v6 (Azure Pipelines)
 

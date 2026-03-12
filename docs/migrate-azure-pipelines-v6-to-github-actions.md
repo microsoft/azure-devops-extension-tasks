@@ -53,6 +53,8 @@ Common input mappings:
 - `localizationRoot` → `localization-root`
 - `extensionPricing` → `extension-pricing`
 - `updateTasksVersion` (`none`\|`major`\|`minor`\|`patch`) → `update-tasks-version` (`none`\|`major`\|`minor`\|`patch`)
+- `marketplaceVersionAction` → `marketplace-version-action`
+- `versionSource` → `version-source`
 
 ### Consolidated inputs
 
@@ -162,6 +164,7 @@ Typical output mapping:
 - Azure Pipelines `extensionMetadata` → GitHub Actions `metadata`
 - Azure Pipelines `proposedVersion` → GitHub Actions `proposed-version`
 - Azure Pipelines `currentVersion` → GitHub Actions `current-version`
+- Azure Pipelines `versionSource` → GitHub Actions `version-source`
 
 ## Status mapping
 

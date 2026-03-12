@@ -12,6 +12,9 @@ types:
   identifier:
     type: string
     match: '^[a-zA-Z0-9._-]+$'
+  version-source-entry:
+    type: string
+    match: '^(marketplace|manifest|vsix|\d+\.\d+\.\d+|\$\{\{.*\}\})$'
   publish-mode:
     type: choice
     options:
@@ -136,6 +139,20 @@ inputs:
     items:
       type: string
 
+  version-source:
+    type: string
+    separators: newline
+    items:
+      type: version-source-entry
+
+  marketplace-version-action:
+    type: choice
+    options:
+      - None
+      - Major
+      - Minor
+      - Patch
+
   version-action:
     type: choice
     options:
@@ -175,3 +192,11 @@ outputs:
 
   proposed-version:
     type: semver
+
+  version-source:
+    type: choice
+    options:
+      - marketplace
+      - manifest
+      - vsix
+      - literal
