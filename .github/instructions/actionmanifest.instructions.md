@@ -9,6 +9,7 @@ description: Guidance for GitHub Actions manifests
 - For deprecated inputs, use the dedicated `deprecationMessage:` field.
 - Keep deprecation text synchronized across related manifests (for example root `action.yml` and composite action manifests).
 - When renaming an input, add a new input with the new name and add a `deprecationMessage:` to the old input explaining what new input to use instead.
+- **Never set a `default` on a deprecated input.** GitHub Actions always provides the default value even when the user doesn't set the input, so runtime conflict checks between the old and new input will see both as set with different values and fail. Either remove `default` from the deprecated input or remove the deprecated input entirely.
 
 ## Action wrapper synchronization strategy
 

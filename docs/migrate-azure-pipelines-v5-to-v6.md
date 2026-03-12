@@ -84,8 +84,8 @@ Use this mapping carefully when updating YAML:
 | `serviceUrl` for install/wait-install style flows            | `accounts`                                               | `install` and `waitForInstallation` no longer take `serviceUrl`; each account resolves to service URL. |
 | `extensionTag`                                               | _(removed)_                                              | Compose full value into `extensionId` yourself.                                                        |
 | `outputVariable` custom name settings                        | _(removed)_                                              | Use built-in task output variables instead.                                                            |
-| `versionAction`                                              | `marketplaceVersionAction`                               | Renamed. Old name supported as alias.                                                                  |
-| `extensionVersionOverride`                                   | `versionSource`                                          | Use `versionSource` with semver literals instead of a variable name.                                   |
+| `versionAction`                                              | `marketplaceVersionAction`                               | **Removed** as alias. Use `marketplaceVersionAction` instead.                                          |
+| `extensionVersionOverride`                                   | `versionSource`                                          | **Removed**. Use `versionSource` with semver literals instead of a variable name.                      |
 
 Additional source selection behavior in v6:
 
@@ -175,8 +175,8 @@ For OIDC setup and Entra workload federation details, see:
 In v6, `queryVersion` introduces multi-source version resolution:
 
 - **New input `versionSource`** (default: `marketplace`) — a newline-separated list of sources to consider. The highest valid semver wins.
-- **Renamed `versionAction` → `marketplaceVersionAction`** — applies only to the marketplace source (alias `versionAction` still works).
-- **Deprecated `extensionVersionOverride`** — use `versionSource` with a semver literal instead of a pipeline variable name.
+- **Removed `versionAction` alias** — use `marketplaceVersionAction` instead. Applies only to the marketplace source.
+- **Removed `extensionVersionOverride`** — use `versionSource` with a semver literal instead of a pipeline variable name.
 - **Auth is optional** — when `marketplace` is not in `versionSource`, no service connection is required.
 - **New output `versionSource`** — indicates which source provided the winning version.
 

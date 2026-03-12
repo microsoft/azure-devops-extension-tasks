@@ -558,7 +558,7 @@ describe('GitHub Action main entrypoint', () => {
         'auth-type': 'pat',
         'publisher-id': 'publisher',
         'extension-id': 'extension',
-        'version-action': 'major',
+        'marketplace-version-action': 'major',
       },
     });
     githubAdapterCtorMock.mockReturnValue(platform);

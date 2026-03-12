@@ -192,25 +192,6 @@ inputs:
       **Example:** If latest is `1.2.3` and action is `Minor`, result is `1.3.0`
     required: false
     default: None
-  version-action:
-    description: |-
-      Auto-increment action applied to the current marketplace version (query-version operation only).
-
-      Available for: query-version.
-      Required for: none.
-      Default: None
-    required: false
-    default: None
-    deprecationMessage: Use 'marketplace-version-action' instead.
-  extension-version-override:
-    description: |-
-      Override version to use instead of querying the marketplace (query-version operation only).
-
-      Available for: query-version.
-      Required for: none.
-      Default: none
-    required: false
-    deprecationMessage: Use 'version-source' with a version value instead of a variable name.
   manifest-file:
     description: |-
       **Manifest file path(s)** (newline-separated).
@@ -294,8 +275,6 @@ runs:
         extension-id: ${{ inputs.extension-id }}
         version-source: ${{ inputs.version-source }}
         marketplace-version-action: ${{ inputs.marketplace-version-action }}
-        version-action: ${{ inputs.version-action }}
-        extension-version-override: ${{ inputs.extension-version-override }}
         manifest-file: ${{ inputs.manifest-file }}
         use: ${{ inputs.use }}
         vsix-file: ${{ inputs.vsix-file }}

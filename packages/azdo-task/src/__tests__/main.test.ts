@@ -625,7 +625,7 @@ describe('Azure DevOps main entrypoint', () => {
         connectionNamePAT: 'svc-connection',
         publisherId: 'publisher',
         extensionId: 'extension',
-        versionAction: 'MAJOR',
+        marketplaceVersionAction: 'MAJOR',
       },
       boolInputs: {
         setBuildNumber: true,
@@ -696,7 +696,7 @@ describe('Azure DevOps main entrypoint', () => {
         connectionNamePAT: 'svc-connection',
         publisherId: 'publisher',
         extensionId: 'extension',
-        versionAction: 'patch',
+        marketplaceVersionAction: 'patch',
       },
     });
     azdoAdapterCtorMock.mockReturnValue(platform);

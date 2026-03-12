@@ -72,7 +72,7 @@ jobs:
           token: ${{ secrets.MARKETPLACE_PAT }}
           publisher-id: ${{ env.PUBLISHER_ID }}
           extension-id: ${{ env.EXTENSION_ID }}
-          version-action: Patch
+          marketplace-version-action: Patch
 
       - id: version
         name: Resolve version (query or initial)

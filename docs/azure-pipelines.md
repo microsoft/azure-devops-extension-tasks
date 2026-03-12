@@ -177,7 +177,6 @@ Resolves the proposed extension version from one or more sources. The highest va
 - Optional:
   - `versionSource` (default: `marketplace`; newline-separated list of `marketplace`, `manifest`, `vsix`, or semver literals)
   - `marketplaceVersionAction` (`None`, `Major`, `Minor`, `Patch`; only applies to the marketplace source; alias: `versionAction`)
-  - `extensionVersionOverride` (deprecated — use `versionSource` with a literal instead)
   - `setBuildNumber`
   - `use`, `vsixFile`, `manifestFile`
   - `tfxVersion`

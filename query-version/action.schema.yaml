@@ -57,17 +57,6 @@ inputs:
       - Minor
       - Patch
 
-  version-action:
-    type: choice
-    options:
-      - None
-      - Major
-      - Minor
-      - Patch
-
-  extension-version-override:
-    type: string
-
   manifest-file:
     type: string
 

@@ -221,7 +221,6 @@
       "label": "Marketplace Version Action",
       "required": false,
       "defaultValue": "none",
-      "aliases": ["versionAction"],
       "helpMarkDown": "**Action to apply to the marketplace version**.\n\nOnly applies when `marketplace` is listed in Version Source.\n\n- **None**: Use the current latest marketplace version as-is\n- **Major**: Increment major and reset minor/patch\n- **Minor**: Increment minor and reset patch\n- **Patch**: Increment patch\n\n**Example**: If latest is `1.2.3` and action is `Minor`, result is `1.3.0`",
       "visibleRule": "operation = queryVersion",
       "options": {
@@ -230,14 +229,6 @@
         "minor": "Minor - Increment minor",
         "patch": "Patch - Increment patch"
       }
-    },
-    {
-      "name": "extensionVersionOverride",
-      "type": "string",
-      "label": "Version Override Variable (deprecated)",
-      "required": false,
-      "helpMarkDown": "**Deprecated**: Use Version Source with a literal version value instead.\n\nVariable name containing a version override. If set and the variable exists, that value is used instead of querying marketplace.",
-      "visibleRule": "operation = queryVersion"
     },
     {
       "name": "setBuildNumber",

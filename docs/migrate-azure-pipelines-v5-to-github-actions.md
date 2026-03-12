@@ -49,8 +49,8 @@ Common conversions from Azure Pipelines-style names to GitHub Actions inputs:
 | `updateTasksVersion` (boolean) + `updateTasksVersionType` | `update-tasks-version` (`none`\|`major`\|`minor`\|`patch`) | `none` is the disabled mode.                                                               |
 | `serviceUrl` for install/wait-install style flows         | `accounts`                                                 | `install` and `wait-for-installation` use `accounts` instead of `service-url`.             |
 | `extensionTag`                                            | _(removed)_                                                | Compose full `extension-id` yourself.                                                      |
-| `versionAction`                                           | `marketplace-version-action`                               | Renamed. Old name `version-action` deprecated.                                             |
-| `extensionVersionOverride`                                | `version-source`                                           | Use `version-source` with semver literals instead of a variable name.                      |
+| `versionAction`                                           | `marketplace-version-action`                               | **Removed**. Use `marketplace-version-action` instead.                                     |
+| `extensionVersionOverride`                                | `version-source`                                           | **Removed**. Use `version-source` with semver literals instead of a variable name.         |
 
 Package/publish metadata inputs available in v6:
 
@@ -140,8 +140,8 @@ If you are not ready for OIDC yet:
 In v6, `query-version` introduces multi-source version resolution:
 
 - **New input `version-source`** (default: `marketplace`) — a newline-separated list of sources. The highest valid semver wins.
-- **Renamed `version-action` → `marketplace-version-action`** — applies only to the marketplace source.
-- **Deprecated `extension-version-override`** — use `version-source` with a semver literal instead.
+- **Removed `version-action`** — use `marketplace-version-action` instead. Applies only to the marketplace source.
+- **Removed `extension-version-override`** — use `version-source` with a semver literal instead.
 - **Auth is optional** — when `marketplace` is not in `version-source`, no token is required.
 - **New output `version-source`** — indicates which source provided the winning version.
 

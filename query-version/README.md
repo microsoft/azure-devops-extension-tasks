@@ -1,6 +1,6 @@
 # Query Azure DevOps Extension Version
 
-Query an extension version from Visual Studio Marketplace and optionally increment it.
+Query an extension version from multiple sources and optionally increment it. Supports marketplace, manifest, VSIX, and literal semver values — the highest valid version wins.
 
 ## Usage
 
@@ -8,62 +8,144 @@ Query an extension version from Visual Studio Marketplace and optionally increme
 - uses: jessehouwing/azdo-marketplace/query-version@v6
   id: query
   with:
+    auth-type: pat
     token: ${{ secrets.MARKETPLACE_TOKEN }}
     publisher-id: 'my-publisher'
     extension-id: 'my-extension'
-    version-action: 'Patch'
+    marketplace-version-action: 'Patch'
 
 - run: |
-  echo "Current version: ${{ steps.query.outputs.current-version }}"
-  echo "Proposed version: ${{ steps.query.outputs.proposed-version }}"
+    echo "Current version: ${{ steps.query.outputs.current-version }}"
+    echo "Proposed version: ${{ steps.query.outputs.proposed-version }}"
+    echo "Version source: ${{ steps.query.outputs.version-source }}"
 ```
 
-## Version Actions
+## Version Sources
 
-- `None`: Keep the latest marketplace version
+Use `version-source` (newline-separated) to specify where versions come from. The highest valid semver wins.
+
+- `marketplace` (default): Query the current marketplace version
+- `manifest`: Read version from `vss-extension.json`
+- `vsix`: Read version from a VSIX file
+- A semver literal (e.g. `1.0.0`)
+- Anything else is skipped (handles empty expressions, unresolved variables)
+
+When `marketplace` is not listed, authentication is not required.
+
+## Marketplace Version Action
+
+Only applies when `marketplace` is listed in `version-source`.
+
+- `None` (default): Use the current marketplace version as-is
 - `Major`: Increment major and reset minor/patch
 - `Minor`: Increment minor and reset patch
 - `Patch`: Increment patch
 
-## Override Behavior
-
-Use `extension-version-override` to point to an env var that contains a version. If present, that value is used instead of marketplace query.
+**Example:** If the latest marketplace version is `1.2.3` and action is `Minor`, the result is `1.3.0`.
 
 ## Outputs
 
-- `current-version`: Current marketplace version before version action
-- `proposed-version`: Proposed version after applying version action
+- `proposed-version`: The highest version from all sources after applying any version action.
+- `current-version`: The winning version before applying any increment.
+- `version-source`: The source that provided the winning version (`marketplace`, `manifest`, `vsix`, or `literal`).
 
-## GitHub Marketplace sample
+## Examples
+
+### Auto-increment marketplace version (default behavior)
 
 ```yaml
 - uses: jessehouwing/azdo-marketplace/query-version@v6
   id: query
   with:
+    auth-type: pat
     token: ${{ secrets.MARKETPLACE_TOKEN }}
     publisher-id: my-publisher
     extension-id: my-extension
-    version-action: Patch
-
-- run: echo "Current: ${{ steps.query.outputs.current-version }} -> Next: ${{ steps.query.outputs.proposed-version }}"
+    marketplace-version-action: Patch
 ```
 
-## GitHub Marketplace inputs
+### First publish with fallback
 
-- `auth-type`: Selects authentication mode (`pat`, `basic`, or `oidc`).
-- `token`: Provides PAT/secret token for authenticated query operations.
-- `username`: Provides username when `auth-type` is `basic`.
-- `service-url`: Overrides the Azure DevOps/Marketplace endpoint.
-- `tfx-version`: Selects which `tfx-cli` version/source is used; `built-in` uses the bundled JS entrypoint, `path` uses `tfx` from PATH.
-- `publisher-id`: Identifies the publisher that owns the extension to query.
-- `extension-id`: Identifies the extension to query.
-- `version-action`: Selects version increment strategy (`None`, `Major`, `Minor`, `Patch`).
-- `extension-version-override`: Names an environment variable containing an explicit version.
+```yaml
+- uses: jessehouwing/azdo-marketplace/query-version@v6
+  id: query
+  with:
+    auth-type: pat
+    token: ${{ secrets.MARKETPLACE_TOKEN }}
+    publisher-id: my-publisher
+    extension-id: my-extension
+    marketplace-version-action: Patch
+    version-source: |
+      marketplace
+      1.0.0
+```
 
-## GitHub Marketplace outputs
+### Use version from manifest only (no auth required)
 
-- `proposed-version`: Returns the computed version after applying `version-action`.
-- `current-version`: Returns the current marketplace version before increment logic.
+```yaml
+- uses: jessehouwing/azdo-marketplace/query-version@v6
+  id: query
+  with:
+    version-source: manifest
+```
+
+### GitVersion integration (no auth required)
+
+```yaml
+- uses: jessehouwing/azdo-marketplace/query-version@v6
+  id: query
+  with:
+    version-source: |
+      ${{ steps.gitversion.outputs.semVer }}
+```
+
+### Highest-wins across multiple sources
+
+```yaml
+- uses: jessehouwing/azdo-marketplace/query-version@v6
+  id: query
+  with:
+    auth-type: pat
+    token: ${{ secrets.MARKETPLACE_TOKEN }}
+    marketplace-version-action: Patch
+    version-source: |
+      marketplace
+      ${{ steps.gitversion.outputs.semVer }}
+      manifest
+```
+
+### Using OIDC authentication
+
+```yaml
+- uses: azure/login@v2
+  with:
+    client-id: ${{ secrets.AZURE_CLIENT_ID }}
+    tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+    subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+- uses: jessehouwing/azdo-marketplace/query-version@v6
+  id: query
+  with:
+    auth-type: oidc
+    publisher-id: my-publisher
+    extension-id: my-extension
+    marketplace-version-action: Patch
+```
+
+## Inputs
+
+- `auth-type`: Authentication mode (`pat`, `basic`, or `oidc`). Default: `pat`.
+- `token`: PAT or secret token. Required when `auth-type` is `pat` or `basic`.
+- `username`: Username for `basic` authentication.
+- `service-url`: Custom Azure DevOps/Marketplace endpoint URL.
+- `tfx-version`: tfx-cli version/source (`built-in`, `path`, or version spec). Default: `built-in`.
+- `publisher-id`: Publisher that owns the extension.
+- `extension-id`: Extension to query.
+- `version-source`: Version sources to consider (newline-separated). Default: `marketplace`.
+- `marketplace-version-action`: Version increment strategy (`None`, `Major`, `Minor`, `Patch`). Default: `None`.
+- `manifest-file`: Manifest file path(s) for reading publisher/extension IDs.
+- `use`: Input source (`manifest` or `vsix`).
+- `vsix-file`: Path to pre-built `.vsix` file when `use` is `vsix`.
 
 ## See Also
 

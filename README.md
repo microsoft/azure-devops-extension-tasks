@@ -88,8 +88,7 @@ When creating a PAT for pipeline automation, include at least the following scop
 - `max-retries`: Sets maximum validation retry attempts for `wait-for-validation`.
 - `min-timeout`: Sets minimum retry delay (minutes) for `wait-for-validation`.
 - `max-timeout`: Sets maximum retry delay (minutes) for `wait-for-validation`.
-- `version-action`: Controls how queried marketplace version is transformed (`None`, `Major`, `Minor`, `Patch`).
-- `extension-version-override`: Names an environment variable containing an explicit version override.
+- `marketplace-version-action`: Controls how queried marketplace version is transformed (`None`, `Major`, `Minor`, `Patch`).
 - `expected-tasks`: Provides JSON task/version expectations for `wait-for-installation`.
 - `vsix-path`: Provides a VSIX path for identity/task discovery in install/share/unshare/validation flows.
 - `timeout-minutes`: Sets total wait time for `wait-for-installation`.
@@ -189,7 +188,7 @@ When creating a PAT for pipeline automation, include at least the following scop
     token: ${{ secrets.MARKETPLACE_TOKEN }}
     publisher-id: my-publisher
     extension-id: my-extension
-    version-action: Patch
+    marketplace-version-action: Patch
 
 - run: echo "Next: ${{ steps.query.outputs.proposed-version }}"
 ```
