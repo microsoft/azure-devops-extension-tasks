@@ -61,45 +61,78 @@ When creating a PAT for pipeline automation, include at least the following scop
 
 ### Main action inputs
 
+**General**
+
 - `operation`: Selects which command to run (`package`, `publish`, `install`, `share`, `unshare`, `unpublish`, `show`, `query-version`, `wait-for-validation`, `wait-for-installation`).
+
+**Connection & Authentication**
+
 - `auth-type`: Chooses authentication mode (`pat`, `basic`, `oidc`) for authenticated operations.
-- `token`: Provides the secret token used for `pat` and `basic` authentication.
-- `username`: Provides the username when `auth-type` is `basic`.
 - `service-url`: Overrides the Azure DevOps/Marketplace endpoint for supported operations.
-- `tfx-version`: Selects the `tfx-cli` source (`built-in`, `path`, or npm version spec); `built-in` uses the bundled JS entrypoint, while `path` uses `tfx` from PATH.
-- `publisher-id`: Sets or overrides the extension publisher identifier (required for `show`, optional for `install`/`share`/`unshare`/`unpublish`/`wait-for-validation`/`query-version` when inferred from manifest or VSIX inputs).
+- `token`: Provides the secret token used for `pat` and `basic` authentication.
+- `tfx-version`: Selects the `tfx-cli` source (`built-in`, `path`, or npm version spec); `built-in` uses the bundled vesion, while `path` uses `tfx` from PATH.
+- `username`: Provides the username when `auth-type` is `basic`.
+
+**Extension identity**
+
 - `extension-id`: Sets or overrides the extension identifier inside the publisher namespace (required for `show`, optional for `install`/`share`/`unshare`/`unpublish`/`wait-for-validation`/`query-version` when inferred from manifest or VSIX inputs).
+- `publisher-id`: Sets or overrides the extension publisher identifier (required for `show`, optional for `install`/`share`/`unshare`/`unpublish`/`wait-for-validation`/`query-version` when inferred from manifest or VSIX inputs).
+
+**Input sources**
+
 - `manifest-file`: Points to one or more manifest files used for manifest-based operations and identity fallback in install/share/unshare/unpublish/wait-for-validation/query-version.
 - `manifest-file-js`: Points to a JS manifest module for `tfx --manifest-js`.
 - `overrides-file`: Points to an overrides JSON file merged into manifest packaging/publishing.
-- `vsix-file`: Points to a pre-built VSIX file when publishing from VSIX source.
 - `use`: Chooses publish input source (`manifest` or `vsix`).
-- `extension-version`: Overrides extension version during package/publish/validation flows.
+- `vsix-file`: Points to a pre-built VSIX file when publishing from VSIX source.
+- `vsix-path`: Provides a VSIX path for identity/task discovery in install/share/unshare/validation flows.
+
+**Packaging options**
+
+- `bypass-validation`: Skips package-time validation checks.
 - `extension-name`: Overrides extension display name during package/publish.
+- `extension-pricing`: Overrides pricing behavior (`default`, `free`, `paid`).
+- `extension-version`: Overrides extension version during package/publish/validation flows.
 - `extension-visibility`: Overrides marketplace visibility (`private`, `public`, preview variants).
 - `localization-root`: Points to localization resources for package/publish.
-- `extension-pricing`: Overrides pricing behavior (`default`, `free`, `paid`).
-- `output-path`: Sets where generated VSIX files are written.
-- `bypass-validation`: Skips package-time validation checks.
 - `no-wait-validation`: Skips waiting for marketplace validation after publish.
-- `update-tasks-version`: Controls task version update strategy (`none`, `major`, `minor`, `patch`).
+- `output-path`: Sets where generated VSIX files are written.
 - `update-tasks-id`: Regenerates deterministic task IDs for extension variants.
+- `update-tasks-version`: Controls task version update strategy (`none`, `major`, `minor`, `patch`).
+
+**Organization targeting**
+
 - `accounts`: Provides newline-separated Azure DevOps organizations for install/share/unshare/verification operations.
-- `max-retries`: Sets maximum validation retry attempts for `wait-for-validation`.
-- `min-timeout`: Sets minimum retry delay (minutes) for `wait-for-validation`.
-- `max-timeout`: Sets maximum retry delay (minutes) for `wait-for-validation`.
-- `marketplace-version-action`: Controls how queried marketplace version is transformed (`None`, `Major`, `Minor`, `Patch`).
-- `expected-tasks`: Provides JSON task/version expectations for `wait-for-installation`.
-- `vsix-path`: Provides a VSIX path for identity/task discovery in install/share/unshare/validation flows.
-- `timeout-minutes`: Sets total wait time for `wait-for-installation`.
-- `polling-interval-seconds`: Sets polling frequency for `wait-for-installation` checks.
+
+**Query version**
+
+- `marketplace-version-action`: Controls how the queried marketplace version is transformed (`None`, `Major`, `Minor`, `Patch`).
+- `version-source`: Specifies which version sources to consider (newline-separated); highest valid semver wins. Values: `marketplace`, `manifest`, `vsix`, or a semver literal. Defaults to `marketplace`.
+
+**Wait for validation / installation**
+
+- `polling-interval-seconds`: Sets polling interval between checks.
+- `timeout-minutes`: Sets total wait time.
+
+**Wait for installation**
+
+- `expected-tasks`: Provides task/version expectations to verify.
 
 ### Main action outputs
 
-- `vsix-path`: Returns the generated VSIX path from package/publish flows.
-- `metadata`: Returns extension metadata JSON from `show`.
-- `proposed-version`: Returns the computed version from `query-version`.
-- `current-version`: Returns the current marketplace version from `query-version`.
+**Package / publish**
+
+- `vsix-path`: Returns the generated VSIX path.
+
+**Show**
+
+- `metadata`: Returns extension metadata JSON.
+
+**Query version**
+
+- `current-version`: Returns the current version before any increment is applied.
+- `proposed-version`: Returns the computed version after applying the version action.
+- `version-source`: Returns the source that provided the winning version (`marketplace`, `manifest`, `vsix`, or `literal`).
 
 ## GitHub Marketplace samples (individual composite actions)
 
@@ -200,7 +233,6 @@ When creating a PAT for pipeline automation, include at least the following scop
   with:
     token: ${{ secrets.MARKETPLACE_TOKEN }}
     manifest-file: vss-extension.json
-    max-retries: '10'
 ```
 
 ### wait-for-installation

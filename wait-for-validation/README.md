@@ -15,7 +15,7 @@ Validate that an Azure DevOps extension has been successfully processed by the m
     extension-version: '1.2.3'
 ```
 
-### With Custom Retry Settings
+### With Custom Timeout and Polling
 
 ```yaml
 - uses: jessehouwing/azdo-marketplace/wait-for-validation@v6
@@ -23,9 +23,8 @@ Validate that an Azure DevOps extension has been successfully processed by the m
     token: ${{ secrets.MARKETPLACE_TOKEN }}
     publisher-id: 'my-publisher'
     extension-id: 'my-extension'
-    max-retries: '20'
-    min-timeout: '2'
-    max-timeout: '30'
+    timeout-minutes: '20'
+    polling-interval-seconds: '60'
 ```
 
 ### Validate Using VSIX Identity Fallback
@@ -35,7 +34,6 @@ Validate that an Azure DevOps extension has been successfully processed by the m
   with:
     token: ${{ secrets.MARKETPLACE_TOKEN }}
     vsix-path: ${{ steps.package.outputs.vsix-path }}
-    max-retries: '15'
 ```
 
 ### With OIDC Authentication
@@ -82,9 +80,8 @@ OR
 
 #### Validation Options
 
-- `max-retries`: Maximum retry attempts (default: `10`)
-- `min-timeout`: Minimum timeout between retries in minutes (default: `1`)
-- `max-timeout`: Maximum timeout between retries in minutes (default: `15`)
+- `timeout-minutes`: Total time to wait for validation in minutes (default: `10`)
+- `polling-interval-seconds`: Polling interval between validation checks in seconds (default: `30`)
 - `extension-version`: Optional specific extension version to validate (e.g. `1.2.3`)
 
 #### Identity Fallback
@@ -122,19 +119,18 @@ jobs:
           token: ${{ secrets.MARKETPLACE_TOKEN }}
           publisher-id: 'my-publisher'
           extension-id: 'my-extension'
-          max-retries: '15'
+          timeout-minutes: '15'
 ```
 
 ## How It Works
 
 This action polls the marketplace to check if your extension has been successfully validated after publishing. The marketplace validation process can take several minutes, so the action uses exponential backoff with configurable retry settings.
 
-**Retry Logic**:
+**Polling Logic**:
 
-- Starts with minimum timeout
-- Increases timeout exponentially on each retry
-- Caps at maximum timeout
-- Stops after max-retries attempts
+- Polls at a fixed interval (`polling-interval-seconds`)
+- Stops as soon as validation succeeds or fails
+- Fails if validation has not completed within `timeout-minutes`
 
 ## GitHub Marketplace sample
 
@@ -144,7 +140,6 @@ This action polls the marketplace to check if your extension has been successful
     token: ${{ secrets.MARKETPLACE_TOKEN }}
     publisher-id: my-publisher
     extension-id: my-extension
-    max-retries: '10'
 ```
 
 ## GitHub Marketplace inputs
@@ -158,9 +153,8 @@ This action polls the marketplace to check if your extension has been successful
 - `extension-id`: Identifies the extension to validate.
 - `extension-version`: Targets a specific extension version for validation checks.
 - `vsix-path`: Provides VSIX-based identity fallback when publisher/extension IDs are omitted.
-- `max-retries`: Sets maximum validation retry attempts.
-- `min-timeout`: Sets minimum retry delay in minutes.
-- `max-timeout`: Sets maximum retry delay in minutes.
+- `timeout-minutes`: Sets total wait time for validation in minutes (default: `10`).
+- `polling-interval-seconds`: Sets polling interval between validation checks in seconds (default: `30`).
 
 ## GitHub Marketplace outputs
 

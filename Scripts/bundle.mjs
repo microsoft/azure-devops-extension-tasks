@@ -516,7 +516,30 @@ async function dedupeRuntimeDependencies(target) {
   await runCommand(npmCommand, dedupeArgs, distDir);
 }
 
-async function normalizeTextLineEndings(directory) {
+async function normalizeTextLineEndings(directory, { skipDirectories = new Set() } = {}) {
+  const textExtensions = new Set([
+    '.js',
+    '.mjs',
+    '.cjs',
+    '.ts',
+    '.mts',
+    '.cts',
+    '.json',
+    '.jsonc',
+    '.yaml',
+    '.yml',
+    '.md',
+    '.txt',
+    '.html',
+    '.css',
+    '.sh',
+    '.cmd',
+    '.bat',
+    '.ps1',
+    '.xml',
+    '.svg',
+  ]);
+
   try {
     await fs.access(directory);
   } catch {
@@ -541,6 +564,12 @@ async function normalizeTextLineEndings(directory) {
       }
 
       if (!entry.isFile()) {
+        continue;
+      }
+
+      // Skip files with extensions that are never text to avoid unnecessary reads.
+      const ext = path.extname(entry.name).toLowerCase();
+      if (ext && !textExtensions.has(ext)) {
         continue;
       }
 
@@ -647,21 +676,53 @@ function resolveTargetsFromArgs() {
 
 async function bundle() {
   const selectedTargets = resolveTargetsFromArgs();
+  const bundleStart = performance.now();
 
   for (const target of selectedTargets) {
     const distDir = path.join(rootDir, target.packageDir, 'dist');
-    console.log(`Bundling ${target.name}...`);
+    const targetStart = performance.now();
+    const step = (label) => {
+      const elapsed = ((performance.now() - targetStart) / 1000).toFixed(1);
+      console.log(`  [${elapsed}s] ${label}`);
+    };
+
+    console.log(`\nBundling ${target.name}...`);
     await buildWithRollup(target);
+    step('rollup build');
+
     await removeDeclarationArtifacts(distDir);
     await removeMapArtifacts(distDir);
+    step('remove artifacts');
 
     await writeRuntimeDependencyManifest(target);
+    step('write dependency manifest');
+
     await installRuntimeDependencies(target);
+    step('npm install');
+
     await dedupeRuntimeDependencies(target);
-    await normalizeTextLineEndings(path.join(rootDir, target.packageDir, 'dist', 'node_modules'));
+    step('npm dedupe + audit fix');
+
+    // Normalize line endings in committed dist files (excludes node_modules which is not committed).
+    // Only needed for the GitHub Action target; AzDO dist files are not committed.
+    if (target.name === 'GitHub Action') {
+      await normalizeTextLineEndings(distDir);
+      step('normalize line endings');
+    }
+
     await copyBundledModuleResources(target);
+    step('copy bundled module resources');
+
     await copyRuntimeAssets(target);
-    console.log(`✓ ${target.name} bundled`);
+    step('copy runtime assets');
+
+    const totalSeconds = ((performance.now() - targetStart) / 1000).toFixed(1);
+    console.log(`✓ ${target.name} bundled in ${totalSeconds}s`);
+  }
+
+  const grandTotal = ((performance.now() - bundleStart) / 1000).toFixed(1);
+  if (selectedTargets.length > 1) {
+    console.log(`\n✓ All targets bundled in ${grandTotal}s`);
   }
 }
 

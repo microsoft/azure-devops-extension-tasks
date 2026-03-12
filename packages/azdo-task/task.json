@@ -290,33 +290,6 @@
       "visibleRule": "operation = package || operation = publish"
     },
     {
-      "name": "maxRetries",
-      "type": "string",
-      "label": "Max Retries",
-      "required": false,
-      "defaultValue": "10",
-      "helpMarkDown": "**Maximum number of retry attempts** for extension validation.\n\n- Validation can take time as marketplace processes the extension\n- Task will retry with exponential backoff between min and max timeout\n- Set higher for complex extensions that take longer to validate\n\n**Default**: 10 attempts",
-      "visibleRule": "operation = waitForValidation"
-    },
-    {
-      "name": "minTimeout",
-      "type": "string",
-      "label": "Min Timeout (minutes)",
-      "required": false,
-      "defaultValue": "1",
-      "helpMarkDown": "**Minimum timeout between validation retry attempts** (in minutes).\n\n- Initial wait time before first retry\n- Increases exponentially up to max timeout\n- Lower values check validation status more frequently\n\n**Default**: 1 minute",
-      "visibleRule": "operation = waitForValidation"
-    },
-    {
-      "name": "maxTimeout",
-      "type": "string",
-      "label": "Max Timeout (minutes)",
-      "required": false,
-      "defaultValue": "15",
-      "helpMarkDown": "**Maximum timeout between validation retry attempts** (in minutes).\n\n- Maximum wait time between retry attempts\n- Timeout increases exponentially from min timeout\n- Higher values give extension more time to validate\n\n**Default**: 15 minutes",
-      "visibleRule": "operation = waitForValidation"
-    },
-    {
       "name": "expectedTasks",
       "type": "multiLine",
       "label": "Expected Tasks (JSON)",

@@ -397,48 +397,6 @@ inputs:
       myorg2
       ```
     required: false
-  max-retries:
-    description: |-
-      **Maximum retry attempts** for extension validation.
-
-      Available for: wait-for-validation.
-      Required for: none.
-      Default: 10
-
-      - Validation can take time as marketplace processes the extension
-      - Task retries with exponential backoff
-
-      **Default:** `10`
-    required: false
-    default: '10'
-  min-timeout:
-    description: |-
-      **Minimum timeout between retry attempts** (in minutes).
-
-      Available for: wait-for-validation.
-      Required for: none.
-      Default: 1
-
-      - Initial wait time before first retry
-      - Increases exponentially up to max-timeout
-
-      **Default:** `1`
-    required: false
-    default: '1'
-  max-timeout:
-    description: |-
-      **Maximum timeout between retry attempts** (in minutes).
-
-      Available for: wait-for-validation.
-      Required for: none.
-      Default: 15
-
-      - Maximum wait time between retries
-      - Timeout increases exponentially from min-timeout
-
-      **Default:** `15`
-    required: false
-    default: '15'
   version-source:
     description: |-
       **Version sources** to consider (newline-separated). Highest valid semver wins.
@@ -535,7 +493,7 @@ inputs:
     description: |-
       **Maximum time to wait** for tasks to become available (in minutes).
 
-      Available for: wait-for-installation.
+      Available for: wait-for-installation, wait-for-validation.
       Required for: none.
       Default: 10
 
@@ -549,7 +507,7 @@ inputs:
     description: |-
       **Interval between task availability checks** (in seconds).
 
-      Available for: wait-for-installation.
+      Available for: wait-for-installation, wait-for-validation.
       Required for: none.
       Default: 15
 

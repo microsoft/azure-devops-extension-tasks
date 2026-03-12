@@ -1,3 +1,10 @@
+# Normalize all text files to LF repository-wide
+* text=auto eol=lf
+
+# Windows batch/cmd files must stay CRLF or they break on Windows runners
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
 # Keep first-party generated dist artifacts normalized across OS environments
 packages/*/dist/**/*.js text eol=lf
 packages/*/dist/**/*.d.ts text eol=lf

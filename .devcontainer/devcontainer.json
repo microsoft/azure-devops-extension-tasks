@@ -10,6 +10,7 @@
   "customizations": {
     "vscode": {
       "settings": {
+        "files.eol": "\n",
         "editor.formatOnSave": true,
         "editor.defaultFormatter": "esbenp.prettier-vscode",
         "[typescript]": {
