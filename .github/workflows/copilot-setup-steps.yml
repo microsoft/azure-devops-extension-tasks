@@ -16,7 +16,7 @@ env:
 jobs:
   copilot-setup-steps:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 120
 
     permissions:
       contents: read
