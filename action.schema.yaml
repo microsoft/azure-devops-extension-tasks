@@ -153,15 +153,6 @@ inputs:
       - Minor
       - Patch
 
-  max-retries:
-    type: number
-
-  min-timeout:
-    type: number
-
-  max-timeout:
-    type: number
-
   timeout-minutes:
     type: number
 

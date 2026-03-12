@@ -196,7 +196,7 @@ inputs:
     description: |-
       **Maximum time to wait** for tasks to become available (in minutes).
 
-      Available for: wait-for-installation.
+      Available for: wait-for-installation, wait-for-validation.
       Required for: none.
       Default: 10
 
@@ -210,7 +210,7 @@ inputs:
     description: |-
       **Interval between task availability checks** (in seconds).
 
-      Available for: wait-for-installation.
+      Available for: wait-for-installation, wait-for-validation.
       Required for: none.
       Default: 15
 
@@ -241,3 +241,4 @@ runs:
         vsix-path: ${{ inputs.vsix-path }}
         timeout-minutes: ${{ inputs.timeout-minutes }}
         polling-interval-seconds: ${{ inputs.polling-interval-seconds }}
+

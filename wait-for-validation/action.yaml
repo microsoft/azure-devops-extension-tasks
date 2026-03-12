@@ -182,44 +182,32 @@ inputs:
 
       **Note:** Use this OR expected-tasks/manifest-file, not multiple
     required: false
-  max-retries:
+  timeout-minutes:
     description: |-
-      **Maximum retry attempts** for extension validation.
+      **Maximum time to wait** for tasks to become available (in minutes).
 
-      Available for: wait-for-validation.
+      Available for: wait-for-installation, wait-for-validation.
       Required for: none.
       Default: 10
 
-      - Validation can take time as marketplace processes the extension
-      - Task retries with exponential backoff
+      - Task polls Azure DevOps at regular intervals
+      - If tasks don't appear within timeout, verification fails
 
       **Default:** `10`
     required: false
     default: '10'
-  min-timeout:
+  polling-interval-seconds:
     description: |-
-      **Minimum timeout between retry attempts** (in minutes).
+      **Interval between task availability checks** (in seconds).
 
-      Available for: wait-for-validation.
-      Required for: none.
-      Default: 1
-
-      - Initial wait time before first retry
-      - Increases exponentially up to max-timeout
-
-      **Default:** `1`
-    required: false
-    default: '1'
-  max-timeout:
-    description: |-
-      **Maximum timeout between retry attempts** (in minutes).
-
-      Available for: wait-for-validation.
+      Available for: wait-for-installation, wait-for-validation.
       Required for: none.
       Default: 15
 
-      - Maximum wait time between retries
-      - Timeout increases exponentially from min-timeout
+      - How often to check if tasks are available
+      - Lower values detect availability faster but create more API calls
+
+      **Recommendation:** 30-60 seconds is usually sufficient
 
       **Default:** `15`
     required: false
@@ -241,6 +229,5 @@ runs:
         extension-version: ${{ inputs.extension-version }}
         manifest-file: ${{ inputs.manifest-file }}
         vsix-path: ${{ inputs.vsix-path }}
-        max-retries: ${{ inputs.max-retries }}
-        min-timeout: ${{ inputs.min-timeout }}
-        max-timeout: ${{ inputs.max-timeout }}
+        timeout-minutes: ${{ inputs.timeout-minutes }}
+        polling-interval-seconds: ${{ inputs.polling-interval-seconds }}

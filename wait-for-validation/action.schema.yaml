@@ -52,11 +52,8 @@ inputs:
   extension-version:
     type: semver
 
-  max-retries:
+  timeout-minutes:
     type: number
 
-  min-timeout:
-    type: number
-
-  max-timeout:
+  polling-interval-seconds:
     type: number
