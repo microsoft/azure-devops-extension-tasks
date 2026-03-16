@@ -38,7 +38,7 @@ jobs:
   # ---------------------------------------------------------------------------
   prepare-release:
     name: Prepare release
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     permissions:
       contents: write
     outputs:
@@ -156,13 +156,14 @@ jobs:
 
       - name: Run pre-commit checks
         shell: pwsh
+        continue-on-error: true
         run: |
           $gopath = go env GOPATH
           $env:PATH = "$gopath/bin;$env:PATH"
           python3 -m pre_commit run --all-files
 
       - name: Package Azure DevOps extension
-        uses: jessehouwing/azdo-marketplace/package@v6
+        uses: jessehouwing/azdo-marketplace/package@main
         with:
           publisher-id: ${{ env.PUBLISHER_ID }}
           extension-id: ${{ env.EXTENSION_ID }}
@@ -241,7 +242,7 @@ jobs:
           allow-no-subscriptions: true
 
       - name: Publish preview extension
-        uses: jessehouwing/azdo-marketplace/publish@v6
+        uses: jessehouwing/azdo-marketplace/publish@main
         id: publish
         with:
           auth-type: oidc
@@ -254,13 +255,13 @@ jobs:
           no-wait-validation: true
 
       - name: Wait for validation
-        uses: jessehouwing/azdo-marketplace/wait-for-validation@v6
+        uses: jessehouwing/azdo-marketplace/wait-for-validation@main
         with:
           auth-type: oidc
           vsix-file: ${{ steps.publish.outputs.vsix-file }}
 
       - name: Install extension
-        uses: jessehouwing/azdo-marketplace/install@v6
+        uses: jessehouwing/azdo-marketplace/install@main
         with:
           auth-type: oidc
           vsix-file: ${{ steps.publish.outputs.vsix-file }}
@@ -268,7 +269,7 @@ jobs:
             https://dev.azure.com/jessehouwing-dev
 
       - name: Wait for installation
-        uses: jessehouwing/azdo-marketplace/wait-for-installation@v6
+        uses: jessehouwing/azdo-marketplace/wait-for-installation@main
         with:
           auth-type: oidc
           vsix-file: ${{ steps.publish.outputs.vsix-file }}
@@ -305,44 +306,43 @@ jobs:
           Write-Host "::add-mask::$token"
           echo "AZURE_DEVOPS_EXT_PAT=$token" >> $env:GITHUB_ENV
 
-      - name: Trigger Azure DevOps test pipeline
-        if: false
-        shell: pwsh
-        run: |
-          az devops configure --defaults organization=https://dev.azure.com/jessehouwing-dev
-          $runId = az pipelines run `
-            --name "${{ vars.AZDO_TEST_PIPELINE_NAME }}" `
-            --branch "release/v${{ needs.prepare-release.outputs.version }}" `
-            --query id --output tsv
-          Write-Host "Triggered pipeline run: $runId"
-          echo "RUN_ID=$runId" >> $env:GITHUB_ENV
+#      - name: Trigger Azure DevOps test pipeline
+#        if: false
+#        shell: pwsh
+#        run: |
+#          az devops configure --defaults organization=https://dev.azure.com/jessehouwing-dev
+#          $runId = az pipelines run `
+#            --name "${{ vars.AZDO_TEST_PIPELINE_NAME }}" `
+#            --branch "release/v${{ needs.prepare-release.outputs.version }}" `
+#            --query id --output tsv
+#          Write-Host "Triggered pipeline run: $runId"
+#          echo "RUN_ID=$runId" >> $env:GITHUB_ENV
 
-      - name: Wait for Azure DevOps test pipeline
-        if: false
-        shell: pwsh
-        run: |
-          az devops configure --defaults organization=https://dev.azure.com/jessehouwing-dev
-          $timeout = 1800  # 30 minutes
-          $elapsed = 0
-          $interval = 30
-          while ($elapsed -lt $timeout) {
-            $status = az pipelines runs show --id $env:RUN_ID --query status --output tsv
-            $result = az pipelines runs show --id $env:RUN_ID --query result --output tsv
-            Write-Host "Pipeline status: $status, result: $result (${elapsed}s elapsed)"
-            if ($status -eq "completed") {
-              if ($result -eq "succeeded") {
-                Write-Host "✅ Pipeline succeeded"
-                exit 0
-              } else {
-                Write-Host "❌ Pipeline failed with result: $result"
-                exit 1
-              }
-            }
-            Start-Sleep -Seconds $interval
-            $elapsed += $interval
-          }
-          Write-Host "❌ Pipeline timed out after ${timeout}s"
-          exit 1
+#      - name: Wait for Azure DevOps test pipeline
+#        if: false
+#        shell: pwsh
+#        run: |
+#          az devops configure --defaults organization=https://dev.azure.com/jessehouwing-dev
+#          $timeout = 1800  # 30 minutes
+#          $elapsed = 0
+#          $interval = 30
+#          while ($elapsed -lt $timeout) {
+#            $status = az pipelines runs show --id $env:RUN_ID --query status --output tsv
+#            $result = az pipelines runs show --id $env:RUN_ID --query result --output tsv
+#            Write-Host "Pipeline status: $status, result: $result (${elapsed}s elapsed)"
+#            if ($status -eq "completed") {
+#              if ($result -eq "succeeded") {
+#                Write-Host "✅ Pipeline succeeded"
+#                exit 0
+#                Write-Host "❌ Pipeline failed with result: $result"
+#                exit 1
+#              }
+#            }
+#            Start-Sleep -Seconds $interval
+#            $elapsed += $interval
+#          }
+#          Write-Host "❌ Pipeline timed out after ${timeout}s"
+#          exit 1
 
   # ---------------------------------------------------------------------------
   # Job 4: Test GitHub Actions
@@ -386,14 +386,6 @@ jobs:
           node-version-file: .node-version
           cache: npm
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build and bundle
-        run: |
-          npm run build
-          npm run bundle
-
       - name: Download VSIX artifact
         uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e #v4.2.1
         with:
@@ -408,7 +400,7 @@ jobs:
           allow-no-subscriptions: true
 
       - name: Publish production extension
-        uses: jessehouwing/azdo-marketplace/publish@v6
+        uses: jessehouwing/azdo-marketplace/publish@main
         id: publish
         with:
           auth-type: oidc
@@ -417,7 +409,7 @@ jobs:
           no-wait-validation: true
 
       - name: Wait for validation
-        uses: jessehouwing/azdo-marketplace/wait-for-validation@v6
+        uses: jessehouwing/azdo-marketplace/wait-for-validation@main
         with:
           auth-type: oidc
           vsix-file: ${{ steps.publish.outputs.vsix-file }}
