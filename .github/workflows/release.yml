@@ -307,43 +307,43 @@ jobs:
           Write-Host "::add-mask::$token"
           echo "AZURE_DEVOPS_EXT_PAT=$token" >> $env:GITHUB_ENV
 
-#      - name: Trigger Azure DevOps test pipeline
-#        if: false
-#        shell: pwsh
-#        run: |
-#          az devops configure --defaults organization=https://dev.azure.com/jessehouwing-dev
-#          $runId = az pipelines run `
-#            --name "${{ vars.AZDO_TEST_PIPELINE_NAME }}" `
-#            --branch "release/v${{ needs.prepare-release.outputs.version }}" `
-#            --query id --output tsv
-#          Write-Host "Triggered pipeline run: $runId"
-#          echo "RUN_ID=$runId" >> $env:GITHUB_ENV
+  #      - name: Trigger Azure DevOps test pipeline
+  #        if: false
+  #        shell: pwsh
+  #        run: |
+  #          az devops configure --defaults organization=https://dev.azure.com/jessehouwing-dev
+  #          $runId = az pipelines run `
+  #            --name "${{ vars.AZDO_TEST_PIPELINE_NAME }}" `
+  #            --branch "release/v${{ needs.prepare-release.outputs.version }}" `
+  #            --query id --output tsv
+  #          Write-Host "Triggered pipeline run: $runId"
+  #          echo "RUN_ID=$runId" >> $env:GITHUB_ENV
 
-#      - name: Wait for Azure DevOps test pipeline
-#        if: false
-#        shell: pwsh
-#        run: |
-#          az devops configure --defaults organization=https://dev.azure.com/jessehouwing-dev
-#          $timeout = 1800  # 30 minutes
-#          $elapsed = 0
-#          $interval = 30
-#          while ($elapsed -lt $timeout) {
-#            $status = az pipelines runs show --id $env:RUN_ID --query status --output tsv
-#            $result = az pipelines runs show --id $env:RUN_ID --query result --output tsv
-#            Write-Host "Pipeline status: $status, result: $result (${elapsed}s elapsed)"
-#            if ($status -eq "completed") {
-#              if ($result -eq "succeeded") {
-#                Write-Host "✅ Pipeline succeeded"
-#                exit 0
-#                Write-Host "❌ Pipeline failed with result: $result"
-#                exit 1
-#              }
-#            }
-#            Start-Sleep -Seconds $interval
-#            $elapsed += $interval
-#          }
-#          Write-Host "❌ Pipeline timed out after ${timeout}s"
-#          exit 1
+  #      - name: Wait for Azure DevOps test pipeline
+  #        if: false
+  #        shell: pwsh
+  #        run: |
+  #          az devops configure --defaults organization=https://dev.azure.com/jessehouwing-dev
+  #          $timeout = 1800  # 30 minutes
+  #          $elapsed = 0
+  #          $interval = 30
+  #          while ($elapsed -lt $timeout) {
+  #            $status = az pipelines runs show --id $env:RUN_ID --query status --output tsv
+  #            $result = az pipelines runs show --id $env:RUN_ID --query result --output tsv
+  #            Write-Host "Pipeline status: $status, result: $result (${elapsed}s elapsed)"
+  #            if ($status -eq "completed") {
+  #              if ($result -eq "succeeded") {
+  #                Write-Host "✅ Pipeline succeeded"
+  #                exit 0
+  #                Write-Host "❌ Pipeline failed with result: $result"
+  #                exit 1
+  #              }
+  #            }
+  #            Start-Sleep -Seconds $interval
+  #            $elapsed += $interval
+  #          }
+  #          Write-Host "❌ Pipeline timed out after ${timeout}s"
+  #          exit 1
 
   # ---------------------------------------------------------------------------
   # Job 4: Test GitHub Actions
