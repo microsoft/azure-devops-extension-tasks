@@ -129,6 +129,7 @@ jobs:
         run: node Scripts/update-version.mjs ${{ steps.resolve.outputs.version }}
 
       - name: Format
+        continue-on-error: true
         run: npm run format
 
       - name: Lint fix
