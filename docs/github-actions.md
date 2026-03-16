@@ -65,7 +65,7 @@ This repository ships a **unified JavaScript action** and **composite command wr
 
 - `max-retries`, `min-timeout`, `max-timeout`
 - `accounts`
-- `expected-tasks`, `manifest-file`, `vsix-path`
+- `expected-tasks`, `manifest-file`, `vsix-file`
 - `timeout-minutes`, `polling-interval-seconds`
 
 ## Command reference (unified action)
@@ -101,8 +101,8 @@ This repository ships a **unified JavaScript action** and **composite command wr
   - `operation: unpublish`
   - auth inputs
 - Optional:
-  - `publisher-id`, `extension-id` (can be inferred from `manifest-file` or `vsix-path`)
-  - `manifest-file`, `vsix-path`
+  - `publisher-id`, `extension-id` (can be inferred from `manifest-file` or `vsix-file`)
+  - `manifest-file`, `vsix-file`
   - tooling/service URL overrides
 
 ### `share`
@@ -112,8 +112,8 @@ This repository ships a **unified JavaScript action** and **composite command wr
   - auth inputs
   - `share-with`
 - Optional:
-  - `publisher-id`, `extension-id` (can be inferred from `manifest-file` or `vsix-path`)
-  - `manifest-file`, `vsix-path`
+  - `publisher-id`, `extension-id` (can be inferred from `manifest-file` or `vsix-file`)
+  - `manifest-file`, `vsix-file`
 
 ### `unshare`
 
@@ -122,8 +122,8 @@ This repository ships a **unified JavaScript action** and **composite command wr
   - auth inputs
   - `unshare-with`
 - Optional:
-  - `publisher-id`, `extension-id` (can be inferred from `manifest-file` or `vsix-path`)
-  - `manifest-file`, `vsix-path`
+  - `publisher-id`, `extension-id` (can be inferred from `manifest-file` or `vsix-file`)
+  - `manifest-file`, `vsix-file`
 
 ### `install`
 
@@ -132,8 +132,8 @@ This repository ships a **unified JavaScript action** and **composite command wr
   - auth inputs
   - `accounts`
 - Optional:
-  - `publisher-id`, `extension-id` (can be inferred from `manifest-file` or `vsix-path`)
-  - `manifest-file`, `vsix-path`
+  - `publisher-id`, `extension-id` (can be inferred from `manifest-file` or `vsix-file`)
+  - `manifest-file`, `vsix-file`
   - `extension-version`
 
 ### `show`
@@ -165,8 +165,8 @@ Resolves the proposed extension version from one or more sources. The highest va
   - `operation: wait-for-validation`
   - auth inputs
 - Optional:
-  - `publisher-id`, `extension-id` (can be inferred from `manifest-file` or `vsix-path`)
-  - `manifest-file`, `vsix-path`
+  - `publisher-id`, `extension-id` (can be inferred from `manifest-file` or `vsix-file`)
+  - `manifest-file`, `vsix-file`
   - `max-retries`, `min-timeout`, `max-timeout`
 
 ### `wait-for-installation`
@@ -176,14 +176,14 @@ Resolves the proposed extension version from one or more sources. The highest va
   - auth inputs
   - `accounts`
 - Optional:
-  - `publisher-id` (if omitted, inferred from `vsix-path` when provided)
-  - `extension-id` (if omitted, inferred from `vsix-path` when provided)
-  - one of `expected-tasks`, `manifest-file`, `vsix-path`
+  - `publisher-id` (if omitted, inferred from `vsix-file` when provided)
+  - `extension-id` (if omitted, inferred from `vsix-file` when provided)
+  - one of `expected-tasks`, `manifest-file`, `vsix-file`
   - `timeout-minutes`, `polling-interval-seconds`
 
 ## Unified action outputs
 
-- `vsix-path` (package)
+- `vsix-file` (package)
 - `metadata` (show)
 - `proposed-version` (query-version) — highest version from all sources
 - `current-version` (query-version) — resolved version before increment (from the winning `version-source`)
@@ -222,7 +222,7 @@ Use these when you prefer a dedicated command surface over setting `operation` m
 - uses: jessehouwing/azdo-marketplace/package@v6
   id: package
 
-- run: echo "VSIX: ${{ steps.package.outputs.vsix-path }}"
+- run: echo "VSIX: ${{ steps.package.outputs.vsix-file }}"
 ```
 
 ## Recommended publish example (OIDC)
@@ -251,7 +251,7 @@ steps:
       operation: publish
       auth-type: oidc
       use: vsix
-      vsix-file: ${{ steps.package.outputs.vsix-path }}
+      vsix-file: ${{ steps.package.outputs.vsix-file }}
 ```
 
 ## Query-version examples

@@ -17,14 +17,14 @@ jest.setTimeout(60_000);
 
 describe('VSIX Integration Tests', () => {
   const testDir = '/tmp/vsix-integration-tests';
-  const realWorldVsixPath = join(testDir, 'real-extension.vsix');
+  const realWorldVsixFile = join(testDir, 'real-extension.vsix');
 
   beforeAll(async () => {
     // Create test directory
     mkdirSync(testDir, { recursive: true });
 
     // Create a realistic VSIX file
-    await createRealWorldVsix(realWorldVsixPath);
+    await createRealWorldVsix(realWorldVsixFile);
   });
 
   afterAll(() => {
@@ -34,7 +34,7 @@ describe('VSIX Integration Tests', () => {
 
   describe('Reading real-world VSIX structure', () => {
     it('should read a complete extension manifest', async () => {
-      const reader = await VsixReader.open(realWorldVsixPath);
+      const reader = await VsixReader.open(realWorldVsixFile);
 
       const manifest = await reader.readExtensionManifest();
 
@@ -53,7 +53,7 @@ describe('VSIX Integration Tests', () => {
     });
 
     it('should discover all tasks from contributions', async () => {
-      const reader = await VsixReader.open(realWorldVsixPath);
+      const reader = await VsixReader.open(realWorldVsixFile);
 
       const taskPaths = await reader.findTaskPaths();
 
@@ -72,7 +72,7 @@ describe('VSIX Integration Tests', () => {
     });
 
     it('should read all task manifests with correct versions', async () => {
-      const reader = await VsixReader.open(realWorldVsixPath);
+      const reader = await VsixReader.open(realWorldVsixFile);
 
       const tasks = await reader.readTaskManifests();
 
@@ -93,7 +93,7 @@ describe('VSIX Integration Tests', () => {
     });
 
     it('should get tasks info for verifyInstall integration', async () => {
-      const reader = await VsixReader.open(realWorldVsixPath);
+      const reader = await VsixReader.open(realWorldVsixFile);
 
       const tasksInfo = await reader.getTasksInfo();
 
@@ -111,9 +111,9 @@ describe('VSIX Integration Tests', () => {
 
     it('should handle multiple readers on same file', async () => {
       // Open multiple readers simultaneously
-      const reader1 = await VsixReader.open(realWorldVsixPath);
-      const reader2 = await VsixReader.open(realWorldVsixPath);
-      const reader3 = await VsixReader.open(realWorldVsixPath);
+      const reader1 = await VsixReader.open(realWorldVsixFile);
+      const reader2 = await VsixReader.open(realWorldVsixFile);
+      const reader3 = await VsixReader.open(realWorldVsixFile);
 
       // Read concurrently
       const [manifest1, manifest2, manifest3] = await Promise.all([
@@ -130,7 +130,7 @@ describe('VSIX Integration Tests', () => {
     });
 
     it('should read specific files by path', async () => {
-      const reader = await VsixReader.open(realWorldVsixPath);
+      const reader = await VsixReader.open(realWorldVsixFile);
 
       // Read task manifest directly
       const taskJsonBuffer = await reader.readFile('PublishTask/task.json');
@@ -143,7 +143,7 @@ describe('VSIX Integration Tests', () => {
     });
 
     it('should list all files including nested paths', async () => {
-      const reader = await VsixReader.open(realWorldVsixPath);
+      const reader = await VsixReader.open(realWorldVsixFile);
 
       const files = await reader.listFiles();
 
@@ -164,7 +164,7 @@ describe('VSIX Integration Tests', () => {
     });
 
     it('should get metadata quickly without reading all files', async () => {
-      const reader = await VsixReader.open(realWorldVsixPath);
+      const reader = await VsixReader.open(realWorldVsixFile);
 
       const metadata = await reader.getMetadata();
 
@@ -186,7 +186,7 @@ describe('VSIX Integration Tests', () => {
     });
 
     it('should handle missing files gracefully', async () => {
-      const reader = await VsixReader.open(realWorldVsixPath);
+      const reader = await VsixReader.open(realWorldVsixFile);
 
       await expect(reader.readFile('nonexistent/file.txt')).rejects.toThrow('File not found');
 
@@ -194,7 +194,7 @@ describe('VSIX Integration Tests', () => {
     });
 
     it('should handle operations after close', async () => {
-      const reader = await VsixReader.open(realWorldVsixPath);
+      const reader = await VsixReader.open(realWorldVsixFile);
       await reader.close();
 
       // Operations after close should still work by reopening internally or fail gracefully
@@ -205,7 +205,7 @@ describe('VSIX Integration Tests', () => {
 
   describe('Performance', () => {
     it('should cache file reads efficiently', async () => {
-      const reader = await VsixReader.open(realWorldVsixPath);
+      const reader = await VsixReader.open(realWorldVsixFile);
 
       // First read
       const start1 = Date.now();
@@ -224,7 +224,7 @@ describe('VSIX Integration Tests', () => {
     });
 
     it('should handle large number of sequential reads', async () => {
-      const reader = await VsixReader.open(realWorldVsixPath);
+      const reader = await VsixReader.open(realWorldVsixFile);
 
       // Read all tasks multiple times
       for (let i = 0; i < 3; i++) {

@@ -15,16 +15,16 @@ import { VsixReader } from '../vsix-reader.js';
 jest.setTimeout(60_000);
 
 describe('VSIX Chain Integration Tests', () => {
-  let testVsixPath: string;
-  let outputVsixPath: string;
+  let testVsixFile: string;
+  let outputVsixFile: string;
   let testDir: string;
 
   beforeEach(async () => {
     // Create test directory
     testDir = join(tmpdir(), `vsix-chain-test-${Date.now()}`);
     mkdirSync(testDir, { recursive: true });
-    testVsixPath = join(testDir, 'input.vsix');
-    outputVsixPath = join(testDir, 'output.vsix');
+    testVsixFile = join(testDir, 'input.vsix');
+    outputVsixFile = join(testDir, 'output.vsix');
 
     // Create a realistic test VSIX
     const zipFile = new yazl.ZipFile();
@@ -96,7 +96,7 @@ describe('VSIX Chain Integration Tests', () => {
 
     await new Promise<void>((resolve, reject) => {
       (zipFile.outputStream as any)
-        .pipe(createWriteStream(testVsixPath) as any)
+        .pipe(createWriteStream(testVsixFile) as any)
         .on('finish', resolve)
         .on('error', reject);
       zipFile.end();
@@ -104,7 +104,7 @@ describe('VSIX Chain Integration Tests', () => {
   });
 
   it('should complete full read → edit → write chain', async () => {
-    const reader = await VsixReader.open(testVsixPath);
+    const reader = await VsixReader.open(testVsixFile);
 
     const writer = await ManifestEditor.fromReader(reader)
       .setPublisher('modified-publisher')
@@ -115,15 +115,15 @@ describe('VSIX Chain Integration Tests', () => {
       .updateTaskVersion('PackageExtension', '6.0.0')
       .toWriter();
 
-    await writer.writeToFile(outputVsixPath);
+    await writer.writeToFile(outputVsixFile);
     await writer.close();
     await reader.close();
 
     // Verify output exists
-    expect(existsSync(outputVsixPath)).toBe(true);
+    expect(existsSync(outputVsixFile)).toBe(true);
 
     // Verify modifications
-    const outputReader = await VsixReader.open(outputVsixPath);
+    const outputReader = await VsixReader.open(outputVsixFile);
     const manifest = await outputReader.readExtensionManifest();
     const tasks = await outputReader.readTaskManifests();
 
@@ -142,7 +142,7 @@ describe('VSIX Chain Integration Tests', () => {
   });
 
   it('should preserve unchanged files byte-for-byte', async () => {
-    const reader = await VsixReader.open(testVsixPath);
+    const reader = await VsixReader.open(testVsixFile);
 
     // Read unchanged file before modification
     const originalReadme = await reader.readFile('README.md');
@@ -150,12 +150,12 @@ describe('VSIX Chain Integration Tests', () => {
 
     const writer = await ManifestEditor.fromReader(reader).setPublisher('new-publisher').toWriter();
 
-    await writer.writeToFile(outputVsixPath);
+    await writer.writeToFile(outputVsixFile);
     await writer.close();
     await reader.close();
 
     // Read same files from output
-    const outputReader = await VsixReader.open(outputVsixPath);
+    const outputReader = await VsixReader.open(outputVsixFile);
     const outputReadme = await outputReader.readFile('README.md');
     const outputIcon = await outputReader.readFile('icon.png');
 
@@ -167,19 +167,19 @@ describe('VSIX Chain Integration Tests', () => {
   });
 
   it('should handle file additions', async () => {
-    const reader = await VsixReader.open(testVsixPath);
+    const reader = await VsixReader.open(testVsixFile);
 
     const writer = await ManifestEditor.fromReader(reader)
       .setFile('newfile.txt', 'This is a new file')
       .setFile('another/nested/file.json', JSON.stringify({ test: true }))
       .toWriter();
 
-    await writer.writeToFile(outputVsixPath);
+    await writer.writeToFile(outputVsixFile);
     await writer.close();
     await reader.close();
 
     // Verify new files exist
-    const outputReader = await VsixReader.open(outputVsixPath);
+    const outputReader = await VsixReader.open(outputVsixFile);
 
     expect(await outputReader.fileExists('newfile.txt')).toBe(true);
     expect(await outputReader.fileExists('another/nested/file.json')).toBe(true);
@@ -191,19 +191,19 @@ describe('VSIX Chain Integration Tests', () => {
   });
 
   it('should handle file removals', async () => {
-    const reader = await VsixReader.open(testVsixPath);
+    const reader = await VsixReader.open(testVsixFile);
 
     const writer = await ManifestEditor.fromReader(reader)
       .removeFile('README.md')
       .removeFile('icon.png')
       .toWriter();
 
-    await writer.writeToFile(outputVsixPath);
+    await writer.writeToFile(outputVsixFile);
     await writer.close();
     await reader.close();
 
     // Verify files were removed
-    const outputReader = await VsixReader.open(outputVsixPath);
+    const outputReader = await VsixReader.open(outputVsixFile);
 
     expect(await outputReader.fileExists('README.md')).toBe(false);
     expect(await outputReader.fileExists('icon.png')).toBe(false);
@@ -215,7 +215,7 @@ describe('VSIX Chain Integration Tests', () => {
   });
 
   it('should handle mixed operations (add, modify, remove)', async () => {
-    const reader = await VsixReader.open(testVsixPath);
+    const reader = await VsixReader.open(testVsixFile);
 
     const writer = await ManifestEditor.fromReader(reader)
       .setPublisher('mixed-publisher')
@@ -225,11 +225,11 @@ describe('VSIX Chain Integration Tests', () => {
       .updateTaskVersion('PublishExtension', '7.0.0')
       .toWriter();
 
-    await writer.writeToFile(outputVsixPath);
+    await writer.writeToFile(outputVsixFile);
     await writer.close();
     await reader.close();
 
-    const outputReader = await VsixReader.open(outputVsixPath);
+    const outputReader = await VsixReader.open(outputVsixFile);
     const manifest = await outputReader.readExtensionManifest();
 
     expect(manifest.publisher).toBe('mixed-publisher');
@@ -246,7 +246,7 @@ describe('VSIX Chain Integration Tests', () => {
   });
 
   it('should write to buffer and then to file', async () => {
-    const reader = await VsixReader.open(testVsixPath);
+    const reader = await VsixReader.open(testVsixFile);
 
     const writer = await ManifestEditor.fromReader(reader).setPublisher('buffer-test').toWriter();
 
@@ -255,10 +255,10 @@ describe('VSIX Chain Integration Tests', () => {
     await reader.close();
 
     // Write buffer to file
-    writeFileSync(outputVsixPath, buffer);
+    writeFileSync(outputVsixFile, buffer);
 
     // Verify
-    const outputReader = await VsixReader.open(outputVsixPath);
+    const outputReader = await VsixReader.open(outputVsixFile);
     const manifest = await outputReader.readExtensionManifest();
 
     expect(manifest.publisher).toBe('buffer-test');
@@ -270,20 +270,20 @@ describe('VSIX Chain Integration Tests', () => {
     // This test verifies that unchanged large files aren't recompressed
     // We can't directly test compression level, but we can verify the output is valid
 
-    const reader = await VsixReader.open(testVsixPath);
+    const reader = await VsixReader.open(testVsixFile);
 
     // Only modify manifest, leave large files unchanged
     const writer = await ManifestEditor.fromReader(reader).setVersion('5.1.0').toWriter();
 
     const startTime = Date.now();
-    await writer.writeToFile(outputVsixPath);
+    await writer.writeToFile(outputVsixFile);
     const duration = Date.now() - startTime;
 
     await writer.close();
     await reader.close();
 
     // Verify output is valid and contains all expected files
-    const outputReader = await VsixReader.open(outputVsixPath);
+    const outputReader = await VsixReader.open(outputVsixFile);
     const files = await outputReader.listFiles();
 
     // Should have all original files
@@ -301,7 +301,7 @@ describe('VSIX Chain Integration Tests', () => {
   });
 
   it('should maintain file integrity across chain', async () => {
-    const reader = await VsixReader.open(testVsixPath);
+    const reader = await VsixReader.open(testVsixFile);
 
     // Get original file list
     const originalFiles = await reader.listFiles();
@@ -312,12 +312,12 @@ describe('VSIX Chain Integration Tests', () => {
       .setDescription('New description')
       .toWriter();
 
-    await writer.writeToFile(outputVsixPath);
+    await writer.writeToFile(outputVsixFile);
     await writer.close();
     await reader.close();
 
     // Verify all original files still exist
-    const outputReader = await VsixReader.open(outputVsixPath);
+    const outputReader = await VsixReader.open(outputVsixFile);
     const outputFiles = await outputReader.listFiles();
     const outputFileNames = outputFiles.map((f) => f.path).sort();
 

@@ -1,0 +1,21 @@
+{
+  "id": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+  "name": "PingTask",
+  "friendlyName": "Ping Task",
+  "description": "Minimal no-op task that logs a message. Used for release pipeline validation.",
+  "helpMarkDown": "A no-op task for testing.",
+  "category": "Utility",
+  "author": "Jesse Houwing",
+  "version": {
+    "Major": 1,
+    "Minor": 0,
+    "Patch": 0
+  },
+  "instanceNameFormat": "Ping Task",
+  "inputs": [],
+  "execution": {
+    "Node20_1": {
+      "target": "index.js"
+    }
+  }
+}

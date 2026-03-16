@@ -2,11 +2,11 @@
  * Unpublish command - Removes an extension from the marketplace
  */
 
+import { ArgBuilder } from '../arg-builder.js';
+import type { AuthCredentials } from '../auth.js';
+import { resolveExtensionIdentity } from '../extension-identity.js';
 import type { IPlatformAdapter } from '../platform.js';
 import type { TfxManager } from '../tfx-manager.js';
-import type { AuthCredentials } from '../auth.js';
-import { ArgBuilder } from '../arg-builder.js';
-import { resolveExtensionIdentity } from '../extension-identity.js';
 
 /**
  * Options for unpublish command
@@ -17,7 +17,7 @@ export interface UnpublishOptions {
   /** Extension ID */
   extensionId?: string;
   /** Path to VSIX file to infer publisher/extension identity */
-  vsixPath?: string;
+  vsixFile?: string;
   /** Manifest globs to infer publisher/extension identity */
   manifestGlobs?: string[];
   /** Root folder for manifest discovery */

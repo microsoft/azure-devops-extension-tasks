@@ -83,7 +83,7 @@ None - all inputs are optional with sensible defaults.
 
 ## Outputs
 
-- `vsix-path`: Path to the generated .vsix file
+- `vsix-file`: Path to the generated .vsix file
 
 ## Example: Complete Workflow
 
@@ -112,7 +112,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: extension
-          path: ${{ steps.package.outputs.vsix-path }}
+          path: ${{ steps.package.outputs.vsix-file }}
 ```
 
 ## GitHub Marketplace sample
@@ -125,7 +125,7 @@ jobs:
     extension-id: my-extension
     manifest-file: vss-extension.json
 
-- run: echo "VSIX: ${{ steps.package.outputs.vsix-path }}"
+- run: echo "VSIX: ${{ steps.package.outputs.vsix-file }}"
 ```
 
 ## GitHub Marketplace inputs
@@ -148,7 +148,7 @@ jobs:
 
 ## GitHub Marketplace outputs
 
-- `vsix-path`: Returns the full path to the generated VSIX file.
+- `vsix-file`: Returns the full path to the generated VSIX file.
 
 ## See Also
 

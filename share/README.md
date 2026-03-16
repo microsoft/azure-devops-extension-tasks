@@ -37,7 +37,7 @@ Share an Azure DevOps extension with specific organizations.
 - uses: jessehouwing/azdo-marketplace/share@v6
   with:
     token: ${{ secrets.MARKETPLACE_TOKEN }}
-    vsix-path: ${{ steps.package.outputs.vsix-path }}
+    vsix-file: ${{ steps.package.outputs.vsix-file }}
     accounts: |
       myorg1
       myorg2
@@ -70,7 +70,7 @@ Share an Azure DevOps extension with specific organizations.
 Identity (choose one):
 
 - `publisher-id` + `extension-id`
-- `vsix-path` (fallback source for identity metadata)
+- `vsix-file` (fallback source for identity metadata)
 
 OR
 
@@ -89,7 +89,7 @@ OR
 
 #### Identity Fallback
 
-- `vsix-path`: Path to VSIX file used to infer `publisher-id` and `extension-id` when omitted
+- `vsix-file`: Path to VSIX file used to infer `publisher-id` and `extension-id` when omitted
 
 ## Outputs
 
@@ -138,7 +138,7 @@ jobs:
 - `tfx-version`: Selects which `tfx-cli` version/source is used; `built-in` uses the bundled JS entrypoint without `.bin` shim fallback, `path` uses `tfx` from PATH.
 - `publisher-id`: Identifies the publisher that owns the extension to share.
 - `extension-id`: Identifies the extension to share.
-- `vsix-path`: Provides VSIX-based identity fallback when publisher/extension IDs are omitted.
+- `vsix-file`: Provides VSIX-based identity fallback when publisher/extension IDs are omitted.
 - `accounts`: Lists organizations/accounts that receive extension access.
 
 ## GitHub Marketplace outputs

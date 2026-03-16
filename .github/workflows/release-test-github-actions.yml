@@ -1,0 +1,169 @@
+name: Test GitHub Actions
+
+# Triggered by the release workflow to validate all composite actions
+# against a small sample extension using PAT and OIDC auth types.
+#
+# Required secrets:
+#   MARKETPLACE_PAT   - VS Marketplace PAT for PAT auth tests
+#   AZURE_CLIENT_ID   - Azure AD app client ID for OIDC auth tests
+#   AZURE_TENANT_ID   - Azure AD tenant ID for OIDC auth tests
+
+on:
+  workflow_call:
+    inputs:
+      ref:
+        description: 'Git ref to test'
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Git ref to test'
+        required: false
+        type: string
+
+permissions: {}
+
+env:
+  PUBLISHER_ID: jessehouwing-dev
+  EXTENSION_ID: release-test-ping
+  INITIAL_VERSION: '1.0.0'
+
+jobs:
+  test:
+    name: Test (${{ matrix.auth-type }}, ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        auth-type: [pat, oidc]
+        environment: [publisher-jessehouwing-dev]
+
+    environment: ${{ matrix.environment || '' }}
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f #v6.3.0
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      # --- OIDC login (only for oidc auth type) ---
+      - name: Azure login (OIDC)
+        if: matrix.auth-type == 'oidc'
+        uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5 #v2.3.0
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          allow-no-subscriptions: true
+
+      # --- Query version ---
+      - id: query
+        name: Query next patch version
+        continue-on-error: true
+        uses: ./query-version
+        with:
+          auth-type: ${{ matrix.auth-type }}
+          token: ${{ matrix.auth-type == 'pat' && secrets.MARKETPLACE_PAT || '' }}
+          version-source: |
+            manifest
+            marketplace
+            1.0.0
+          marketplace-version-action: Patch
+
+      # --- Package (manifest mode) ---
+      - id: package-manifest
+        name: Package from manifest
+        uses: ./package
+        with:
+          publisher-id: ${{ env.PUBLISHER_ID }}
+          extension-id: ${{ env.EXTENSION_ID }}
+          extension-version: ${{ steps.query.outputs.proposed-version }}
+          extension-visibility: private_preview
+          update-tasks-version: major
+          update-tasks-id: true
+          manifest-file: tests/sample-extension/vss-extension.json
+
+      # --- Publish (vsix mode) ---
+      - name: Publish from VSIX
+        uses: ./publish
+        id: publish
+        with:
+          auth-type: ${{ matrix.auth-type }}
+          token: ${{ matrix.auth-type == 'pat' && secrets.MARKETPLACE_PAT || '' }}
+          use: vsix
+          vsix-file: ${{ steps.package-manifest.outputs.vsix-file }}
+          no-wait-validation: true
+
+      # --- Wait for validation ---
+      - name: Wait for validation
+        uses: ./wait-for-validation
+        with:
+          auth-type: ${{ matrix.auth-type }}
+          token: ${{ matrix.auth-type == 'pat' && secrets.MARKETPLACE_PAT || '' }}
+          vsix-file: ${{ steps.publish.outputs.vsix-file }}
+      # --- Show extension ---
+      - name: Show extension metadata
+        uses: ./show
+        with:
+          auth-type: ${{ matrix.auth-type }}
+          token: ${{ matrix.auth-type == 'pat' && secrets.MARKETPLACE_PAT || '' }}
+          publisher-id: ${{ env.PUBLISHER_ID }}
+          extension-id: ${{ env.EXTENSION_ID }}
+
+      # --- Share ---
+      - name: Share extension
+        uses: ./share
+        with:
+          auth-type: ${{ matrix.auth-type }}
+          token: ${{ matrix.auth-type == 'pat' && secrets.MARKETPLACE_PAT || '' }}
+          vsix-file: ${{ steps.publish.outputs.vsix-file }}
+          accounts: |
+            https://dev.azure.com/jessehouwing-dev
+
+      # --- Install ---
+      - name: Install extension
+        uses: ./install
+        with:
+          auth-type: ${{ matrix.auth-type }}
+          token: ${{ matrix.auth-type == 'pat' && secrets.MARKETPLACE_PAT || '' }}
+          vsix-file: ${{ steps.publish.outputs.vsix-file }}
+          accounts: |
+            https://dev.azure.com/jessehouwing-dev
+
+      # --- Wait for installation ---
+      - name: Wait for installation
+        uses: ./wait-for-installation
+        with:
+          auth-type: ${{ matrix.auth-type }}
+          token: ${{ matrix.auth-type == 'pat' && secrets.MARKETPLACE_PAT || '' }}
+          vsix-file: ${{ steps.publish.outputs.vsix-file }}
+          accounts: |
+            https://dev.azure.com/jessehouwing-dev
+
+      # --- Unshare ---
+      - name: Unshare extension
+        uses: ./unshare
+        with:
+          auth-type: ${{ matrix.auth-type }}
+          token: ${{ matrix.auth-type == 'pat' && secrets.MARKETPLACE_PAT || '' }}
+          vsix-file: ${{ steps.publish.outputs.vsix-file }}
+          accounts: |
+            https://dev.azure.com/jessehouwing-dev
+
+      # --- Unpublish ---
+      - name: Unpublish extension
+        uses: ./unpublish
+        with:
+          auth-type: ${{ matrix.auth-type }}
+          token: ${{ matrix.auth-type == 'pat' && secrets.MARKETPLACE_PAT || '' }}
+          vsix-file: ${{ steps.publish.outputs.vsix-file }}

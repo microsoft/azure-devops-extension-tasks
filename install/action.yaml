@@ -90,7 +90,7 @@ inputs:
       - Must match publisher in manifest (or override it)
       - Required for command: show.
       - Optional for install/share/unpublish/unshare/wait-for-validation/query-version:
-        falls back to value from manifest-file or vsix-path/vsix-file when not specified.
+        falls back to value from manifest-file or vsix-file when not specified.
       - Alphanumeric with hyphens, dots, underscores only
 
       **Example:** `mycompany` or `my-publisher-id`
@@ -107,7 +107,7 @@ inputs:
       - Combined with Publisher ID forms full identifier: `publisherId.extensionId`
       - Required for command: show.
       - Optional for install/share/unpublish/unshare/wait-for-validation/query-version:
-        falls back to value from manifest-file or vsix-path/vsix-file when not specified.
+        falls back to value from manifest-file or vsix-file when not specified.
       - Alphanumeric with hyphens, dots, underscores only
 
       **Example:** `my-extension` or `azure-devops-tasks`
@@ -133,11 +133,11 @@ inputs:
       manifests/prod/vss-extension.json
       ```
     required: false
-  vsix-path:
+  vsix-file:
     description: |-
       **Path to .vsix file** for auto-extracting task versions.
 
-      Available for: install, share, unpublish, unshare, wait-for-installation, wait-for-validation.
+      Available for: install, publish, query-version, share, unpublish, unshare, wait-for-installation, wait-for-validation.
       Required for: none.
       Default: none
 
@@ -186,5 +186,5 @@ runs:
         publisher-id: ${{ inputs.publisher-id }}
         extension-id: ${{ inputs.extension-id }}
         manifest-file: ${{ inputs.manifest-file }}
-        vsix-path: ${{ inputs.vsix-path }}
+        vsix-file: ${{ inputs.vsix-file }}
         accounts: ${{ inputs.accounts }}

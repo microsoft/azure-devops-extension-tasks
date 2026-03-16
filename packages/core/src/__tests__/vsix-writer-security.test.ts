@@ -13,15 +13,15 @@ import { ManifestEditor } from '../manifest-editor.js';
 import { VsixReader } from '../vsix-reader.js';
 
 describe('VsixWriter Security Tests', () => {
-  let testVsixPath: string;
-  let outputVsixPath: string;
+  let testVsixFile: string;
+  let outputVsixFile: string;
   let testDir: string;
 
   beforeEach(async () => {
     testDir = join(tmpdir(), `vsix-security-test-${Date.now()}`);
     mkdirSync(testDir, { recursive: true });
-    testVsixPath = join(testDir, 'input.vsix');
-    outputVsixPath = join(testDir, 'output.vsix');
+    testVsixFile = join(testDir, 'input.vsix');
+    outputVsixFile = join(testDir, 'output.vsix');
 
     // Create a minimal test VSIX
     const zipFile = new yazl.ZipFile();
@@ -37,7 +37,7 @@ describe('VsixWriter Security Tests', () => {
 
     await new Promise<void>((resolve, reject) => {
       (zipFile.outputStream as any)
-        .pipe(createWriteStream(testVsixPath) as any)
+        .pipe(createWriteStream(testVsixFile) as any)
         .on('finish', resolve)
         .on('error', reject);
       zipFile.end();
@@ -45,7 +45,7 @@ describe('VsixWriter Security Tests', () => {
   });
 
   it('should reject absolute paths in setFile', async () => {
-    const reader = await VsixReader.open(testVsixPath);
+    const reader = await VsixReader.open(testVsixFile);
 
     await expect(async () => {
       const writer = await ManifestEditor.fromReader(reader)
@@ -53,14 +53,14 @@ describe('VsixWriter Security Tests', () => {
         .setFile('/etc/passwd', 'malicious')
         .toWriter();
 
-      await writer.writeToFile(outputVsixPath);
+      await writer.writeToFile(outputVsixFile);
     }).rejects.toThrow(/Security.*[Aa]bsolute/);
 
     await reader.close();
   });
 
   it('should reject paths with parent directory traversal in setFile', async () => {
-    const reader = await VsixReader.open(testVsixPath);
+    const reader = await VsixReader.open(testVsixFile);
 
     await expect(async () => {
       const writer = await ManifestEditor.fromReader(reader)
@@ -68,14 +68,14 @@ describe('VsixWriter Security Tests', () => {
         .setFile('../../../etc/passwd', 'malicious')
         .toWriter();
 
-      await writer.writeToFile(outputVsixPath);
+      await writer.writeToFile(outputVsixFile);
     }).rejects.toThrow(/Security.*[Pp]ath traversal/);
 
     await reader.close();
   });
 
   it('should reject Windows absolute paths in setFile', async () => {
-    const reader = await VsixReader.open(testVsixPath);
+    const reader = await VsixReader.open(testVsixFile);
 
     await expect(async () => {
       const writer = await ManifestEditor.fromReader(reader)
@@ -83,14 +83,14 @@ describe('VsixWriter Security Tests', () => {
         .setFile('C:\\Windows\\System32\\evil.dll', 'malicious')
         .toWriter();
 
-      await writer.writeToFile(outputVsixPath);
+      await writer.writeToFile(outputVsixFile);
     }).rejects.toThrow(/Security.*[Aa]bsolute/);
 
     await reader.close();
   });
 
   it('should reject paths with null bytes in setFile', async () => {
-    const reader = await VsixReader.open(testVsixPath);
+    const reader = await VsixReader.open(testVsixFile);
 
     await expect(async () => {
       const writer = await ManifestEditor.fromReader(reader)
@@ -98,14 +98,14 @@ describe('VsixWriter Security Tests', () => {
         .setFile('file\0name.txt', 'malicious')
         .toWriter();
 
-      await writer.writeToFile(outputVsixPath);
+      await writer.writeToFile(outputVsixFile);
     }).rejects.toThrow(/Security.*[Nn]ull byte/);
 
     await reader.close();
   });
 
   it('should reject sneaky parent traversal patterns in setFile', async () => {
-    const reader = await VsixReader.open(testVsixPath);
+    const reader = await VsixReader.open(testVsixFile);
 
     const sneakyPaths = [
       '..\\..\\etc\\passwd',
@@ -120,7 +120,7 @@ describe('VsixWriter Security Tests', () => {
           .setFile(path, 'malicious')
           .toWriter();
 
-        await writer.writeToFile(outputVsixPath);
+        await writer.writeToFile(outputVsixFile);
       }).rejects.toThrow(/Security/);
     }
 
@@ -128,7 +128,7 @@ describe('VsixWriter Security Tests', () => {
   });
 
   it('should accept safe relative paths in setFile', async () => {
-    const reader = await VsixReader.open(testVsixPath);
+    const reader = await VsixReader.open(testVsixFile);
 
     const safePaths = [
       'folder/file.txt',
@@ -146,14 +146,14 @@ describe('VsixWriter Security Tests', () => {
     const writer = await editor.toWriter();
 
     // Should not throw
-    await expect(writer.writeToFile(outputVsixPath)).resolves.not.toThrow();
+    await expect(writer.writeToFile(outputVsixFile)).resolves.not.toThrow();
 
     await writer.close();
     await reader.close();
   });
 
   it('should validate paths when writing', async () => {
-    const reader = await VsixReader.open(testVsixPath);
+    const reader = await VsixReader.open(testVsixFile);
 
     // Create editor with malicious path
     const editor = ManifestEditor.fromReader(reader);
@@ -170,7 +170,7 @@ describe('VsixWriter Security Tests', () => {
     const writer = await editor.toWriter();
 
     // Writer should still catch the invalid path
-    await expect(writer.writeToFile(outputVsixPath)).rejects.toThrow(/Security/);
+    await expect(writer.writeToFile(outputVsixFile)).rejects.toThrow(/Security/);
 
     await reader.close();
   });

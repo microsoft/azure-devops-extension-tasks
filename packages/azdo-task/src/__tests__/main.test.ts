@@ -141,10 +141,10 @@ describe('Azure DevOps main entrypoint', () => {
       token: 'token',
       serviceUrl: 'https://dev.azure.com/org',
     }));
-    packageExtensionMock.mockImplementation(async () => ({ vsixPath: '/tmp/ext.vsix' }));
+    packageExtensionMock.mockImplementation(async () => ({ vsixFile: '/tmp/ext.vsix' }));
     publishExtensionMock.mockImplementation(async () => ({
       published: true,
-      vsixPath: '/tmp/publish.vsix',
+      vsixFile: '/tmp/publish.vsix',
     }));
     installExtensionMock.mockImplementation(async () => ({ allSuccess: true }));
     waitForInstallationMock.mockImplementation(async () => ({ success: true }));
@@ -166,7 +166,7 @@ describe('Azure DevOps main entrypoint', () => {
 
     expect(validateNodeAvailableMock).toHaveBeenCalledWith(platform);
     expect(packageExtensionMock).toHaveBeenCalled();
-    expect(platform.setOutput).toHaveBeenCalledWith('vsixPath', '/tmp/ext.vsix');
+    expect(platform.setOutput).toHaveBeenCalledWith('vsixFile', '/tmp/ext.vsix');
     expect(getAuthMock).not.toHaveBeenCalled();
     expect(platform.setResult).toHaveBeenCalledWith('Succeeded', 'package completed successfully');
   });
@@ -723,7 +723,7 @@ describe('Azure DevOps main entrypoint', () => {
 
     await importMainAndFlush();
 
-    expect(platform.setOutput).toHaveBeenCalledWith('vsixPath', '');
+    expect(platform.setOutput).toHaveBeenCalledWith('vsixFile', '');
     expect(platform.setOutput).toHaveBeenCalledWith('extensionMetadata', '');
     expect(platform.setOutput).toHaveBeenCalledWith('proposedVersion', '');
     expect(platform.setOutput).toHaveBeenCalledWith('currentVersion', '');
@@ -758,14 +758,14 @@ describe('Azure DevOps main entrypoint', () => {
   });
 
   it('passes vsixFile to waitForInstallation even when use is manifest', async () => {
-    const vsixPath = '/tmp/my-extension.vsix';
+    const vsixFile = '/tmp/my-extension.vsix';
     const platform = createPlatformMock({
       inputs: {
         operation: 'waitForInstallation',
         connectionType: 'PAT',
         connectionNamePAT: 'svc-connection',
         use: 'manifest',
-        vsixFile: vsixPath,
+        vsixFile: vsixFile,
       },
       delimitedInputs: {
         'accounts|;': ['https://dev.azure.com/org1'],
@@ -777,7 +777,7 @@ describe('Azure DevOps main entrypoint', () => {
     await importMainAndFlush();
 
     expect(waitForInstallationMock).toHaveBeenCalledWith(
-      expect.objectContaining({ vsixPath }),
+      expect.objectContaining({ vsixFile }),
       expect.anything(),
       platform
     );

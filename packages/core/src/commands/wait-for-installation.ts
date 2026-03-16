@@ -20,7 +20,7 @@ export interface WaitForInstallationOptions {
   accounts: string[]; // Target organization names or URLs
   expectedTasks?: ExpectedTask[]; // Tasks with expected versions
   manifestFiles?: string[]; // Paths to extension manifests (vss-extension.json) to read task versions
-  vsixPath?: string; // Path to VSIX file to read task versions from
+  vsixFile?: string; // Path to VSIX file to read task versions from
   timeoutMinutes?: number; // Default: 10
   pollingIntervalSeconds?: number; // Default: 30
 }
@@ -108,11 +108,11 @@ async function resolveExpectedTasks(
     }
   }
 
-  // If vsixPath is provided, read task versions from VSIX
-  if (options.vsixPath) {
+  // If vsixFile is provided, read task versions from VSIX
+  if (options.vsixFile) {
     try {
-      platform.debug(`Reading task versions from VSIX: ${options.vsixPath}`);
-      const reader = await VsixReader.open(options.vsixPath);
+      platform.debug(`Reading task versions from VSIX: ${options.vsixFile}`);
+      const reader = await VsixReader.open(options.vsixFile);
 
       try {
         const tasksInfo = await reader.getTasksInfo();
@@ -128,7 +128,7 @@ async function resolveExpectedTasks(
       }
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      platform.warning(`Failed to read VSIX ${options.vsixPath}: ${errorMessage}`);
+      platform.warning(`Failed to read VSIX ${options.vsixFile}: ${errorMessage}`);
     }
   }
 

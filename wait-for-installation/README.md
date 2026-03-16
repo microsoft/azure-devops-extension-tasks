@@ -31,7 +31,7 @@ Verify that an Azure DevOps extension has been installed correctly and that all 
   with:
     token: ${{ secrets.MARKETPLACE_TOKEN }}
     accounts: 'myorg'
-    vsix-path: './dist/extension.vsix'
+    vsix-file: './dist/extension.vsix'
 ```
 
 ### Verify with Expected Tasks JSON
@@ -106,14 +106,14 @@ Verify that an Azure DevOps extension has been installed correctly and that all 
 
 Identity inputs:
 
-- `publisher-id`: Publisher ID (optional when `vsix-path` is provided)
-- `extension-id`: Extension ID (optional when `vsix-path` is provided)
+- `publisher-id`: Publisher ID (optional when `vsix-file` is provided)
+- `extension-id`: Extension ID (optional when `vsix-file` is provided)
 
 **Plus one of:**
 
 - `expected-tasks`: JSON array of expected tasks
 - `manifest-file`: Extension manifest path(s), newline-separated
-- `vsix-path`: Path to .vsix file
+- `vsix-file`: Path to .vsix file
 
 OR
 
@@ -167,7 +167,7 @@ jobs:
         with:
           token: ${{ secrets.MARKETPLACE_TOKEN }}
           use: 'vsix'
-          vsix-file: ${{ steps.package.outputs.vsix-path }}
+          vsix-file: ${{ steps.package.outputs.vsix-file }}
 
       - name: Install to Production Org
         uses: jessehouwing/azdo-marketplace/install@v6
@@ -184,7 +184,7 @@ jobs:
           publisher-id: 'my-publisher'
           extension-id: 'my-extension'
           accounts: 'production-org'
-          vsix-path: ${{ steps.package.outputs.vsix-path }}
+          vsix-file: ${{ steps.package.outputs.vsix-file }}
           timeout-minutes: '15'
 ```
 
@@ -236,7 +236,7 @@ Each task can have multiple versions. The verification succeeds if ALL specified
 - `accounts`: Lists organizations/accounts where installation is verified.
 - `expected-tasks`: Supplies explicit JSON task/version expectations.
 - `manifest-file`: Supplies manifest file(s) for task expectation discovery.
-- `vsix-path`: Supplies a VSIX path for task expectation and identity discovery.
+- `vsix-file`: Supplies a VSIX path for task expectation and identity discovery.
 - `timeout-minutes`: Sets total verification timeout window.
 - `polling-interval-seconds`: Sets interval between installation checks.
 

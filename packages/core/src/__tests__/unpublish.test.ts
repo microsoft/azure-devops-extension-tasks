@@ -1,12 +1,12 @@
-import { describe, it, expect, beforeEach, jest } from '@jest/globals';
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { mkdtemp, rm, writeFile } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
+import type { AuthCredentials } from '../auth.js';
 import { unpublishExtension } from '../commands/unpublish.js';
 import { TfxManager } from '../tfx-manager.js';
-import { MockPlatformAdapter } from './helpers/mock-platform.js';
 import { createIdentityVsix } from './helpers/create-test-vsix.js';
-import type { AuthCredentials } from '../auth.js';
+import { MockPlatformAdapter } from './helpers/mock-platform.js';
 
 describe('unpublishExtension', () => {
   let platform: MockPlatformAdapter;
@@ -94,7 +94,7 @@ describe('unpublishExtension', () => {
     expect(platform.isSecret('pass')).toBe(true);
   });
 
-  it('resolves identity from vsixPath', async () => {
+  it('resolves identity from vsixFile', async () => {
     const vsix = await createIdentityVsix({
       publisher: 'publisher-from-vsix',
       extensionId: 'extension-from-vsix',
@@ -110,7 +110,7 @@ describe('unpublishExtension', () => {
 
       await unpublishExtension(
         {
-          vsixPath: vsix.vsixPath,
+          vsixFile: vsix.vsixFile,
         },
         patAuth,
         tfxManager,

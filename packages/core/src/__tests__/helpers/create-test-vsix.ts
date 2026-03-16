@@ -8,14 +8,14 @@ export async function createIdentityVsix(options?: {
   publisher?: string;
   extensionId?: string;
   version?: string;
-}): Promise<{ vsixPath: string; cleanup: () => Promise<void> }> {
+}): Promise<{ vsixFile: string; cleanup: () => Promise<void> }> {
   const testDir = join(
     tmpdir(),
     `identity-vsix-${Date.now()}-${Math.random().toString(16).slice(2)}`
   );
   await mkdir(testDir, { recursive: true });
 
-  const vsixPath = join(testDir, 'test.vsix');
+  const vsixFile = join(testDir, 'test.vsix');
   const zipFile = new yazl.ZipFile();
 
   const manifest = {
@@ -30,14 +30,14 @@ export async function createIdentityVsix(options?: {
 
   await new Promise<void>((resolve, reject) => {
     (zipFile.outputStream as any)
-      .pipe(createWriteStream(vsixPath) as any)
+      .pipe(createWriteStream(vsixFile) as any)
       .on('finish', resolve)
       .on('error', reject);
     zipFile.end();
   });
 
   return {
-    vsixPath,
+    vsixFile,
     cleanup: async () => {
       await rm(testDir, { recursive: true, force: true });
     },

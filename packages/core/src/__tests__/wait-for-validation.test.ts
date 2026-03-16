@@ -300,7 +300,7 @@ describe('waitForValidation', () => {
     expect(callArgs).toContain('ext');
   });
 
-  it('should resolve publisher and extension from vsixPath', async () => {
+  it('should resolve publisher and extension from vsixFile', async () => {
     const vsix = await createIdentityVsix({
       publisher: 'publisher-from-vsix',
       extensionId: 'extension-from-vsix',
@@ -317,7 +317,7 @@ describe('waitForValidation', () => {
 
       await waitForValidation(
         {
-          vsixPath: vsix.vsixPath,
+          vsixFile: vsix.vsixFile,
         },
         auth,
         tfxManager,

@@ -40,7 +40,7 @@ function normalizeOperation(operation: string): string {
 }
 
 function initializeDeclaredOutputs(platform: AzdoAdapter): void {
-  platform.setOutput('vsixPath', '');
+  platform.setOutput('vsixFile', '');
   platform.setOutput('extensionMetadata', '');
   platform.setOutput('proposedVersion', '');
   platform.setOutput('currentVersion', '');
@@ -277,8 +277,8 @@ async function runPackage(platform: AzdoAdapter, tfxManager: TfxManager): Promis
 
   const result = await packageExtension(options, tfxManager, platform);
 
-  if (result.vsixPath) {
-    platform.setOutput('vsixPath', result.vsixPath);
+  if (result.vsixFile) {
+    platform.setOutput('vsixFile', result.vsixFile);
   }
 }
 
@@ -336,7 +336,7 @@ async function runUnpublish(
     {
       publisherId: platform.getInput('publisherId'),
       extensionId: platform.getInput('extensionId'),
-      vsixPath: platform.getPathInput('vsixFile') || platform.getInput('vsixPath'),
+      vsixFile: platform.getPathInput('vsixFile') || platform.getInput('vsixFile'),
       manifestGlobs: platform.getDelimitedInput('manifestFile', '\n'),
     },
     auth,
@@ -354,7 +354,7 @@ async function runShare(
     {
       publisherId: platform.getInput('publisherId'),
       extensionId: platform.getInput('extensionId'),
-      vsixPath: platform.getPathInput('vsixFile') || platform.getInput('vsixPath'),
+      vsixFile: platform.getPathInput('vsixFile') || platform.getInput('vsixFile'),
       manifestGlobs: platform.getDelimitedInput('manifestFile', '\n'),
       shareWith: platform.getDelimitedInput('accounts', '\n', true),
     },
@@ -373,7 +373,7 @@ async function runUnshare(
     {
       publisherId: platform.getInput('publisherId'),
       extensionId: platform.getInput('extensionId'),
-      vsixPath: platform.getPathInput('vsixFile') || platform.getInput('vsixPath'),
+      vsixFile: platform.getPathInput('vsixFile') || platform.getInput('vsixFile'),
       manifestGlobs: platform.getDelimitedInput('manifestFile', '\n'),
       unshareWith: platform.getDelimitedInput('accounts', '\n', true),
     },
@@ -392,7 +392,7 @@ async function runInstall(
     {
       publisherId: platform.getInput('publisherId'),
       extensionId: platform.getInput('extensionId'),
-      vsixPath: platform.getPathInput('vsixFile') || platform.getInput('vsixPath'),
+      vsixFile: platform.getPathInput('vsixFile') || platform.getInput('vsixFile'),
       manifestGlobs: platform.getDelimitedInput('manifestFile', '\n'),
       accounts: platform.getDelimitedInput('accounts', '\n', true),
     },
@@ -485,7 +485,7 @@ async function runWaitForValidation(
     {
       publisherId: platform.getInput('publisherId'),
       extensionId: platform.getInput('extensionId'),
-      vsixPath: platform.getPathInput('vsixFile') || platform.getInput('vsixPath'),
+      vsixFile: platform.getPathInput('vsixFile') || platform.getInput('vsixFile'),
       manifestGlobs: platform.getDelimitedInput('manifestFile', '\n'),
       extensionVersion: platform.getInput('extensionVersion'),
       timeoutMinutes: timeoutMinutesInput ? parseInt(timeoutMinutesInput, 10) : undefined,
@@ -505,7 +505,7 @@ async function runWaitForValidation(
 
 async function runWaitForInstallation(platform: AzdoAdapter, auth: AuthCredentials): Promise<void> {
   const use = platform.getInput('use') as 'manifest' | 'vsix' | undefined;
-  const vsixPath = platform.getPathInput('vsixFile') || platform.getInput('vsixPath');
+  const vsixFile = platform.getPathInput('vsixFile') || platform.getInput('vsixFile');
   const expectedTasksInput = platform.getInput('expectedTasks');
   let expectedTasks;
   if (expectedTasksInput) {
@@ -529,7 +529,7 @@ async function runWaitForInstallation(platform: AzdoAdapter, auth: AuthCredentia
       expectedTasks,
       manifestFiles:
         use === 'manifest' ? platform.getDelimitedInput('manifestFile', '\n') : undefined,
-      vsixPath,
+      vsixFile,
       timeoutMinutes: parseInt(platform.getInput('timeoutMinutes') || '10'),
       pollingIntervalSeconds: parseInt(platform.getInput('pollingIntervalSeconds') || '30'),
     },

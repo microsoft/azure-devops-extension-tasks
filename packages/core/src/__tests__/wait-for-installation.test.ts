@@ -192,7 +192,7 @@ describe('waitForInstallation', () => {
     expect(readManifestMock).toHaveBeenCalledTimes(4);
   });
 
-  it('resolves expected tasks from vsixPath and closes reader', async () => {
+  it('resolves expected tasks from vsixFile and closes reader', async () => {
     vsixReaderGetTasksInfoMock.mockResolvedValue([{ name: 'TaskFromVsix', version: '2.1.0' }]);
     getTaskDefinitionsMock.mockResolvedValue([
       {
@@ -207,7 +207,7 @@ describe('waitForInstallation', () => {
         publisherId: 'pub',
         extensionId: 'ext',
         accounts: ['https://dev.azure.com/org1'],
-        vsixPath: 'extension.vsix',
+        vsixFile: 'extension.vsix',
       },
       auth,
       platform
@@ -232,7 +232,7 @@ describe('waitForInstallation', () => {
       {
         extensionId: 'explicit-extension',
         accounts: ['https://dev.azure.com/org1'],
-        vsixPath: 'extension.vsix',
+        vsixFile: 'extension.vsix',
       },
       auth,
       platform
@@ -258,7 +258,7 @@ describe('waitForInstallation', () => {
       {
         publisherId: 'explicit-publisher',
         accounts: ['https://dev.azure.com/org1'],
-        vsixPath: 'extension.vsix',
+        vsixFile: 'extension.vsix',
       },
       auth,
       platform
@@ -270,7 +270,7 @@ describe('waitForInstallation', () => {
     ).toBe(true);
   });
 
-  it('fails when identity is missing and no vsixPath is provided', async () => {
+  it('fails when identity is missing and no vsixFile is provided', async () => {
     await expect(
       waitForInstallation(
         {

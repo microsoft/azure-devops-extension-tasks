@@ -203,7 +203,7 @@
       "type": "filePath",
       "label": "Output Path",
       "required": false,
-      "helpMarkDown": "**Output directory** for the generated/final .vsix file.\n\n- Available for `package` and `publish`\n- Defaults to current directory if not specified\n- Directory will be created if it doesn't exist\n- The actual filename is based on publisher.extension-id-version.vsix\n\n**Example**: `$(Build.ArtifactStagingDirectory)`\n\n**Output**: Full path is stored in `vsixPath` variable",
+      "helpMarkDown": "**Output directory** for the generated/final .vsix file.\n\n- Available for `package` and `publish`\n- Defaults to current directory if not specified\n- Directory will be created if it doesn't exist\n- The actual filename is based on publisher.extension-id-version.vsix\n\n**Example**: `$(Build.ArtifactStagingDirectory)`\n\n**Output**: Full path is stored in `vsixFile` variable",
       "visibleRule": "operation = package || operation = publish"
     },
     {
@@ -333,7 +333,7 @@
   ],
   "outputVariables": [
     {
-      "name": "vsixPath",
+      "name": "vsixFile",
       "description": "Path to the generated .vsix file (package operation only)"
     },
     {

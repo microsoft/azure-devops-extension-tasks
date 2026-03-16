@@ -43,7 +43,7 @@ Install an Azure DevOps extension to specific accounts/organizations.
 - uses: jessehouwing/azdo-marketplace/install@v6
   with:
     token: ${{ secrets.MARKETPLACE_TOKEN }}
-    vsix-path: ${{ steps.package.outputs.vsix-path }}
+    vsix-file: ${{ steps.package.outputs.vsix-file }}
     accounts: |
       myorg1
       myorg2
@@ -76,7 +76,7 @@ Install an Azure DevOps extension to specific accounts/organizations.
 Identity (choose one):
 
 - `publisher-id` + `extension-id`
-- `vsix-path` (fallback source for identity metadata)
+- `vsix-file` (fallback source for identity metadata)
 
 OR
 
@@ -95,7 +95,7 @@ OR
 
 #### Identity Fallback
 
-- `vsix-path`: Path to VSIX file used to infer `publisher-id` and `extension-id` when omitted
+- `vsix-file`: Path to VSIX file used to infer `publisher-id` and `extension-id` when omitted
 
 ## Outputs
 
@@ -151,7 +151,7 @@ jobs:
 - `tfx-version`: Selects which `tfx-cli` version/source is used; `built-in` uses the bundled JS entrypoint without `.bin` shim fallback, `path` uses `tfx` from PATH.
 - `publisher-id`: Identifies the publisher that owns the extension to install.
 - `extension-id`: Identifies the extension to install.
-- `vsix-path`: Provides VSIX-based identity fallback when publisher/extension IDs are omitted.
+- `vsix-file`: Provides VSIX-based identity fallback when publisher/extension IDs are omitted.
 - `accounts`: Lists target organizations/accounts where the extension is installed.
 
 ## GitHub Marketplace outputs

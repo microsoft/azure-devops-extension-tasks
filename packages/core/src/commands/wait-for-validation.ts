@@ -22,7 +22,7 @@ export interface WaitForValidationOptions {
   /** Extension ID */
   extensionId?: string;
   /** Path to VSIX file to infer publisher/extension identity */
-  vsixPath?: string;
+  vsixFile?: string;
   /** Optional extension version to validate */
   extensionVersion?: string;
   /** Root folder for manifest (if validating from manifest) */

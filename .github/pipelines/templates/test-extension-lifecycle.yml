@@ -1,0 +1,184 @@
+# Template: test-extension-lifecycle.yml
+#
+# Runs the full extension lifecycle (query → package → publish → validate →
+# share → install → wait → unshare → unpublish) against a small sample
+# extension using the specified auth type.
+
+parameters:
+  - name: connectionType
+    type: string
+  - name: connectionName
+    type: string
+  - name: publisherId
+    type: string
+  - name: extensionId
+    type: string
+  - name: initialVersion
+    type: string
+  - name: organizationUrl
+    type: string
+
+steps:
+  - checkout: self
+
+  - task: NodeTool@0
+    displayName: Setup Node.js
+    inputs:
+      versionSpec: 20.x
+
+  - script: npm ci
+    displayName: Install dependencies
+
+  - script: npm run build
+    displayName: Build
+
+  - script: npm run bundle
+    displayName: Bundle
+
+  - task: azdo-marketplace@6
+    name: queryVersion
+    displayName: Query next patch version
+    continueOnError: true
+    inputs:
+      operation: queryVersion
+      connectionType: ${{ parameters.connectionType }}
+      ${{ if eq(parameters.connectionType, 'PAT') }}:
+        connectionNamePAT: ${{ parameters.connectionName }}
+      ${{ if eq(parameters.connectionType, 'WorkloadIdentity') }}:
+        connectionNameWorkloadIdentity: ${{ parameters.connectionName }}
+      ${{ if eq(parameters.connectionType, 'AzureRM') }}:
+        connectionNameAzureRm: ${{ parameters.connectionName }}
+      publisherId: ${{ parameters.publisherId }}
+      extensionId: ${{ parameters.extensionId }}
+      versionAction: Patch
+
+  - pwsh: |
+      $version = '${{ parameters.initialVersion }}'
+      if ('$(queryVersion.extension.proposedVersion)' -and '$(queryVersion.extension.proposedVersion)' -ne '') {
+        $version = '$(queryVersion.extension.proposedVersion)'
+      }
+      Write-Host "Using extension version: $version"
+      Write-Host "##vso[task.setvariable variable=resolvedVersion]$version"
+    displayName: Resolve version
+
+  # --- Package from manifest ---
+  - task: azdo-marketplace@6
+    name: packageManifest
+    displayName: Package from manifest
+    inputs:
+      operation: package
+      publisherId: ${{ parameters.publisherId }}
+      extensionId: ${{ parameters.extensionId }}
+      extensionVersion: $(resolvedVersion)
+      extensionVisibility: private_preview
+      updateTasksVersion: patch
+      updateTasksId: true
+      outputPath: $(Build.ArtifactStagingDirectory)
+      manifestFile: tests/sample-extension/vss-extension.json
+
+  # --- Publish from VSIX ---
+  - task: azdo-marketplace@6
+    displayName: Publish from VSIX
+    inputs:
+      operation: publish
+      connectionType: ${{ parameters.connectionType }}
+      ${{ if eq(parameters.connectionType, 'PAT') }}:
+        connectionNamePAT: ${{ parameters.connectionName }}
+      ${{ if eq(parameters.connectionType, 'WorkloadIdentity') }}:
+        connectionNameWorkloadIdentity: ${{ parameters.connectionName }}
+      ${{ if eq(parameters.connectionType, 'AzureRM') }}:
+        connectionNameAzureRm: ${{ parameters.connectionName }}
+      use: vsix
+      vsixFile: $(packageManifest.extension.outputPath)
+      noWaitValidation: true
+
+  # --- Wait for validation ---
+  - task: azdo-marketplace@6
+    displayName: Wait for validation
+    inputs:
+      operation: waitForValidation
+      connectionType: ${{ parameters.connectionType }}
+      ${{ if eq(parameters.connectionType, 'PAT') }}:
+        connectionNamePAT: ${{ parameters.connectionName }}
+      ${{ if eq(parameters.connectionType, 'WorkloadIdentity') }}:
+        connectionNameWorkloadIdentity: ${{ parameters.connectionName }}
+      ${{ if eq(parameters.connectionType, 'AzureRM') }}:
+        connectionNameAzureRm: ${{ parameters.connectionName }}
+      vsixFile: $(packageManifest.extension.outputPath)
+
+  # --- Share ---
+  - task: azdo-marketplace@6
+    displayName: Share extension
+    inputs:
+      operation: share
+      connectionType: ${{ parameters.connectionType }}
+      ${{ if eq(parameters.connectionType, 'PAT') }}:
+        connectionNamePAT: ${{ parameters.connectionName }}
+      ${{ if eq(parameters.connectionType, 'WorkloadIdentity') }}:
+        connectionNameWorkloadIdentity: ${{ parameters.connectionName }}
+      ${{ if eq(parameters.connectionType, 'AzureRM') }}:
+        connectionNameAzureRm: ${{ parameters.connectionName }}
+      vsixFile: $(packageManifest.extension.outputPath)
+      accounts: ${{ parameters.organizationUrl }}
+
+  # --- Install ---
+  - task: azdo-marketplace@6
+    displayName: Install extension
+    inputs:
+      operation: install
+      connectionType: ${{ parameters.connectionType }}
+      ${{ if eq(parameters.connectionType, 'PAT') }}:
+        connectionNamePAT: ${{ parameters.connectionName }}
+      ${{ if eq(parameters.connectionType, 'WorkloadIdentity') }}:
+        connectionNameWorkloadIdentity: ${{ parameters.connectionName }}
+      ${{ if eq(parameters.connectionType, 'AzureRM') }}:
+        connectionNameAzureRm: ${{ parameters.connectionName }}
+      vsixFile: $(packageManifest.extension.outputPath)
+      accounts: ${{ parameters.organizationUrl }}
+
+  # --- Wait for installation ---
+  - task: azdo-marketplace@6
+    displayName: Wait for installation
+    inputs:
+      operation: waitForInstallation
+      connectionType: ${{ parameters.connectionType }}
+      ${{ if eq(parameters.connectionType, 'PAT') }}:
+        connectionNamePAT: ${{ parameters.connectionName }}
+      ${{ if eq(parameters.connectionType, 'WorkloadIdentity') }}:
+        connectionNameWorkloadIdentity: ${{ parameters.connectionName }}
+      ${{ if eq(parameters.connectionType, 'AzureRM') }}:
+        connectionNameAzureRm: ${{ parameters.connectionName }}
+      publisherId: ${{ parameters.publisherId }}
+      extensionId: ${{ parameters.extensionId }}
+      vsixFile: $(packageManifest.extension.outputPath)
+      accounts: ${{ parameters.organizationUrl }}
+
+  # --- Unshare ---
+  - task: azdo-marketplace@6
+    displayName: Unshare extension
+    inputs:
+      operation: unshare
+      connectionType: ${{ parameters.connectionType }}
+      ${{ if eq(parameters.connectionType, 'PAT') }}:
+        connectionNamePAT: ${{ parameters.connectionName }}
+      ${{ if eq(parameters.connectionType, 'WorkloadIdentity') }}:
+        connectionNameWorkloadIdentity: ${{ parameters.connectionName }}
+      ${{ if eq(parameters.connectionType, 'AzureRM') }}:
+        connectionNameAzureRm: ${{ parameters.connectionName }}
+      vsixFile: $(packageManifest.extension.outputPath)
+      accounts: ${{ parameters.organizationUrl }}
+
+  # --- Unpublish ---
+  - task: azdo-marketplace@6
+    displayName: Unpublish extension
+    inputs:
+      operation: unpublish
+      connectionType: ${{ parameters.connectionType }}
+      ${{ if eq(parameters.connectionType, 'PAT') }}:
+        connectionNamePAT: ${{ parameters.connectionName }}
+      ${{ if eq(parameters.connectionType, 'WorkloadIdentity') }}:
+        connectionNameWorkloadIdentity: ${{ parameters.connectionName }}
+      ${{ if eq(parameters.connectionType, 'AzureRM') }}:
+        connectionNameAzureRm: ${{ parameters.connectionName }}
+      publisherId: ${{ parameters.publisherId }}
+      extensionId: ${{ parameters.extensionId }}

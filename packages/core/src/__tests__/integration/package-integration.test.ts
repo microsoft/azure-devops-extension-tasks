@@ -118,7 +118,7 @@ describe('Package Command Integration Test', () => {
     }
 
     // Assert
-    expect(result.vsixPath).toBe(outputPath);
+    expect(result.vsixFile).toBe(outputPath);
 
     // Verify VSIX file exists
     const stats = await fs.stat(outputPath);
@@ -148,7 +148,7 @@ describe('Package Command Integration Test', () => {
     expect(errors).toHaveLength(0);
   }, 60000); // 60 second timeout for package operation
 
-  it('should set vsixPath output variable', async () => {
+  it('should set vsixFile output variable', async () => {
     if (!canRunTfx) return;
     // Arrange
     const outputPath = path.join(outputDir, 'custom-var-test.vsix');
@@ -175,7 +175,7 @@ describe('Package Command Integration Test', () => {
     }
 
     // Assert - Check output was set via setVariable
-    const outputValue = platform.getVariable('vsixPath');
+    const outputValue = platform.getVariable('vsixFile');
     expect(outputValue).toBe(outputPath);
   }, 60000);
 

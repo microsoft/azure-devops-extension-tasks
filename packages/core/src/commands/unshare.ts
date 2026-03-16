@@ -2,12 +2,12 @@
  * Unshare command - Unshares an extension from organizations
  */
 
-import type { IPlatformAdapter } from '../platform.js';
-import type { TfxManager } from '../tfx-manager.js';
-import type { AuthCredentials } from '../auth.js';
 import { ArgBuilder } from '../arg-builder.js';
+import type { AuthCredentials } from '../auth.js';
 import { resolveExtensionIdentity } from '../extension-identity.js';
 import { normalizeOrganizationIdentifiers } from '../organization-utils.js';
+import type { IPlatformAdapter } from '../platform.js';
+import type { TfxManager } from '../tfx-manager.js';
 
 /**
  * Options for unshare command
@@ -18,7 +18,7 @@ export interface UnshareOptions {
   /** Extension ID */
   extensionId?: string;
   /** Path to VSIX file to infer publisher/extension identity */
-  vsixPath?: string;
+  vsixFile?: string;
   /** Manifest globs to infer publisher/extension identity */
   manifestGlobs?: string[];
   /** Root folder for manifest discovery */

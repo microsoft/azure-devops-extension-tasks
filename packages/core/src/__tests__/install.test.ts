@@ -1,12 +1,12 @@
-import { describe, it, expect, beforeEach, jest } from '@jest/globals';
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { mkdtemp, rm, writeFile } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
+import type { AuthCredentials } from '../auth.js';
 import { installExtension } from '../commands/install.js';
 import { TfxManager } from '../tfx-manager.js';
-import { MockPlatformAdapter } from './helpers/mock-platform.js';
 import { createIdentityVsix } from './helpers/create-test-vsix.js';
-import type { AuthCredentials } from '../auth.js';
+import { MockPlatformAdapter } from './helpers/mock-platform.js';
 
 describe('installExtension', () => {
   let platform: MockPlatformAdapter;
@@ -79,7 +79,7 @@ describe('installExtension', () => {
     expect(mockExecute).toHaveBeenCalledTimes(3);
   });
 
-  it('should resolve publisher and extension from vsixPath', async () => {
+  it('should resolve publisher and extension from vsixFile', async () => {
     const vsix = await createIdentityVsix({
       publisher: 'publisher-from-vsix',
       extensionId: 'extension-from-vsix',
@@ -97,7 +97,7 @@ describe('installExtension', () => {
       await installExtension(
         {
           accounts: ['https://dev.azure.com/org1'],
-          vsixPath: vsix.vsixPath,
+          vsixFile: vsix.vsixFile,
         },
         auth,
         tfxManager,

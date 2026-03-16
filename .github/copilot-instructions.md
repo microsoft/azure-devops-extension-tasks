@@ -229,7 +229,7 @@ await editor.applyOptions(options);
 
 // 3. Write changes
 const writer = await editor.toWriter();
-await writer.writeToFilesystem(); // or writeToFile(vsixPath)
+await writer.writeToFilesystem(); // or writeToFile(vsixFile)
 
 // 4. Get overrides for tfx (filesystem only)
 const overridesPath = writer.getOverridesPath();

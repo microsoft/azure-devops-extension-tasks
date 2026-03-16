@@ -112,7 +112,7 @@ inputs:
       - Must match publisher in manifest (or override it)
       - Required for command: show.
       - Optional for install/share/unpublish/unshare/wait-for-validation/query-version:
-        falls back to value from manifest-file or vsix-path/vsix-file when not specified.
+        falls back to value from manifest-file or vsix-file when not specified.
       - Alphanumeric with hyphens, dots, underscores only
 
       **Example:** `mycompany` or `my-publisher-id`
@@ -129,7 +129,7 @@ inputs:
       - Combined with Publisher ID forms full identifier: `publisherId.extensionId`
       - Required for command: show.
       - Optional for install/share/unpublish/unshare/wait-for-validation/query-version:
-        falls back to value from manifest-file or vsix-path/vsix-file when not specified.
+        falls back to value from manifest-file or vsix-file when not specified.
       - Alphanumeric with hyphens, dots, underscores only
 
       **Example:** `my-extension` or `azure-devops-tasks`
@@ -194,18 +194,17 @@ inputs:
     required: false
   vsix-file:
     description: |-
-      **Path to pre-built .vsix file** (for publish and query-version operations).
+      **Path to .vsix file** for auto-extracting task versions.
 
-      Available for: publish, query-version.
+      Available for: install, publish, query-version, share, unpublish, unshare, wait-for-installation, wait-for-validation.
       Required for: none.
       Default: none
 
-      - Use when `use` is 'vsix'
-      - File must be a valid extension package
-      - Supports GitHub Actions expressions
-      - For query-version: reads publisher-id and extension-id from the VSIX when not specified
+      - Reads extension identity (publisher-id and extension-id) when not specified
+      - For wait-for-installation: extracts task.json files from VSIX package
+      - Most convenient when verifying immediately after packaging
 
-      **Example:** `$``{{ github.workspace }}/dist/my-extension.vsix`
+      **Note:** Use this OR expected-tasks/manifest-file, not multiple
     required: false
   extension-version:
     description: |-
@@ -289,7 +288,7 @@ inputs:
       - Directory will be created if it doesn't exist
       - Actual filename is based on publisher.extensionId-version.vsix
 
-      **Output:** Full path stored in `vsix-path` output
+      **Output:** Full path stored in `vsix-file` output
     required: false
   no-wait-validation:
     description: |-
@@ -339,7 +338,7 @@ inputs:
     required: false
     default: 'false'
 outputs:
-  vsix-path:
+  vsix-file:
     description: |
       **Path to generated .vsix file** (package operation only).
 
@@ -350,9 +349,9 @@ outputs:
         with:
           operation: package
 
-      - run: echo "VSIX at $``{{ steps.package.outputs.vsix-path }}"
+      - run: echo "VSIX at $``{{ steps.package.outputs.vsix-file }}"
       ```
-    value: ${{ steps.publish.outputs.vsix-path }}
+    value: ${{ steps.publish.outputs.vsix-file }}
 runs:
   using: composite
   steps:

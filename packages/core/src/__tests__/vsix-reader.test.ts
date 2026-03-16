@@ -5,14 +5,14 @@ import { VsixReader } from '../vsix-reader.js';
 
 describe('VsixReader', () => {
   const testDir = '/tmp/vsix-reader-tests';
-  const testVsixPath = join(testDir, 'test-extension.vsix');
+  const testVsixFile = join(testDir, 'test-extension.vsix');
 
   beforeAll(async () => {
     // Create test directory
     mkdirSync(testDir, { recursive: true });
 
     // Create a test VSIX file
-    await createTestVsix(testVsixPath);
+    await createTestVsix(testVsixFile);
   });
 
   afterAll(() => {
@@ -22,9 +22,9 @@ describe('VsixReader', () => {
 
   describe('open and close', () => {
     it('should open a VSIX file', async () => {
-      const reader = await VsixReader.open(testVsixPath);
+      const reader = await VsixReader.open(testVsixFile);
       expect(reader).toBeInstanceOf(VsixReader);
-      expect(reader.getPath()).toBe(testVsixPath);
+      expect(reader.getPath()).toBe(testVsixFile);
       await reader.close();
     });
 
@@ -33,7 +33,7 @@ describe('VsixReader', () => {
     });
 
     it('should allow closing multiple times', async () => {
-      const reader = await VsixReader.open(testVsixPath);
+      const reader = await VsixReader.open(testVsixFile);
       await reader.close();
       await reader.close(); // Should not throw
     });
@@ -41,7 +41,7 @@ describe('VsixReader', () => {
 
   describe('listFiles', () => {
     it('should list all files in the VSIX', async () => {
-      const reader = await VsixReader.open(testVsixPath);
+      const reader = await VsixReader.open(testVsixFile);
       const files = await reader.listFiles();
 
       expect(files.length).toBeGreaterThan(0);
@@ -57,7 +57,7 @@ describe('VsixReader', () => {
     });
 
     it('should not include directories', async () => {
-      const reader = await VsixReader.open(testVsixPath);
+      const reader = await VsixReader.open(testVsixFile);
       const files = await reader.listFiles();
 
       expect(files.every((f) => !f.path.endsWith('/'))).toBe(true);
@@ -68,7 +68,7 @@ describe('VsixReader', () => {
 
   describe('fileExists', () => {
     it('should return true for existing files', async () => {
-      const reader = await VsixReader.open(testVsixPath);
+      const reader = await VsixReader.open(testVsixFile);
 
       expect(await reader.fileExists('extension.vsomanifest')).toBe(true);
       expect(await reader.fileExists('PublishTask/task.json')).toBe(true);
@@ -77,7 +77,7 @@ describe('VsixReader', () => {
     });
 
     it('should return false for non-existent files', async () => {
-      const reader = await VsixReader.open(testVsixPath);
+      const reader = await VsixReader.open(testVsixFile);
 
       expect(await reader.fileExists('nonexistent.txt')).toBe(false);
 
@@ -85,7 +85,7 @@ describe('VsixReader', () => {
     });
 
     it('should handle backslash paths', async () => {
-      const reader = await VsixReader.open(testVsixPath);
+      const reader = await VsixReader.open(testVsixFile);
 
       expect(await reader.fileExists('PublishTask\\task.json')).toBe(true);
 
@@ -95,7 +95,7 @@ describe('VsixReader', () => {
 
   describe('readFile', () => {
     it('should read file contents', async () => {
-      const reader = await VsixReader.open(testVsixPath);
+      const reader = await VsixReader.open(testVsixFile);
 
       const buffer = await reader.readFile('extension.vsomanifest');
       expect(buffer).toBeInstanceOf(Buffer);
@@ -108,7 +108,7 @@ describe('VsixReader', () => {
     });
 
     it('should cache file contents', async () => {
-      const reader = await VsixReader.open(testVsixPath);
+      const reader = await VsixReader.open(testVsixFile);
 
       const buffer1 = await reader.readFile('extension.vsomanifest');
       const buffer2 = await reader.readFile('extension.vsomanifest');
@@ -119,7 +119,7 @@ describe('VsixReader', () => {
     });
 
     it('should throw error for non-existent file', async () => {
-      const reader = await VsixReader.open(testVsixPath);
+      const reader = await VsixReader.open(testVsixFile);
 
       await expect(reader.readFile('nonexistent.txt')).rejects.toThrow('File not found');
 
@@ -129,7 +129,7 @@ describe('VsixReader', () => {
 
   describe('readExtensionManifest', () => {
     it('should read extension manifest', async () => {
-      const reader = await VsixReader.open(testVsixPath);
+      const reader = await VsixReader.open(testVsixFile);
 
       const manifest = await reader.readExtensionManifest();
       expect(manifest.id).toBe('test-extension');
@@ -141,7 +141,7 @@ describe('VsixReader', () => {
     });
 
     it('should parse contributions', async () => {
-      const reader = await VsixReader.open(testVsixPath);
+      const reader = await VsixReader.open(testVsixFile);
 
       const manifest = await reader.readExtensionManifest();
       expect(manifest.contributions).toBeDefined();
@@ -154,7 +154,7 @@ describe('VsixReader', () => {
 
   describe('findTaskPaths', () => {
     it('should find task directories', async () => {
-      const reader = await VsixReader.open(testVsixPath);
+      const reader = await VsixReader.open(testVsixFile);
 
       const paths = await reader.findTaskPaths();
       expect(paths).toContain('PublishTask');
@@ -166,7 +166,7 @@ describe('VsixReader', () => {
 
   describe('readTaskManifest', () => {
     it('should read task manifest', async () => {
-      const reader = await VsixReader.open(testVsixPath);
+      const reader = await VsixReader.open(testVsixFile);
 
       const manifest = await reader.readTaskManifest('PublishTask');
       expect(manifest.id).toBeDefined();
@@ -182,7 +182,7 @@ describe('VsixReader', () => {
     });
 
     it('should throw error for invalid task path', async () => {
-      const reader = await VsixReader.open(testVsixPath);
+      const reader = await VsixReader.open(testVsixFile);
 
       await expect(reader.readTaskManifest('NonExistentTask')).rejects.toThrow();
 
@@ -192,7 +192,7 @@ describe('VsixReader', () => {
 
   describe('readTaskManifests', () => {
     it('should read all task manifests', async () => {
-      const reader = await VsixReader.open(testVsixPath);
+      const reader = await VsixReader.open(testVsixFile);
 
       const tasks = await reader.readTaskManifests();
       expect(tasks.length).toBe(2);
@@ -205,7 +205,7 @@ describe('VsixReader', () => {
 
   describe('getMetadata', () => {
     it('should get quick metadata', async () => {
-      const reader = await VsixReader.open(testVsixPath);
+      const reader = await VsixReader.open(testVsixFile);
 
       const metadata = await reader.getMetadata();
       expect(metadata).toEqual({
@@ -220,10 +220,10 @@ describe('VsixReader', () => {
     });
 
     it('should fallback to extension.vsixmanifest identity metadata', async () => {
-      const xmlFallbackVsixPath = join(testDir, 'xml-fallback.vsix');
-      await createXmlFallbackTestVsix(xmlFallbackVsixPath);
+      const xmlFallbackVsixFile = join(testDir, 'xml-fallback.vsix');
+      await createXmlFallbackTestVsix(xmlFallbackVsixFile);
 
-      const reader = await VsixReader.open(xmlFallbackVsixPath);
+      const reader = await VsixReader.open(xmlFallbackVsixFile);
       const metadata = await reader.getMetadata();
 
       expect(metadata).toEqual({
@@ -238,10 +238,10 @@ describe('VsixReader', () => {
     });
 
     it('should parse identity metadata when Identity is not self-closing', async () => {
-      const xmlFallbackVsixPath = join(testDir, 'xml-fallback-open-close.vsix');
-      await createXmlFallbackOpenCloseIdentityVsix(xmlFallbackVsixPath);
+      const xmlFallbackVsixFile = join(testDir, 'xml-fallback-open-close.vsix');
+      await createXmlFallbackOpenCloseIdentityVsix(xmlFallbackVsixFile);
 
-      const reader = await VsixReader.open(xmlFallbackVsixPath);
+      const reader = await VsixReader.open(xmlFallbackVsixFile);
       const metadata = await reader.getMetadata();
 
       expect(metadata).toEqual({
@@ -258,7 +258,7 @@ describe('VsixReader', () => {
 
   describe('getTasksInfo', () => {
     it('should get tasks information', async () => {
-      const reader = await VsixReader.open(testVsixPath);
+      const reader = await VsixReader.open(testVsixFile);
 
       const tasks = await reader.getTasksInfo();
       expect(tasks.length).toBe(2);
@@ -281,7 +281,7 @@ describe('VsixReader', () => {
 
   describe('chainable API', () => {
     it('should cache file reads for repeated calls', async () => {
-      const reader = await VsixReader.open(testVsixPath);
+      const reader = await VsixReader.open(testVsixFile);
 
       // Call twice - should use cached buffer
       const buffer1 = await reader.readFile('extension.vsomanifest');

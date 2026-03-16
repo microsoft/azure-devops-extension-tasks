@@ -12,15 +12,15 @@ import yazl from 'yazl';
 import { ManifestEditor } from '../manifest-editor.js';
 import { VsixReader } from '../vsix-reader.js';
 import { VsixWriter } from '../vsix-writer.js';
-import { MockPlatformAdapter } from './helpers/mock-platform.js';
 import {
   REAL_WORLD_EXTENSION_VSIXMANIFEST_XML,
   REAL_WORLD_EXTENSION_VSOMANIFEST_JSON,
   REAL_WORLD_VSS_EXTENSION_JSON,
 } from './fixtures/real-world-manifest-samples.js';
+import { MockPlatformAdapter } from './helpers/mock-platform.js';
 
 describe('ManifestEditor', () => {
-  let testVsixPath: string;
+  let testVsixFile: string;
   let mockPlatform: MockPlatformAdapter;
 
   beforeEach(async () => {
@@ -29,7 +29,7 @@ describe('ManifestEditor', () => {
     // Create a test VSIX file
     const testDir = join(tmpdir(), `vsix-test-${Date.now()}`);
     mkdirSync(testDir, { recursive: true });
-    testVsixPath = join(testDir, 'test.vsix');
+    testVsixFile = join(testDir, 'test.vsix');
 
     const zipFile = new yazl.ZipFile();
 
@@ -77,7 +77,7 @@ describe('ManifestEditor', () => {
     // Write to file
     await new Promise<void>((resolve, reject) => {
       (zipFile.outputStream as any)
-        .pipe(createWriteStream(testVsixPath) as any)
+        .pipe(createWriteStream(testVsixFile) as any)
         .on('finish', resolve)
         .on('error', reject);
       zipFile.end();
@@ -85,7 +85,7 @@ describe('ManifestEditor', () => {
   });
 
   it('should create an editor from a reader', async () => {
-    const reader = await VsixReader.open(testVsixPath);
+    const reader = await VsixReader.open(testVsixFile);
     const editor = ManifestEditor.fromReader(reader);
 
     expect(editor).toBeInstanceOf(ManifestEditor);
@@ -95,7 +95,7 @@ describe('ManifestEditor', () => {
   });
 
   it('should track publisher modification', async () => {
-    const reader = await VsixReader.open(testVsixPath);
+    const reader = await VsixReader.open(testVsixFile);
     const editor = ManifestEditor.fromReader(reader);
 
     editor.setPublisher('new-publisher');
@@ -107,7 +107,7 @@ describe('ManifestEditor', () => {
   });
 
   it('should track version modification', async () => {
-    const reader = await VsixReader.open(testVsixPath);
+    const reader = await VsixReader.open(testVsixFile);
     const editor = ManifestEditor.fromReader(reader);
 
     editor.setVersion('2.0.0');
@@ -119,7 +119,7 @@ describe('ManifestEditor', () => {
   });
 
   it('should track multiple modifications with chaining', async () => {
-    const reader = await VsixReader.open(testVsixPath);
+    const reader = await VsixReader.open(testVsixFile);
     const editor = ManifestEditor.fromReader(reader)
       .setPublisher('chained-publisher')
       .setVersion('3.0.0')
@@ -138,7 +138,7 @@ describe('ManifestEditor', () => {
   });
 
   it('should track visibility modification', async () => {
-    const reader = await VsixReader.open(testVsixPath);
+    const reader = await VsixReader.open(testVsixFile);
     const editor = ManifestEditor.fromReader(reader);
 
     editor.setVisibility('public');
@@ -150,7 +150,7 @@ describe('ManifestEditor', () => {
   });
 
   it('should track pricing modification', async () => {
-    const reader = await VsixReader.open(testVsixPath);
+    const reader = await VsixReader.open(testVsixFile);
     const editor = ManifestEditor.fromReader(reader);
 
     editor.setPricing('free');
@@ -162,7 +162,7 @@ describe('ManifestEditor', () => {
   });
 
   it('should track task version modification', async () => {
-    const reader = await VsixReader.open(testVsixPath);
+    const reader = await VsixReader.open(testVsixFile);
     const editor = ManifestEditor.fromReader(reader);
 
     editor.updateTaskVersion('TestTask', '2.1.0');
@@ -178,7 +178,7 @@ describe('ManifestEditor', () => {
   });
 
   it('should track task ID modification', async () => {
-    const reader = await VsixReader.open(testVsixPath);
+    const reader = await VsixReader.open(testVsixFile);
     const editor = ManifestEditor.fromReader(reader);
 
     editor.updateTaskId('TestTask', 'TestTask', 'test-publisher', 'test-extension');
@@ -190,7 +190,7 @@ describe('ManifestEditor', () => {
   });
 
   it('should track file additions', async () => {
-    const reader = await VsixReader.open(testVsixPath);
+    const reader = await VsixReader.open(testVsixFile);
     const editor = ManifestEditor.fromReader(reader);
 
     editor.setFile('newfile.txt', 'new content');
@@ -204,7 +204,7 @@ describe('ManifestEditor', () => {
   });
 
   it('should track file removals', async () => {
-    const reader = await VsixReader.open(testVsixPath);
+    const reader = await VsixReader.open(testVsixFile);
     const editor = ManifestEditor.fromReader(reader);
 
     editor.removeFile('dummy.txt');
@@ -217,7 +217,7 @@ describe('ManifestEditor', () => {
   });
 
   it('should convert to writer', async () => {
-    const reader = await VsixReader.open(testVsixPath);
+    const reader = await VsixReader.open(testVsixFile);
     const editor = ManifestEditor.fromReader(reader);
     const writer = await editor.toWriter();
 
@@ -228,15 +228,15 @@ describe('ManifestEditor', () => {
 });
 
 describe('VsixWriter', () => {
-  let testVsixPath: string;
-  let outputVsixPath: string;
+  let testVsixFile: string;
+  let outputVsixFile: string;
 
   beforeEach(async () => {
     // Create test VSIX
     const testDir = join(tmpdir(), `vsix-test-${Date.now()}`);
     mkdirSync(testDir, { recursive: true });
-    testVsixPath = join(testDir, 'input.vsix');
-    outputVsixPath = join(testDir, 'output.vsix');
+    testVsixFile = join(testDir, 'input.vsix');
+    outputVsixFile = join(testDir, 'output.vsix');
 
     const zipFile = new yazl.ZipFile();
 
@@ -256,7 +256,7 @@ describe('VsixWriter', () => {
 
     await new Promise<void>((resolve, reject) => {
       (zipFile.outputStream as any)
-        .pipe(createWriteStream(testVsixPath) as any)
+        .pipe(createWriteStream(testVsixFile) as any)
         .on('finish', resolve)
         .on('error', reject);
       zipFile.end();
@@ -264,20 +264,20 @@ describe('VsixWriter', () => {
   });
 
   it('should write modified VSIX to file', async () => {
-    const reader = await VsixReader.open(testVsixPath);
+    const reader = await VsixReader.open(testVsixFile);
     const writer = await ManifestEditor.fromReader(reader)
       .setPublisher('new-publisher')
       .setVersion('2.0.0')
       .toWriter();
 
-    await writer.writeToFile(outputVsixPath);
+    await writer.writeToFile(outputVsixFile);
     await reader.close();
 
     // Verify output file exists
-    expect(existsSync(outputVsixPath)).toBe(true);
+    expect(existsSync(outputVsixFile)).toBe(true);
 
     // Verify modifications were applied
-    const outputReader = await VsixReader.open(outputVsixPath);
+    const outputReader = await VsixReader.open(outputVsixFile);
     const manifest = await outputReader.readExtensionManifest();
 
     expect(manifest.publisher).toBe('new-publisher');
@@ -287,14 +287,14 @@ describe('VsixWriter', () => {
   });
 
   it('should preserve unchanged files', async () => {
-    const reader = await VsixReader.open(testVsixPath);
+    const reader = await VsixReader.open(testVsixFile);
     const writer = await ManifestEditor.fromReader(reader).setPublisher('new-publisher').toWriter();
 
-    await writer.writeToFile(outputVsixPath);
+    await writer.writeToFile(outputVsixFile);
     await reader.close();
 
     // Verify unchanged file is preserved
-    const outputReader = await VsixReader.open(outputVsixPath);
+    const outputReader = await VsixReader.open(outputVsixFile);
     const file2Content = await outputReader.readFile('file2.txt');
 
     expect(file2Content.toString()).toBe('unchanged content');
@@ -303,7 +303,7 @@ describe('VsixWriter', () => {
   });
 
   it('should write to buffer', async () => {
-    const reader = await VsixReader.open(testVsixPath);
+    const reader = await VsixReader.open(testVsixFile);
     const writer = await ManifestEditor.fromReader(reader)
       .setPublisher('buffer-publisher')
       .toWriter();
@@ -315,9 +315,9 @@ describe('VsixWriter', () => {
     expect(buffer.length).toBeGreaterThan(0);
 
     // Write buffer to file and verify
-    writeFileSync(outputVsixPath, buffer);
+    writeFileSync(outputVsixFile, buffer);
 
-    const outputReader = await VsixReader.open(outputVsixPath);
+    const outputReader = await VsixReader.open(outputVsixFile);
     const manifest = await outputReader.readExtensionManifest();
 
     expect(manifest.publisher).toBe('buffer-publisher');

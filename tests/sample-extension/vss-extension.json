@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json.schemastore.org/vss-extension",
+  "manifestVersion": 1,
+  "id": "release-test-ping",
+  "version": "1.0.0",
+  "name": "Release Test Ping",
+  "publisher": "jessehouwing-dev",
+  "description": "Minimal single-task extension used to validate the release pipeline end-to-end.",
+  "categories": ["Azure Pipelines"],
+  "targets": [
+    {
+      "id": "Microsoft.VisualStudio.Services"
+    }
+  ],
+  "contributions": [
+    {
+      "id": "ping-task",
+      "type": "ms.vss-distributed-task.task",
+      "targets": ["ms.vss-distributed-task.tasks"],
+      "properties": {
+        "name": "PingTask"
+      }
+    }
+  ],
+  "files": [
+    {
+      "path": "PingTask"
+    }
+  ]
+}

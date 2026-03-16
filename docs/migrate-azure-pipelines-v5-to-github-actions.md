@@ -93,8 +93,8 @@ Custom output variable inputs are no longer supported in this v6 rebuild.
 
 Use standard step outputs only:
 
-- package: `${{ steps.package.outputs.vsix-path }}`
-- publish: `${{ steps.publish.outputs.vsix-path }}`
+- package: `${{ steps.package.outputs.vsix-file }}`
+- publish: `${{ steps.publish.outputs.vsix-file }}`
 - show: `${{ steps.show.outputs.metadata }}`
 - query-version: `${{ steps.version.outputs.proposed-version }}`, `${{ steps.version.outputs.current-version }}`
 
@@ -189,7 +189,7 @@ Highest-wins with fallback:
 v5 Azure Pipelines output references typically looked like pipeline variables.
 In GitHub Actions, consume step outputs instead:
 
-- package output: `${{ steps.package.outputs.vsix-path }}`
+- package output: `${{ steps.package.outputs.vsix-file }}`
 - show output: `${{ steps.show.outputs.metadata }}`
 - query version outputs: `${{ steps.version.outputs.proposed-version }}`, `${{ steps.version.outputs.current-version }}`
 
@@ -229,7 +229,7 @@ jobs:
           operation: publish
           auth-type: oidc
           use: vsix
-          vsix-file: ${{ steps.package.outputs.vsix-path }}
+          vsix-file: ${{ steps.package.outputs.vsix-file }}
 ```
 
 ## Validation checklist

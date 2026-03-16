@@ -18,7 +18,7 @@ export interface InstallOptions {
   /** Extension ID */
   extensionId?: string;
   /** Path to VSIX file to infer publisher/extension identity */
-  vsixPath?: string;
+  vsixFile?: string;
   /** Manifest globs to infer publisher/extension identity */
   manifestGlobs?: string[];
   /** Root folder for manifest discovery */

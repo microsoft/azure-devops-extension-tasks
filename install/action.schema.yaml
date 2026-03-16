@@ -37,7 +37,7 @@ inputs:
     items:
       type: string
 
-  vsix-path:
+  vsix-file:
     type: string
 
   accounts:

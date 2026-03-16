@@ -66,7 +66,7 @@ describe('publishExtension', () => {
       const result = await publishExtension(withManifestDefaults(), auth, tfxManager, platform);
 
       expect(result.published).toBe(true);
-      expect(result.vsixPath).toBe('/output/extension.vsix');
+      expect(result.vsixFile).toBe('/output/extension.vsix');
       expect(result.extensionId).toBe('my-extension');
 
       // Check auth args
@@ -94,7 +94,7 @@ describe('publishExtension', () => {
 
       const result = await publishExtension(withManifestDefaults(), auth, tfxManager, platform);
 
-      expect(result.vsixPath).toBe('/out/generated-manifest.vsix');
+      expect(result.vsixFile).toBe('/out/generated-manifest.vsix');
     });
 
     it('should copy packaged vsix to outputPath when publishing from manifest', async () => {
@@ -124,7 +124,7 @@ describe('publishExtension', () => {
         );
 
         const expectedPath = join(outputPath, 'generated-manifest.vsix');
-        expect(result.vsixPath).toBe(expectedPath);
+        expect(result.vsixFile).toBe(expectedPath);
         const copied = await fs.readFile(expectedPath, 'utf-8');
         expect(copied).toBe('manifest-published-vsix');
       } finally {
@@ -340,7 +340,7 @@ describe('publishExtension', () => {
       );
 
       expect(result.published).toBe(true);
-      expect(result.vsixPath).toBe('/path/to/extension.vsix');
+      expect(result.vsixFile).toBe('/path/to/extension.vsix');
 
       const callArgs = mockExecute.mock.calls[0][0];
       expect(callArgs).toContain('--vsix');
@@ -393,7 +393,7 @@ describe('publishExtension', () => {
       );
 
       expect(result.published).toBe(true);
-      expect(result.vsixPath).toBe('/path/to/extension.vsix');
+      expect(result.vsixFile).toBe('/path/to/extension.vsix');
     });
 
     it('should copy published vsix to outputPath when publishing from vsix', async () => {
@@ -426,7 +426,7 @@ describe('publishExtension', () => {
         );
 
         const expectedPath = join(outputPath, 'input.vsix');
-        expect(result.vsixPath).toBe(expectedPath);
+        expect(result.vsixFile).toBe(expectedPath);
         const copied = await fs.readFile(expectedPath, 'utf-8');
         expect(copied).toBe('vsix-content');
       } finally {
@@ -436,7 +436,7 @@ describe('publishExtension', () => {
 
     it('should read and log version from a real vsix when publish payload has no metadata', async () => {
       const tempDir = await fs.mkdtemp(join(tmpdir(), 'publish-real-vsix-'));
-      const vsixPath = join(tempDir, 'workflow-test.vsix');
+      const vsixFile = join(tempDir, 'workflow-test.vsix');
 
       const zipFile = new yazl.ZipFile();
       zipFile.addBuffer(
@@ -459,7 +459,7 @@ describe('publishExtension', () => {
 
       await new Promise<void>((resolve, reject) => {
         zipFile.outputStream
-          .pipe(createWriteStream(vsixPath) as unknown as NodeJS.WritableStream)
+          .pipe(createWriteStream(vsixFile) as unknown as NodeJS.WritableStream)
           .on('finish', resolve)
           .on('error', reject);
         zipFile.end();
@@ -481,7 +481,7 @@ describe('publishExtension', () => {
         const result = await publishExtension(
           {
             publishSource: 'vsix',
-            vsixFile: vsixPath,
+            vsixFile: vsixFile,
           },
           auth,
           tfxManager,
@@ -658,7 +658,7 @@ describe('publishExtension', () => {
     const vsixArgIndex = callArgs.indexOf('--vsix');
     expect(vsixArgIndex).toBeGreaterThan(-1);
     expect(callArgs[vsixArgIndex + 1]).toContain('temp-');
-    expect(result.vsixPath).toBe(callArgs[vsixArgIndex + 1]);
+    expect(result.vsixFile).toBe(callArgs[vsixArgIndex + 1]);
     expect(writeToFileMock).toHaveBeenCalled();
     expect(writerCloseMock).toHaveBeenCalled();
     expect(readerCloseMock).toHaveBeenCalled();

@@ -1,14 +1,14 @@
-import { describe, it, expect, beforeEach } from '@jest/globals';
-import { MockPlatformAdapter } from '../helpers/mock-platform.js';
+import { beforeEach, describe, expect, it } from '@jest/globals';
 import { TfxManager } from '../../tfx-manager.js';
 import {
-  validateExtensionId,
-  validatePublisherId,
   validateAccountUrl,
-  validateVersion,
+  validateExtensionId,
   validateNodeAvailable,
   validateNpmAvailable,
+  validatePublisherId,
+  validateVersion,
 } from '../../validation.js';
+import { MockPlatformAdapter } from '../helpers/mock-platform.js';
 
 describe('End-to-End Integration Tests', () => {
   let platform: MockPlatformAdapter;
@@ -136,11 +136,11 @@ describe('End-to-End Integration Tests', () => {
       expect(version).toBe('1.0.0');
 
       // Simulate setting outputs
-      platform.setOutput('vsixPath', '/path/to/extension.vsix');
+      platform.setOutput('vsixFile', '/path/to/extension.vsix');
       platform.setOutput('extensionId', extensionId!);
 
       const outputs = platform.getOutputs();
-      expect(outputs.get('vsixPath')).toBe('/path/to/extension.vsix');
+      expect(outputs.get('vsixFile')).toBe('/path/to/extension.vsix');
       expect(outputs.get('extensionId')).toBe('my-extension');
     });
   });

@@ -100,7 +100,7 @@ jobs:
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f #v6.0.0
         with:
           name: vsix-${{ env.EXTENSION_ID }}-${{ steps.version.outputs.value }}
-          path: ${{ steps.package.outputs.vsix-path }}
+          path: ${{ steps.package.outputs.vsix-file }}
           if-no-files-found: error
 
       - name: Publish from VSIX
@@ -109,7 +109,7 @@ jobs:
           auth-type: pat
           token: ${{ secrets.MARKETPLACE_PAT }}
           use: vsix
-          vsix-file: ${{ steps.package.outputs.vsix-path }}
+          vsix-file: ${{ steps.package.outputs.vsix-file }}
           no-wait-validation: true
 
       - name: Wait for validation
@@ -117,7 +117,7 @@ jobs:
         with:
           auth-type: pat
           token: ${{ secrets.MARKETPLACE_PAT }}
-          vsix-path: ${{ steps.package.outputs.vsix-path }}
+          vsix-file: ${{ steps.package.outputs.vsix-file }}
 
       - name: Share extension
         if: ${{ inputs.organization_urls != '' }}
@@ -125,7 +125,7 @@ jobs:
         with:
           auth-type: pat
           token: ${{ secrets.MARKETPLACE_PAT }}
-          vsix-path: ${{ steps.package.outputs.vsix-path }}
+          vsix-file: ${{ steps.package.outputs.vsix-file }}
           accounts: ${{ inputs.organization_urls }}
 
       - name: Install extension
@@ -134,7 +134,7 @@ jobs:
         with:
           auth-type: pat
           token: ${{ secrets.MARKETPLACE_PAT }}
-          vsix-path: ${{ steps.package.outputs.vsix-path }}
+          vsix-file: ${{ steps.package.outputs.vsix-file }}
           accounts: ${{ inputs.organization_urls }}
 
       - name: Wait for installation
@@ -143,5 +143,5 @@ jobs:
         with:
           auth-type: pat
           token: ${{ secrets.MARKETPLACE_PAT }}
-          vsix-path: ${{ steps.package.outputs.vsix-path }}
+          vsix-file: ${{ steps.package.outputs.vsix-file }}
           accounts: ${{ inputs.organization_urls }}

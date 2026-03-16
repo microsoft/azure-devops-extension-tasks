@@ -131,7 +131,7 @@ inputs:
       - Must match publisher in manifest (or override it)
       - Required for command: show.
       - Optional for install/share/unpublish/unshare/wait-for-validation/query-version:
-        falls back to value from manifest-file or vsix-path/vsix-file when not specified.
+        falls back to value from manifest-file or vsix-file when not specified.
       - Alphanumeric with hyphens, dots, underscores only
 
       **Example:** `mycompany` or `my-publisher-id`
@@ -148,7 +148,7 @@ inputs:
       - Combined with Publisher ID forms full identifier: `publisherId.extensionId`
       - Required for command: show.
       - Optional for install/share/unpublish/unshare/wait-for-validation/query-version:
-        falls back to value from manifest-file or vsix-path/vsix-file when not specified.
+        falls back to value from manifest-file or vsix-file when not specified.
       - Alphanumeric with hyphens, dots, underscores only
 
       **Example:** `my-extension` or `azure-devops-tasks`
@@ -197,21 +197,6 @@ inputs:
       - Existing JSON is preserved unless overridden by explicit inputs
       - Manifest updates from this action are merged into this file
       - Path is relative to the current working directory
-    required: false
-  vsix-file:
-    description: |-
-      **Path to pre-built .vsix file** (for publish and query-version operations).
-
-      Available for: publish, query-version.
-      Required for: none.
-      Default: none
-
-      - Use when `use` is 'vsix'
-      - File must be a valid extension package
-      - Supports GitHub Actions expressions
-      - For query-version: reads publisher-id and extension-id from the VSIX when not specified
-
-      **Example:** `$``{{ github.workspace }}/dist/my-extension.vsix`
     required: false
   use:
     description: |-
@@ -308,7 +293,7 @@ inputs:
       - Directory will be created if it doesn't exist
       - Actual filename is based on publisher.extensionId-version.vsix
 
-      **Output:** Full path stored in `vsix-path` output
+      **Output:** Full path stored in `vsix-file` output
     required: false
   bypass-validation:
     description: |-
@@ -473,13 +458,13 @@ inputs:
       ]
       ```
 
-      **Note:** Use this OR auto-discovery options (manifest-file/vsix-path), not both
+      **Note:** Use this OR auto-discovery options (manifest-file/vsix-file), not both
     required: false
-  vsix-path:
+  vsix-file:
     description: |-
       **Path to .vsix file** for auto-extracting task versions.
 
-      Available for: install, share, unpublish, unshare, wait-for-installation, wait-for-validation.
+      Available for: install, publish, query-version, share, unpublish, unshare, wait-for-installation, wait-for-validation.
       Required for: none.
       Default: none
 
@@ -520,7 +505,7 @@ inputs:
     required: false
     default: '15'
 outputs:
-  vsix-path:
+  vsix-file:
     description: |
       **Path to generated .vsix file** (package operation only).
 
@@ -531,7 +516,7 @@ outputs:
         with:
           operation: package
 
-      - run: echo "VSIX at $``{{ steps.package.outputs.vsix-path }}"
+      - run: echo "VSIX at $``{{ steps.package.outputs.vsix-file }}"
       ```
   metadata:
     description: |

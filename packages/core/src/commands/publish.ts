@@ -62,7 +62,7 @@ export interface PublishResult {
   /** Whether extension was published successfully */
   published: boolean;
   /** Path to the vsix file that was published */
-  vsixPath: string;
+  vsixFile: string;
   /** Extension ID */
   extensionId: string;
   /** Extension version */
@@ -81,7 +81,7 @@ async function executeTfxPublish(
   args: ArgBuilder,
   platform: IPlatformAdapter,
   options: PublishOptions,
-  publishedVsixPath?: string
+  publishedVsixFile?: string
 ): Promise<PublishResult> {
   // Flags
   if (options.noWaitValidation) {
@@ -111,11 +111,11 @@ async function executeTfxPublish(
   let publisherId = '';
 
   if (options.publishSource === 'vsix') {
-    const metadataVsixPath = publishedVsixPath ?? options.vsixFile;
+    const metadataVsixFile = publishedVsixFile ?? options.vsixFile;
 
-    if (metadataVsixPath && (await platform.fileExists(metadataVsixPath))) {
+    if (metadataVsixFile && (await platform.fileExists(metadataVsixFile))) {
       try {
-        const reader = await VsixReader.open(metadataVsixPath);
+        const reader = await VsixReader.open(metadataVsixFile);
         const metadata = await reader.getMetadata();
         await reader.close();
 
@@ -124,7 +124,7 @@ async function executeTfxPublish(
         publisherId = metadata.publisher;
       } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        platform.debug(`Could not read VSIX metadata from ${metadataVsixPath}: ${errorMessage}`);
+        platform.debug(`Could not read VSIX metadata from ${metadataVsixFile}: ${errorMessage}`);
       }
     }
   } else {
@@ -138,22 +138,22 @@ async function executeTfxPublish(
   publisherId = publisherId || options.publisherId || '';
 
   // Determine vsix path
-  let vsixPath =
+  let vsixFile =
     options.publishSource === 'manifest'
       ? (json.packaged ?? '')
-      : (publishedVsixPath ?? options.vsixFile ?? '');
+      : (publishedVsixFile ?? options.vsixFile ?? '');
 
-  if (options.outputPath && vsixPath) {
-    const sourceExists = await platform.fileExists(vsixPath);
+  if (options.outputPath && vsixFile) {
+    const sourceExists = await platform.fileExists(vsixFile);
     if (sourceExists) {
-      const outputVsixPath = join(options.outputPath, basename(vsixPath));
+      const outputVsixFile = join(options.outputPath, basename(vsixFile));
       await mkdir(options.outputPath, { recursive: true });
-      await copyFile(vsixPath, outputVsixPath);
-      platform.debug(`Copied published VSIX to output path: ${outputVsixPath}`);
-      vsixPath = outputVsixPath;
+      await copyFile(vsixFile, outputVsixFile);
+      platform.debug(`Copied published VSIX to output path: ${outputVsixFile}`);
+      vsixFile = outputVsixFile;
     } else {
       platform.warning(
-        `Could not copy VSIX to output path because source file was not found: ${vsixPath}`
+        `Could not copy VSIX to output path because source file was not found: ${vsixFile}`
       );
     }
   }
@@ -164,7 +164,7 @@ async function executeTfxPublish(
 
   return {
     published: json.published === true,
-    vsixPath,
+    vsixFile,
     extensionId,
     extensionVersion,
     publisherId,
@@ -402,7 +402,7 @@ export async function publishExtension(
       (options.updateTasksVersion && options.updateTasksVersion !== 'none') ||
       options.updateTasksId;
 
-    let vsixPathToPublish = options.vsixFile;
+    let vsixFileToPublish = options.vsixFile;
 
     if (needsModification) {
       platform.info('Modifying VSIX before publishing...');
@@ -426,16 +426,16 @@ export async function publishExtension(
       // Write modified VSIX to a temporary file
       const writer = await editor.toWriter();
       const tempDir = platform.getTempDir();
-      const tempVsixPath = `${tempDir}/temp-${Date.now()}.vsix`;
+      const tempVsixFile = `${tempDir}/temp-${Date.now()}.vsix`;
 
-      platform.debug(`Writing modified VSIX to: ${tempVsixPath}`);
-      await writer.writeToFile(tempVsixPath);
+      platform.debug(`Writing modified VSIX to: ${tempVsixFile}`);
+      await writer.writeToFile(tempVsixFile);
       await writer.close();
       await reader.close();
 
       // Use the modified VSIX for publishing
-      vsixPathToPublish = tempVsixPath;
-      args.option('--vsix', tempVsixPath);
+      vsixFileToPublish = tempVsixFile;
+      args.option('--vsix', tempVsixFile);
 
       platform.info('VSIX modifications applied successfully');
     } else {
@@ -443,6 +443,6 @@ export async function publishExtension(
       args.option('--vsix', options.vsixFile);
     }
 
-    return executeTfxPublish(tfx, args, platform, options, vsixPathToPublish);
+    return executeTfxPublish(tfx, args, platform, options, vsixFileToPublish);
   }
 }

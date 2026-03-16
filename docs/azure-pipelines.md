@@ -215,13 +215,13 @@ Verifies tasks are available after install.
 
 Declared task output variables (from `task.json`):
 
-- `vsixPath`
+- `vsixFile`
 - `extensionMetadata`
 - `proposedVersion` — highest version from all sources
 - `currentVersion` — resolved version before increment; when marketplace is queried this is the marketplace version, otherwise it falls back to the selected source version
 - `versionSource` — which source won: `marketplace`, `manifest`, `vsix`, or `literal`
 
-These are referenced as step outputs, for example `$(packageExt.vsixPath)`.
+These are referenced as step outputs, for example `$(packageExt.vsixFile)`.
 
 ## queryVersion examples
 
@@ -310,5 +310,5 @@ steps:
       connectionType: PAT
       connectionNamePAT: MyMarketplaceConnection
       use: vsix
-      vsixFile: $(packageExt.vsixPath)
+      vsixFile: $(packageExt.vsixFile)
 ```

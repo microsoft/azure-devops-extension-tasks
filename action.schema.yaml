@@ -127,9 +127,6 @@ inputs:
     items:
       type: string
 
-  vsix-path:
-    type: string
-
   no-wait-validation:
     type: boolean
 
@@ -161,7 +158,7 @@ inputs:
 
 # Validate outputs
 outputs:
-  vsix-path:
+  vsix-file:
     type: string
 
   metadata:

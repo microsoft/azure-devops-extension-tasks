@@ -60,7 +60,7 @@ Common input mappings:
 
 - Use `accounts` for `install`, `share`, `unshare`, and wait operations on both platforms.
 - Do not map any publish sharing input; publish-time sharing was removed. Use a dedicated `share` step with `accounts`.
-- For `install`, `share`, `unshare`, `unpublish`, and `waitForValidation`/`wait-for-validation`, identity can be inferred from either manifest (`manifestFile`/`manifest-file`) or VSIX (`vsixFile`/`vsix-path`) inputs.
+- For `install`, `share`, `unshare`, `unpublish`, and `waitForValidation`/`wait-for-validation`, identity can be inferred from either manifest (`manifestFile`/`manifest-file`) or VSIX (`vsixFile`/`vsix-file`) inputs.
 
 ## Account input mapping
 
@@ -100,8 +100,8 @@ Custom output variable inputs are no longer supported.
 
 Use standard step outputs only:
 
-- package: `vsix-path`
-- publish: `vsix-path`
+- package: `vsix-file`
+- publish: `vsix-file`
 - show: `metadata`
 - queryVersion/query-version: `proposed-version`, `current-version`
 
@@ -151,16 +151,16 @@ Also ensure workflow permissions include `id-token: write`.
 Azure Pipelines variable references:
 
 - `$(VarName)`
-- `$(stepName.vsixPath)`
+- `$(stepName.vsixFile)`
 
 GitHub Actions references:
 
 - `${{ env.VAR_NAME }}`
-- `${{ steps.step_id.outputs.vsix-path }}`
+- `${{ steps.step_id.outputs.vsix-file }}`
 
 Typical output mapping:
 
-- Azure Pipelines `vsixPath` → GitHub Actions `vsix-path`
+- Azure Pipelines `vsixFile` → GitHub Actions `vsix-file`
 - Azure Pipelines `extensionMetadata` → GitHub Actions `metadata`
 - Azure Pipelines `proposedVersion` → GitHub Actions `proposed-version`
 - Azure Pipelines `currentVersion` → GitHub Actions `current-version`
@@ -181,7 +181,7 @@ Legacy v5/v6 status-style task outputs are not used in GitHub Actions. Use built
 
 Use `${{ steps.<step_id>.conclusion }}` when `continue-on-error: true` is involved and you need post-step branching based on final conclusion semantics.
 
-Current Azure Pipelines v6 task outputs are `vsixPath`, `extensionMetadata`, `proposedVersion`, and `currentVersion`; status-style outputs are legacy and should not be relied on.
+Current Azure Pipelines v6 task outputs are `vsixFile`, `extensionMetadata`, `proposedVersion`, and `currentVersion`; status-style outputs are legacy and should not be relied on.
 
 ## End-to-end example
 
@@ -201,7 +201,7 @@ steps:
       connectionType: PAT
       connectionNamePAT: MyMarketplaceConnection
       use: vsix
-      vsixFile: $(packageExt.vsixPath)
+      vsixFile: $(packageExt.vsixFile)
 ```
 
 ### GitHub Actions
@@ -239,7 +239,7 @@ jobs:
           operation: publish
           auth-type: oidc
           use: vsix
-          vsix-file: ${{ steps.package.outputs.vsix-path }}
+          vsix-file: ${{ steps.package.outputs.vsix-file }}
 ```
 
 ## Cutover checklist

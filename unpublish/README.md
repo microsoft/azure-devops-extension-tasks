@@ -22,7 +22,7 @@ Remove an Azure DevOps extension from the Visual Studio Marketplace.
 - uses: jessehouwing/azdo-marketplace/unpublish@v6
   with:
     token: ${{ secrets.MARKETPLACE_TOKEN }}
-    vsix-path: ${{ steps.package.outputs.vsix-path }}
+    vsix-file: ${{ steps.package.outputs.vsix-file }}
 ```
 
 ### With OIDC Authentication
@@ -50,7 +50,7 @@ Remove an Azure DevOps extension from the Visual Studio Marketplace.
 Identity (choose one):
 
 - `publisher-id` + `extension-id`
-- `vsix-path` (fallback source for identity metadata)
+- `vsix-file` (fallback source for identity metadata)
 
 OR
 
@@ -69,7 +69,7 @@ OR
 
 #### Identity Fallback
 
-- `vsix-path`: Path to VSIX file used to infer `publisher-id` and `extension-id` when omitted
+- `vsix-file`: Path to VSIX file used to infer `publisher-id` and `extension-id` when omitted
 
 ## Outputs
 
@@ -118,7 +118,7 @@ jobs:
 - `tfx-version`: Selects which `tfx-cli` version/source is used; `built-in` uses the bundled JS entrypoint without `.bin` shim fallback, `path` uses `tfx` from PATH.
 - `publisher-id`: Identifies the publisher that owns the extension to unpublish.
 - `extension-id`: Identifies the extension to unpublish.
-- `vsix-path`: Provides VSIX-based identity fallback when publisher/extension IDs are omitted.
+- `vsix-file`: Provides VSIX-based identity fallback when publisher/extension IDs are omitted.
 
 ## GitHub Marketplace outputs
 

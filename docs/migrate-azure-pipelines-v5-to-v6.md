@@ -147,7 +147,7 @@ steps:
       connectionType: PAT
       connectionNamePAT: MyMarketplaceConnection
       use: vsix
-      vsixFile: $(packageExt.vsixPath)
+      vsixFile: $(packageExt.vsixFile)
 ```
 
 ## Authentication changes
@@ -232,7 +232,7 @@ In v6, `queryVersion` introduces multi-source version resolution:
 
 Azure Pipelines v6 task outputs:
 
-- `vsixPath`
+- `vsixFile`
 - `extensionMetadata`
 - `proposedVersion`
 - `currentVersion`

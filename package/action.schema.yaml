@@ -76,5 +76,5 @@ inputs:
 
 # Validate outputs
 outputs:
-  vsix-path:
+  vsix-file:
     type: string

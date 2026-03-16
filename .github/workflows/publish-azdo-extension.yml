@@ -104,7 +104,7 @@ jobs:
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f #v7.0.0
         with:
           name: vsix-${{ inputs.extension_id }}-${{ steps.version.outputs.value }}
-          path: ${{ steps.package.outputs.vsix-path }}
+          path: ${{ steps.package.outputs.vsix-file }}
           if-no-files-found: error
 
       - name: Publish from VSIX
@@ -112,20 +112,20 @@ jobs:
         with:
           auth-type: oidc
           use: vsix
-          vsix-file: ${{ steps.package.outputs.vsix-path }}
+          vsix-file: ${{ steps.package.outputs.vsix-file }}
           no-wait-validation: true
 
       - name: Wait for validation
         uses: ./wait-for-validation
         with:
           auth-type: oidc
-          vsix-path: ${{ steps.package.outputs.vsix-path }}
+          vsix-file: ${{ steps.package.outputs.vsix-file }}
 
       - name: Share extension
         uses: ./share
         with:
           auth-type: oidc
-          vsix-path: ${{ steps.package.outputs.vsix-path }}
+          vsix-file: ${{ steps.package.outputs.vsix-file }}
           accounts: |
             https://dev.azure.com/jessehouwing-dev
 
@@ -133,7 +133,7 @@ jobs:
         uses: ./install
         with:
           auth-type: oidc
-          vsix-path: ${{ steps.package.outputs.vsix-path }}
+          vsix-file: ${{ steps.package.outputs.vsix-file }}
           accounts: |
             https://dev.azure.com/jessehouwing-dev
 
@@ -141,6 +141,6 @@ jobs:
         uses: ./wait-for-installation
         with:
           auth-type: oidc
-          vsix-path: ${{ steps.package.outputs.vsix-path }}
+          vsix-file: ${{ steps.package.outputs.vsix-file }}
           accounts: |
             https://dev.azure.com/jessehouwing-dev

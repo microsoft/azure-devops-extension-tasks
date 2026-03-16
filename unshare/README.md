@@ -37,7 +37,7 @@ Unshare an Azure DevOps extension from specific organizations.
 - uses: jessehouwing/azdo-marketplace/unshare@v6
   with:
     token: ${{ secrets.MARKETPLACE_TOKEN }}
-    vsix-path: ${{ steps.package.outputs.vsix-path }}
+    vsix-file: ${{ steps.package.outputs.vsix-file }}
     accounts: |
       old-org-1
       old-org-2
@@ -70,7 +70,7 @@ Unshare an Azure DevOps extension from specific organizations.
 Identity (choose one):
 
 - `publisher-id` + `extension-id`
-- `vsix-path` (fallback source for identity metadata)
+- `vsix-file` (fallback source for identity metadata)
 
 OR
 
@@ -89,7 +89,7 @@ OR
 
 #### Identity Fallback
 
-- `vsix-path`: Path to VSIX file used to infer `publisher-id` and `extension-id` when omitted
+- `vsix-file`: Path to VSIX file used to infer `publisher-id` and `extension-id` when omitted
 
 ## Outputs
 
@@ -139,7 +139,7 @@ jobs:
 - `tfx-version`: Selects which `tfx-cli` version/source is used; `built-in` uses the bundled JS entrypoint without `.bin` shim fallback, `path` uses `tfx` from PATH.
 - `publisher-id`: Identifies the publisher that owns the extension to unshare.
 - `extension-id`: Identifies the extension to unshare.
-- `vsix-path`: Provides VSIX-based identity fallback when publisher/extension IDs are omitted.
+- `vsix-file`: Provides VSIX-based identity fallback when publisher/extension IDs are omitted.
 - `accounts`: Lists organizations/accounts to remove extension access from.
 
 ## GitHub Marketplace outputs

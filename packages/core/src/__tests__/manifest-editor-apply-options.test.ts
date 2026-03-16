@@ -14,7 +14,7 @@ import { VsixReader } from '../vsix-reader.js';
 import { MockPlatformAdapter } from './helpers/mock-platform.js';
 
 describe('ManifestEditor.applyOptions()', () => {
-  let testVsixPath: string;
+  let testVsixFile: string;
   let mockPlatform: MockPlatformAdapter;
   let testDir: string;
 
@@ -24,7 +24,7 @@ describe('ManifestEditor.applyOptions()', () => {
     // Create a test VSIX file
     testDir = join(tmpdir(), `manifest-editor-test-${Date.now()}`);
     mkdirSync(testDir, { recursive: true });
-    testVsixPath = join(testDir, 'test.vsix');
+    testVsixFile = join(testDir, 'test.vsix');
 
     const zipFile = new yazl.ZipFile();
 
@@ -70,7 +70,7 @@ describe('ManifestEditor.applyOptions()', () => {
     // Write to file
     await new Promise<void>((resolve, reject) => {
       (zipFile.outputStream as any)
-        .pipe(createWriteStream(testVsixPath) as any)
+        .pipe(createWriteStream(testVsixFile) as any)
         .on('finish', resolve)
         .on('error', reject);
       zipFile.end();
@@ -84,7 +84,7 @@ describe('ManifestEditor.applyOptions()', () => {
   });
 
   it('should apply publisher override', async () => {
-    const reader = await VsixReader.open(testVsixPath);
+    const reader = await VsixReader.open(testVsixFile);
     const editor = ManifestEditor.fromReader(reader);
 
     await editor.applyOptions({
@@ -98,7 +98,7 @@ describe('ManifestEditor.applyOptions()', () => {
   });
 
   it('should apply extension ID override', async () => {
-    const reader = await VsixReader.open(testVsixPath);
+    const reader = await VsixReader.open(testVsixFile);
     const editor = ManifestEditor.fromReader(reader);
 
     await editor.applyOptions({
@@ -112,7 +112,7 @@ describe('ManifestEditor.applyOptions()', () => {
   });
 
   it('should apply extension ID without tag', async () => {
-    const reader = await VsixReader.open(testVsixPath);
+    const reader = await VsixReader.open(testVsixFile);
     const editor = ManifestEditor.fromReader(reader);
 
     await editor.applyOptions({
@@ -126,7 +126,7 @@ describe('ManifestEditor.applyOptions()', () => {
   });
 
   it('should apply extension version', async () => {
-    const reader = await VsixReader.open(testVsixPath);
+    const reader = await VsixReader.open(testVsixFile);
     const editor = ManifestEditor.fromReader(reader);
 
     await editor.applyOptions({
@@ -140,7 +140,7 @@ describe('ManifestEditor.applyOptions()', () => {
   });
 
   it('should apply extension name', async () => {
-    const reader = await VsixReader.open(testVsixPath);
+    const reader = await VsixReader.open(testVsixFile);
     const editor = ManifestEditor.fromReader(reader);
 
     await editor.applyOptions({
@@ -154,7 +154,7 @@ describe('ManifestEditor.applyOptions()', () => {
   });
 
   it('should apply visibility settings', async () => {
-    const reader = await VsixReader.open(testVsixPath);
+    const reader = await VsixReader.open(testVsixFile);
     const editor = ManifestEditor.fromReader(reader);
 
     await editor.applyOptions({
@@ -168,7 +168,7 @@ describe('ManifestEditor.applyOptions()', () => {
   });
 
   it('should apply pricing settings', async () => {
-    const reader = await VsixReader.open(testVsixPath);
+    const reader = await VsixReader.open(testVsixFile);
     const editor = ManifestEditor.fromReader(reader);
 
     await editor.applyOptions({
@@ -182,7 +182,7 @@ describe('ManifestEditor.applyOptions()', () => {
   });
 
   it('should update task versions when requested', async () => {
-    const reader = await VsixReader.open(testVsixPath);
+    const reader = await VsixReader.open(testVsixFile);
     const editor = ManifestEditor.fromReader(reader);
 
     await editor.applyOptions({
@@ -204,7 +204,7 @@ describe('ManifestEditor.applyOptions()', () => {
   });
 
   it('should use major as default version type', async () => {
-    const reader = await VsixReader.open(testVsixPath);
+    const reader = await VsixReader.open(testVsixFile);
     const editor = ManifestEditor.fromReader(reader);
 
     await editor.applyOptions({
@@ -225,7 +225,7 @@ describe('ManifestEditor.applyOptions()', () => {
   });
 
   it('should update task IDs when requested', async () => {
-    const reader = await VsixReader.open(testVsixPath);
+    const reader = await VsixReader.open(testVsixFile);
     const editor = ManifestEditor.fromReader(reader);
 
     await editor.applyOptions({
@@ -247,7 +247,7 @@ describe('ManifestEditor.applyOptions()', () => {
   });
 
   it('should apply multiple options at once', async () => {
-    const reader = await VsixReader.open(testVsixPath);
+    const reader = await VsixReader.open(testVsixFile);
     const editor = ManifestEditor.fromReader(reader);
 
     await editor.applyOptions({
@@ -280,7 +280,7 @@ describe('ManifestEditor.applyOptions()', () => {
   });
 
   it('should handle empty options gracefully', async () => {
-    const reader = await VsixReader.open(testVsixPath);
+    const reader = await VsixReader.open(testVsixFile);
     const editor = ManifestEditor.fromReader(reader);
 
     await editor.applyOptions({});
@@ -295,7 +295,7 @@ describe('ManifestEditor.applyOptions()', () => {
   });
 
   it('should skip task version update if no extension version provided', async () => {
-    const reader = await VsixReader.open(testVsixPath);
+    const reader = await VsixReader.open(testVsixFile);
     const editor = ManifestEditor.fromReader(reader);
 
     await editor.applyOptions({
@@ -310,7 +310,7 @@ describe('ManifestEditor.applyOptions()', () => {
   });
 
   it('should return editor for chaining', async () => {
-    const reader = await VsixReader.open(testVsixPath);
+    const reader = await VsixReader.open(testVsixFile);
     const editor = ManifestEditor.fromReader(reader);
 
     const result = await editor.applyOptions({
@@ -323,7 +323,7 @@ describe('ManifestEditor.applyOptions()', () => {
   });
 
   it('should enable binary file synchronization when requested', async () => {
-    const reader = await VsixReader.open(testVsixPath);
+    const reader = await VsixReader.open(testVsixFile);
     const editor = ManifestEditor.fromReader(reader);
 
     await editor.applyOptions({
@@ -336,7 +336,7 @@ describe('ManifestEditor.applyOptions()', () => {
   });
 
   it('should handle all visibility options', async () => {
-    const reader = await VsixReader.open(testVsixPath);
+    const reader = await VsixReader.open(testVsixFile);
 
     const testCases: Array<{
       visibility: 'public' | 'private' | 'public_preview' | 'private_preview';

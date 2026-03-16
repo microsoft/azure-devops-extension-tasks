@@ -1,0 +1,551 @@
+name: Release
+
+# Multi-job release workflow for Azure DevOps extension and GitHub Actions.
+#
+# Required secrets:
+#   AZURE_CLIENT_ID       - Azure AD app client ID for OIDC authentication
+#   AZURE_TENANT_ID       - Azure AD tenant ID for OIDC authentication
+#
+# Required repository variables:
+#   AZDO_TEST_PIPELINE_NAME  - Name of the Azure DevOps test pipeline to trigger
+#
+# Required environments (with protection rules):
+#   publisher-jessehouwing-dev  - For preview release and GitHub Actions tests
+#   publisher-jessehouwing      - For production releases (job 4, requires approval)
+
+on:
+  push:
+    branches:
+      - 'release/v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Semantic version to release (e.g., 6.1.0)'
+        required: true
+        type: string
+
+permissions: {}
+
+env:
+  PUBLISHER_ID: jessehouwing
+  PUBLISHER_ID_DEV: jessehouwing-dev
+  EXTENSION_ID: azdo-marketplace-extension
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Job 1: Prepare release branch
+  # Idempotent — safe to re-run after pushing fixes to the release branch.
+  # ---------------------------------------------------------------------------
+  prepare-release:
+    name: Prepare release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      version: ${{ steps.resolve.outputs.version }}
+      branch: release/v${{ steps.resolve.outputs.version }}
+      major: ${{ steps.parse.outputs.major }}
+      minor: ${{ steps.parse.outputs.minor }}
+      patch: ${{ steps.parse.outputs.patch }}
+
+    steps:
+      - name: Resolve version
+        id: resolve
+        shell: pwsh
+        run: |
+          if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+            $version = "${{ inputs.version }}"
+          }
+          else {
+            # Extract version from branch name: release/vX.Y.Z -> X.Y.Z
+            $version = "${{ github.ref_name }}" -replace '^release/v', ''
+          }
+          "version=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Validate version format
+        shell: pwsh
+        run: |
+          if ("${{ steps.resolve.outputs.version }}" -notmatch '^[0-9]+\.[0-9]+\.[0-9]+$') {
+            Write-Host "::error::Version must be in format x.y.z (e.g., 6.1.0)"
+            exit 1
+          }
+
+      - name: Parse version components
+        id: parse
+        shell: pwsh
+        run: |
+          $major, $minor, $patch = "${{ steps.resolve.outputs.version }}".Split('.')
+          "major=$major" >> $env:GITHUB_OUTPUT
+          "minor=$minor" >> $env:GITHUB_OUTPUT
+          "patch=$patch" >> $env:GITHUB_OUTPUT
+
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Create or checkout release branch
+        shell: pwsh
+        run: |
+          $branch = "release/v${{ steps.resolve.outputs.version }}"
+          git ls-remote --exit-code --heads origin $branch *> $null
+          if ($LASTEXITCODE -eq 0) {
+            Write-Host "Branch $branch already exists, checking it out"
+            git fetch origin $branch
+            git checkout $branch
+            git pull origin $branch
+          }
+          else {
+            Write-Host "Creating branch $branch from main"
+            git checkout -b $branch
+          }
+
+      - name: Setup Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f #v6.3.0
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - name: Setup Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 #v6.2.0
+        with:
+          python-version: '3.x'
+
+      - name: Setup Go
+        uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 #v6.3.0
+        with:
+          go-version: stable
+
+      - name: Install pre-commit
+        run: python3 -m pip install --user pre-commit
+
+      - name: Install actionlint
+        run: go install github.com/rhysd/actionlint/cmd/actionlint@latest
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Update version references
+        run: node Scripts/update-version.mjs ${{ steps.resolve.outputs.version }}
+
+      - name: Format
+        run: npm run format
+
+      - name: Lint fix
+        run: npm run lint:fix
+
+      - name: Sync action inputs
+        run: npm run sync:action-inputs
+
+      - name: Build
+        run: npm run build
+
+      - name: Test
+        # Disable workflow commands during test execution to prevent test
+        # output (e.g. ##vso or ::set-output) from being interpreted as
+        # actual workflow commands.
+        shell: pwsh
+        run: |
+          $stopMarker = [guid]::NewGuid().ToString()
+          Write-Host "::stop-commands::$stopMarker"
+          npm run test
+          Write-Host "::$stopMarker::"
+
+      - name: Bundle
+        run: npm run bundle
+
+      - name: Run pre-commit checks
+        shell: pwsh
+        run: |
+          $gopath = go env GOPATH
+          $env:PATH = "$gopath/bin;$env:PATH"
+          python3 -m pre_commit run --all-files
+
+      - name: Package Azure DevOps extension
+        uses: jessehouwing/azdo-marketplace/package@v6
+        with:
+          publisher-id: ${{ env.PUBLISHER_ID }}
+          extension-id: ${{ env.EXTENSION_ID }}
+          extension-version: ${{ steps.resolve.outputs.version }}
+          output-path: ${{ runner.temp }}
+
+      - name: Upload VSIX artifact
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f #v7.0.0
+        with:
+          name: vsix-${{ env.EXTENSION_ID }}-${{ steps.resolve.outputs.version }}
+          path: ${{ runner.temp }}/*.vsix
+          if-no-files-found: error
+
+      - name: Commit and push changes
+        shell: pwsh
+        run: |
+          $branch = "release/v${{ steps.resolve.outputs.version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet
+          if ($LASTEXITCODE -eq 0) {
+            Write-Host "No changes to commit"
+          }
+          else {
+            git commit -m "chore: prepare release v${{ steps.resolve.outputs.version }}"
+          }
+          git push origin "HEAD:$branch"
+
+  # ---------------------------------------------------------------------------
+  # Job 2: Preview release to Azure DevOps
+  # Publishes a private preview extension with unique task IDs to the dev org.
+  # ---------------------------------------------------------------------------
+  preview-release:
+    name: Preview release (Azure DevOps)
+    needs: prepare-release
+    runs-on: windows-latest
+    environment:
+      name: 'publisher-jessehouwing-dev'
+      url: https://marketplace.visualstudio.com/items?itemName=${{ env.PUBLISHER_ID_DEV }}.${{ env.EXTENSION_ID }}-preview
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
+        with:
+          ref: release/v${{ needs.prepare-release.outputs.version }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f #v6.3.0
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build and bundle
+        run: |
+          npm run build
+          npm run bundle
+
+      - name: Download VSIX artifact
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e #v4.2.1
+        with:
+          name: vsix-${{ env.EXTENSION_ID }}-${{ needs.prepare-release.outputs.version }}
+          path: ${{ runner.temp }}/vsix
+
+      - name: Azure login (OIDC)
+        uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5 #v2.3.0
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          allow-no-subscriptions: true
+
+      - name: Publish preview extension
+        uses: jessehouwing/azdo-marketplace/publish@v6
+        id: publish
+        with:
+          auth-type: oidc
+          use: vsix
+          vsix-file: ${{ runner.temp }}/vsix/*.vsix
+          publisher-id: ${{ env.PUBLISHER_ID_DEV }}
+          extension-id: ${{ env.EXTENSION_ID }}-preview
+          extension-visibility: private_preview
+          update-tasks-id: true
+          no-wait-validation: true
+
+      - name: Wait for validation
+        uses: jessehouwing/azdo-marketplace/wait-for-validation@v6
+        with:
+          auth-type: oidc
+          vsix-file: ${{ steps.publish.outputs.vsix-file }}
+
+      - name: Install extension
+        uses: jessehouwing/azdo-marketplace/install@v6
+        with:
+          auth-type: oidc
+          vsix-file: ${{ steps.publish.outputs.vsix-file }}
+          accounts: |
+            https://dev.azure.com/jessehouwing-dev
+
+      - name: Wait for installation
+        uses: jessehouwing/azdo-marketplace/wait-for-installation@v6
+        with:
+          auth-type: oidc
+          vsix-file: ${{ steps.publish.outputs.vsix-file }}
+          accounts: |
+            https://dev.azure.com/jessehouwing-dev
+
+  # ---------------------------------------------------------------------------
+  # Job 3: Test Azure Pipelines
+  # Triggers the Azure DevOps test pipeline and waits for completion.
+  # ---------------------------------------------------------------------------
+  test-azure-pipelines:
+    name: Test Azure Pipelines
+    needs: [prepare-release, preview-release]
+    runs-on: windows-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Azure login (OIDC)
+        uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5 #v2.3.0
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          allow-no-subscriptions: true
+
+      - name: Get Azure DevOps access token
+        shell: pwsh
+        run: |
+          $token = az account get-access-token `
+            --resource 499b84ac-1321-427f-aa17-267ca6975798 `
+            --query accessToken --output tsv
+          Write-Host "::add-mask::$token"
+          echo "AZURE_DEVOPS_EXT_PAT=$token" >> $env:GITHUB_ENV
+
+      - name: Trigger Azure DevOps test pipeline
+        if: false
+        shell: pwsh
+        run: |
+          az devops configure --defaults organization=https://dev.azure.com/jessehouwing-dev
+          $runId = az pipelines run `
+            --name "${{ vars.AZDO_TEST_PIPELINE_NAME }}" `
+            --branch "release/v${{ needs.prepare-release.outputs.version }}" `
+            --query id --output tsv
+          Write-Host "Triggered pipeline run: $runId"
+          echo "RUN_ID=$runId" >> $env:GITHUB_ENV
+
+      - name: Wait for Azure DevOps test pipeline
+        if: false
+        shell: pwsh
+        run: |
+          az devops configure --defaults organization=https://dev.azure.com/jessehouwing-dev
+          $timeout = 1800  # 30 minutes
+          $elapsed = 0
+          $interval = 30
+          while ($elapsed -lt $timeout) {
+            $status = az pipelines runs show --id $env:RUN_ID --query status --output tsv
+            $result = az pipelines runs show --id $env:RUN_ID --query result --output tsv
+            Write-Host "Pipeline status: $status, result: $result (${elapsed}s elapsed)"
+            if ($status -eq "completed") {
+              if ($result -eq "succeeded") {
+                Write-Host "✅ Pipeline succeeded"
+                exit 0
+              } else {
+                Write-Host "❌ Pipeline failed with result: $result"
+                exit 1
+              }
+            }
+            Start-Sleep -Seconds $interval
+            $elapsed += $interval
+          }
+          Write-Host "❌ Pipeline timed out after ${timeout}s"
+          exit 1
+
+  # ---------------------------------------------------------------------------
+  # Job 4: Test GitHub Actions
+  # Runs the reusable test workflow against the prepared release branch.
+  # ---------------------------------------------------------------------------
+  test-github-actions:
+    name: Test GitHub Actions
+    needs: prepare-release
+    uses: ./.github/workflows/release-test-github-actions.yml
+    with:
+      ref: release/v${{ needs.prepare-release.outputs.version }}
+    secrets: inherit
+    permissions:
+      contents: read
+      id-token: write
+
+  # ---------------------------------------------------------------------------
+  # Job 5: Production release to marketplace
+  # Requires environment approval before running.
+  # ---------------------------------------------------------------------------
+  publish-production:
+    name: Publish to marketplace
+    needs: [prepare-release, preview-release, test-azure-pipelines, test-github-actions]
+    runs-on: windows-latest
+    environment:
+      name: publisher-jessehouwing
+      url: https://marketplace.visualstudio.com/items?itemName=${{ env.PUBLISHER_ID }}.${{ env.EXTENSION_ID }}
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
+        with:
+          ref: release/v${{ needs.prepare-release.outputs.version }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f #v6.3.0
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build and bundle
+        run: |
+          npm run build
+          npm run bundle
+
+      - name: Download VSIX artifact
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e #v4.2.1
+        with:
+          name: vsix-${{ env.EXTENSION_ID }}-${{ needs.prepare-release.outputs.version }}
+          path: ${{ runner.temp }}/vsix
+
+      - name: Azure login (OIDC)
+        uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5 #v2.3.0
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          allow-no-subscriptions: true
+
+      - name: Publish production extension
+        uses: jessehouwing/azdo-marketplace/publish@v6
+        id: publish
+        with:
+          auth-type: oidc
+          use: vsix
+          vsix-file: ${{ runner.temp }}/vsix/*.vsix
+          no-wait-validation: true
+
+      - name: Wait for validation
+        uses: jessehouwing/azdo-marketplace/wait-for-validation@v6
+        with:
+          auth-type: oidc
+          vsix-file: ${{ steps.publish.outputs.vsix-file }}
+
+  # ---------------------------------------------------------------------------
+  # Job 6: Create GitHub draft release and tags
+  # Runs in parallel with publish-production after preview and both test jobs.
+  # The draft is published only after the marketplace release succeeds.
+  # ---------------------------------------------------------------------------
+  create-release:
+    name: Create GitHub draft release
+    needs: [prepare-release, preview-release, test-azure-pipelines, test-github-actions]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
+        with:
+          ref: release/v${{ needs.prepare-release.outputs.version }}
+          fetch-depth: 0
+
+      - name: Download VSIX artifact
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e #v4.2.1
+        with:
+          name: vsix-${{ env.EXTENSION_ID }}-${{ needs.prepare-release.outputs.version }}
+          path: ${{ runner.temp }}/vsix
+
+      - name: Create version tag
+        shell: pwsh
+        run: |
+          $version = "v${{ needs.prepare-release.outputs.version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # Create or update the exact version tag
+          git tag -fa $version -m "Release $version" HEAD
+          git push origin $version --force
+
+      - name: Create GitHub draft release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: pwsh
+        run: |
+          $version = "v${{ needs.prepare-release.outputs.version }}"
+          $vsixFile = Get-ChildItem -Path "${{ runner.temp }}/vsix" -Filter *.vsix -File -Recurse |
+            Select-Object -First 1 -ExpandProperty FullName
+
+          # Delete existing release if present (idempotent)
+          try {
+            gh release delete $version --repo "${{ github.repository }}" --yes
+          }
+          catch {
+          }
+
+          # Create release with VSIX attachment
+          gh release create $version `
+            --repo "${{ github.repository }}" `
+            --title "Release $version" `
+            --draft `
+            --generate-notes `
+            --target "release/$version" `
+            $vsixFile
+
+  # ---------------------------------------------------------------------------
+  # Job 7: Publish GitHub release
+  # Publishes the draft release after marketplace publication succeeds.
+  # ---------------------------------------------------------------------------
+  publish-github-release:
+    name: Publish GitHub release
+    needs: [prepare-release, publish-production, create-release]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
+        with:
+          ref: release/v${{ needs.prepare-release.outputs.version }}
+          fetch-depth: 0
+
+      - name: Publish draft release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: pwsh
+        run: |
+          $version = "v${{ needs.prepare-release.outputs.version }}"
+          gh release edit $version `
+            --repo "${{ github.repository }}" `
+            --draft=false
+
+      - name: Update floating tags
+        shell: pwsh
+        run: |
+          $major = "v${{ needs.prepare-release.outputs.major }}"
+          $majorMinor = "v${{ needs.prepare-release.outputs.major }}.${{ needs.prepare-release.outputs.minor }}"
+
+          # Force-push floating major and major.minor tags
+          git tag -fa $major -m "Floating tag $major" HEAD
+          git push origin $major --force
+
+          git tag -fa $majorMinor -m "Floating tag $majorMinor" HEAD
+          git push origin $majorMinor --force
+
+  # ---------------------------------------------------------------------------
+  # Job 8: Cleanup release branch
+  # ---------------------------------------------------------------------------
+  cleanup:
+    name: Cleanup release branch
+    needs: [prepare-release, publish-production, create-release, publish-github-release]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Delete release branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: pwsh
+        run: |
+          $branch = "release/v${{ needs.prepare-release.outputs.version }}"
+          Write-Host "Deleting branch $branch"
+          try {
+            gh api `
+              --method DELETE `
+              "/repos/${{ github.repository }}/git/refs/heads/$branch"
+          }
+          catch {
+            Write-Host "Branch already deleted or not found"
+          }
+          Write-Host "✅ Branch $branch deleted"

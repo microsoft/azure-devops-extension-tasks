@@ -6,7 +6,7 @@ import { VsixReader } from './vsix-reader.js';
 export interface ExtensionIdentityOptions {
   publisherId?: string;
   extensionId?: string;
-  vsixPath?: string;
+  vsixFile?: string;
   rootFolder?: string;
   manifestGlobs?: string[];
 }
@@ -19,10 +19,10 @@ export async function resolveExtensionIdentity(
   let publisherId = options.publisherId;
   let extensionId = options.extensionId;
 
-  if ((!publisherId || !extensionId) && options.vsixPath) {
-    platform.debug(`Reading extension identity from VSIX: ${options.vsixPath}`);
+  if ((!publisherId || !extensionId) && options.vsixFile) {
+    platform.debug(`Reading extension identity from VSIX: ${options.vsixFile}`);
 
-    const reader = await VsixReader.open(options.vsixPath);
+    const reader = await VsixReader.open(options.vsixFile);
     try {
       const metadata = await reader.getMetadata();
       publisherId = publisherId || metadata.publisher;
@@ -58,7 +58,7 @@ export async function resolveExtensionIdentity(
 
   if (!publisherId || !extensionId) {
     throw new Error(
-      `publisherId and extensionId are required for ${operationName}. Provide them directly, or provide vsixPath/manifestGlobs so they can be inferred from VSIX or manifest metadata.`
+      `publisherId and extensionId are required for ${operationName}. Provide them directly, or provide vsixFile/manifestGlobs so they can be inferred from VSIX or manifest metadata.`
     );
   }
 

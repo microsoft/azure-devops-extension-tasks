@@ -6,9 +6,9 @@ import { cwd } from 'process';
 import { ArgBuilder } from '../arg-builder.js';
 import { FilesystemManifestReader } from '../filesystem-manifest-reader.js';
 import { ManifestEditor } from '../manifest-editor.js';
-import { resolveTaskUpdateOptionPrecedence } from './manifest-option-precedence.js';
 import type { IPlatformAdapter } from '../platform.js';
 import type { TfxManager } from '../tfx-manager.js';
+import { resolveTaskUpdateOptionPrecedence } from './manifest-option-precedence.js';
 
 /**
  * Options for package command
@@ -45,7 +45,7 @@ export interface PackageOptions {
  */
 export interface PackageResult {
   /** Path to created .vsix file */
-  vsixPath: string;
+  vsixFile: string;
   /** Extension ID from manifest */
   extensionId: string;
   /** Extension version */
@@ -249,12 +249,12 @@ export async function packageExtension(
       throw new Error('tfx did not return expected JSON output with path');
     }
 
-    platform.setVariable('vsixPath', json.path, false, true);
+    platform.setVariable('vsixFile', json.path, false, true);
 
     platform.info(`Packaged extension: ${json.path}`);
 
     return {
-      vsixPath: json.path,
+      vsixFile: json.path,
       extensionId: json.id || extensionId || '',
       extensionVersion: json.version || options.extensionVersion || '',
       publisherId: json.publisher || options.publisherId || '',

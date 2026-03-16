@@ -112,7 +112,7 @@ inputs:
       - Must match publisher in manifest (or override it)
       - Required for command: show.
       - Optional for install/share/unpublish/unshare/wait-for-validation/query-version:
-        falls back to value from manifest-file or vsix-path/vsix-file when not specified.
+        falls back to value from manifest-file or vsix-file when not specified.
       - Alphanumeric with hyphens, dots, underscores only
 
       **Example:** `mycompany` or `my-publisher-id`
@@ -129,7 +129,7 @@ inputs:
       - Combined with Publisher ID forms full identifier: `publisherId.extensionId`
       - Required for command: show.
       - Optional for install/share/unpublish/unshare/wait-for-validation/query-version:
-        falls back to value from manifest-file or vsix-path/vsix-file when not specified.
+        falls back to value from manifest-file or vsix-file when not specified.
       - Alphanumeric with hyphens, dots, underscores only
 
       **Example:** `my-extension` or `azure-devops-tasks`

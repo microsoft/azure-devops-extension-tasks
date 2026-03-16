@@ -31,7 +31,7 @@ inputs:
   extension-id:
     type: identifier
 
-  vsix-path:
+  vsix-file:
     type: string
 
   manifest-file:

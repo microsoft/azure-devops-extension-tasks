@@ -262,8 +262,8 @@ async function runPackage(platform: GitHubAdapter, tfxManager: TfxManager): Prom
 
   const result = await packageExtension(options, tfxManager, platform);
 
-  if (result.vsixPath) {
-    platform.setOutput('vsix-path', result.vsixPath);
+  if (result.vsixFile) {
+    platform.setOutput('vsix-file', result.vsixFile);
   }
 }
 
@@ -309,8 +309,8 @@ async function runPublish(
     platform
   );
 
-  if (result.vsixPath) {
-    platform.setOutput('vsix-path', result.vsixPath);
+  if (result.vsixFile) {
+    platform.setOutput('vsix-file', result.vsixFile);
   }
 
   platform.debug(`Published: ${JSON.stringify(result)}`);
@@ -325,7 +325,7 @@ async function runUnpublish(
     {
       publisherId: platform.getInput('publisher-id'),
       extensionId: platform.getInput('extension-id'),
-      vsixPath: platform.getInput('vsix-path'),
+      vsixFile: platform.getInput('vsix-file'),
       manifestGlobs: platform.getDelimitedInput('manifest-file', '\n'),
     },
     auth,
@@ -343,7 +343,7 @@ async function runShare(
     {
       publisherId: platform.getInput('publisher-id'),
       extensionId: platform.getInput('extension-id'),
-      vsixPath: platform.getInput('vsix-path'),
+      vsixFile: platform.getInput('vsix-file'),
       manifestGlobs: platform.getDelimitedInput('manifest-file', '\n'),
       shareWith: platform.getDelimitedInput('accounts', '\n', true),
     },
@@ -362,7 +362,7 @@ async function runUnshare(
     {
       publisherId: platform.getInput('publisher-id'),
       extensionId: platform.getInput('extension-id'),
-      vsixPath: platform.getInput('vsix-path'),
+      vsixFile: platform.getInput('vsix-file'),
       manifestGlobs: platform.getDelimitedInput('manifest-file', '\n'),
       unshareWith: platform.getDelimitedInput('accounts', '\n', true),
     },
@@ -381,7 +381,7 @@ async function runInstall(
     {
       publisherId: platform.getInput('publisher-id'),
       extensionId: platform.getInput('extension-id'),
-      vsixPath: platform.getInput('vsix-path'),
+      vsixFile: platform.getInput('vsix-file'),
       manifestGlobs: platform.getDelimitedInput('manifest-file', '\n'),
       accounts: platform.getDelimitedInput('accounts', '\n', true),
     },
@@ -470,7 +470,7 @@ async function runWaitForValidation(
     {
       publisherId: platform.getInput('publisher-id'),
       extensionId: platform.getInput('extension-id'),
-      vsixPath: platform.getInput('vsix-path'),
+      vsixFile: platform.getInput('vsix-file'),
       extensionVersion: platform.getInput('extension-version'),
       manifestGlobs: platform.getDelimitedInput('manifest-file', '\n'),
       timeoutMinutes: timeoutMinutesInput ? parseInt(timeoutMinutesInput, 10) : undefined,
@@ -514,7 +514,7 @@ async function runWaitForInstallation(
       accounts: platform.getDelimitedInput('accounts', '\n', true),
       expectedTasks,
       manifestFiles: platform.getDelimitedInput('manifest-file', '\n'),
-      vsixPath: platform.getInput('vsix-path'),
+      vsixFile: platform.getInput('vsix-file'),
       timeoutMinutes: parseInt(platform.getInput('timeout-minutes') || '10'),
       pollingIntervalSeconds: parseInt(platform.getInput('polling-interval-seconds') || '30'),
     },

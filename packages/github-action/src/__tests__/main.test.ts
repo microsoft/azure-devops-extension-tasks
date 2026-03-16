@@ -137,7 +137,7 @@ describe('GitHub Action main entrypoint', () => {
       token: 'token',
       serviceUrl: 'https://dev.azure.com/org',
     }));
-    packageExtensionMock.mockImplementation(async () => ({ vsixPath: '/tmp/ext.vsix' }));
+    packageExtensionMock.mockImplementation(async () => ({ vsixFile: '/tmp/ext.vsix' }));
     publishExtensionMock.mockImplementation(async () => ({}));
     installExtensionMock.mockImplementation(async () => ({ allSuccess: true }));
     waitForInstallationMock.mockImplementation(async () => ({ success: true }));
@@ -159,7 +159,7 @@ describe('GitHub Action main entrypoint', () => {
 
     expect(validateNodeAvailableMock).toHaveBeenCalledWith(platform);
     expect(packageExtensionMock).toHaveBeenCalled();
-    expect(platform.setOutput).toHaveBeenCalledWith('vsix-path', '/tmp/ext.vsix');
+    expect(platform.setOutput).toHaveBeenCalledWith('vsix-file', '/tmp/ext.vsix');
     expect(getAuthMock).not.toHaveBeenCalled();
     expect(platform.setResult).toHaveBeenCalledWith('Succeeded', 'package completed successfully');
   });
@@ -210,7 +210,7 @@ describe('GitHub Action main entrypoint', () => {
   });
 
   it('executes publish operation with oidc auth and version-spec tfx', async () => {
-    publishExtensionMock.mockImplementation(async () => ({ vsixPath: '/tmp/published.vsix' }));
+    publishExtensionMock.mockImplementation(async () => ({ vsixFile: '/tmp/published.vsix' }));
 
     const platform = createPlatformMock({
       inputs: {
@@ -249,11 +249,11 @@ describe('GitHub Action main entrypoint', () => {
       expect.anything(),
       platform
     );
-    expect(platform.setOutput).toHaveBeenCalledWith('vsix-path', '/tmp/published.vsix');
+    expect(platform.setOutput).toHaveBeenCalledWith('vsix-file', '/tmp/published.vsix');
   });
 
   it('defaults publish source to manifest when use is omitted', async () => {
-    publishExtensionMock.mockImplementation(async () => ({ vsixPath: '/tmp/published.vsix' }));
+    publishExtensionMock.mockImplementation(async () => ({ vsixFile: '/tmp/published.vsix' }));
 
     const platform = createPlatformMock({
       inputs: {
@@ -283,7 +283,7 @@ describe('GitHub Action main entrypoint', () => {
 
   it('executes publish from vsix and emits modified vsix path output', async () => {
     publishExtensionMock.mockImplementation(async () => ({
-      vsixPath: '/tmp/temp-12345.vsix',
+      vsixFile: '/tmp/temp-12345.vsix',
     }));
 
     const platform = createPlatformMock({
@@ -308,7 +308,7 @@ describe('GitHub Action main entrypoint', () => {
       expect.anything(),
       platform
     );
-    expect(platform.setOutput).toHaveBeenCalledWith('vsix-path', '/tmp/temp-12345.vsix');
+    expect(platform.setOutput).toHaveBeenCalledWith('vsix-file', '/tmp/temp-12345.vsix');
     expectNoLegacyStatusOutputs(platform);
   });
 
@@ -496,12 +496,12 @@ describe('GitHub Action main entrypoint', () => {
     expect(setFailedMock).toHaveBeenCalledWith('Unknown operation: nope');
   });
 
-  it('forwards vsix-path for identity fallback in unpublish', async () => {
+  it('forwards vsix-file for identity fallback in unpublish', async () => {
     const platform = createPlatformMock({
       inputs: {
         operation: 'unpublish',
         'auth-type': 'pat',
-        'vsix-path': '/tmp/extension.vsix',
+        'vsix-file': '/tmp/extension.vsix',
       },
     });
     githubAdapterCtorMock.mockReturnValue(platform);
@@ -512,7 +512,7 @@ describe('GitHub Action main entrypoint', () => {
       expect.objectContaining({
         publisherId: undefined,
         extensionId: undefined,
-        vsixPath: '/tmp/extension.vsix',
+        vsixFile: '/tmp/extension.vsix',
       }),
       expect.anything(),
       expect.anything(),

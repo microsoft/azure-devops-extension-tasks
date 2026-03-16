@@ -56,7 +56,7 @@ When creating a PAT for pipeline automation, include at least the following scop
     extension-id: my-extension
     manifest-file: vss-extension.json
 
-- run: echo "VSIX: ${{ steps.publish.outputs.vsix-path }}"
+- run: echo "VSIX: ${{ steps.publish.outputs.vsix-file }}"
 ```
 
 ### Main action inputs
@@ -85,7 +85,7 @@ When creating a PAT for pipeline automation, include at least the following scop
 - `overrides-file`: Points to an overrides JSON file merged into manifest packaging/publishing.
 - `use`: Chooses publish input source (`manifest` or `vsix`).
 - `vsix-file`: Points to a pre-built VSIX file when publishing from VSIX source.
-- `vsix-path`: Provides a VSIX path for identity/task discovery in install/share/unshare/validation flows.
+- `vsix-file`: Provides a VSIX file for identity/task discovery in install/share/unshare/validation flows.
 
 **Packaging options**
 
@@ -122,7 +122,7 @@ When creating a PAT for pipeline automation, include at least the following scop
 
 **Package / publish**
 
-- `vsix-path`: Returns the generated VSIX path.
+- `vsix-file`: Returns path to the generated VSIX file.
 
 **Show**
 
@@ -146,7 +146,7 @@ When creating a PAT for pipeline automation, include at least the following scop
     extension-id: my-extension
     manifest-file: vss-extension.json
 
-- run: echo "Packaged: ${{ steps.package.outputs.vsix-path }}"
+- run: echo "Packaged: ${{ steps.package.outputs.vsix-file }}"
 ```
 
 ### publish

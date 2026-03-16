@@ -137,22 +137,22 @@ export interface VsixFile {
  */
 export class VsixReader extends ManifestReader {
   private zipFile: yauzl.ZipFile | null = null;
-  private readonly vsixPath: string;
+  private readonly vsixFile: string;
   private fileCache: Map<string, Buffer> = new Map();
   private entriesCache: yauzl.Entry[] | null = null;
 
-  private constructor(vsixPath: string) {
+  private constructor(vsixFile: string) {
     super();
-    this.vsixPath = vsixPath;
+    this.vsixFile = vsixFile;
   }
 
   /**
    * Open a VSIX file for reading
-   * @param vsixPath Path to the VSIX file
+   * @param vsixFile Path to the VSIX file
    * @returns VsixReader instance
    */
-  static async open(vsixPath: string): Promise<VsixReader> {
-    const reader = new VsixReader(vsixPath);
+  static async open(vsixFile: string): Promise<VsixReader> {
+    const reader = new VsixReader(vsixFile);
     await reader.openZip();
     return reader;
   }
@@ -163,7 +163,7 @@ export class VsixReader extends ManifestReader {
   private async openZip(): Promise<void> {
     return new Promise((resolve, reject) => {
       yauzl.open(
-        this.vsixPath,
+        this.vsixFile,
         {
           lazyEntries: true,
           strictFileNames: false,
@@ -491,7 +491,7 @@ export class VsixReader extends ManifestReader {
    * Get the path to the VSIX file
    */
   getPath(): string {
-    return this.vsixPath;
+    return this.vsixFile;
   }
 }
 

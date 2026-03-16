@@ -33,7 +33,7 @@ Validate that an Azure DevOps extension has been successfully processed by the m
 - uses: jessehouwing/azdo-marketplace/wait-for-validation@v6
   with:
     token: ${{ secrets.MARKETPLACE_TOKEN }}
-    vsix-path: ${{ steps.package.outputs.vsix-path }}
+    vsix-file: ${{ steps.package.outputs.vsix-file }}
 ```
 
 ### With OIDC Authentication
@@ -61,7 +61,7 @@ Validate that an Azure DevOps extension has been successfully processed by the m
 Identity (choose one):
 
 - `publisher-id` + `extension-id`
-- `vsix-path` (fallback source for identity metadata)
+- `vsix-file` (fallback source for identity metadata)
 
 OR
 
@@ -86,7 +86,7 @@ OR
 
 #### Identity Fallback
 
-- `vsix-path`: Path to VSIX file used to infer `publisher-id` and `extension-id` when omitted
+- `vsix-file`: Path to VSIX file used to infer `publisher-id` and `extension-id` when omitted
 
 ## Outputs
 
@@ -152,7 +152,7 @@ This action polls the marketplace to check if your extension has been successful
 - `publisher-id`: Identifies the publisher that owns the extension to validate.
 - `extension-id`: Identifies the extension to validate.
 - `extension-version`: Targets a specific extension version for validation checks.
-- `vsix-path`: Provides VSIX-based identity fallback when publisher/extension IDs are omitted.
+- `vsix-file`: Provides VSIX-based identity fallback when publisher/extension IDs are omitted.
 - `timeout-minutes`: Sets total wait time for validation in minutes (default: `10`).
 - `polling-interval-seconds`: Sets polling interval between validation checks in seconds (default: `30`).
 

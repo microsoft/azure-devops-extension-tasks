@@ -185,7 +185,7 @@ jobs:
 
 ## GitHub Marketplace outputs
 
-- `vsix-path`: Returns the generated/final VSIX path produced during publish.
+- `vsix-file`: Returns the generated/final VSIX path produced during publish.
 
 ## See Also
 
