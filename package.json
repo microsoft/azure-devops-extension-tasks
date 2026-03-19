@@ -14,8 +14,8 @@
   "scripts": {
     "initdev": "npm run initdev:npm",
     "initdev:npm": "npm run initdev:npm:base & npm run initdev:npm:tasks",
-    "initdev:npm:base": "npm install --no-progress --force --no-update-notifier --legacy-peer-deps --no-fund",
-    "initdev:npm:tasks": "glob-exec --parallel --foreach \"BuildTasks/*/tsconfig.json\" -- \"cd {{file.dir}} && npm install --force --no-update-notifier --no-progress --legacy-peer-deps --no-fund\"",
+    "initdev:npm:base": "npm install --no-progress --force --no-update-notifier --legacy-peer-deps --no-fund && npm audit fix --legacy-peer-deps || exit /b 0",
+    "initdev:npm:tasks": "glob-exec --parallel --foreach \"BuildTasks/*/tsconfig.json\" -- \"cd {{file.dir}} && npm install --force --no-update-notifier --no-progress --legacy-peer-deps --no-fund  && npm audit fix --legacy-peer-deps || exit /b 0\"",
     "compile:tasks": "npm run compile:tasks:v5",
     "compile:tasks:v5": "glob-exec \"BuildTasks/*/tsconfig.json\" -- \"tsc -b {{files.join(' ')}}\"",
     "postcompile:tasks": "npm run lint:tasks",
