@@ -10,7 +10,7 @@ export function getVsixPublisherExe(): string {
     if (cacheVsixPublisherExe === "") {
         const vswhereTool = tl.tool(path.join(path.dirname(fileURLToPath(import.meta.url)), "tools", "vswhere.exe"));
         vswhereTool.line("-version [15.0,) -latest -requires Microsoft.VisualStudio.Component.VSSDK -find VSSDK\\VisualStudioIntegration\\Tools\\Bin\\VsixPublisher.exe");
-        const vswhereResult = vswhereTool.execSync({ silent: true } as tr.IExecSyncOptions);
+        const vswhereResult = vswhereTool.execSync({ silent: true });
         const vsixPublisherExe = vswhereResult.stdout.trim();
         if (vswhereResult.code === 0 && vsixPublisherExe && tl.exist(vsixPublisherExe)) {
             tl.debug('VsixPublisher.exe installed path: ' + vsixPublisherExe);
