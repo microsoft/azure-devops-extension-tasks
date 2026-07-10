@@ -10,7 +10,7 @@
   "license": "MIT",
   "dependencies": {
     "azure-pipelines-task-lib": "^5.2.7",
-    "azure-pipelines-tasks-azure-arm-rest": "^3.271.2",
+    "azure-pipelines-tasks-azure-arm-rest": "^3.277.0",
     "uuidv5": "^1.0.0"
   },
   "devDependencies": {
