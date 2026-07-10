@@ -27,6 +27,11 @@ updates:
   - "/BuildTasks/*/"
   schedule:
     interval: "weekly"
+  groups:
+    shared-task-dependencies:
+      patterns:
+      - "*"
+      group-by: dependency-name
   ignore:
   - dependency-name: "azure-pipelines-task-lib"
     update-types: [ "version-update:semver-major" ]
