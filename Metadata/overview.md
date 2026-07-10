@@ -28,12 +28,12 @@ Visual Studio
 
  When creating a personal access token for use by your pipeline, make sure the token has at least the following scopes for the task(s) you are using:
 
-* **Publish**: `All accessible organisations`, `Marketplace (publish)`
-* **Unpublish**: `All accessible organisations`, `Marketplace (manage)`
-* **Share**: `All accessible organisations`, `Marketplace (publish)`
-* **Install**: `All accessible organisations` or a specific Organisation, `Extensions (read and manage)`, `Marketplace (acquire)`
-* **Query Version**: `All accessible organisations`, `Marketplace (read)`
-* **Is Valid**: `All accessible organisations`, `Marketplace (read)`
+* **Publish**: `Marketplace (publish)`
+* **Unpublish**: `Marketplace (manage)`
+* **Share**: `Marketplace (publish)`
+* **Install**: `Extensions (read and manage)`, `Marketplace (acquire)`
+* **Query Version**: `Marketplace (read)`
+* **Is Valid**: `Marketplace (read)`
 
 ![Permissions](./Images/permissions.png)
 
