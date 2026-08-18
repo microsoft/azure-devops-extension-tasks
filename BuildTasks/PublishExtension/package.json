@@ -11,7 +11,7 @@
   "dependencies": {
     "7zip-bin": "^5.2.0",
     "azure-pipelines-task-lib": "^5.278.0",
-    "azure-pipelines-tasks-azure-arm-rest": "^3.277.0",
+    "azure-pipelines-tasks-azure-arm-rest": "^3.277.1",
     "uuidv5": "^1.0.0",
     "x2js": "^3.4.4"
   }
