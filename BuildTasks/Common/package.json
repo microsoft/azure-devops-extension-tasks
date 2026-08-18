@@ -9,7 +9,7 @@
   "type": "module",
   "license": "MIT",
   "dependencies": {
-    "azure-pipelines-task-lib": "^5.278.0",
+    "azure-pipelines-task-lib": "^5.279.0",
     "uuidv5": "^1.0.0"
   },
   "types": "./uuidv5.d.ts"
