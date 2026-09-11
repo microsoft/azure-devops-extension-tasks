@@ -10,8 +10,11 @@
   "license": "MIT",
   "dependencies": {
     "azure-pipelines-task-lib": "^5.278.0",
-    "azure-pipelines-tool-lib": "^2.0.10",
+    "azure-pipelines-tool-lib": "^2.279.1",
     "tfx-cli": "^0.24.0",
     "uuidv5": "^1.0.0"
+  },
+  "overrides": {
+    "qs": "^6.16.0"
   }
 }
