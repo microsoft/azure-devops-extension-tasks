@@ -14,8 +14,8 @@
   "scripts": {
     "initdev": "npm run initdev:npm",
     "initdev:npm": "npm run initdev:npm:base & npm run initdev:npm:tasks",
-    "initdev:npm:base": "npm install --no-progress --force --no-update-notifier --legacy-peer-deps --no-fund && npm audit fix --legacy-peer-deps || exit /b 0",
-    "initdev:npm:tasks": "glob-exec --parallel --foreach \"BuildTasks/*/tsconfig.json\" -- \"cd {{file.dir}} && npm install --force --no-update-notifier --no-progress --legacy-peer-deps --no-fund  && npm audit fix --legacy-peer-deps || exit /b 0\"",
+    "initdev:npm:base": "npm ci --no-progress --force --no-update-notifier --no-fund",
+    "initdev:npm:tasks": "glob-exec --foreach \"BuildTasks/*/tsconfig.json\" -- \"cd {{file.dir}} && npm ci --force --no-update-notifier --no-progress --no-fund\"",
     "compile:tasks": "npm run compile:tasks:v5",
     "compile:tasks:v5": "glob-exec \"BuildTasks/*/tsconfig.json\" -- \"tsc -b {{files.join(' ')}}\"",
     "postcompile:tasks": "npm run lint:tasks",
@@ -26,6 +26,10 @@
     "build:clean": "npm run clean && npm run initdev && npm run build",
     "build:tasks": "npm run compile:tasks",
     "package": "glob-exec --parallel --foreach \"BuildTasks/*/tsconfig.json\" -- \"cd {{file.dir}} && npm dedupe && npm prune --omit=dev\"",
+    "install": "npm install --no-update-notifier --no-progress --no-fund",
+    "install:recursive": "glob-exec --foreach \"BuildTasks/*/tsconfig.json\" -- \"cd {{file.dir}} && npm install --force --no-update-notifier --no-progress --no-fund\"",
+    "audit": "npm audit fix",
+    "audit:recursive": "glob-exec --foreach \"BuildTasks/*/tsconfig.json\" -- \"cd {{file.dir}} && npm audit fix\"",
     "clean": "git clean -fdX"
   },
   "author": "Microsoft Corporation",
@@ -40,7 +44,7 @@
     "eslint": "^10.10.0",
     "glob-exec": "^0.1.1",
     "globals": "^17.12.0",
-    "tfx-cli": "^0.24.0",
+    "tfx-cli": "^0.24.2",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.70.0"
   },

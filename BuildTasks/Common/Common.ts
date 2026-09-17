@@ -5,8 +5,16 @@ import fs from "node:fs/promises";
 import fsSync from "node:fs";
 import os from "node:os";
 import tl from "azure-pipelines-task-lib";
-import { ToolRunner } from "azure-pipelines-task-lib/toolrunner.js";
+import { IExecOptions, IExecSyncOptions, IExecSyncResult, ToolRunner } from "azure-pipelines-task-lib/toolrunner.js";
 import uuidv5 from "uuidv5";
+
+export interface TfxRunner {
+    arg(val: string | string[]): TfxRunner;
+    line(val: string): TfxRunner;
+    argIf(condition: unknown, val: string | string[]): TfxRunner;
+    execAsync(options?: IExecOptions): Promise<number>;
+    execSync(options?: IExecSyncOptions): IExecSyncResult;
+}
 
 function writeBuildTempFile(taskName: string, data: any): string {
     const baseTempDir = tl.getVariable("Agent.TempDirectory") || os.tmpdir();
@@ -46,7 +54,7 @@ async function deleteBuildTempFile(tempFile: string) {
  * @param  {ToolRunner} tfx
  * @returns {() => Promise<void>} Cleaner function that the caller should await to cleanup temporary files created to be used as arguments
  */
-export function validateAndSetTfxManifestArguments(tfx: ToolRunner): (() => Promise<void>) {
+export function validateAndSetTfxManifestArguments(tfx: TfxRunner): (() => Promise<void>) {
     const rootFolder = tl.getInput("rootFolder", false);
     tfx.argIf(rootFolder, ["--root", rootFolder]);
 
@@ -182,11 +190,11 @@ export function validateAndSetTfxManifestArguments(tfx: ToolRunner): (() => Prom
  * Run a tfx command by ensuring that "tfx" exists, installing it on the fly if needed.
  * @param  {(tfx:ToolRunner)=>void} cmd
  */
-export async function runTfx(cmd: (tfx: ToolRunner) => void): Promise<boolean> {
+export async function runTfx(cmd: (tfx: TfxRunner) => void): Promise<boolean> {
     let tfx: ToolRunner;
     let tfxPath: string;
 
-    const tryRunCmd = async (tfx: ToolRunner) => {
+    const tryRunCmd = async (tfx: TfxRunner) => {
         try {
             // Set working folder
             const cwd = tl.getInput("cwd", false);
