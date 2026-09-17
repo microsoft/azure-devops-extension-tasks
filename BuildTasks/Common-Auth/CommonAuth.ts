@@ -1,6 +1,6 @@
 import tl from "azure-pipelines-task-lib";
-import { ToolRunner } from "azure-pipelines-task-lib/toolrunner.js";
 import { AzureRMEndpoint } from "azure-pipelines-tasks-azure-arm-rest/azure-arm-endpoint.js";
+import type { TfxRunner } from "../Common/Common.js";
 
 export function getMarketplaceEndpointDetails(inputFieldName: string): {
     url: string;
@@ -24,7 +24,7 @@ export function getMarketplaceEndpointDetails(inputFieldName: string): {
     };
 }
 
-export async function setTfxMarketplaceArguments(tfx: ToolRunner, setServiceUrl = true): Promise<void> {
+export async function setTfxMarketplaceArguments(tfx: TfxRunner, setServiceUrl = true): Promise<void> {
     const connectTo = tl.getInput("connectTo", false) || "VsTeam";
 
     if (connectTo === "VsTeam") {
