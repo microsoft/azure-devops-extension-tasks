@@ -54,7 +54,8 @@ async function deleteBuildTempFile(tempFile: string) {
  * @param  {ToolRunner} tfx
  * @returns {() => Promise<void>} Cleaner function that the caller should await to cleanup temporary files created to be used as arguments
  */
-export function validateAndSetTfxManifestArguments(tfx: TfxRunner): (() => Promise<void>) {
+export function validateAndSetTfxManifestArguments(tfx: TfxRunner, options?: { skipVersionOverride?: boolean }): (() => Promise<void>) {
+    const skipVersionOverride = options?.skipVersionOverride ?? false;
     const rootFolder = tl.getInput("rootFolder", false);
     tfx.argIf(rootFolder, ["--root", rootFolder]);
 
@@ -150,7 +151,7 @@ export function validateAndSetTfxManifestArguments(tfx: TfxRunner): (() => Promi
     }
 
     const extensionVersion = getExtensionVersion();
-    if (extensionVersion) {
+    if (extensionVersion && !skipVersionOverride) {
         tl.debug(`Overriding extension version to: ${extensionVersion}`);
         jsonOverrides = (jsonOverrides || {});
         jsonOverrides.version = extensionVersion;
