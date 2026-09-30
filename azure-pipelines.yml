@@ -16,6 +16,8 @@ pool:
 variables:
 - name: 'marketplaceServiceConnection'
   value: '84645cfd-95a8-4fcc-bb6a-d8e35e3d699d'
+- name: 'npm_config_registry'
+  value: 'https://packagefeedproxy.microsoft.io/npm/'
 
 stages:
 - stage: 'Build'

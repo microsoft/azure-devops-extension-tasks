@@ -26,10 +26,10 @@
     "build:clean": "npm run clean && npm run initdev && npm run build",
     "build:tasks": "npm run compile:tasks",
     "package": "glob-exec --parallel --foreach \"BuildTasks/*/tsconfig.json\" -- \"cd {{file.dir}} && npm dedupe && npm prune --omit=dev\"",
-    "install": "npm install --no-update-notifier --no-progress --no-fund",
+    "install:base": "npm install --no-update-notifier --no-progress --no-fund",
     "install:recursive": "glob-exec --foreach \"BuildTasks/*/tsconfig.json\" -- \"cd {{file.dir}} && npm install --force --no-update-notifier --no-progress --no-fund\"",
-    "audit": "npm audit fix",
-    "audit:recursive": "glob-exec --foreach \"BuildTasks/*/tsconfig.json\" -- \"cd {{file.dir}} && npm audit fix\"",
+    "audit:base": "npm audit fix",
+    "audit:recursive": "glob-exec --foreach \"BuildTasks/*/tsconfig.json\" -- \"cd {{file.dir}} && npm audit fix || exit 0\"",
     "clean": "git clean -fdX"
   },
   "author": "Microsoft Corporation",
