@@ -26,9 +26,9 @@ stages:
   - job:
     displayName: 'Build on Windows'
     steps:
-    - task: NodeTool@0
+    - task: UseNode@1
       inputs:
-        versionSpec: '20.x'
+        version: '24.x'
       displayName: 'Install Node.js'
 
     - script: |
@@ -198,9 +198,9 @@ stages:
             artifact: vsix
             patterns: "**/*-private.vsix"
 
-          - task: NodeTool@0
+          - task: UseNode@1
             inputs:
-              versionSpec: '20.x'
+              version: '24.x'
             displayName: 'Install Node.js'
 
           - task: TfxInstaller@5
@@ -239,9 +239,9 @@ stages:
             artifact: vsix
             patterns: "**/*-public.vsix"
 
-          - task: NodeTool@0
+          - task: UseNode@1
             inputs:
-              versionSpec: '20.x'
+              version: '24.x'
             displayName: 'Install Node.js'
 
           - task: TfxInstaller@5

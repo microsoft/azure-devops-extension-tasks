@@ -216,9 +216,9 @@ stages:
     - download: current
       artifact: unsigned-vsix
 
-    - task: NodeTool@0
+    - task: UseNode@1
       inputs:
-        versionSpec: '20.x'
+        version: '24.x'
       displayName: 'Install Node.js'
 
     - task: TfxInstaller@5
@@ -268,9 +268,9 @@ stages:
     - download: current
       artifact: unsigned-vsix
 
-    - task: NodeTool@0
+    - task: UseNode@1
       inputs:
-        versionSpec: '20.x'
+        version: '24.x'
       displayName: 'Install Node.js'
 
     - task: TfxInstaller@5
