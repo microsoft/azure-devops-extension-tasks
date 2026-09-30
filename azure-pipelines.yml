@@ -16,6 +16,8 @@ pool:
 variables:
 - name: 'marketplaceServiceConnection'
   value: '84645cfd-95a8-4fcc-bb6a-d8e35e3d699d'
+- name: 'npm_config_registry'
+  value: 'https://packagefeedproxy.microsoft.io/npm/'
 
 stages:
 - stage: 'Build'
@@ -24,9 +26,9 @@ stages:
   - job:
     displayName: 'Build on Windows'
     steps:
-    - task: NodeTool@0
+    - task: UseNode@1
       inputs:
-        versionSpec: '20.x'
+        version: '24.x'
       displayName: 'Install Node.js'
 
     - script: |
@@ -196,9 +198,9 @@ stages:
             artifact: vsix
             patterns: "**/*-private.vsix"
 
-          - task: NodeTool@0
+          - task: UseNode@1
             inputs:
-              versionSpec: '20.x'
+              version: '24.x'
             displayName: 'Install Node.js'
 
           - task: TfxInstaller@5
@@ -237,9 +239,9 @@ stages:
             artifact: vsix
             patterns: "**/*-public.vsix"
 
-          - task: NodeTool@0
+          - task: UseNode@1
             inputs:
-              versionSpec: '20.x'
+              version: '24.x'
             displayName: 'Install Node.js'
 
           - task: TfxInstaller@5
