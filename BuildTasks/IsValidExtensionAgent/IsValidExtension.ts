@@ -45,7 +45,33 @@ await common.runTfx(async tfx => {
                 // condition, not a "the extension is invalid" verdict, so it must not
                 // be parsed as JSON nor be reported as a validation failure (#1742).
                 if (exitCode !== 0 || !outputStream.jsonString) {
-                    const reason = errorStream.messages.join("").trim() || `tfx exited with code ${exitCode} and produced no output`;
+                    // tfx writes its errors to stdout, so check both streams.
+                    const messages = [...outputStream.messages, ...errorStream.messages];
+                    const reason = messages.join("").trim() || `tfx exited with code ${exitCode} and produced no output`;
+
+                    // An explicit Marketplace error (e.g. expired or invalid PAT) will not resolve by retrying.
+                    for (const line of messages) {
+                        const tfError = /error: Error: (TF\d+:.*)/.exec(line);
+                        if (tfError) {
+                            throw new Error(tfError[1].trim());
+                        }
+
+                        const start = line.indexOf("{");
+                        const end = line.lastIndexOf("}");
+                        if (start < 0 || end <= start) {
+                            continue;
+                        }
+                        let marketplaceError: { typeKey?: string; message?: string };
+                        try {
+                            marketplaceError = JSON.parse(line.substring(start, end + 1)) as { typeKey?: string; message?: string };
+                        } catch {
+                            continue;
+                        }
+                        if (marketplaceError?.typeKey) {
+                            throw new Error(marketplaceError.message || marketplaceError.typeKey);
+                        }
+                    }
+
                     return retry(new Error(`Could not reach the Marketplace to determine validation status: ${reason}`));
                 }
 

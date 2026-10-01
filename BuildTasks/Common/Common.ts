@@ -288,7 +288,7 @@ export class TfxJsonOutputStream extends stream.Writable {
         if (!messages) { return; }
         // Split messages to be sure that we are invoking the write lineWriter for each lineWriter
         // Otherwise we could get messages in console with the wrong prefix used by azure-pipelines-task-lib
-        messages.split("\n").forEach(lineWriter);
+        messages.split("\n").forEach(line => lineWriter(line));
     }
 }
 
