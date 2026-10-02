@@ -8,6 +8,54 @@ import tl from "azure-pipelines-task-lib";
 import { IExecOptions, IExecSyncOptions, IExecSyncResult, ToolRunner } from "azure-pipelines-task-lib/toolrunner.js";
 import uuidv5 from "uuidv5";
 
+interface TaskVersion {
+    Major?: string;
+    Minor?: string;
+    Patch?: string;
+    major?: number;
+    minor?: number;
+    patch?: number;
+}
+
+interface ManifestContribution {
+    type?: string;
+    properties?: {
+        name?: string;
+        supportsTasks?: string[];
+    };
+}
+
+interface ExtensionManifest {
+    id?: string;
+    name?: string;
+    publisher?: string;
+    version?: string;
+    contributions?: ManifestContribution[];
+}
+
+interface TaskManifest {
+    id?: string;
+    name?: string;
+    version?: TaskVersion;
+}
+
+interface ManifestOverrides {
+    name?: string;
+    public?: boolean;
+    galleryFlags?: string[];
+    version?: string;
+}
+
+export function toErrorMessage(error: unknown): string {
+    if (error instanceof Error) {
+        return error.message;
+    }
+    if (typeof error === "string") {
+        return error;
+    }
+    return JSON.stringify(error) ?? "Unknown error";
+}
+
 export interface TfxRunner {
     arg(val: string | string[]): TfxRunner;
     line(val: string): TfxRunner;
@@ -16,7 +64,7 @@ export interface TfxRunner {
     execSync(options?: IExecSyncOptions): IExecSyncResult;
 }
 
-function writeBuildTempFile(taskName: string, data: any): string {
+function writeBuildTempFile(taskName: string, data: string | Buffer): string {
     const baseTempDir = tl.getVariable("Agent.TempDirectory") || os.tmpdir();
     fsSync.mkdirSync(baseTempDir, { recursive: true });
 
@@ -113,18 +161,18 @@ export function validateAndSetTfxManifestArguments(tfx: TfxRunner, options?: { s
         }
     }
 
-    let jsonOverrides: any;
+    let jsonOverrides: ManifestOverrides | undefined;
     const extensionName = tl.getInput("extensionName", false);
     if (extensionName) {
         tl.debug(`Overriding extension name to: ${extensionName}`);
-        jsonOverrides = (jsonOverrides || {});
+        jsonOverrides ??= {};
         jsonOverrides.name = extensionName;
     }
 
     const extensionVisibility = tl.getInput("extensionVisibility", false);
     if (extensionVisibility && extensionVisibility !== "default") {
         tl.debug(`Overriding extension visibility to: ${extensionVisibility}`);
-        jsonOverrides = (jsonOverrides || {});
+        jsonOverrides ??= {};
 
         const isPublic = extensionVisibility.indexOf("public") >= 0;
         const isPreview = extensionVisibility.indexOf("preview") >= 0;
@@ -132,7 +180,7 @@ export function validateAndSetTfxManifestArguments(tfx: TfxRunner, options?: { s
         jsonOverrides.public = isPublic;
 
         if (isPreview) {
-            jsonOverrides.galleryFlags = jsonOverrides.galleryFlags || [];
+            jsonOverrides.galleryFlags ??= [];
             jsonOverrides.galleryFlags.push("Preview");
         }
     }
@@ -140,12 +188,12 @@ export function validateAndSetTfxManifestArguments(tfx: TfxRunner, options?: { s
     const extensionPricing = tl.getInput("extensionPricing", false);
     if (extensionPricing && extensionPricing !== "default") {
         tl.debug(`Overriding extension pricing to: ${extensionPricing}`);
-        jsonOverrides = (jsonOverrides || {});
+        jsonOverrides ??= {};
 
         const isPaid = extensionPricing.indexOf("paid") >= 0;
 
         if (isPaid) {
-            jsonOverrides.galleryFlags = jsonOverrides.galleryFlags || [];
+            jsonOverrides.galleryFlags ??= [];
             jsonOverrides.galleryFlags.push("Paid");
         }
     }
@@ -153,7 +201,7 @@ export function validateAndSetTfxManifestArguments(tfx: TfxRunner, options?: { s
     const extensionVersion = getExtensionVersion();
     if (extensionVersion && !skipVersionOverride) {
         tl.debug(`Overriding extension version to: ${extensionVersion}`);
-        jsonOverrides = (jsonOverrides || {});
+        jsonOverrides ??= {};
         jsonOverrides.version = extensionVersion;
     }
 
@@ -191,7 +239,7 @@ export function validateAndSetTfxManifestArguments(tfx: TfxRunner, options?: { s
  * Run a tfx command by ensuring that "tfx" exists, installing it on the fly if needed.
  * @param  {(tfx:ToolRunner)=>void} cmd
  */
-export async function runTfx(cmd: (tfx: TfxRunner) => void): Promise<boolean> {
+export async function runTfx(cmd: (tfx: TfxRunner) => Promise<unknown>): Promise<boolean> {
     let tfx: ToolRunner;
     let tfxPath: string;
 
@@ -203,11 +251,11 @@ export async function runTfx(cmd: (tfx: TfxRunner) => void): Promise<boolean> {
                 tl.cd(cwd);
             }
 
-            cmd(tfx);
+            await cmd(tfx);
             return true;
         }
         catch (err) {
-            tl.setResult(tl.TaskResult.Failed, `Error running task: ${err}`);
+            tl.setResult(tl.TaskResult.Failed, `Error running task: ${toErrorMessage(err)}`);
             return false;
         }
     };
@@ -267,8 +315,8 @@ export class TfxJsonOutputStream extends stream.Writable {
         super();
     }
 
-    _write(chunk: any, enc: string, cb: (Function)): void {
-        const chunkStr: string = chunk.toString();
+    _write(chunk: Buffer | string, enc: BufferEncoding, cb: (error?: Error | null) => void): void {
+        const chunkStr = chunk.toString();
         if (chunkStr.startsWith("[command]")) {
             this.taskOutput(chunkStr, this.out);
         }
@@ -292,55 +340,54 @@ export class TfxJsonOutputStream extends stream.Writable {
     }
 }
 
-function getTaskPathContributions(manifest: any): string[] {
+function getTaskPathContributions(manifest: ExtensionManifest): string[] {
     // Check for task contributions
     if (!manifest.contributions) {
         return [];
     }
 
     return manifest.contributions
-        .filter((c: any) => c.type === "ms.vss-distributed-task.task" && c.properties && c.properties["name"])
-        .map((c: any) => c.properties["name"]);
+        .filter((contribution) => contribution.type === "ms.vss-distributed-task.task" && typeof contribution.properties?.name === "string")
+        .map((contribution) => contribution.properties.name);
 }
 
-function updateTaskId(manifest: any, publisherId: string, extensionId: string): unknown {
+    function updateTaskId(manifest: TaskManifest, publisherId: string, extensionId: string): TaskManifest {
     tl.debug(`Task manifest ${manifest.name} id before: ${manifest.id}`);
 
     const extensionNs = uuidv5("url", "https://marketplace.visualstudio.com/vsts", true);
-    manifest.id = uuidv5(extensionNs, `${publisherId}.${extensionId}.${manifest.name}`, false);
+    const taskId = uuidv5(extensionNs, `${publisherId}.${extensionId}.${manifest.name}`, false);
+    manifest.id = typeof taskId === "string" ? taskId : uuidv5.uuidToString(taskId);
 
     tl.debug(`Task manifest ${manifest.name} id after: ${manifest.id}`);
     return manifest;
 }
 
-function updateExtensionManifestTaskIds(manifest: any, originalTaskId: string, newTaskId: string): unknown {
+function updateExtensionManifestTaskIds(manifest: ExtensionManifest, originalTaskId: string, newTaskId: string): ExtensionManifest {
     if (!manifest.contributions) {
         tl.debug(`No contributions found`);
         return manifest;
     }
 
-    manifest.contributions
-        .filter((c: any) => c.type !== "ms.vss-distributed-task.task" && c.properties && c.properties.supportsTasks)
-        .forEach((c: any) => {
-            const supportsTasks = [...c.properties.supportsTasks];
-            const index = supportsTasks.indexOf(originalTaskId);
-            if (index != -1) {
+    for (const contribution of manifest.contributions) {
+        const supportsTasks = contribution.properties?.supportsTasks;
+        if (contribution.type === "ms.vss-distributed-task.task" || !Array.isArray(supportsTasks)) {
+            continue;
+        }
 
-                tl.debug(`Extension manifest supportsTasks before: ${c.properties.supportsTasks}`);
-
-                supportsTasks[index] = newTaskId;
-                c.properties.supportsTasks = supportsTasks;
-
-                tl.debug(`Extension manifest supportsTasks after: ${c.properties.supportsTasks}`);
-            } else {
-                tl.debug(`No supportTasks entry found in manifest contribution`);
-            }
-        });
+        const index = supportsTasks.indexOf(originalTaskId);
+        if (index >= 0) {
+            tl.debug(`Extension manifest supportsTasks before: ${supportsTasks.join(", ")}`);
+            supportsTasks[index] = newTaskId;
+            tl.debug(`Extension manifest supportsTasks after: ${supportsTasks.join(", ")}`);
+        } else {
+            tl.debug(`No supportTasks entry found in manifest contribution`);
+        }
+    }
 
     return manifest;
 }
 
-function updateTaskVersion(manifest: any, extensionVersionString: string, extensionVersionType: string): unknown {
+function updateTaskVersion(manifest: TaskManifest, extensionVersionString: string, extensionVersionType: string): TaskManifest {
     const versionParts = extensionVersionString.split(".");
     if (versionParts.length > 3) {
         tl.warning("Detected a version that consists of more than 3 parts. Build tasks support only 3 parts, ignoring the rest.");
@@ -352,15 +399,17 @@ function updateTaskVersion(manifest: any, extensionVersionString: string, extens
         tl.warning("Detected no version in task manifest. Forcing major.");
         manifest.version = extensionversion;
     } else {
-        tl.debug(`Task manifest ${manifest.name} version before: ${JSON.stringify(manifest.version)}`);
+        const taskVersion = typeof manifest.version === "object" && manifest.version !== null ? manifest.version : {};
+        manifest.version = taskVersion;
+        tl.debug(`Task manifest ${manifest.name} version before: ${JSON.stringify(taskVersion)}`);
 
         switch (extensionVersionType) {
             default:
-            case "major": manifest.version.Major = `${extensionversion.major}`;
+            case "major": taskVersion.Major = `${extensionversion.major}`;
             // eslint-disable-next-line no-fallthrough
-            case "minor": manifest.version.Minor = `${extensionversion.minor}`;
+            case "minor": taskVersion.Minor = `${extensionversion.minor}`;
             // eslint-disable-next-line no-fallthrough
-            case "patch": manifest.version.Patch = `${extensionversion.patch}`;
+            case "patch": taskVersion.Patch = `${extensionversion.patch}`;
         }
     }
     tl.debug(`Task manifest ${manifest.name} version after: ${JSON.stringify(manifest.version)}`);
@@ -393,13 +442,13 @@ async function updateTaskManifests(manifestPaths: string[], updateTasksId: boole
     const tasksIds: [string, string][] = [];
 
     await Promise.all(manifestPaths.map(async (extensionPath) => {
-        const manifest: any = await getManifest(extensionPath);
+        const manifest = await getManifest<ExtensionManifest>(extensionPath);
         const taskManifestPaths: string[] = getTaskManifestPaths(extensionPath, manifest);
 
         if (taskManifestPaths && taskManifestPaths.length) {
             await Promise.all(taskManifestPaths.map(async (taskPath) => {
                 tl.debug(`Patching: ${taskPath}.`);
-                let taskManifest: any = await getManifest(taskPath);
+                let taskManifest = await getManifest<TaskManifest>(taskPath);
 
                 if (updateTasksId) {
                     tl.debug(`Updating Id...`);
@@ -407,11 +456,11 @@ async function updateTaskManifests(manifestPaths: string[], updateTasksId: boole
                     const extensionTag = tl.getInput("extensionTag", false) || "";
                     const extensionId = `${(tl.getInput("extensionId", false) || manifest.id)}${extensionTag}`;
 
-                    const originalTaskId: string = taskManifest.id || null;
+                    const originalTaskId = taskManifest.id;
                     taskManifest = updateTaskId(taskManifest, publisherId, extensionId);
-                    const newTaskId: string = taskManifest.id;
+                    const newTaskId = taskManifest.id;
 
-                    if (originalTaskId && (originalTaskId !== newTaskId)) {
+                    if (originalTaskId && newTaskId && originalTaskId !== newTaskId) {
                         tasksIds.push([originalTaskId, newTaskId])
                     }
                 }
@@ -461,20 +510,24 @@ function getExtensionManifestPaths(): string[] {
     return tl.findMatch(rootFolder, manifestsPatterns);
 }
 
-async function getManifest(path: string): Promise<unknown> {
+async function getManifest<T extends object>(path: string): Promise<T> {
     const data = (await fs.readFile(path, "utf8")).replace(/^\uFEFF/,
         () => {
             tl.warning(`Removing Unicode BOM from manifest file: ${path}.`);
             return "";
         });
     try {
-        return JSON.parse(data);
+        const manifest: unknown = JSON.parse(data);
+        if (!manifest || typeof manifest !== "object" || Array.isArray(manifest)) {
+            throw new Error("Manifest must contain a JSON object.");
+        }
+        return manifest as T;
     } catch (jsonError) {
-        throw new Error(`Error parsing task manifest: ${path} - ${jsonError}`, { cause: jsonError });
+        throw new Error(`Error parsing task manifest: ${path} - ${toErrorMessage(jsonError)}`, { cause: jsonError });
     }
 }
 
-function getTaskManifestPaths(manifestPath: string, manifest: any): string[] {
+function getTaskManifestPaths(manifestPath: string, manifest: ExtensionManifest): string[] {
     const tasks = getTaskPathContributions(manifest);
     const rootFolder = path.dirname(manifestPath);
 
@@ -507,7 +560,7 @@ function getTaskManifestPaths(manifestPath: string, manifest: any): string[] {
     }, []);
 }
 
-export async function writeManifest(manifest: any, path: string): Promise<void> {
+export async function writeManifest(manifest: object, path: string): Promise<void> {
     const manifestJson = `${JSON.stringify(manifest, null, 2)}\n`;
     await fs.writeFile(path, manifestJson, { encoding: "utf8" });
 }

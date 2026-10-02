@@ -49,6 +49,10 @@ await common.runTfx(async tfx => {
                     const messages = [...outputStream.messages, ...errorStream.messages];
                     const reason = messages.join("").trim() || `tfx exited with code ${exitCode} and produced no output`;
 
+                    if (/Failed request:\s*\((?:401|403)\)/i.test(reason)) {
+                        throw new Error(reason);
+                    }
+
                     // An explicit Marketplace error (e.g. expired or invalid PAT) will not resolve by retrying.
                     for (const line of messages) {
                         const tfError = /error: Error: (TF\d+:.*)/.exec(line);
