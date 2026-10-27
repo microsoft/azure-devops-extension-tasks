@@ -146,14 +146,14 @@ await common.runTfx(async tfx => {
         const json = JSON.parse(outputStream.jsonString);
 
         if (json && json.published) {
-            const publishedVsix : string = fileType === "manifest" ? json.packaged : vsixOutput;
+            const publishedVsix = common.validateVsixPath(fileType === "manifest" ? json.packaged : vsixOutput);
 
             if (outputVariable) {
                 tl.setVariable(outputVariable, publishedVsix);
             }
             tl.setVariable("Extension.OutputPath", publishedVsix);
 
-            console.log(`Published VSIX: ${publishedVsix}.`);
+            tl.writeExternalOutput(`Published VSIX: ${publishedVsix}.\n`, { source: "childProcess" });
             tl.setResult(tl.TaskResult.Succeeded, `tfx exited with return code: ${code}`);
         }
         else {

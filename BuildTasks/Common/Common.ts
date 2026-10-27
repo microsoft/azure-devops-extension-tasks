@@ -5,6 +5,7 @@ import fs from "node:fs/promises";
 import fsSync from "node:fs";
 import os from "node:os";
 import tl from "azure-pipelines-task-lib";
+import { filterExternalOutput } from "azure-pipelines-task-lib/externaloutput.js";
 import { IExecOptions, IExecSyncOptions, IExecSyncResult, ToolRunner } from "azure-pipelines-task-lib/toolrunner.js";
 import uuidv5 from "uuidv5";
 
@@ -54,6 +55,14 @@ export function toErrorMessage(error: unknown): string {
         return error;
     }
     return JSON.stringify(error) ?? "Unknown error";
+}
+
+export function validateVsixPath(value: unknown): string {
+    if (typeof value !== "string" || value.trim().length === 0
+        || value.includes("\0") || value.includes("\r") || value.includes("\n")) {
+        throw new Error("tfx returned an invalid VSIX path. Expected a nonempty string without NUL or line breaks.");
+    }
+    return value;
 }
 
 export interface TfxRunner {
@@ -336,7 +345,9 @@ export class TfxJsonOutputStream extends stream.Writable {
         if (!messages) { return; }
         // Split messages to be sure that we are invoking the write lineWriter for each lineWriter
         // Otherwise we could get messages in console with the wrong prefix used by azure-pipelines-task-lib
-        messages.split("\n").forEach(line => lineWriter(line));
+        // Filter only the displayed text; JSON and output-variable values must retain their original bytes.
+        messages.split("\n").forEach(line =>
+            lineWriter(filterExternalOutput(line, { source: "childProcess" }).toString("utf8")));
     }
 }
 
@@ -570,6 +581,7 @@ export async function checkUpdateTasksManifests(manifestFile?: string): Promise<
 }
 
 export default {
+    validateVsixPath,
     validateAndSetTfxManifestArguments,
     runTfx,
     getExtensionVersion,

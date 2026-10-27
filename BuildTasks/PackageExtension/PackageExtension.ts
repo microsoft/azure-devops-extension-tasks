@@ -24,13 +24,14 @@ try {
                 throw `tfx exited with return code: ${code}`
             }
             const json = JSON.parse(outputStream.jsonString);
+            const vsixPath = common.validateVsixPath(json?.path);
 
             if (outputVariable) {
-                tl.setVariable(outputVariable, json.path);
+                tl.setVariable(outputVariable, vsixPath);
             }
-            tl.setVariable("Extension.OutputPath", json.path);
+            tl.setVariable("Extension.OutputPath", vsixPath);
 
-            console.log(`Packaged extension: ${json.path}.`);
+            tl.writeExternalOutput(`Packaged extension: ${vsixPath}.\n`, { source: "childProcess" });
             tl.setResult(tl.TaskResult.Succeeded, `tfx exited with return code: ${code}`);
         }
         catch (err) {
@@ -44,6 +45,6 @@ try {
     });
 }
 catch (err) {
-    console.log(`Error packaging extension: ${err}.`);
+    tl.writeExternalOutput(`Error packaging extension: ${common.toErrorMessage(err)}.\n`, { source: "childProcess" });
     tl.setResult(tl.TaskResult.Failed, `Error packaging extension: ${err}`);
 }
