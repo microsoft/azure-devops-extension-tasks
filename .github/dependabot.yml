@@ -8,7 +8,7 @@ registries:
   ms-npm:
     type: npm-registry
     url: https://packagefeedproxy.microsoft.io/npm/
-    token: anonymous # feed is public; schema requires a credential
+    token: ${{ secrets.NPM_FEED_TOKEN }} # feed is public; schema requires a credential
     replaces-base: true
 updates:
 - package-ecosystem: "github-actions"
