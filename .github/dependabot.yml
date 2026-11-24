@@ -4,6 +4,11 @@
 # https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
 
 version: 2
+registries:
+  ms-npm:
+    type: npm-registry
+    url: https://packagefeedproxy.microsoft.io/npm/
+    replaces-base: true
 updates:
 - package-ecosystem: "github-actions"
   directory: "/"
@@ -11,6 +16,8 @@ updates:
     interval: "weekly"
 - package-ecosystem: "npm"
   directory: "/"
+  registries:
+  - ms-npm
   schedule:
     interval: "weekly"
   groups:
@@ -25,6 +32,8 @@ updates:
 - package-ecosystem: "npm"
   directories:
   - "/BuildTasks/*/"
+  registries:
+  - ms-npm
   schedule:
     interval: "weekly"
   groups:
