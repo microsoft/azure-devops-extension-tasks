@@ -43,7 +43,7 @@
     "@ungap/structured-clone": "^1.4.0",
     "eslint": "^10.11.0",
     "glob-exec": "^0.1.1",
-    "globals": "^17.12.0",
+    "globals": "^17.14.0",
     "tfx-cli": "^0.24.2",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.70.0"
